@@ -39,10 +39,14 @@ final.
 
 ## 📄 Story Files associés
 
+> **Convention de nommage** : les libellés `US-INIT-0X` du backlog deviennent des identifiants
+> `US-00.x` au moment de leur création via `/us-new` (ex. `US-INIT-01` → **US-00.1**). Le backlog
+> conserve les libellés d'origine à titre d'inventaire ; le SCB et les Story Files font foi.
+
 | US ID | Titre | Story File | Statut |
 |---|---|---|---|
 | US-INIT | Initialisation de la factory | _(bootstrap `init_factory.py` — voir SCB)_ | ⏳ development_start |
-| US-INIT-01 | Secrets & scan de dépôt | _(à créer via `/us-new`)_ | ⏳ à venir |
+| US-00.1 (ex US-INIT-01) | Secrets & scan de dépôt | [US-00.1-secrets-scan-depot.md](../stories/US-00.1-secrets-scan-depot.md) | ⏳ business_alignment |
 | US-INIT-02 | Qualité statique de référence | _(à créer via `/us-new`)_ | ⏳ à venir |
 | US-INIT-03 | Migrations réversibles | _(à créer via `/us-new`)_ | ⏳ à venir |
 | US-INIT-04 | CI + protection de branche réelles | _(à créer via `/us-new`)_ | ⏳ à venir |
