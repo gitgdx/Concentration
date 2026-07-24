@@ -49,10 +49,20 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : —
-**Dettes ouvertes** : —
+**Chantier actif** : US-01.1 — Affichage Hub & grille d'échéances (EPIC_01, track FULL), phase
+`business_alignment`. Story File créé, maquettes Stitch rapatriées dans `docs/design/stitch/`.
+Prochaine étape : `EVT_STORY_READY` → validation @Architect → design UX+Data → ADR-002/003/004 → Lock.
+**Dettes ouvertes** :
+- Fichiers EPIC créés **rétroactivement** (EPIC_00, EPIC_01) — `/us-new` ne vérifie pas l'existence
+  du fichier EPIC parent ; durcissement du rituel à décider.
+- Sprint 0 non déroulé : US-INIT-01→06 listées au backlog, sans ligne SCB ni Story File.
+- Décisions design à arbitrer (@UXDesigner + @PO) : gradient continu OKLCH (PRD) vs 4 paliers
+  (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
-**Actions humaines en attente** : —
+**Actions humaines en attente** :
+- Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).
+- Décider la création de US-01.2 (Gestion des événements) et le déroulé du Sprint 0.
+- Arbitrages design ci-dessus.
 
 ## Anti-patterns (à ne pas reproduire)
 

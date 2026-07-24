@@ -7,8 +7,13 @@ Rituel de création d'US : $ARGUMENTS
 
 Exécute dans l'ordre, en t'arrêtant à la première erreur :
 
-1. **Déterminer l'ID** : lire `STORY_CERTIFICATION_BOARD.md` et `BACKLOG.md`, trouver le prochain
+1. **EPIC parent + ID** : lire `STORY_CERTIFICATION_BOARD.md` et `BACKLOG.md`, trouver le prochain
    numéro libre dans l'EPIC demandée (ex : EPIC_01 → US-01.2).
+   **Prérequis EPIC (bloquant)** : vérifier que le fichier `docs/epics/EPIC_XX-*.md` existe. S'il
+   manque, STOPPER le rituel et le faire créer par le subagent **product-owner** depuis
+   `docs/epics/EPIC_FILE_TEMPLATE.md` (description/périmètre, table des Story Files, risques,
+   critères de clôture) + l'ajouter à l'inventaire de `BACKLOG.md`, AVANT de poursuivre. Aucune US
+   ne se crée dans une EPIC dépourvue de fichier EPIC.
 2. **Track scale-adaptive** (voir `docs/governance/TRACKS.md`) : évaluer les critères objectifs
    (nb de fichiers estimé, migration de schéma ?, surface auth/sécurité/admin ?, nouvelle API ?) et
    proposer QUICK, STANDARD ou FULL. Demander confirmation à l'utilisateur si ambigu.
