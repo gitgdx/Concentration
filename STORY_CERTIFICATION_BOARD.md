@@ -13,6 +13,8 @@
 | US-00.1 | Secrets & scan de dépôt | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.2 | Qualité statique de référence | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
+| US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -79,3 +81,20 @@
 - **Prochaine étape** : `EVT_STORY_READY` (visa PO complet) → validation technique @Architect
   (+ ADR de convention à assigner). **Bloque US-01.2** (qui applique la convention et instancie le
   patron de test aller-retour).
+
+### [US-01.1] Affichage Hub & grille d'échéances
+
+- **PO Visa** (2026-07-24) : Story File créé via `/us-new` — contexte métier, User Story, 9 AC
+  déclinés Nominal/Erreur/Limite, 13 scénarios Gherkin (dont AC-9 « état vide » et « échéance échue
+  en tête » ajoutés après la gate *clarify*). Valeur : cœur du MVP — rendre lisible d'un regard le
+  temps restant avant chaque échéance (nombre nu sans unité + gradient temporel).
+  Voir `docs/stories/US-01.1-affichage-hub-grille.md`. EPIC : `docs/epics/EPIC_01-module-echeances.md`.
+- **Track** : FULL — nouvelle EPIC fondatrice + architecture transverse (moteur de dégradé OKLCH,
+  moteur d'unité adaptative, registre de modules extensible du hub). ADR-002/003/004 à rédiger
+  avant l'Integration Lock (phase `technical_validation`).
+- **Design Data / UX** : ⏳ requis (track FULL — pas de N/A justifiable). Entrée UX = maquettes
+  Stitch rapatriées dans `docs/design/stitch/`. ⚠️ Conflit relevé (gate *analyze*) : le gradient
+  des maquettes est **inversé** vs RF-04 (orange = imminent chez Stitch, alors que RF-04 dit
+  orange = loin du prochain changement) → **le PRD fait foi**, maquettes = référence uniquement.
+- **Prochaine étape** : gate *clarify* (7 ambiguïtés PRD ↔ maquette) → `EVT_STORY_READY` →
+  validation @Architect (`EVT_ARCHI_VALIDATED`) → design UX + Data → ADR → Integration Lock.
