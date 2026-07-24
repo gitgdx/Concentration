@@ -16,12 +16,15 @@
 
 | US | Titre | Agent(s) | AC résumé |
 |---|---|---|---|
-| US-INIT-01 | Secrets & scan de dépôt | @DevOps + @CyberSecurity | `.gitleaks.toml` adapté au projet réel ; aucun secret en dur détecté ; rotation documentée si des valeurs de démo ont fuité |
-| US-INIT-02 | Qualité statique de référence | @Developer | lint + typecheck + formatter exécutés sans erreur sur le squelette de l'adapter ; 0 règle désactivée sans justification |
-| US-INIT-03 | Migrations réversibles | @DataEngineer | premier schéma de données (si applicable) versionné, migration testée upgrade/downgrade |
-| US-INIT-04 | CI + protection de branche réelles | @DevOps | `ci.yml` vert sur une PR de test ; `sh scripts/apply_branch_protection.sh` exécuté et vérifié |
-| US-INIT-05 | ADR-001 stack + Constitution adaptée | @Architect | `docs/adr/ADR-001-*.md` documentant les choix de stack ; Constitution relue et ajustée si besoin |
-| US-INIT-06 | Couverture initiale + ratchet | @QA_Tester | seuils de `factory.config.json` mesurés réellement sur le squelette ; premiers rapports dans `reports/US-INIT-06/` |
+| US-00.1 | Secrets & scan de dépôt | @DevOps + @CyberSecurity | `.gitleaks.toml` adapté au projet réel ; aucun secret en dur détecté ; rotation documentée si des valeurs de démo ont fuité |
+| US-00.2 | Qualité statique de référence | @Developer | lint + typecheck + formatter exécutés sans erreur sur le squelette de l'adapter ; 0 règle désactivée sans justification |
+| US-00.3 | Migrations réversibles | @DataEngineer | convention de migrations **réversibles** (versionnement monotone, contrat up/down, interdiction destructive RF-21, patron de test aller-retour), **agnostique de la techno** ; aucun schéma concret au Sprint 0 (persistance reportée à US-01.2 + ADR) — la convention y est appliquée et testée |
+| US-00.4 | CI + protection de branche réelles | @DevOps | `ci.yml` vert sur une PR de test ; `sh scripts/apply_branch_protection.sh` exécuté et vérifié |
+| US-00.5 | ADR-001 stack + Constitution adaptée | @Architect | `docs/adr/ADR-001-*.md` documentant les choix de stack ; Constitution relue et ajustée si besoin |
+| US-00.6 | Couverture initiale + ratchet | @QA_Tester | seuils de `factory.config.json` mesurés réellement sur le squelette ; premiers rapports dans `reports/US-00.6/` |
+
+> **Alignement de nommage** : les IDs réels du Sprint 0 sont `US-00.1…US-00.6` (les libellés
+> historiques `US-INIT-01…06` correspondaient aux mêmes chantiers).
 
 ### EPIC_01 — Module Échéances (MVP)
 
