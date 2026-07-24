@@ -47,7 +47,7 @@ final.
 |---|---|---|---|
 | US-INIT | Initialisation de la factory | _(bootstrap `init_factory.py` — voir SCB)_ | ⏳ development_start |
 | US-00.1 (ex US-INIT-01) | Secrets & scan de dépôt | [US-00.1-secrets-scan-depot.md](../stories/US-00.1-secrets-scan-depot.md) | ⏳ business_alignment |
-| US-INIT-02 | Qualité statique de référence | _(à créer via `/us-new`)_ | ⏳ à venir |
+| US-00.2 (ex US-INIT-02) | Qualité statique de référence | [US-00.2-qualite-statique.md](../stories/US-00.2-qualite-statique.md) | ⏳ business_alignment |
 | US-INIT-03 | Migrations réversibles | _(à créer via `/us-new`)_ | ⏳ à venir |
 | US-INIT-04 | CI + protection de branche réelles | _(à créer via `/us-new`)_ | ⏳ à venir |
 | US-INIT-05 | ADR-001 stack + Constitution adaptée | _(à créer via `/us-new`)_ | ⏳ à venir |
