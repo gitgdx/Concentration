@@ -1,0 +1,162 @@
+{
+  "$comment": "Source de vérité du bus d'événements de la factory. docs/EVENTS_CATALOG.md est la vue humaine de ce fichier. Consommé par scripts/validate_trace.py (pre-commit + CI). Toute divergence de nommage devient une erreur bloquante.",
+  "version": "2.0",
+  "events": {
+    "EVT_STORY_CREATED": {
+      "emitter": "product-owner",
+      "consumers": ["architect"],
+      "preconditions": [],
+      "description": "Story File + ligne SCB + feature Gherkin créés (rituel /us-new)."
+    },
+    "EVT_TRACK_SELECTED": {
+      "emitter": "architect",
+      "consumers": ["*"],
+      "preconditions": ["EVT_STORY_CREATED"],
+      "description": "Track scale-adaptive choisi (QUICK | STANDARD | FULL) — critères dans docs/governance/TRACKS.md."
+    },
+    "EVT_STORY_READY": {
+      "emitter": "product-owner",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_STORY_CREATED"],
+      "description": "AC détaillés + Gherkin rédigés, PO Visa ✅. Prête pour validation technique."
+    },
+    "EVT_ARCHI_VALIDATED": {
+      "emitter": "architect",
+      "consumers": ["data-engineer", "ux-designer"],
+      "preconditions": ["EVT_STORY_READY"],
+      "description": "Story validée techniquement. Phase design démarrée."
+    },
+    "EVT_DATA_DESIGN_COMPLETED": {
+      "emitter": "data-engineer",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_ARCHI_VALIDATED"],
+      "description": "Schéma de données + migration de schéma prêts (remplace l'ancien nom DATA_ENGINEER_COMPLETED)."
+    },
+    "EVT_UX_DESIGN_COMPLETED": {
+      "emitter": "ux-designer",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_ARCHI_VALIDATED"],
+      "description": "Wireframes + tokens prêts (remplace l'ancien nom UX_DESIGNER_COMPLETED)."
+    },
+    "EVT_MIGRATION_SCRIPT_READY": {
+      "emitter": "data-engineer",
+      "consumers": ["devops"],
+      "preconditions": ["EVT_DATA_DESIGN_COMPLETED"],
+      "description": "Migration de schéma réversible validée."
+    },
+    "EVT_DESIGN_COMPLETED": {
+      "emitter": "architect",
+      "consumers": ["developer"],
+      "preconditions": ["EVT_ARCHI_VALIDATED"],
+      "description": "Integration Lock : designs Data et UX verrouillés (ou N/A justifiés). Codage autorisé."
+    },
+    "EVT_CODE_READY": {
+      "emitter": "developer",
+      "consumers": ["code-reviewer", "cyber-security"],
+      "preconditions": ["EVT_DESIGN_COMPLETED"],
+      "description": "Code + tests poussés sur la branche de l'US. Audits requis."
+    },
+    "EVT_CODE_REVIEW_PASSED": {
+      "emitter": "code-reviewer",
+      "consumers": ["qa-tester", "architect"],
+      "preconditions": ["EVT_CODE_READY"],
+      "description": "Audit de revue validé (✅ 🔍). Rapport exigé dans evidence."
+    },
+    "EVT_CODE_REVIEW_FAILED": {
+      "emitter": "code-reviewer",
+      "consumers": ["developer", "architect"],
+      "preconditions": ["EVT_CODE_READY"],
+      "description": "Audit de revue refusé — retour développement."
+    },
+    "EVT_SECURITY_AUDIT_PASSED": {
+      "emitter": "cyber-security",
+      "consumers": ["qa-tester", "architect"],
+      "preconditions": ["EVT_CODE_READY"],
+      "description": "Audit sécurité validé (✅ 🛡️). Sorties d'outils SAST exigées dans evidence."
+    },
+    "EVT_SECURITY_AUDIT_FAILED": {
+      "emitter": "cyber-security",
+      "consumers": ["developer", "architect"],
+      "preconditions": ["EVT_CODE_READY"],
+      "description": "Audit sécurité refusé — retour développement."
+    },
+    "EVT_QA_PASSED": {
+      "emitter": "qa-tester",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_CODE_REVIEW_PASSED", "EVT_SECURITY_AUDIT_PASSED"],
+      "description": "Tests validés (🧪 PASS). Le rapport doit indiquer le décompte passed/skipped (remplace EVT_QA_READY_FOR_PROD)."
+    },
+    "EVT_QA_FAILED": {
+      "emitter": "qa-tester",
+      "consumers": ["developer"],
+      "preconditions": [],
+      "description": "Échec des tests — retour développement."
+    },
+    "EVT_READY_FOR_DEPLOY": {
+      "emitter": "architect",
+      "consumers": ["devops"],
+      "preconditions": ["EVT_QA_PASSED"],
+      "description": "Déploiement autorisé par l'Architecte."
+    },
+    "EVT_STAGING_DEPLOYED": {
+      "emitter": "devops",
+      "consumers": ["architect", "qa-tester"],
+      "preconditions": ["EVT_READY_FOR_DEPLOY"],
+      "description": "Déploiement staging réussi."
+    },
+    "EVT_STAGING_FAILED": {
+      "emitter": "devops",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_READY_FOR_DEPLOY"],
+      "description": "Échec staging — arbitrage Architecte."
+    },
+    "EVT_DEPLOYMENT_SUCCESS": {
+      "emitter": "devops",
+      "consumers": ["architect", "tech-writer"],
+      "preconditions": ["EVT_STAGING_DEPLOYED"],
+      "description": "Déploiement production réussi (🚀 DEPLOYED)."
+    },
+    "EVT_DEPLOYMENT_FAILURE": {
+      "emitter": "devops",
+      "consumers": ["architect"],
+      "preconditions": [],
+      "description": "Échec du déploiement — restauration requise."
+    },
+    "EVT_DOCS_UPDATED": {
+      "emitter": "tech-writer",
+      "consumers": ["architect"],
+      "preconditions": ["EVT_DEPLOYMENT_SUCCESS"],
+      "description": "Documentation + CHANGELOG mis à jour post-déploiement."
+    },
+    "EVT_DEV_BLOCKER": {
+      "emitter": "developer",
+      "consumers": ["architect", "product-owner"],
+      "preconditions": [],
+      "description": "Blocage technique — arrêt du workflow, arbitrage requis."
+    },
+    "EVT_WORKFLOW_VIOLATION": {
+      "emitter": "architect",
+      "consumers": ["*"],
+      "preconditions": [],
+      "description": "Violation du workflow constatée (ex : livraison hors process)."
+    },
+    "EVT_WAIVER_GRANTED": {
+      "emitter": "human",
+      "consumers": ["*"],
+      "preconditions": [],
+      "description": "Dérogation accordée par un HUMAIN uniquement, avec justification obligatoire dans rationale (Constitution Art. 5)."
+    },
+    "EVT_CERTIFIED_PROD": {
+      "emitter": "architect",
+      "consumers": ["*"],
+      "preconditions": ["EVT_QA_PASSED", "EVT_DEPLOYMENT_SUCCESS"],
+      "description": "Certification finale 🚀 OUI — apposée uniquement si le gate scripté /certify passe."
+    }
+  },
+  "deprecated_aliases": {
+    "DATA_ENGINEER_COMPLETED": "EVT_DATA_DESIGN_COMPLETED",
+    "UX_DESIGNER_COMPLETED": "EVT_UX_DESIGN_COMPLETED",
+    "EVT_QA_READY_FOR_PROD": "EVT_QA_PASSED",
+    "EVT_STORY_READY_FOR_TECH_VALIDATION": "EVT_STORY_READY"
+  }
+}

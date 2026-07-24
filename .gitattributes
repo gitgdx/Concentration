@@ -1,0 +1,9 @@
+# Les hooks et scripts shell DOIVENT rester en LF — un clone Windows avec
+# core.autocrlf=true casserait les hooks git et les hooks Claude Code.
+*.sh text eol=lf
+scripts/githooks/* text eol=lf
+*.py text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf

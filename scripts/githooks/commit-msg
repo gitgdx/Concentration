@@ -1,0 +1,35 @@
+#!/bin/sh
+# Valide le message de commit : convention <type>(<scope>): <description>
+# + trailer de traçabilité "US: US-XX.X" (ou "US: none" justifié).
+# Les commits de merge et de revert sont exemptés.
+
+# Types autorisés générés depuis factory.config.json (défaut de secours si absent)
+[ -f scripts/factory_env.sh ] && . ./scripts/factory_env.sh
+: "${FACTORY_COMMIT_TYPES:=feat|fix|refactor|test|docs|chore}"
+
+msg_file="$1"
+first_line=$(head -n 1 "$msg_file")
+
+case "$first_line" in
+  Merge*|Revert*|fixup!*|squash!*) exit 0 ;;
+esac
+
+if ! echo "$first_line" | grep -qE "^(${FACTORY_COMMIT_TYPES})\([a-z0-9._/-]+\): .+"; then
+  echo ""
+  echo "❌ COMMIT BLOQUÉ — format de message invalide."
+  echo "   Attendu : <type>(<scope>): <description>"
+  echo "   Types   : $(echo "$FACTORY_COMMIT_TYPES" | tr '|' ' ')"
+  echo "   Exemple : feat(auth): add login endpoint"
+  echo ""
+  exit 1
+fi
+
+if ! grep -qE '^US: (US-[A-Z0-9.-]+|none)( .*)?$' "$msg_file"; then
+  echo ""
+  echo "❌ COMMIT BLOQUÉ — trailer de traçabilité manquant."
+  echo "   Ajouter en fin de message : US: US-XX.X   (ou 'US: none — <justification>')"
+  echo ""
+  exit 1
+fi
+
+exit 0

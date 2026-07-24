@@ -1,0 +1,28 @@
+name: 🎭 E2E Nightly
+
+# Smoke test minimal : l'application s'analyse, se teste et se construit sans erreur.
+# À ENRICHIR avec de vrais parcours utilisateur (package `integration_test`, fourni avec le
+# SDK Flutter) dès que l'écran principal (hub de pratiques, grille de tuiles) existe — voir
+# docs/qa/E2E_RUNBOOK.md. Non requis par la protection de branche (nightly / manuel
+# uniquement) : son échec n'empêche pas de merger une PR.
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  e2e-smoke:
+    name: Smoke test (build complet)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.7'
+          channel: 'stable'
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Analyze + test + build (validation bout-en-bout)
+        run: python scripts/run_gates.py --component app

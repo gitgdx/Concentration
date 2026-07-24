@@ -1,0 +1,19 @@
+#!/bin/sh
+# Refuse le push direct vers la branche principale. Le merge passe par une PR
+# (protection de branche GitHub : scripts/apply_branch_protection.sh).
+
+[ -f scripts/factory_env.sh ] && . ./scripts/factory_env.sh
+: "${FACTORY_MAIN_BRANCH:=main}"
+: "${FACTORY_BRANCH_HINT:=feat/US-XX.X-description}"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/$FACTORY_MAIN_BRANCH" ]; then
+    echo ""
+    echo "❌ PUSH BLOQUÉ — push direct vers $FACTORY_MAIN_BRANCH interdit."
+    echo "   Ouvrir une Pull Request depuis la branche $FACTORY_BRANCH_HINT."
+    echo ""
+    exit 1
+  fi
+done
+
+exit 0

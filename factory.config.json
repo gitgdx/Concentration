@@ -1,0 +1,119 @@
+{
+  "$schema": "scripts/factory.config.schema.json",
+  "kit": {
+    "name": "factory-starter-kit",
+    "version": "1.0.0",
+    "initialized_at": "2026-07-24T09:59:00+02:00"
+  },
+  "project": {
+    "name": "Concentration",
+    "slug": "concentration",
+    "description": ""
+  },
+  "git": {
+    "main_branch": "main",
+    "branch_pattern": "^feat/US-[0-9]+\\.[0-9]+.*$",
+    "branch_hint": "feat/US-XX.X-description",
+    "commit_types": [
+      "feat",
+      "fix",
+      "refactor",
+      "test",
+      "docs",
+      "chore"
+    ]
+  },
+  "governance": {
+    "grandfathering_date": null,
+    "code_extensions": [
+      "py",
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "dart"
+    ],
+    "trace_dir": "docs/trace",
+    "reports_dir": "reports",
+    "scb_path": "STORY_CERTIFICATION_BOARD.md",
+    "log_path": "PROJECT_LOG.md"
+  },
+  "status_checks": [
+    {
+      "job_id": "secrets-scan",
+      "name": "🔐 Secrets scan (gitleaks)",
+      "workflow": "ci.yml"
+    },
+    {
+      "job_id": "governance",
+      "name": "📋 Governance (SCB + traçabilité + synchro)",
+      "workflow": "ci.yml"
+    },
+    {
+      "job_id": "check-branch-name",
+      "name": "check-branch-name",
+      "workflow": "branch-naming.yml"
+    },
+    {
+      "job_id": "app-quality",
+      "name": "📱 App (gates run_gates.py)",
+      "workflow": "ci.yml"
+    }
+  ],
+  "branch_protection": {
+    "required_approving_review_count": 1,
+    "enforce_admins": true,
+    "required_conversation_resolution": true,
+    "allow_force_pushes": false,
+    "allow_deletions": false,
+    "required_linear_history": false
+  },
+  "adapter": {
+    "name": "flutter",
+    "components": {
+      "app": {
+        "path": ".",
+        "runtime": {
+          "flutter": "3.44.7",
+          "dart": "3.12"
+        },
+        "coverage_min": 80,
+        "install": {
+          "cmd": "flutter pub get"
+        },
+        "gates": {
+          "format": {
+            "cmd": "dart format --output=none --set-exit-if-changed lib test"
+          },
+          "analyze": {
+            "cmd": "flutter analyze"
+          },
+          "test": {
+            "cmd": "flutter test --coverage && python scripts/check_flutter_coverage.py --min 80"
+          },
+          "deps_audit": {
+            "cmd": "dart pub outdated --show-all",
+            "blocking": false
+          },
+          "build": {
+            "cmd": "flutter build web --release"
+          }
+        }
+      }
+    }
+  },
+  "agents": {
+    "roster": [
+      "product-owner",
+      "architect",
+      "ux-designer",
+      "data-engineer",
+      "developer",
+      "code-reviewer",
+      "cyber-security",
+      "qa-tester",
+      "devops",
+      "tech-writer"
+    ]
+  }
+}

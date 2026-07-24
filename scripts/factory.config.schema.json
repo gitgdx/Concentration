@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "factory.config.json — config centrale de la factory",
+  "type": "object",
+  "required": ["kit", "project", "git", "governance", "status_checks", "adapter"],
+  "properties": {
+    "kit": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "initialized_at": { "type": ["string", "null"], "description": "ISO-8601, posé par init_factory.py" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "slug"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "description": { "type": "string" }
+      }
+    },
+    "git": {
+      "type": "object",
+      "required": ["main_branch", "branch_pattern"],
+      "properties": {
+        "main_branch": { "type": "string", "minLength": 1 },
+        "branch_pattern": { "type": "string", "description": "Regex POSIX/PCRE du nom de branche de travail" },
+        "branch_hint": { "type": "string" },
+        "commit_types": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "grandfathering_date": { "type": ["string", "null"], "description": "Date YYYY-MM-DD avant laquelle les US sans trace sont tolérées (null = aucun legacy)" },
+        "code_extensions": { "type": "array", "items": { "type": "string" } },
+        "trace_dir": { "type": "string" },
+        "reports_dir": { "type": "string" },
+        "scb_path": { "type": "string" },
+        "log_path": { "type": "string" }
+      }
+    },
+    "status_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["job_id", "name", "workflow"],
+        "properties": {
+          "job_id": { "type": "string" },
+          "name": { "type": "string", "description": "Doit correspondre EXACTEMENT au name: du job CI (vérifié par factory_sync.py --check)" },
+          "workflow": { "type": "string" }
+        }
+      }
+    },
+    "branch_protection": {
+      "type": "object",
+      "properties": {
+        "required_approving_review_count": { "type": "integer", "minimum": 0 },
+        "enforce_admins": { "type": "boolean" },
+        "required_conversation_resolution": { "type": "boolean" },
+        "allow_force_pushes": { "type": "boolean" },
+        "allow_deletions": { "type": "boolean" },
+        "required_linear_history": { "type": "boolean" }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "components": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["path", "gates"],
+            "properties": {
+              "path": { "type": "string" },
+              "runtime": { "type": "object" },
+              "coverage_min": { "type": "integer" },
+              "coverage_ratchet": { "type": "object" },
+              "install": {
+                "type": "object",
+                "description": "Commande d'installation des dépendances, exécutée par init_factory.py avant les gates",
+                "properties": {
+                  "cmd": { "type": "string" },
+                  "cwd": { "type": "string" }
+                }
+              },
+              "gates": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "required": ["cmd"],
+                  "properties": {
+                    "cmd": { "type": "string" },
+                    "cwd": { "type": "string" },
+                    "blocking": { "type": "boolean", "default": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "roster": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

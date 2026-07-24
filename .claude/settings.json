@@ -1,0 +1,66 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/check_scb_compliance.py)",
+      "Bash(python scripts/validate_trace.py *)",
+      "Bash(python scripts/trace_append.py *)",
+      "Bash(python scripts/run_gates.py *)",
+      "Bash(python scripts/factory_sync.py --check)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/block_dangerous_bash.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/protect_files.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/post_scb_edit.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session_start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/check_traceability.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

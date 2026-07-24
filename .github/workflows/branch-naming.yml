@@ -1,0 +1,31 @@
+name: 🌿 Branch Naming Check
+
+on:
+  push:
+    branches-ignore: [ main ]
+  pull_request:
+    types: [ opened, edited, synchronize, reopened ]
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔍 Validate Branch Name
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BRANCH="${{ github.head_ref }}"
+          else
+            BRANCH="${{ github.ref_name }}"
+          fi
+
+          echo "Checking branch: $BRANCH"
+
+          PATTERN="^feat/US-[0-9]+\.[0-9]+.*$"
+
+          if [[ "$BRANCH" =~ $PATTERN ]]; then
+            echo "✅ Branch name '$BRANCH' is compliant."
+          else
+            echo "❌ Branch name '$BRANCH' is NOT compliant!"
+            echo "It must match the pattern '$PATTERN' (e.g., feat/US-XX.X-description)."
+            exit 1
+          fi

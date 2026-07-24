@@ -1,0 +1,178 @@
+# Vue DESCRIPTIVE du workflow de la factory — pour orientation humaine et nouveaux agents.
+# Ce fichier n'est PAS exécuté : les sources de vérité EXÉCUTABLES sont
+#   - scripts/events_catalog.json   (machine à états : quel événement exige quelle précondition)
+#   - scripts/check_scb_compliance.py (règles de cohérence du SCB)
+# Toute divergence entre ce fichier et les deux sources ci-dessus doit être corrigée ICI.
+
+workflow_id: factory_starter_kit_v1
+name: "Workflow de production — track STANDARD"
+orchestrator: "@Architect"
+log_manager: PROJECT_LOG.md
+certification_board: STORY_CERTIFICATION_BOARD.md
+
+phases:
+  - id: business_alignment
+    agent: "@ProductOwner"
+    action: "Story File + AC Nominal/Erreur/Limite + Gherkin + initialisation de la ligne SCB"
+    artifacts:
+      - path: tests/features/US-XXX_description.feature
+        description: "Fichier Gherkin par US"
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "PO Visa"
+      visa: "✅ @PO"
+    events_emitted: [EVT_STORY_CREATED, EVT_STORY_READY]
+    next_on: "SUCCESS -> technical_validation"
+
+  - id: technical_validation
+    agent: "@Architect"
+    action: "Vérification faisabilité, sélection du track, rédaction ADR si décision structurante"
+    dependencies: [business_alignment]
+    artifacts:
+      - path: docs/adr/ADR-XXX-description.md
+        description: "ADR si décision architecturale (obligatoire si nouveau pattern/choix de stack)"
+    events_emitted: [EVT_TRACK_SELECTED, EVT_ARCHI_VALIDATED]
+    next_on: "SUCCESS -> parallel_design"
+
+  - id: parallel_design
+    type: parallel_branch
+    branches:
+      - id: data_design
+        agent: "@DataEngineer"
+        action: "Schéma de données, diagramme ER, migration réversible"
+        artifacts_update:
+          file: STORY_CERTIFICATION_BOARD.md
+          column: "Design Data"
+          visa: "✅ @Data (ou N/A justifié)"
+        events_emitted: [EVT_DATA_DESIGN_COMPLETED, EVT_MIGRATION_SCRIPT_READY]
+      - id: ux_design
+        agent: "@UXDesigner"
+        action: "Wireframes, design tokens, conformité WCAG AA, dark mode"
+        artifacts_update:
+          file: STORY_CERTIFICATION_BOARD.md
+          column: "Design UX"
+          visa: "✅ @UX (ou N/A justifié)"
+        events_emitted: [EVT_UX_DESIGN_COMPLETED]
+
+  - id: integration_lock
+    agent: "@Architect"
+    action: "Vérification cohérence Data/UX & Integration Lock"
+    dependencies: [data_design, ux_design]
+    events_emitted: [EVT_DESIGN_COMPLETED]
+    next_on: "SUCCESS -> development_start"
+
+  - id: development_start
+    agent: "@Developer"
+    action: "Codage + tests unitaires obligatoires (seuils : factory.config.json)"
+    pre_condition: "EVT_DESIGN_COMPLETED tracé"
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "Code (Dev)"
+      visa: "✅ @Dev"
+    events_emitted: [EVT_CODE_READY]
+    next_on: "SUCCESS -> parallel_audit"
+
+  - id: parallel_audit
+    type: parallel_branch
+    rituel: "/audit-us"
+    branches:
+      - id: code_review
+        agent: "@CodeReviewer"
+        action: "Revue de code (DRY, complexité, N+1, lisibilité, couverture des AC) — contexte frais"
+        dependencies: [development_start]
+        output: reports/US-XXX/code_review.md
+        pre_condition: "EVT_CODE_READY tracé"
+        artifacts_update:
+          file: STORY_CERTIFICATION_BOARD.md
+          column: "Audit Rev 🔍"
+          visa: "✅ 🔍"
+        events_emitted: [EVT_CODE_REVIEW_PASSED, EVT_CODE_REVIEW_FAILED]
+      - id: security_audit
+        agent: "@CyberSecurity"
+        action: "SAST + audit des dépendances + revue manuelle (injection, IDOR, XSS, secrets) — contexte frais"
+        dependencies: [development_start]
+        output: reports/US-XXX/security.md
+        pre_condition: "EVT_CODE_READY tracé"
+        artifacts_update:
+          file: STORY_CERTIFICATION_BOARD.md
+          column: "Audit Sec 🛡️"
+          visa: "✅ 🛡️"
+        events_emitted: [EVT_SECURITY_AUDIT_PASSED, EVT_SECURITY_AUDIT_FAILED]
+
+  - id: quality_assurance
+    agent: "@QA_Tester"
+    action: "Exécution réelle des suites de tests + E2E BDD (décompte passed/skipped obligatoire)"
+    dependencies: [code_review, security_audit]
+    conditions: ["EVT_CODE_REVIEW_PASSED", "EVT_SECURITY_AUDIT_PASSED"]
+    output: reports/US-XXX/qa.md
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "QA Status"
+      visa: "🧪 PASS"
+    events_emitted: [EVT_QA_PASSED, EVT_QA_FAILED]
+    next_on:
+      SUCCESS: prepare_deployment
+      FAILURE_MINOR: development_start
+      FAILURE_MAJOR: alert_stakeholders
+
+  - id: alert_stakeholders
+    agent: "@Architect"
+    action: "Analyse de l'échec, arbitrage technique, directive de résolution"
+    recipients: ["@ProductOwner", "@Developer"]
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "QA Status"
+      visa: "🧪 FAIL"
+    next_on: "RESOLVED -> development_start"
+
+  - id: prepare_deployment
+    agent: "@Architect"
+    action: "Validation post-QA : SCB conforme, autorisation de déploiement"
+    dependencies: [quality_assurance]
+    pre_conditions: ["QA Status == 🧪 PASS", "Audit Rev == ✅", "Audit Sec == ✅"]
+    events_emitted: [EVT_READY_FOR_DEPLOY]
+    next_on: "SUCCESS -> deployment_staging"
+
+  - id: deployment_staging
+    agent: "@DevOps_Engineer"
+    action: "Migration en environnement + déploiement staging + smoke tests"
+    dependencies: [prepare_deployment]
+    conditions: ["EVT_READY_FOR_DEPLOY"]
+    events_emitted: [EVT_STAGING_DEPLOYED, EVT_STAGING_FAILED]
+    on_failure: alert_stakeholders
+    next_on:
+      SUCCESS: deployment_prod
+      FAILURE: alert_stakeholders
+
+  - id: deployment_prod
+    agent: "@DevOps_Engineer"
+    action: "Déploiement production + monitoring/health-check + vérification post-déploiement"
+    dependencies: [deployment_staging]
+    conditions: ["EVT_STAGING_DEPLOYED"]
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "Déploiement (DevOps)"
+      visa: "🚀 DEPLOYED"
+    events_emitted: [EVT_DEPLOYMENT_SUCCESS, EVT_DEPLOYMENT_FAILURE]
+    on_failure: alert_stakeholders
+    next_on: "SUCCESS -> documentation"
+
+  - id: documentation
+    agent: "@TechWriter"
+    action: "Documentation API, guide utilisateur, README, CHANGELOG"
+    dependencies: [deployment_prod]
+    conditions: ["EVT_DEPLOYMENT_SUCCESS"]
+    events_emitted: [EVT_DOCS_UPDATED]
+    next_on: "SUCCESS -> epic_closure"
+
+  - id: epic_closure
+    agent: "@Architect"
+    rituel: "/certify"
+    action: "Gate scripté final : SCB conforme, trace complète, gates techniques verts, déploiement effectif"
+    dependencies: [documentation]
+    pre_conditions: ["Déploiement == 🚀 DEPLOYED", "QA Status == 🧪 PASS"]
+    artifacts_update:
+      file: STORY_CERTIFICATION_BOARD.md
+      column: "Certifié Prod"
+      visa: "🚀 OUI"
+    events_emitted: [EVT_CERTIFIED_PROD]

@@ -1,0 +1,58 @@
+name: ✅ CI
+
+# Gates qualité bloquants sur CHAQUE PR (et sur la branche principale).
+# Ces jobs sont les status checks requis par la protection de branche
+# (scripts/apply_branch_protection.sh). Constitution : docs/governance/CONSTITUTION.md.
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets-scan:
+    name: 🔐 Secrets scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  governance:
+    name: 📋 Governance (SCB + traçabilité + synchro)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation deps
+        run: pip install jsonschema
+      - name: SCB compliance
+        run: python scripts/check_scb_compliance.py
+      - name: Trace validation
+        run: python scripts/validate_trace.py --all
+      - name: Synchro config (status checks ↔ CI ↔ seuils de l'adapter)
+        run: python scripts/factory_sync.py --check
+
+  app-quality:
+    name: 📱 App (gates run_gates.py)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.7'
+          channel: 'stable'
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Gates app (format, analyze, test, deps_audit, build)
+        run: python scripts/run_gates.py --component app

@@ -1,0 +1,55 @@
+#!/bin/sh
+# Pre-commit versionné (installé via scripts/install_hooks.sh → core.hooksPath).
+# Enforcement local — chaque règle est RÉPLIQUÉE en CI (ci.yml), donc un bypass
+# --no-verify sera de toute façon rattrapé par les gates de PR.
+# Constitution : docs/governance/CONSTITUTION.md
+
+# Paramètres générés depuis factory.config.json (défauts de secours si absent)
+[ -f scripts/factory_env.sh ] && . ./scripts/factory_env.sh
+: "${FACTORY_MAIN_BRANCH:=main}"
+: "${FACTORY_BRANCH_HINT:=feat/US-XX.X-description}"
+: "${FACTORY_CODE_EXT_REGEX:=\.(py|ts|tsx|js|jsx)$}"
+
+fail() {
+  echo ""
+  echo "❌ COMMIT BLOQUÉ — $1"
+  echo ""
+  exit 1
+}
+
+# ── 1. Interdiction de committer directement sur la branche principale ──────
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "$FACTORY_MAIN_BRANCH" ]; then
+  fail "commit direct sur $FACTORY_MAIN_BRANCH interdit. Créer une branche $FACTORY_BRANCH_HINT."
+fi
+
+# ── 2. Traçabilité : code staged ⇒ ligne AJOUTÉE au tableau PROJECT_LOG ────
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+code_files=$(echo "$staged" | grep -E "$FACTORY_CODE_EXT_REGEX" | grep -vE '(\.test\.|\.spec\.|__tests__|/tests/|node_modules)')
+
+if [ -n "$code_files" ]; then
+  # Une simple présence de PROJECT_LOG.md dans le staging ne suffit pas :
+  # on exige qu'une ligne de tableau datée ait été AJOUTÉE.
+  added_lines=$(git diff --cached -U0 -- PROJECT_LOG.md | grep -cE '^\+\| *[0-9]{4}-[0-9]{2}-[0-9]{2} *\| *@')
+  if [ "$added_lines" -eq 0 ] 2>/dev/null; then
+    echo "Fichiers de code staged :"
+    echo "$code_files" | sed 's/^/  - /'
+    fail "aucune ligne ajoutée au tableau de PROJECT_LOG.md (format : | YYYY-MM-DD | @Agent | Modèle | Action | Statut | Fichiers |)"
+  fi
+fi
+
+# ── 3. Cohérence SCB + traçabilité + synchro config (règles croisées) ───────
+if command -v python >/dev/null 2>&1; then
+  python scripts/check_scb_compliance.py || fail "SCB non conforme (voir violations ci-dessus)"
+  python scripts/validate_trace.py --staged || fail "traçabilité non conforme (voir erreurs ci-dessus)"
+  if [ -f factory.config.json ]; then
+    python scripts/factory_sync.py --check || fail "synchro factory non conforme (relancer : python scripts/factory_sync.py --write)"
+  fi
+fi
+
+# ── 4. Scan de secrets (si gitleaks installé — la CI le fait de toute façon) ─
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --config .gitleaks.toml || fail "secret potentiel détecté dans le staging"
+fi
+
+exit 0
