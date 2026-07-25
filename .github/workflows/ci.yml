@@ -17,6 +17,14 @@ jobs:
   secrets-scan:
     name: 🔐 Secrets scan (gitleaks)
     runs-on: ubuntu-latest
+    # gitleaks-action@v2, sur un événement pull_request, appelle l'API GitHub
+    # (ScanPullRequest : énumération des commits + résumé de PR). Sans permissions
+    # explicites, le GITHUB_TOKEN par défaut est restreint → "Resource not accessible
+    # by integration". Ce bloc accorde le strict nécessaire (les autres permissions
+    # passent à none). N'affecte pas l'identité du status check.
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
