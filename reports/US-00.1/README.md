@@ -6,18 +6,32 @@ Index des preuves pour l'audit (`/audit-us`) et la QA. Branche : `feat/US-00.1-s
 
 | Tâche | Description | Statut | Preuve |
 |---|---|---|---|
-| **T1** | Créer `.gitleaks.toml` (fichier verrouillé) | ⏳ **HUMAIN** | Proposition prête : [`gitleaks.toml.proposed`](gitleaks.toml.proposed) → `cp` vers racine |
+| **T1** | Créer `.gitleaks.toml` (fichier verrouillé) | ✅ Fait (HUMAIN) | Config posée à la racine, identique à [`gitleaks.toml.proposed`](gitleaks.toml.proposed) |
 | **T2** | Vérifier le job CI `secrets-scan` | ✅ Fait | §Vérification CI ci-dessous |
-| **T3** | Installer `gitleaks` localement | ⏳ **HUMAIN/DevOps** | `gitleaks version` (v8+) |
-| **T4** | Committer les configs secrets dans le bon ordre | ⏳ (après T1) | `.gitleaks.toml` avant/avec `.env.example`+`.mcp.json` (déjà sur `main`) |
-| **T5** | Scan historique complet → 0 fuite | ⏳ (après T1+T3) | `gitleaks-history.sarif` (à générer) |
-| **T6** | Scan working tree / index → 0 fuite | ⏳ (après T1+T3) | `gitleaks-worktree.sarif` (à générer) |
-| **T7** | Test négatif pre-commit (faux secret bloqué) | ⏳ **HUMAIN** (après T1+T3) | `negative-precommit.txt` (redacted) |
-| **T8** | Test négatif CI (faux secret → job rouge) | ⏳ (après T1) | lien run Actions (branche jetable) |
+| **T3** | Installer `gitleaks` localement | ✅ Fait (HUMAIN) | gitleaks **8.30.1** installé (winget) |
+| **T4** | Committer `.gitleaks.toml` | ✅ Fait | ce commit |
+| **T5** | Scan historique complet → 0 fuite | ✅ Fait | [`gitleaks-history.sarif`](gitleaks-history.sarif) — 11 commits, `no leaks found` |
+| **T6** | Scan working tree → 0 fuite | ✅ Fait | [`gitleaks-worktree.sarif`](gitleaks-worktree.sarif) — 89 MB scannés, `no leaks found` |
+| **T7** | Test négatif pre-commit (faux secret détecté) | ✅ Fait | [`negative-precommit.txt`](negative-precommit.txt) — `leaks found: 1`, exit 1 |
+| **T8** | Test négatif CI (faux secret → job rouge) | ⏳ (nécessite un PR) | lien run Actions (branche jetable) |
 | **T9** | Documenter la procédure de rotation | ✅ Fait | [`docs/security/SECRET_ROTATION.md`](../../docs/security/SECRET_ROTATION.md) |
 | **T10** | Indexer les preuves | ✅ (ce fichier) | — |
 
-Légende : ✅ fait · ⏳ en attente · **HUMAIN** = action non réalisable par l'agent (fichier verrouillé ou outil local).
+Légende : ✅ fait · ⏳ en attente · (HUMAIN) = étape réalisée par l'humain (fichier verrouillé / outil local).
+
+### Résultats des scans (gitleaks 8.30.1, config `.gitleaks.toml`)
+
+- **T5 — historique** (`gitleaks git`) : 11 commits, ~396 KB → **`no leaks found`** (exit 0).
+- **T6 — working tree** (`gitleaks dir`) : ~89 MB (inclut `.claude/settings.local.json`, qui contient
+  la **vraie** clé Stitch) → **`no leaks found`** (exit 0) → **valide l'allowlist** (pas de faux positif
+  sur la clé locale légitime).
+- **T7 — négatif** (`gitleaks protect --staged` sur un faux `AQ.<token>` injecté) → **`leaks found: 1`,
+  exit 1** → le garde-fou détecte ; le hook `pre-commit` (section 4) appelle alors `fail` et bloque le
+  commit. Faux secret retiré immédiatement, jamais committé.
+
+> **Note outillage** : gitleaks 8.30.1 ne liste plus `detect`/`protect` dans `--help` (remplacés par
+> `git`/`dir`), mais `gitleaks protect --staged` reste un **alias déprécié fonctionnel** → le hook
+> `pre-commit` du dépôt (qui l'utilise) **fonctionne sans modification**. Vérifié empiriquement.
 
 ## Vérification CI — job `secrets-scan` (T2)
 
@@ -34,9 +48,9 @@ Vérifié dans [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) :
 
 **Conclusion T2** : aucune édition de `ci.yml` requise pour US-00.1 (le job est correctement câblé).
 
-## Preuves restantes
+## Preuve restante — T8 (test négatif CI)
 
-Elles nécessitent d'abord les actions humaines T1 (poser `.gitleaks.toml`) et T3 (installer
-gitleaks). Une fois faites, @Developer génère T5/T6 (scans redacted) et T8 (test négatif CI) ;
-l'humain réalise T7 (test négatif pre-commit local). Tous les rapports gitleaks archivés ici
-utilisent `--redact` (aucune valeur de secret, même fausse, n'est écrite).
+Seul **T8** reste : prouver qu'un faux secret poussé sur une PR fait **échouer** le job CI
+`secrets-scan`. Il nécessite une **branche jetable + PR** (le job tourne sur `pull_request`), puis
+la suppression de la branche/commit (le faux secret n'est **jamais** mergé). À réaliser au moment
+de l'ouverture de la PR US-00.1. Tous les rapports archivés ici utilisent `--redact`.
