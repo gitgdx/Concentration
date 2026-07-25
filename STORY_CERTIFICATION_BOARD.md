@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
-| US-00.1 | Secrets & scan de dépôt | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.1 | Secrets & scan de dépôt | development_start | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.2 | Qualité statique de référence | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -44,8 +44,14 @@
 - **Clarify résolu** : scan historique + working tree ; secret trouvé → révoquer/roter (réécriture
   d'historique = dernier recours humain) ; allowlist `.env`/`settings.local.json`/placeholders
   (`changeme`, `${...}`) ; couverture Dart `N/A` (pas de code applicatif). Historique vérifié propre.
-- **Prochaine étape** : `EVT_STORY_READY` → validation @Architect → Integration Lock (design N/A) →
-  développement (T1 = création de `.gitleaks.toml` par l'humain).
+- **Story Ready + Integration Lock** (2026-07-25) : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED`
+  (@Architect : story enrichie, faisabilité OK, track STANDARD, aucun ADR) → `EVT_DESIGN_COMPLETED`
+  (Integration Lock : **Design Data N/A** — aucun schéma ; **Design UX N/A** — aucune interface).
+  **Codage autorisé** selon T1–T10. Phase SCB → `development_start`, branche
+  `feat/US-00.1-secrets-scan-depot` (partie du nouveau `main`).
+- **Prochaine étape** : @Developer exécute les tâches agent (T2 vérif CI, T9 doc rotation, T10 index
+  preuves) ; **actions HUMAINES requises** T1 (créer `.gitleaks.toml` verrouillé — contenu préparé par
+  l'agent) + T3/T7 (installer gitleaks + test négatif pre-commit).
 
 ### [US-00.2] Qualité statique de référence
 
