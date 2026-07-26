@@ -11,7 +11,7 @@
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.2 | Qualité statique de référence | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.2 | Qualité statique de référence | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -98,7 +98,14 @@
   effective** (2 lignes d'exemple commentées) ; gate `format` exit 0 (0 fichier à reformater) ; gate
   `analyze` `No issues found!` ; **0 directive `// ignore`** dans `lib/`/`test/` (AC-3 par revue).
   Preuves : `reports/US-00.2/README.md`. Phase → `parallel_audit`.
-- **Prochaine étape** : `/audit-us US-00.2` (Rev 🔍 + Sec 🛡️, contextes frais) → QA → deploy → `/certify`.
+- **Audit Rev 🔍** (2026-07-26, `EVT_CODE_REVIEW_PASSED`, contexte frais) : **PASS**, 0 bloquant.
+  Prouvé : format exit 0, analyze « No issues found! », `analysis_options.yaml` 0 désactivation effective,
+  0 `// ignore`, non-durcissement confirmé, `run_gates --component app` 5/5 verts. 1 suggestion mineure
+  (claim CI dans le README → ressort QA/DevOps). Rapport : `reports/US-00.2/code_review.md`.
+- **Audit Sec 🛡️** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **PASS**, 0 finding.
+  Diff 100 % documentaire (0 code/pubspec/analysis_options touché) → portée sécurité classique sans objet
+  (justifié) ; gitleaks 0 fuite, `dart pub outdated` 0 CVE, aucun affaiblissement de lint. Rapport : `reports/US-00.2/security.md`.
+- **Prochaine étape** : **QA** → déploiement (merge sur `main`) → `/certify`.
 
 ### [US-00.3] Migrations réversibles
 
