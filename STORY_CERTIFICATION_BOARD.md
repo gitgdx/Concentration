@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | CI + protection de branche réelles | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | development_start | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -151,7 +151,12 @@
   (phase `epic_closure`). **Sprint 0 (EPIC_00) complet : US-00.1 + US-00.2 + US-00.3 certifiées.** La
   convention est prête à être appliquée + son patron de test instancié par **US-01.2**.
 
-### [US-00.4] CI + protection de branche réelles
+### [US-00.4] Enforcement de la branche principale : constat, vérification honnête et cible armée
+
+> ⚠️ **US RE-CADRÉE le 2026-07-26** (titre initial : « CI + protection de branche réelles »). Voir
+> l'encadré **« Blocage de plateforme et re-cadrage »** en fin de section : la protection de branche
+> côté serveur est **indisponible** sur ce dépôt. **La certification de cette US ne clôt PAS le
+> risque #2 d'EPIC_00, qui demeure OUVERT.**
 
 - **PO Visa** (2026-07-26) : Story File créé via `/us-new` — `docs/stories/US-00.4-ci-protection-branche.md`,
   **7 AC** déclinés Nominal/Erreur/Limite, **13 scénarios Gherkin**
@@ -162,8 +167,12 @@
 - **⚠️ Constat d'entrée (vérifié par API le 2026-07-26)** : `main` **n'est PAS protégée**
   (`GET /repos/gitgdx/Concentration/branches` → `"protected": false`). Les 4 status checks déclarés
   dans `factory.config.json` s'exécutent sur les PR mais **aucun n'est requis** : rien n'empêche
-  techniquement un merge avec CI rouge, un push direct ou un force-push. Les PR #3/#6/#8/#9 ont été
-  fusionnées **sans protection active** — par discipline de process, pas par contrainte de plateforme.
+  techniquement un merge avec CI rouge, un push direct ou un force-push. Les **8** PR fusionnées
+  (#1, #3, #4, #5, #6, #7, #8, #9) l'ont **toutes** été **sans protection active** — par discipline de
+  process, pas par contrainte de plateforme. *(Décompte corrigé le 2026-07-26 : « 4 PR » était faux, il
+  omettait les PR de déploiement, de certification, le hotfix et la consolidation. Commande probante :
+  `git log --first-parent --oneline origin/main` → 8 fusions + exactement 2 commits directs ;
+  `git log --merges` en renvoie 12 et ne prouve rien.)*
   **Angle mort corrélé** : `factory_sync.py --check` affiche « conforme (env, **protection**, … ) »
   **sans jamais contacter l'API GitHub** (vérification purement documentaire) — libellé trompeur.
 - **Track** : `STANDARD` — critères `docs/governance/TRACKS.md` : 0 fichier de code Dart, ≤ 15
@@ -204,8 +213,50 @@
 - **Portée bornée (AC-7)** : cette US **ne réécrit pas** l'historique Git et **ne remet pas en cause**
   les certifications de US-00.1/00.2/00.3 (audits à contexte frais, gates CI réellement exécutés,
   preuves archivées). Elle constate le trou d'enforcement, le documente et le ferme pour la suite.
-- **Prochaine étape** : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED` (@Architect) **avec ADR-006** →
-  Integration Lock `EVT_DESIGN_COMPLETED` (Data N/A + UX N/A justifiés) → développement (T1→T14).
+- **🔴 Blocage de plateforme et re-cadrage** (2026-07-26, `EVT_DEV_BLOCKER` → `EVT_WAIVER_GRANTED`) :
+  en phase `technical_validation`, avec un jeton `gh` authentifié `gitgdx` et `{"admin": true}` sur le
+  dépôt, **les deux** mécanismes d'enforcement renvoient un **403 identique** :
+  `GET …/branches/main/protection` **et** `GET …/rulesets` →
+  *« Upgrade to GitHub Pro or make this repository public to enable this feature. »* Le dépôt est
+  **privé** (`owner_type: User`) et le plan du compte n'ouvre la protection de branche ni en classique
+  ni en rulesets. `apply_branch_protection.sh` **échouerait en 403** : ce n'a jamais été un problème de
+  droits ni d'outillage. **Cause racine affinée** : `factory.config.json` déclarait depuis l'origine un
+  enforcement que le compte **n'a jamais pu appliquer**, et `factory_sync.py --check` était
+  structurellement incapable de le voir (comparaison documentaire, aucun appel API). Le défaut n'est
+  donc pas « un script qu'on a oublié de lancer ».
+- **Dérogation humaine** (`EVT_WAIVER_GRANTED`, Constitution Art. 5) : après présentation des 3 options
+  chiffrées, l'humain décide **ni GitHub Pro (~4 USD/mois), ni passage du dépôt en public**. US-00.4 est
+  re-cadrée en **US de constat + outillage** : **8 AC** satisfaisables, **20 scénarios** Gherkin, cible
+  de protection **déclarée et ARMÉE mais NON APPLIQUÉE** (applicable en une commande le jour du
+  déblocage, sans nouvelle décision). **Retirés** du périmètre : application réelle, 4 checks
+  « bloquants », test négatif serveur, comparaison config ↔ dépôt en exit 0. **Reportées** : T16→T19.
+- **⚠️ Ce que cette US ne fera PAS — à lire avant tout audit ou certification** : `main` **ne sera pas
+  protégée**. La règle « jamais de push direct sur la branche principale » **reste NON enforced par la
+  plateforme**. Ce qui protège `main` aujourd'hui = hook `pre-push` **local** + CI qui **rapporte** 4
+  status checks **sans pouvoir bloquer** la fusion = **filet de discipline**, pas contrainte de
+  plateforme. **Le risque #2 d'EPIC_00 demeure OUVERT** et EPIC_00 **ne peut pas être déclarée complète
+  sur cette base**. Toute lecture inverse reproduirait exactement le défaut que l'US dénonce.
+- **ADR-006 ✅ Accepté** — *Protection de la branche principale : 0 approbation + `enforce_admins` sur
+  dépôt mono-collaborateur, cible armée non appliquée*. **Réécrit en place** (pas d'ADR-007) : le
+  fichier était `untracked`, jamais commité, audité ni référencé — donc **jamais entré en vigueur** ; la
+  clause d'immuabilité protège le registre des décisions *effectives*, pas un brouillon non versionné.
+  Contient un **démenti explicite** des 4 affirmations fausses de sa première version (« règle
+  effective », `"protected": true` prouvé, gates « incontournables », force-push « refusé par le
+  serveur »). Conserve les pièges d'implémentation : `required_pull_request_reviews` doit rester
+  **présent avec `0`** (le retirer désactiverait « Require a PR before merging ») et `restrictions: null`
+  (PUT) vs clé **absente** (GET) → une comparaison naïve produirait de fausses dérives.
+- **Integration Lock ✅** (2026-07-26, `EVT_ARCHI_VALIDATED` → `EVT_DESIGN_COMPLETED`) : **Design Data
+  N/A** (aucun schéma, aucune persistance) et **Design UX N/A** (aucune surface d'interface) — recevables
+  en track STANDARD. **Codage autorisé** selon **T1→T15** (13 [agent], 2 [action humaine]) ; **T16→T19
+  reportées et INTERDITES à l'exécution** — sans protection, un `git push` direct sur `main`
+  **réussirait** et la modifierait hors PR (critère de test #18 : `origin/main` doit rester inchangée).
+  **21 critères de test**, tous exécutables sans écrire sur `main`. Contrainte de preuve : exit 0 et
+  exit 1 sur **fixtures** avec préfixe `[SIMULATION]` obligatoire ; **exit 2 (403) est le seul chemin
+  observable in vivo** ; le chemin 404 n'est pas observable sur ce dépôt.
+- **Prochaine étape** : développement T1→T15 par @Developer (T4 et T6 = **actions humaines**, fichiers
+  Art. 6, diffs exacts dans le Story File) → `/audit-us` (Rev + Sec, contextes frais) → QA → DevOps →
+  `/certify`. **Priorité relevée pour US-00.5** : `CLAUDE.md` (règle 2) et la Constitution (Art. 4)
+  affirment un enforcement qui **restera faux** après cette US — à corriger dès la clôture d'US-00.4.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
