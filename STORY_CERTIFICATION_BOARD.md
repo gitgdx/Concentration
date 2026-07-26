@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ❌ | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -293,9 +293,58 @@
   chemin **404 n'est pas observable** sur ce dépôt (403) ; les exits **0 et 1 sont prouvés sur
   fixtures**, jamais sur l'état réel ; le critère « 4 checks verts sur la PR » reste **à lever** par
   @DevOps/@QA après ouverture de la PR (et ces checks doivent être **lus**, ils ne bloquent rien).
-- **Prochaine étape** : `/audit-us` (Rev + Sec, **contextes frais**) → QA → DevOps → `/certify`.
-  ⏳ **T6 restant** (humain, cosmétique). **Priorité relevée pour US-00.5** : `CLAUDE.md:20` et
-  `CONSTITUTION.md:49` affirment un enforcement qui **reste faux** après cette US.
+- **❌ Audit Rev 🔍 — FAILED** (2026-07-26, `EVT_CODE_REVIEW_FAILED`, contexte frais) : **2 findings
+  bloquants**, rapport `reports/US-00.4/code_review.md`. L'auditeur a **refusé le PASS de complaisance**
+  et les deux findings sont **reproduits indépendamment par @Architect** :
+  - **B-1 — la relecture « aucune fausse affirmation » a surestimé son exhaustivité.**
+    `enforcement_gap.md` affirmait que S1/S2 étaient « la **dernière** affirmation fausse restante du
+    corpus ». Un grep avec **ses propres motifs** en trouve 3 autres, non corrigées **et non
+    signalées** : `.github/workflows/ci.yml:3-4` (« gates **bloquants** », « status checks **requis par
+    la protection de branche** » — fichier que l'US a pourtant examiné et déclaré « non modifié ») ·
+    `scripts/githooks/pre-push:2-3` (« le merge passe par une PR — **protection de branche GitHub** » :
+    c'est l'élément (a) du filet de discipline de l'AC-7, dont le propre commentaire dit le contraire ;
+    fichier **Art. 6**) · `docs/stories/US-00.1-secrets-scan-depot.md:198,215` (« merge empêché par la
+    protection de branche », critère de test d'une US **certifiée**).
+  - **B-2 — faux vert dans l'outil de preuve.** `check_branch_protection.py::_guard_mapping()` ne garde
+    que le côté **attendu** ; aucune garde symétrique sur la réponse **réelle**. **Reproduit** : une
+    protection portant `lock_branch: {"enabled": true}` (branche entièrement verrouillée) +
+    `block_creations` sort en **EXIT 0 « conforme »**. Contraire au pattern « fail-explicit — jamais de
+    faux vert » et à l'AC-3 nominal. Les fixtures livrées portent **déjà** ces clés (à `false`) : le trou
+    est matérialisé sans être testé. C'est la classe de défaut même que l'US combat.
+  - **Ce que l'audit a validé en propre** : 403 reproduit sur les 2 mécanismes · lecture seule
+    **absolue** · mapping asymétrique **correct**, y compris les 2 pièges · `[SIMULATION]`
+    **structurellement intègre** · 8 chemins rejoués · **l'inférence de l'AC-1 fait (b) est écrite
+    explicitement comme telle en 4 endroits — aucune fraude** · garantie d'import paresseux vérifiée par
+    simulation d'un module cassé · bloc `FACTORY_SYNC` byte-identique · Art. 6 respecté · `origin/main`
+    intacte, T16→T19 non exécutées. **Toutes les réserves de @Developer sont honnêtes ; aucune ne
+    masquait un défaut** — les 2 bloquants n'y figuraient pas.
+- **✅ Audit Sec 🛡️ — PASS** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **0 bloquant**,
+  rapport `reports/US-00.4/security.md`. **`gitleaks` 8.30.1 retrouvé et réellement exécuté** (hors
+  PATH) → `no leaks found` sur le **working tree** (89,82 Mo) **et sur 30 commits d'historique** : la
+  réserve de @Developer est **levée**, l'absence de secret est prouvée par l'outil de référence. Aucun
+  fichier d'US-00.4 allowlisté dans `.gitleaks.toml` (contrôle anti-suppression). **Mitigation R1
+  attaquée et tenue** : injection de saut de ligne via fixture forgée → `json.dumps` échappe, 17/17
+  lignes restent préfixées, issue **exit 1** et non 0 ; `--raw-out` refusé en fixture **sans créer le
+  fichier** ; mode fixture **inatteignable** depuis `--check-remote`. Jeton **non exfiltrable** (test
+  avec jeton factice → 0 occurrence dans l'archive, en-tête remplacé). Zéro dépendance ajoutée.
+  **Tranchages** : bloc PGP + e-mail **acceptable, ne pas expurger** — la signature archivée est
+  *byte-identique* au `gpgsig` présent dans **tout clone** et l'e-mail est l'auteur de tous les commits
+  → exposition incrémentale **nulle** ; expurger serait du théâtre de sécurité au prix de la
+  disqualification d'une preuve brute. Cible armée **sûre** (`required_pull_request_reviews` présent
+  avec `0`, émis inconditionnellement, défaut de repli `1` → fail-safe). **Aucune survente résiduelle** :
+  « la documentation est plus dure avec elle-même que l'audit n'avait besoin de l'être ».
+  **3 MEDIUM non bloquants** : **M1** toute la barrière anti-secrets repose sur `ci.yml`, **éditable par
+  un agent**, gitleaks **conditionnel** en pre-commit, aucun check requis → une PR neutralisant `ci.yml`
+  reste fusionnable (manifestation la plus concrète du risque #2) · **M2** l'outil de preuve n'est
+  protégé ni par l'Art. 6 ni par le hook (`exit 2 → exit 0` sans barrière) · **M3** aucun SAST ni
+  scanner de CVE dans la factory (`deps_audit` non bloquant, `dart pub outdated` compare des versions,
+  pas des vulnérabilités) — sans objet ici, bloquant de fait pour toute US applicative.
+- **Prochaine étape** : ⛔ **correction des 2 bloquants par @Developer** (B-1 : corriger l'over-claim +
+  signaler/corriger les 3 occurrences ; B-2 : garde symétrique côté réponse réelle → exit 2), puis
+  **re-audit Revue** en contexte frais. Phase SCB **inchangée** (`parallel_audit`). QA, DevOps et
+  `/certify` restent bloqués. ⏳ **T6 restant** (humain, cosmétique). **US-00.5** : `CLAUDE.md:20` +
+  `CONSTITUTION.md:49` (+ désormais le critère de test de US-00.1, US **certifiée** → ne pas éditer sans
+  ré-ouverture de cycle).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
