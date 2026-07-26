@@ -13,7 +13,7 @@ Index des preuves pour l'audit (`/audit-us`) et la QA. Branche : `feat/US-00.1-s
 | **T5** | Scan historique complet → 0 fuite | ✅ Fait | [`gitleaks-history.sarif`](gitleaks-history.sarif) — 11 commits, `no leaks found` |
 | **T6** | Scan working tree → 0 fuite | ✅ Fait | [`gitleaks-worktree.sarif`](gitleaks-worktree.sarif) — 89 MB scannés, `no leaks found` |
 | **T7** | Test négatif pre-commit (faux secret détecté) | ✅ Fait | [`negative-precommit.txt`](negative-precommit.txt) — `leaks found: 1`, exit 1 |
-| **T8** | Test négatif CI (faux secret → job rouge) | ⏳ (nécessite un PR) | lien run Actions (branche jetable) |
+| **T8** | Test négatif CI (faux secret → job rouge) | ✅ Fait | job `secrets-scan` = **failure** sur PR #2 (jetable, supprimée) — [run 30155284206](https://github.com/gitgdx/Concentration/actions/runs/30155284206/job/89672154938) |
 | **T9** | Documenter la procédure de rotation | ✅ Fait | [`docs/security/SECRET_ROTATION.md`](../../docs/security/SECRET_ROTATION.md) |
 | **T10** | Indexer les preuves | ✅ (ce fichier) | — |
 
@@ -48,9 +48,17 @@ Vérifié dans [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) :
 
 **Conclusion T2** : aucune édition de `ci.yml` requise pour US-00.1 (le job est correctement câblé).
 
-## Preuve restante — T8 (test négatif CI)
+## T8 — test négatif CI (fait)
 
-Seul **T8** reste : prouver qu'un faux secret poussé sur une PR fait **échouer** le job CI
-`secrets-scan`. Il nécessite une **branche jetable + PR** (le job tourne sur `pull_request`), puis
-la suppression de la branche/commit (le faux secret n'est **jamais** mergé). À réaliser au moment
-de l'ouverture de la PR US-00.1. Tous les rapports archivés ici utilisent `--redact`.
+Un faux secret (`AQ.<token>`) a été poussé sur une **branche jetable** `feat/US-00.1-negtest-ci`
+avec PR **draft #2** vers `main`. Résultat : job **`🔐 Secrets scan (gitleaks)` = `failure`**
+([run 30155284206](https://github.com/gitgdx/Concentration/actions/runs/30155284206/job/89672154938),
+2026-07-25) → la CI aurait empêché la fusion. **Branche + PR supprimées immédiatement** ; le faux
+secret n'a **jamais** touché `main` ni aucune branche persistante. Tous les rapports archivés ici
+utilisent `--redact`.
+
+## Synthèse
+
+Les 10 tâches (T1–T10) sont terminées. AC-1 à AC-4 couverts : config unique calibrée (AC-1),
+scans historique + working tree à 0 fuite (AC-2), garde-fou pre-commit **et** CI prouvés par tests
+négatifs (AC-3), procédure de rotation documentée (AC-4). Prêt pour `EVT_CODE_READY` → audits.

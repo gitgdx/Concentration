@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
-| US-00.1 | Secrets & scan de dépôt | development_start | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.1 | Secrets & scan de dépôt | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.2 | Qualité statique de référence | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -49,9 +49,14 @@
   (Integration Lock : **Design Data N/A** — aucun schéma ; **Design UX N/A** — aucune interface).
   **Codage autorisé** selon T1–T10. Phase SCB → `development_start`, branche
   `feat/US-00.1-secrets-scan-depot` (partie du nouveau `main`).
-- **Prochaine étape** : @Developer exécute les tâches agent (T2 vérif CI, T9 doc rotation, T10 index
-  preuves) ; **actions HUMAINES requises** T1 (créer `.gitleaks.toml` verrouillé — contenu préparé par
-  l'agent) + T3/T7 (installer gitleaks + test négatif pre-commit).
+- **Code (Dev)** (2026-07-25, `EVT_CODE_READY`) : T1–T10 terminées. `.gitleaks.toml` posé par l'humain
+  (identique à la proposition auditée) + suivi Git ; gitleaks 8.30.1 installé. **Preuves** (`reports/US-00.1/`) :
+  T5 scan historique (11 commits) **0 fuite**, T6 working tree (~89 MB, inclut la vraie clé Stitch locale)
+  **0 fuite** → allowlist validée, T7 test négatif pre-commit (faux `AQ.<token>` → `leaks found:1`, exit 1),
+  T8 test négatif CI (PR jetable #2 → job `secrets-scan` **failure**, branche supprimée). Procédure de
+  rotation : `docs/security/SECRET_ROTATION.md`. Note : `gitleaks protect` reste un alias fonctionnel en
+  8.30.1 → hook `pre-commit` OK sans modification.
+- **Prochaine étape** : `/audit-us US-00.1` (audits Rev 🔍 + Sec 🛡️ en contextes frais) → QA → DevOps → `/certify`.
 
 ### [US-00.2] Qualité statique de référence
 
