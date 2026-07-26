@@ -48,10 +48,10 @@ final.
 | US ID | Titre | Story File | Statut |
 |---|---|---|---|
 | US-INIT | Initialisation de la factory | _(bootstrap `init_factory.py` — voir SCB)_ | ⏳ development_start |
-| US-00.1 (ex US-INIT-01) | Secrets & scan de dépôt | [US-00.1-secrets-scan-depot.md](../stories/US-00.1-secrets-scan-depot.md) | ⏳ business_alignment |
-| US-00.2 (ex US-INIT-02) | Qualité statique de référence | [US-00.2-qualite-statique.md](../stories/US-00.2-qualite-statique.md) | ⏳ business_alignment |
-| US-00.3 (ex US-INIT-03) | Migrations réversibles | [US-00.3-migrations-reversibles.md](../stories/US-00.3-migrations-reversibles.md) | ⏳ business_alignment |
-| US-00.4 (ex US-INIT-04) | CI + protection de branche réelles | _(à créer via `/us-new`)_ | ⏳ à venir |
+| US-00.1 (ex US-INIT-01) | Secrets & scan de dépôt | [US-00.1-secrets-scan-depot.md](../stories/US-00.1-secrets-scan-depot.md) | 🚀 **Certifiée Prod** (2026-07-26) |
+| US-00.2 (ex US-INIT-02) | Qualité statique de référence | [US-00.2-qualite-statique.md](../stories/US-00.2-qualite-statique.md) | 🚀 **Certifiée Prod** (2026-07-26) |
+| US-00.3 (ex US-INIT-03) | Migrations réversibles | [US-00.3-migrations-reversibles.md](../stories/US-00.3-migrations-reversibles.md) | 🚀 **Certifiée Prod** (2026-07-26) |
+| US-00.4 (ex US-INIT-04) | CI + protection de branche réelles | [US-00.4-ci-protection-branche.md](../stories/US-00.4-ci-protection-branche.md) | ⏳ business_alignment (track STANDARD) |
 | US-00.5 (ex US-INIT-05) | ADR-001 stack + Constitution adaptée | _(à créer via `/us-new`)_ | ⏳ à venir |
 | US-00.6 (ex US-INIT-06) | Couverture initiale + ratchet | _(à créer via `/us-new`)_ | ⏳ à venir |
 
@@ -60,7 +60,8 @@ final.
 | # | Risque | Impact | Mitigation proposée |
 |---|---|---|---|
 | 1 | Fuite de valeurs de démo dans l'historique lors de l'init. | Exposition de secrets factices/réels. | Scan `gitleaks` + rotation documentée (US-00.1). |
-| 2 | Dérive entre `factory.config.json` et ses projections (CI, protection de branche, seuils). | Règles déclarées mais non enforced. | `python scripts/factory_sync.py --check` (gate CI `governance`). |
+| 2 | Dérive entre `factory.config.json` et ses projections (CI, protection de branche, seuils). | Règles déclarées mais non enforced. | ~~`python scripts/factory_sync.py --check` (gate CI `governance`)~~ → **mitigation prouvée INSUFFISANTE**, voir #5. |
+| 5 | **⚠️ RISQUE #2 MATÉRIALISÉ (constaté le 2026-07-26)** : la branche `main` n'était **pas protégée** (`"protected": false`) malgré une règle déclarée *enforced* dans `CLAUDE.md` et la Constitution. Les 4 status checks s'exécutaient sans qu'aucun ne soit **requis**. Cause racine : `factory_sync.py --check` ne compare que des artefacts **documentaires** et **n'appelle jamais l'API GitHub** — il affichait « conforme (env, *protection*, …) » sur un dépôt grande ouverte. | Tous les gates qualité contournables par un simple merge ou un push direct ; la confiance dans `Certifié Prod` reposait sur la seule discipline des intervenants. | **US-00.4** : applique réellement la protection depuis la config, la prouve par **réponse brute de l'API**, ajoute un test négatif serveur, rend le libellé de `--check` honnête (*documentaire*) et fournit `--check-remote` (comparaison champ par champ, hors CI car droits admin requis). |
 | 3 | Seuils de couverture arbitraires non mesurés sur le code réel. | Ratchet inopérant. | Mesure réelle sur le squelette (US-00.6). |
 | 4 | **US-00.3 définit une convention de migrations réversibles alors que la techno de persistance est délibérément reportée à US-01.2** (`STACK_PROFILE.md §DataEngineer`) → aucun schéma concret à migrer au Sprint 0. | Convention potentiellement trop abstraite ou non appliquée ; « migration testée » non exécutable tel quel au Sprint 0. | Cadrer US-00.3 comme **convention/politique agnostique de la techno**, **appliquée** et dont le patron de test est **instancié** par US-01.2 ; interdiction de migration destructive par défaut (RF-21). |
 

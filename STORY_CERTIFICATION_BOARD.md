@@ -13,6 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.4 | CI + protection de branche réelles | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -149,6 +150,62 @@
   convention + ADR-005 actifs). `/certify` : **6 gates verts** → `EVT_CERTIFIED_PROD`. **US-00.3 clôturée**
   (phase `epic_closure`). **Sprint 0 (EPIC_00) complet : US-00.1 + US-00.2 + US-00.3 certifiées.** La
   convention est prête à être appliquée + son patron de test instancié par **US-01.2**.
+
+### [US-00.4] CI + protection de branche réelles
+
+- **PO Visa** (2026-07-26) : Story File créé via `/us-new` — `docs/stories/US-00.4-ci-protection-branche.md`,
+  **7 AC** déclinés Nominal/Erreur/Limite, **13 scénarios Gherkin**
+  (`tests/features/US-00.4-ci-protection-branche.feature`). Valeur **plateforme** (aucune valeur
+  utilisateur final) — **Règle du "Pourquoi"** : fait passer la règle « jamais de push direct sur la
+  branche principale » de *déclarée* à **effective**. EPIC : `docs/epics/EPIC_00-fondations.md`
+  (chantier ex-« US-INIT-04 », risque #2 de l'EPIC).
+- **⚠️ Constat d'entrée (vérifié par API le 2026-07-26)** : `main` **n'est PAS protégée**
+  (`GET /repos/gitgdx/Concentration/branches` → `"protected": false`). Les 4 status checks déclarés
+  dans `factory.config.json` s'exécutent sur les PR mais **aucun n'est requis** : rien n'empêche
+  techniquement un merge avec CI rouge, un push direct ou un force-push. Les PR #3/#6/#8/#9 ont été
+  fusionnées **sans protection active** — par discipline de process, pas par contrainte de plateforme.
+  **Angle mort corrélé** : `factory_sync.py --check` affiche « conforme (env, **protection**, … ) »
+  **sans jamais contacter l'API GitHub** (vérification purement documentaire) — libellé trompeur.
+- **Track** : `STANDARD` — critères `docs/governance/TRACKS.md` : 0 fichier de code Dart, ≤ 15
+  fichiers, pas de nouvelle page/API, pas de nouvelle EPIC. Le critère « surface admin » (qui
+  plaiderait FULL) a été examiné et **écarté** : il vise la surface *applicative*, interprétation déjà
+  inscrite au SCB par US-00.1. FULL aurait imposé Design Data **et** UX sans N/A possible (absurde pour
+  une US de CI) et une « revue humaine explicite de PR » que le passage à 0 approbation rend
+  précisément non enforçable. **ADR-006 requis malgré STANDARD** (précédent : ADR-005 en STANDARD).
+- **Design Data / UX** : `⏳` → **N/A attendu** au Integration Lock (aucun schéma de données, aucune
+  surface d'interface — US de gouvernance de dépôt), à justifier à `EVT_DESIGN_COMPLETED`.
+- **Arbitrages humains rendus (gate *clarify*, 2026-07-26)** :
+  1. **Cible de protection** = `required_approving_review_count: **0**` + `enforce_admins: **true**`
+     (reste inchangé). Motif : le dépôt n'a **qu'un seul collaborateur** (`gitgdx`, admin) ; GitHub
+     interdit à l'auteur d'approuver sa propre PR et `enforce_admins: true` supprime le bypass admin →
+     la config initiale (`1` + `enforce_admins`) aurait **verrouillé tout merge futur**. Écart à
+     justifier par **ADR-006** (+ condition de retour à `1` dès un 2ᵉ collaborateur, avec point de
+     contrôle inscrit dans `/audit-methodo`).
+  2. **Angle mort traité dans l'US** : `--check` doit annoncer une vérification **documentaire**, et une
+     commande dédiée `--check-remote` compare champ par champ la protection réelle au JSON émis par la
+     config. **Hors CI** — lire la protection exige des droits **admin** que le `GITHUB_TOKEN` de la CI
+     n'a pas ; un gate CI échouerait.
+  3. **2 commits de bootstrap hors PR** (`0a2e5ab` `chore(init)`, `6483022` `chore(governance)`, seuls
+     commits n'étant pas passés par une PR) : **pas d'`EVT_WORKFLOW_VIOLATION` rétroactif** (ils ont
+     *créé* les règles en question). Exemption portée par **ADR-006** + `docs/GIT_PROTECTION.md` + le
+     constat daté de l'AC-7. **`governance.grandfathering_date` reste `null`** — décision d'abord prise
+     de la renseigner, **révisée** après vérification : la clé est **lue par aucun script** (présente
+     seulement dans une description de schéma et un docstring) et sa sémantique documentée est « *US
+     sans trace tolérées* », pas « commits hors PR » ; la renseigner aurait été un no-op risquant de
+     **masquer la dette US-INIT-01→06**.
+  4. **Aucun amendement de `CLAUDE.md` ni de la Constitution** : cette US rend la déclaration
+     « *enforced par protection de branche* » **vraie** — il n'y a rien à corriger. Le constat daté de
+     l'AC-7 suffit.
+- **Prérequis / actions humaines identifiées** : `gh` CLI **n'est pas installé** (`gh: not recognized`)
+  alors que `scripts/apply_branch_protection.sh` en dépend → installation + authentification (droits
+  admin) = action humaine, comme l'installation de `gitleaks` en US-00.1. `factory.config.json` et
+  `scripts/factory_sync.py` sont des **fichiers d'enforcement** (Art. 6) non éditables par un agent :
+  les diffs exacts sont pré-rédigés dans le Story File (T5, T6, T6b).
+- **Portée bornée (AC-7)** : cette US **ne réécrit pas** l'historique Git et **ne remet pas en cause**
+  les certifications de US-00.1/00.2/00.3 (audits à contexte frais, gates CI réellement exécutés,
+  preuves archivées). Elle constate le trou d'enforcement, le documente et le ferme pour la suite.
+- **Prochaine étape** : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED` (@Architect) **avec ADR-006** →
+  Integration Lock `EVT_DESIGN_COMPLETED` (Data N/A + UX N/A justifiés) → développement (T1→T14).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

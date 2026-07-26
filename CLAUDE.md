@@ -49,19 +49,37 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : US-01.1 — Affichage Hub & grille d'échéances (EPIC_01, track FULL), phase
-`business_alignment`. Story File créé, maquettes Stitch rapatriées dans `docs/design/stitch/`.
-Prochaine étape : `EVT_STORY_READY` → validation @Architect → design UX+Data → ADR-002/003/004 → Lock.
+**Chantier actif** : **US-00.4 — CI + protection de branche réelles** (EPIC_00, track STANDARD), phase
+`business_alignment`, branche `feat/US-00.4-ci-protection-branche`. Story File complet (7 AC, 13
+scénarios, T1→T14). Prochaine étape : `EVT_STORY_READY` → `EVT_ARCHI_VALIDATED` **avec ADR-006** →
+Lock (Data N/A + UX N/A) → développement.
+**Sprint 0 (EPIC_00) : 3 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3 🚀 ; restent US-00.4 (en
+cours), US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture + ratchet). ⚠️ La mention
+« SPRINT 0 COMPLET » du PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau).
+US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
+- 🔴 **`main` n'était pas protégée** (constaté 2026-07-26, `"protected": false`) alors que la règle
+  est déclarée *enforced* → corrigé par **US-00.4** (risque #2 d'EPIC_00 matérialisé).
+- 🔴 **`factory_sync.py --check` n'appelle jamais l'API GitHub** et annonce pourtant « protection
+  conforme » — angle mort traité par US-00.4 (libellé *documentaire* + `--check-remote` hors CI).
+- **Périmètre Art. 6 déclaré ≠ appliqué** : `.github/workflows/*` et `apply_branch_protection.sh` ne
+  sont protégés ni par `protect_files.sh` ni par la Constitution → candidat `/audit-methodo`.
+- **`governance.grandfathering_date` est une clé morte** : lue par aucun script, sémantique décalée
+  (« US sans trace », pas « commits hors PR »). Laissée à `null` — à implémenter, redocumenter ou
+  supprimer du schéma.
 - Fichiers EPIC créés **rétroactivement** (EPIC_00, EPIC_01) — `/us-new` ne vérifie pas l'existence
   du fichier EPIC parent ; durcissement du rituel à décider.
-- Sprint 0 non déroulé : US-INIT-01→06 listées au backlog, sans ligne SCB ni Story File.
 - Décisions design à arbitrer (@UXDesigner + @PO) : gradient continu OKLCH (PRD) vs 4 paliers
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
+- 🔴 **US-00.4, chemin critique** : installer + authentifier `gh` CLI (droits admin) — absent du poste
+  alors que `apply_branch_protection.sh` en dépend.
+- 🔴 **US-00.4, T5** : éditer `factory.config.json` (Art. 6) → `required_approving_review_count: 1 → 0`
+  (`enforce_admins` reste `true`). Diff exact dans le Story File. **Ne pas toucher
+  `grandfathering_date`.** Puis T6/T6b (`factory_sync.py`, `apply_branch_protection.sh`).
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).
-- Décider la création de US-01.2 (Gestion des événements) et le déroulé du Sprint 0.
+- Décider la création de US-01.2 (Gestion des événements).
 - Arbitrages design ci-dessus.
 
 ## Anti-patterns (à ne pas reproduire)
