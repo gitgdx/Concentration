@@ -13,3 +13,16 @@ Aucune donnée sensible : aucun jeton, aucun en-tête `Authorization`, propriét
 | `branch_protected_true.json` | `GET …/branches/main` → `"protected": true` | critères #7, #8, #10 |
 | `branch_protected_false.json` | `GET …/branches/main` → `"protected": false` | critère #10 → **exit 1** |
 | `http_404.json` | corps d'erreur **404** de `GET …/protection` | critère #10 (avec `--from-protection-status 404`) |
+
+## Fixtures du correctif B-2 *(ajoutées le 2026-07-26 après l'audit Revue)*
+
+L'audit Revue à contexte frais a établi que le comparateur pouvait rendre **exit 0 « conforme »** sur une protection matériellement divergente : la garde ne portait que sur la **cible**, jamais sur la **réponse réelle**, si bien que toute clé supplémentaire du `GET` était **ignorée en silence**. Les 4 fixtures ci-dessous verrouillent le correctif — chacune ne diffère de `protection_conforme.json` **que par le champ testé**, pour que l'échec d'un cas désigne sans ambiguïté sa cause.
+
+| Fichier | Simule | Attendu |
+|---|---|---|
+| `protection_lock_branch_actif.json` | `lock_branch: {"enabled": true}` — branche **entièrement verrouillée en écriture** | **exit 2** « MAPPING INCOMPLET » — *c'est le cas exact du faux vert corrigé* |
+| `protection_block_creations_actif.json` | `block_creations: {"enabled": true}` | **exit 2** |
+| `protection_cle_inconnue_active.json` | clé inconnue `require_signed_commits_v2: {"enabled": true}` **+** `required_pull_request_reviews.bypass_pull_request_allowances` **non vide** (dispense de PR, dans un **sous-objet mappé**) | **exit 2**, les **2** champs nommés |
+| `protection_cles_additives_neutres.json` | 4 champs additifs **neutres** (`{"enabled": false}`, `null`, `[]`, conteneur vide) | **exit 0** — une clé additive neutre ne doit **pas** faire trébucher l'outil (l'API GitHub est additive) |
+
+Ces 4 fixtures sont, elles aussi, des **instantanés outillés puis gelés** : dérivées une seule fois de `protection_conforme.json` par un générateur laissé **hors du dépôt**.

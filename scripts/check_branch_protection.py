@@ -11,7 +11,9 @@ Trois issues honnêtes, jamais de faux vert :
           écart ; contextes de status checks listés séparément en *manquants* et *en trop*).
   exit 2  VÉRIFICATION IMPOSSIBLE — ce n'est PAS un succès : 403 de plan, 403 de droits, 401,
           404 non désambiguïsé, erreur réseau, `gh` absent ET aucun jeton, erreur d'usage,
-          ou clé de la cible dont le mapping PUT → GET n'est pas défini.
+          clé de la CIBLE dont le mapping PUT → GET n'est pas défini, ou champ ACTIF de la
+          RÉPONSE réelle non couvert par le mapping (cf. §Frontière de couverture, plus bas :
+          `lock_branch: true` ne doit jamais pouvoir ressortir « conforme »).
 
 LECTURE SEULE, ABSOLUE : ce module n'émet que des requêtes GET. Aucune méthode d'écriture (PUT,
 POST, PATCH, DELETE), aucun drapeau de méthode passé à `gh api`, aucun chemin d'écriture distante
@@ -90,6 +92,50 @@ MAPPED_TOP_KEYS = {
 MAPPED_RSC_KEYS = {"strict", "contexts"}
 MAPPED_PRR_KEYS = {"required_approving_review_count"}
 
+# ──────────────────────────────────────────────────────────────────────────────────────────
+#  FRONTIÈRE DE COUVERTURE DU MAPPING — correctif du finding B-2 de l'audit Revue
+# ──────────────────────────────────────────────────────────────────────────────────────────
+#  La garde initiale ne protégeait que le côté ATTENDU (les clés de la cible). Toute clé
+#  SUPPLÉMENTAIRE de la réponse GET était donc ignorée EN SILENCE : une protection réelle
+#  portant `lock_branch: {"enabled": true}` (branche entièrement verrouillée en écriture, plus
+#  aucune fusion possible) ressortait « conforme » en **exit 0**. C'était le seul chemin de
+#  FAUX VERT du dispositif, dans l'outil de preuve lui-même — exactement le défaut que cette
+#  US corrige. La garde est désormais SYMÉTRIQUE, sur trois catégories explicites :
+#
+#    1. INERTE — clé de navigation / métadonnée, sans effet possible sur l'enforcement.
+#       Liste EXPLICITE (ci-dessous) → ignorée sans bruit.
+#    2. MAPPÉE — comparée champ par champ (mapping PUT → GET du §Patterns imposés).
+#    3. TOUT LE RESTE, classé par la SÉMANTIQUE DE SA VALEUR :
+#         · NEUTRE (absente, `false`, `{"enabled": false}`, `null`, conteneur vide) → ignorée
+#           mais NOMMÉE dans la sortie. Jamais silencieuse, et sans faire trébucher l'outil.
+#         · ACTIVE (`true`, `{"enabled": true}`, conteneur non vide, nombre, chaîne, type
+#           inattendu) → **exit 2** en nommant la clé : la comparaison est INCOMPLÈTE, donc
+#           elle ne peut pas conclure.
+#
+#  Pourquoi pas une liste blanche fermée (rejeter toute clé inconnue) : l'API GitHub est
+#  ADDITIVE — une nouvelle clé neutre rendrait l'outil rouge en permanence, et un outil
+#  toujours rouge finit par être ignoré ou rendu non bloquant. Pourquoi pas l'inverse (tout
+#  ignorer) : c'est précisément le faux vert B-2. La frontière retenue ne repose donc pas sur
+#  la connaissance du NOM de la clé, mais sur le fait que sa VALEUR puisse ou non modifier
+#  l'enforcement. Une clé active inconnue est traitée comme non vérifiable, jamais comme
+#  inoffensive.
+INERT_GET_KEYS = {
+    "url",             # auto-référence de l'objet
+    "contexts_url",    # navigation (required_status_checks)
+    "checks",          # miroir moderne de `contexts` — DÉJÀ consommé par _extract_contexts,
+                       # et recoupé avec `contexts` (voir _contexts_inconsistency)
+    "protection_url",  # navigation (réponse .../branches/{b})
+    "name",            # nom de la branche (réponse .../branches/{b})
+    "protection",      # résumé non autoritatif de .../branches/{b} (l'objet autoritatif est
+                       # la réponse de .../protection, lue séparément)
+}
+# Préfixe des métadonnées de FIXTURE (ex. `_fixture`) : l'API GitHub ne renvoie jamais de clé
+# commençant par « _ ». Les traiter comme inertes évite qu'une fixture auto-étiquetée trébuche
+# sur son propre marquage.
+INERT_KEY_PREFIX = "_"
+# Profondeur maximale d'inspection d'un objet imbriqué inconnu : au-delà, on ne devine pas.
+NEUTRAL_MAX_DEPTH = 3
+
 # Rédaction défensive : aucun jeton ne doit atterrir dans reports/ (gitleaks bloquant en
 # pre-commit ET en CI). Le motif ci-dessous est une EXPRESSION, jamais un secret.
 TOKEN_PATTERN = re.compile(r"\b(gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,})")
@@ -102,6 +148,21 @@ class MappingGap(Exception):
     Lever cette exception plutôt que d'ignorer la clé : une clé non comparée serait un trou
     silencieux dans la vérification — exactement le défaut que cette US corrige.
     """
+
+
+@dataclass
+class Comparison:
+    """Résultat structuré d'une comparaison cible ↔ réponse GET.
+
+    `uncovered_active` est le correctif du finding B-2 : il DOMINE `diffs`. Si la réponse porte
+    un champ actif non couvert, la comparaison est incomplète — on ne peut donc affirmer ni la
+    conformité (exit 0 interdit), ni l'exhaustivité de la liste d'écarts → exit 2.
+    """
+
+    ok: list[str] = field(default_factory=list)
+    diffs: list[str] = field(default_factory=list)
+    neutral_ignored: list[str] = field(default_factory=list)
+    uncovered_active: list[str] = field(default_factory=list)
 
 
 class UsageError(Exception):
@@ -376,6 +437,105 @@ def _unwrap_enabled(actual: dict, key: str) -> object:
     return f"<type inattendu : {type(value).__name__}>"
 
 
+def _is_inert_key(key: str) -> bool:
+    """Clé de navigation/métadonnée, sans effet possible sur l'enforcement (voir §Frontière)."""
+    return key in INERT_GET_KEYS or key.startswith(INERT_KEY_PREFIX)
+
+
+def _is_neutral(value: object, depth: int = 0) -> bool:
+    """Une valeur de la réponse GET est NEUTRE si elle ne peut, en l'état, ni durcir ni relâcher
+    l'enforcement : absente, `false`, `{"enabled": false}`, `null`, ou conteneur vide.
+
+    Tout le reste est ACTIF — y compris un nombre, une chaîne non vide ou un type inattendu :
+    on ne devine pas la sémantique d'un champ qu'on ne connaît pas (fail-explicit).
+    """
+    if value is None or value is False:
+        return True
+    if value is True:
+        return False
+    if isinstance(value, dict):
+        if "enabled" in value:
+            return value["enabled"] is False
+        if depth >= NEUTRAL_MAX_DEPTH:
+            return False
+        return all(
+            _is_inert_key(k) or _is_neutral(v, depth + 1) for k, v in value.items()
+        )
+    if isinstance(value, (list, tuple, str)):
+        return len(value) == 0
+    return False
+
+
+def _summarize(value: object) -> str:
+    if isinstance(value, dict) and "enabled" in value:
+        return '{"enabled": ' + _j(value["enabled"]) + "}"
+    text = _j(value)
+    return text if len(text) <= 120 else text[:117] + "…"
+
+
+def _classify_extra(obj: dict, mapped: set[str], prefix: str) -> tuple[list[str], list[str]]:
+    """Classe les clés de `obj` (réponse GET) NON couvertes par `mapped` ni inertes.
+
+    Retourne (neutres ignorées, actives non couvertes). Correctif du finding B-2 : aucune clé
+    de la réponse réelle ne peut plus être écartée en silence.
+    """
+    neutral: list[str] = []
+    active: list[str] = []
+    for key in sorted(obj):
+        if key in mapped or _is_inert_key(key):
+            continue
+        full = f"{prefix}{key}"
+        if _is_neutral(obj[key]):
+            neutral.append(full)
+        else:
+            active.append(f"{full} = {_summarize(obj[key])}")
+    return neutral, active
+
+
+def _guard_actual(actual: dict) -> tuple[list[str], list[str]]:
+    """Garde SYMÉTRIQUE côté réponse RÉELLE — top-level ET sous-objets mappés.
+
+    Les sous-objets comptent autant que la racine : `required_pull_request_reviews` porte des
+    champs d'enforcement absents du mapping (`dismiss_stale_reviews`,
+    `require_code_owner_reviews`, `require_last_push_approval`,
+    `bypass_pull_request_allowances`…). Les ignorer aurait reproduit B-2 un niveau plus bas.
+    """
+    neutral, active = _classify_extra(actual, MAPPED_TOP_KEYS, "")
+    for parent, mapped in (
+        ("required_status_checks", MAPPED_RSC_KEYS),
+        ("required_pull_request_reviews", MAPPED_PRR_KEYS),
+    ):
+        child = actual.get(parent)
+        if isinstance(child, dict):
+            n, a = _classify_extra(child, mapped, f"{parent}.")
+            neutral += n
+            active += a
+    return neutral, active
+
+
+def _contexts_inconsistency(act_rsc: dict) -> str | None:
+    """`contexts` (déprécié) et `checks[].context` doivent décrire le même ensemble.
+
+    `checks` est classé INERTE parce que `_extract_contexts` le consomme en repli ; ce recoupement
+    évite qu'une divergence entre les deux vues passe inaperçue (même famille de trou que B-2).
+    """
+    contexts = act_rsc.get("contexts")
+    checks = act_rsc.get("checks")
+    if not isinstance(contexts, list) or not isinstance(checks, list):
+        return None
+    from_checks = {
+        str(c["context"]) for c in checks if isinstance(c, dict) and c.get("context") is not None
+    }
+    from_contexts = {str(c) for c in contexts}
+    if from_contexts == from_checks:
+        return None
+    return _fmt(
+        "required_status_checks : `contexts` vs `checks[].context`",
+        "les deux vues de l'API décrivent le même ensemble",
+        f"contexts={sorted(from_contexts)} ≠ checks={sorted(from_checks)}",
+    )
+
+
 def _guard_mapping(expected: dict) -> None:
     """Toute clé de la cible non couverte par le mapping = vérification impossible (jamais
     silencieusement ignorée : ce serait un trou dans la preuve)."""
@@ -407,12 +567,16 @@ def _guard_mapping(expected: dict) -> None:
         )
 
 
-def compare(expected: dict, actual: dict) -> tuple[list[str], list[str]]:
-    """Compare la cible (format PUT) à une réponse GET. Retourne (lignes OK, lignes d'écart).
+def compare(expected: dict, actual: dict) -> Comparison:
+    """Compare la cible (format PUT) à une réponse GET.
 
-    Lève MappingGap si la cible porte une clé non mappée (→ exit 2, jamais exit 0/1).
+    Lève MappingGap si la CIBLE porte une clé non mappée (→ exit 2 : on ne peut même pas
+    construire la comparaison). Les clés non couvertes de la RÉPONSE sont, elles, rapportées
+    dans `Comparison.neutral_ignored` / `Comparison.uncovered_active` — la seconde interdit
+    l'exit 0 (correctif du finding B-2).
     """
     _guard_mapping(expected)
+    neutral_ignored, uncovered_active = _guard_actual(actual)
     ok: list[str] = []
     diffs: list[str] = []
 
@@ -451,6 +615,10 @@ def compare(expected: dict, actual: dict) -> tuple[list[str], list[str]]:
                 )
             for ctx in sorted(exp_ctx & act_ctx):
                 ok.append(_fmt("required_status_checks.contexts", ctx, ctx))
+
+            inconsistency = _contexts_inconsistency(act_rsc)
+            if inconsistency:
+                diffs.append(inconsistency)
 
     # 2. required_pull_request_reviews.required_approving_review_count
     #    Objet ou clé ABSENT = ÉCART, et non un zéro : `0` approbation ≠ pas de PR exigée.
@@ -501,7 +669,12 @@ def compare(expected: dict, actual: dict) -> tuple[list[str], list[str]]:
                 _fmt(target, None, "<clé PRÉSENTE dans la réponse GET — restrictions en place>")
             )
 
-    return ok, diffs
+    return Comparison(
+        ok=ok,
+        diffs=diffs,
+        neutral_ignored=neutral_ignored,
+        uncovered_active=uncovered_active,
+    )
 
 
 # ──────────────────────────────────────────────────────────────────────────────────────────
@@ -627,21 +800,52 @@ def _attribute(rep: Reporter, expected: dict, protection: ApiResult, branch_res:
                 "réponse 200 dont le corps n'est pas un objet JSON de protection exploitable",
                 http=200,
             )
-        ok, diffs = compare(expected, protection.body)
+        cmp = compare(expected, protection.body)
         rep.line(
             f"Comparaison champ par champ — {repo}:{branch} · "
-            f"{len(ok)} champ(s) alignés, {len(diffs)} écart(s)."
+            f"{len(cmp.ok)} champ(s) alignés, {len(cmp.diffs)} écart(s), "
+            f"{len(cmp.neutral_ignored)} champ(s) additionnel(s) neutre(s), "
+            f"{len(cmp.uncovered_active)} champ(s) ACTIF(S) non couvert(s)."
         )
-        for line in ok:
+        for line in cmp.ok:
             rep.line(f"  [OK] {line}")
-        if diffs:
-            return _derive(rep, f"protection divergente sur {repo}:{branch}", diffs)
+        if cmp.neutral_ignored:
+            # Nommés, jamais silencieux (correctif B-2) : neutres, donc sans effet sur l'issue.
+            rep.line(
+                "  [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut "
+                "ni durcir ni relâcher l'enforcement : " + ", ".join(cmp.neutral_ignored)
+            )
+        if cmp.uncovered_active:
+            # DOMINE la dérive : une comparaison incomplète ne peut conclure ni à la conformité,
+            # ni à l'exhaustivité de la liste d'écarts. Les écarts déjà détectés sont tout de
+            # même imprimés — les perdre priverait l'opérateur d'information utile.
+            if cmp.diffs:
+                rep.line(
+                    f"  [ÉCARTS DÉJÀ DÉTECTÉS, liste NON exhaustive] {len(cmp.diffs)} :"
+                )
+                rep.line("  champ | attendu | réel")
+                for diff in cmp.diffs:
+                    rep.line(f"  {diff}")
+            return _impossible(
+                rep,
+                "MAPPING INCOMPLET — la réponse GET porte "
+                f"{len(cmp.uncovered_active)} champ(s) ACTIF(S) non couvert(s) par le mapping "
+                "PUT → GET d'US-00.4 : "
+                + " · ".join(cmp.uncovered_active)
+                + ". Ces champs peuvent modifier l'enforcement réel de la branche (ex. "
+                "`lock_branch` verrouille toute écriture, `bypass_pull_request_allowances` "
+                "dispense de PR) : la comparaison est INCOMPLÈTE et ne peut donc RIEN conclure",
+                http=200,
+            )
+        if cmp.diffs:
+            return _derive(rep, f"protection divergente sur {repo}:{branch}", cmp.diffs)
         if rep.prefix:
             rep.line(MSG_SIMULE_OK)
         else:
             rep.line(
                 f"Protection de {repo}:{branch} — conforme à la cible générée par "
-                "`factory_sync.py --emit-branch-protection` (comparaison champ par champ)."
+                "`factory_sync.py --emit-branch-protection` (comparaison champ par champ ; "
+                "aucun champ actif non couvert dans la réponse)."
             )
         return EXIT_CONFORME
 
@@ -689,9 +893,10 @@ def _attribute(rep: Reporter, expected: dict, protection: ApiResult, branch_res:
                 f"GET /repos/{repo}/branches/{branch} → \"protected\": false : la branche n'est "
                 "réellement PAS protégée (ce n'est pas un défaut de droits)."
             )
-            _, diffs = compare(expected, {})
             return _derive(
-                rep, f"protection ABSENTE sur {repo}:{branch} (404 + protected == false)", diffs
+                rep,
+                f"protection ABSENTE sur {repo}:{branch} (404 + protected == false)",
+                compare(expected, {}).diffs,
             )
         if protected is True:
             return _impossible(

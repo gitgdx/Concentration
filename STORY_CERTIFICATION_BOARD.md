@@ -339,12 +339,56 @@
   protégé ni par l'Art. 6 ni par le hook (`exit 2 → exit 0` sans barrière) · **M3** aucun SAST ni
   scanner de CVE dans la factory (`deps_audit` non bloquant, `dart pub outdated` compare des versions,
   pas des vulnérabilités) — sans objet ici, bloquant de fait pour toute US applicative.
-- **Prochaine étape** : ⛔ **correction des 2 bloquants par @Developer** (B-1 : corriger l'over-claim +
-  signaler/corriger les 3 occurrences ; B-2 : garde symétrique côté réponse réelle → exit 2), puis
-  **re-audit Revue** en contexte frais. Phase SCB **inchangée** (`parallel_audit`). QA, DevOps et
-  `/certify` restent bloqués. ⏳ **T6 restant** (humain, cosmétique). **US-00.5** : `CLAUDE.md:20` +
-  `CONSTITUTION.md:49` (+ désormais le critère de test de US-00.1, US **certifiée** → ne pas éditer sans
-  ré-ouverture de cycle).
+- **🔧 Correctifs des 2 bloquants livrés** (2026-07-26, @Developer — **vérifiés indépendamment par
+  @Architect**) :
+  - **B-2 fermé.** `_guard_actual()`, symétrique de `_guard_mapping()`, avec une **frontière de
+    couverture documentée** dans le module : clés **inertes** (liste explicite + préfixe `_`) ignorées ·
+    clés **mappées** comparées · **tout le reste classé par la sémantique de sa VALEUR** — *neutre*
+    (absente/`false`/vide, récursivement) ignorée mais **nommée** `[IGNORÉ — NEUTRE]`, *active*
+    (`true`/non vide) → **exit 2** en nommant la clé. Le choix porte sur la **valeur**, pas sur la
+    connaissance du **nom** : une liste blanche fermée aurait rendu l'outil rouge en permanence (l'API
+    GitHub est additive) et un outil toujours rouge finit ignoré. **Règle de dominance** :
+    `uncovered_active` **domine** les écarts — une comparaison incomplète ne peut affirmer ni la
+    conformité **ni l'exhaustivité de la liste d'écarts**. **Vérifié par @Architect** : l'ex-faux vert
+    (`lock_branch: {"enabled": true}`) sort en **exit 2** en nommant les 2 clés actives, et une clé
+    additive **neutre** reste en **exit 0**. **2 trous de la même famille fermés au passage, non
+    signalés par l'audit** : les sous-objets de `required_pull_request_reviews` étaient eux aussi
+    ignorés en silence — dont **`bypass_pull_request_allowances`, qui DISPENSE DE PR** (B-2 un niveau
+    plus bas) ; et `contexts` ↔ `checks[].context` sont désormais **recoupés**.
+  - **B-1 traité.** Over-claim **retiré** (plus de « dernière affirmation fausse restante », plus de
+    balayage « sur tout le dépôt ») ; `false_claims_sweep.md` déclare explicitement que
+    **l'exhaustivité n'est pas revendiquée**. **C12** `.github/workflows/ci.yml:3-4` **corrigé**
+    (« rapportés, PAS bloquants » ; fusion possible avec CI rouge) — les 4 libellés résolvent toujours,
+    `--check` reste exit 0. **S10** `scripts/githooks/pre-push:2-3` → **non édité** (Art. 6), diff exact
+    fourni en **T22 [action humaine]**. **S11** `US-00.1:198,215` → **non édité** (**décision humaine** :
+    US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule.
+  - **S12 — 3ᵉ fausse affirmation du même fichier**, corrigée par @Architect : `docs/SQUAD_GUIDE.md:36`
+    (nœud Mermaid « Gates CI **bloquants** sur PR … **insensibles aux bypass locaux** » — **deux**
+    affirmations fausses), après S3 (l. 321) et S7 (l. 285). Le principe cardinal du guide (« une règle
+    sans mécanisme d'application est un **vœu** ») s'y applique désormais explicitement à
+    l'enforcement de `main`. **Périmètre de S11 borné par vérification** : US-00.2 et US-00.3 sont
+    **propres**, seule US-00.1 portait cette classe d'affirmation.
+  - **🎓 Leçon méthodologique — trois échecs successifs d'exhaustivité, tous consignés** : balayage par
+    **liste de fichiers** (T14) → rate S3 · balayage par **motif sur `*.md`** (@Architect) → rate
+    `ci.yml` (YAML) et `pre-push` (shell), d'où B-1 · balayage par **motif toutes extensions**
+    (@Developer) → **rate `CLAUDE.md:20`**, le motif `enforced par protection` ne matchant pas la forme
+    énumérative `*Enforced : … + protection de branche.*`. **Un balayage par motif n'est exactement
+    aussi complet que sa liste de motifs** — même défaut que la liste de fichiers, un cran plus haut.
+    Aucune de ces méthodes ne garantit l'exhaustivité ; **la seule garantie serait une relecture
+    intégrale du corpus, qui n'a pas été faite**. À porter à `/audit-methodo`.
+  - **Non-régression** : `--check` exit 0 · `--check-remote` exit 2 (403 de plan) · `run_gates --all`
+    **5/5** · SCB et trace conformes · 3 contrôles négatifs · **import paresseux revérifié** après
+    refonte du module (module rendu syntaxiquement invalide → `--check` reste exit 0) · **`gitleaks`
+    8.30.1 rejoué** par @Developer sur les livrables → `no leaks found`.
+  - ⚠️ **Écart signalé, non résolu** : le comparateur **n'est protégé par rien** (`protect_files.sh`) et
+    **aucun test automatisé ne le couvre** — or il porte maintenant la frontière de couverture, dont
+    l'affaiblissement (retirer une clé de `INERT_GET_KEYS`, inverser `_is_neutral`) **rétablirait
+    silencieusement le faux vert**. Les 8 chemins sont exercés par fixtures versionnées, mais
+    **manuellement**. C'est la classe de risque que B-2 vient de matérialiser → **à arbitrer**.
+- **Prochaine étape** : **re-audit Revue en contexte frais** (nouvel auditeur — jamais celui qui a rendu
+  le FAILED). Phase SCB **inchangée** (`parallel_audit`) jusqu'au verdict. Puis QA → DevOps →
+  `/certify`. ⏳ **T22** (humain, Art. 6 — commentaire de `pre-push`) et **T6** (humain, cosmétique).
+  **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + le critère de test de US-00.1 (S11).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

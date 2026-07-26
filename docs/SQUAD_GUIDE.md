@@ -29,11 +29,21 @@ un rôle précis et un périmètre non-négociable, issue du gabarit `factory-st
 Principe cardinal : **une règle sans mécanisme d'application est un vœu, pas une règle**. Chaque
 règle de gouvernance a donc **3 étages d'enforcement** :
 
+> 🔴 **Constat du 2026-07-26 — l'étage 3 ne bloque rien.** La protection de branche est **indisponible**
+> sur ce dépôt (403 « Upgrade to GitHub Pro or make this repository public », sur la protection
+> classique **et** sur les rulesets). **Aucun status check n'est requis** : les gates CI **rapportent**
+> mais une PR peut être fusionnée **avec la CI rouge**, et l'étage 3 n'est donc **pas** « insensible aux
+> bypass locaux » — il est simplement *ailleurs*. Par ce principe cardinal même, l'enforcement de la
+> branche principale est aujourd'hui **un vœu**. Dérogation humaine tracée (`EVT_WAIVER_GRANTED`,
+> US-00.4) ; voir [ADR-006](adr/ADR-006-protection-branche-principale.md) et
+> [`GIT_PROTECTION.md`](GIT_PROTECTION.md). *(3ᵉ fausse affirmation corrigée dans ce fichier — après
+> l. 285 et l. 321.)*
+
 ```mermaid
 graph TD
     A["⚡ Hooks Claude Code\n(temps réel — feedback immédiat à l'agent :\n--no-verify bloqué, .env protégés, SCB vérifié à chaque édition)"]
     B["🔒 Hooks git versionnés\n(pre-commit : ligne PROJECT_LOG AJOUTÉE + SCB + secrets\ncommit-msg : convention + trailer US\npre-push : branche principale interdite)"]
-    C["🚦 Gates CI bloquants sur PR\n(secrets · gouvernance · gates qualité de l'adapter\ninsensibles aux bypass locaux)"]
+    C["🚦 Gates CI RAPPORTÉS sur PR — NON bloquants\n(secrets · gouvernance · gates qualité de l'adapter\naucun check n'est REQUIS : fusion possible avec CI rouge\n403 de plateforme — cf. ADR-006)"]
 
     A --> B --> C
 

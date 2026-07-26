@@ -36,6 +36,16 @@ US de **plateforme / gouvernance**, requalifiée en **CONSTAT + OUTILLAGE** apr�
 | **T14** | Relecture « aucune fausse affirmation » | ✅ | `false_claims_sweep.md` — 10 corrigées, 6 signalées hors périmètre |
 | **T15** | Transmission formelle à **US-00.5** (OBLIGATOIRE) | ✅ | `enforcement_gap.md` §6 |
 | **T16→T19** | Application, preuve `"protected": true`, **test négatif serveur**, checks bloquants | ⛔ **REPORTÉES — NON EXÉCUTÉES** | Interdites : sans protection, un push direct sur `main` **réussirait**. `origin/main` est resté `801a046` |
+| **T20** | **Correctif B-2** — garde **symétrique** côté réponse réelle (fin du faux vert) + 4 fixtures | ✅ | `check_remote_simulated.txt` cas **[5/8]→[8/8]** · `scripts/check_branch_protection.py` §Frontière de couverture |
+| **T21** | **Correctif B-1** — `ci.yml` rectifié, over-claim retiré, balayage **toutes extensions** | ✅ | `false_claims_sweep.md` **C12/S10/S11/S12** + §Méthode bis · `enforcement_gap.md` §6 quater |
+| **T22** | Diff `scripts/githooks/pre-push` — *son commentaire contredit l'AC-7 dont il est l'élément (a)* | ⏳ **due** | **[action humaine]**, Art. 6 — diff exact dans le Story File §Tâches |
+
+### Suites de l'audit `/audit-us` (contextes frais, 2026-07-26)
+
+| Audit | Verdict | Effet sur ce répertoire |
+|---|---|---|
+| **Sécurité** | ✅ **PASS** — 0 bloquant | **Réserve gitleaks LEVÉE** : le binaire a été retrouvé hors `PATH` et le scan réellement exécuté → `no leaks found` sur le **working tree** et sur **30 commits**. La réserve §2 ci-dessous n'a plus cours (conservée pour la traçabilité de la méthode). |
+| **Revue** | ❌ **FAILED** — 2 bloquants | **B-2** (faux vert du comparateur) et **B-1** (relecture surestimant son exhaustivité), tous deux **reproduits** par l'orchestrateur → corrigés en **T20/T21**, résiduel en **T22**. L'auditeur a par ailleurs constaté que **toutes les réserves de @Developer étaient honnêtes et qu'aucune ne masquait un défaut** — les 2 bloquants n'y figuraient pas. Rapport : `code_review.md`. |
 
 ## Fichiers de ce répertoire
 
@@ -47,7 +57,7 @@ US de **plateforme / gouvernance**, requalifiée en **CONSTAT + OUTILLAGE** apr�
 | `repo_context.json` | `{"private": true, "visibility": "private", "owner_type": "User"}` + `{"admin": true, …}` | **Projection `--jq`** de la réponse |
 | `check_runs.json` | Les **4** status checks **exécutés** et verts sur la tête de la PR #9 | **Projection `--jq`** — prouve l'**exécution**, **pas** le caractère requis |
 | `check_remote_exit2.txt` | **Exit 2 RÉEL** (2 invocations) : `VERIFICATION IMPOSSIBLE — ce n'est PAS un succès`, cause **403 de plan** | Sortie d'outil sur le **dépôt réel** |
-| `check_remote_simulated.txt` | **Exits 0 et 1 SIMULÉS** (4 invocations, fixtures) | ⚠️ **SIMULATION** — n'atteste **rien** du réel |
+| `check_remote_simulated.txt` | **Exits 0 / 1 / 2 SIMULÉS** — **8 invocations** (4 d'origine + 4 du correctif B-2), 8/8 codes conformes à l'attendu | ⚠️ **SIMULATION** — n'atteste **rien** du réel |
 | `enforcement_gap.md` | Constat (4 faits) · **cause racine** · portée bornée · **12 dettes** · **transmission à US-00.5** | Analyse adossée aux preuves |
 | `non_regression.md` | 10 contrôles verts + **3 réserves explicites** | Sorties d'outils |
 | `false_claims_sweep.md` | 7 balayages · **10** occurrences corrigées · **6** signalées hors périmètre | Revue outillée |
@@ -71,9 +81,11 @@ grep -v '^#' reports/US-00.4/branch_main_before.json
 ## Réserves — ce que ce répertoire ne prouve PAS
 
 1. **Aucune preuve d'application de la protection** — aucune n'est produite, aucune n'est exigée.
-2. **`gitleaks` n'était pas installé** dans la session de production des preuves : l'absence de secret
-   a été contrôlée par **grep manuel de substitution**, pas par l'outil de référence. Le critère est
-   gagé **en CI** par le job bloquant `🔐 Secrets scan (gitleaks)` (`non_regression.md` §6).
+2. ~~**`gitleaks` n'était pas installé** dans la session de production des preuves~~ → **RÉSERVE LEVÉE
+   par l'audit Sécurité** (2026-07-26) : binaire retrouvé hors `PATH`, scan réellement exécuté →
+   `no leaks found` sur le working tree **et** sur 30 commits. *(Énoncé conservé barré : la méthode de
+   substitution employée à défaut d'outil — grep de motifs — reste documentée en
+   `non_regression.md` §6.)*
 3. **Les 4 status checks de la PR n'ont pas pu être lus** (`gh pr checks`) : la branche n'était pas
    poussée et aucune PR n'existait au moment de T13 (`non_regression.md` §Réserve PR).
 4. **Le chemin 404 et le repli `urllib`** du comparateur ne sont **jamais** validés en conditions

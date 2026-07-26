@@ -127,7 +127,13 @@ $ grep -rnE 'gh[pousr]_[A-Za-z0-9]{16,}|github_pat_[A-Za-z0-9_]{16,}|AIza[0-9A-Z
   → exit 1
 ```
 
-### ⚠️ Réserve gitleaks — le critère #21 n'est PAS gagé localement
+### ⚠️ Réserve gitleaks — le critère #21 n'est PAS gagé localement *(→ **LEVÉE**, voir §12)*
+
+> ✅ **Cette réserve a été LEVÉE le 2026-07-26** par l'audit Sécurité, qui a retrouvé le binaire hors
+> `PATH` et exécuté le scan réellement (`no leaks found`, working tree + 30 commits). L'énoncé
+> ci-dessous est **conservé tel quel** : il documente la méthode de substitution employée à défaut
+> d'outil, et le fait que l'absence de secret n'était alors **pas** prouvée par l'outil de référence.
+> Détail et scans rejoués sur les fichiers du correctif : **§12**.
 
 ```
 $ command -v gitleaks
@@ -282,6 +288,100 @@ $ git rev-parse origin/main
 Le exit 0 de `--check` à l'état final est le contrôle **le plus important de T10** : il prouve que la
 réécriture complète de `docs/GIT_PROTECTION.md` (286 lignes modifiées) **n'a pas altéré d'un octet** le
 bloc généré entre `<!-- FACTORY_SYNC:BEGIN -->` et `<!-- FACTORY_SYNC:END -->`.
+
+---
+
+## 11. Non-régression APRÈS correctifs post-audit (T20/T21) — 2026-07-26T20:34:35Z
+
+L'audit Revue a rendu **FAILED** (2 bloquants, reproduits par l'orchestrateur). Correctifs **T20**
+(faux vert du comparateur) et **T21** (relecture surestimant son exhaustivité). Tout a été rejoué :
+
+```
+$ python scripts/factory_sync.py --check
+Synchro factory conforme — vérification DOCUMENTAIRE, aucun appel réseau (env, bloc GIT_PROTECTION.md, libellés de jobs des workflows, seuils).
+[AVERTISSEMENT] l'état RÉEL de la protection de branche sur GitHub n'est PAS vérifié ici : lancer `python scripts/factory_sync.py --check-remote` (droits admin requis).
+exit=0
+
+$ python scripts/factory_sync.py --check-remote
+Lecture SEULE de l'API GitHub (GET uniquement) — gitgdx/Concentration:main · GET repos/gitgdx/Concentration/branches/main → 200 · GET repos/gitgdx/Concentration/branches/main/protection → 403
+VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+  Code HTTP : 403 — protection de branche INDISPONIBLE SUR CE PLAN (dépôt privé sans GitHub Pro) — ni un défaut de droits, ni un défaut de configuration : aucune commande ne peut lire ni appliquer la protection en l'état. Message API : 'Upgrade to GitHub Pro or make this repository public to enable this feature.'
+exit=2
+
+$ python scripts/check_scb_compliance.py       -> SCB conforme — Aucune violation détectée.   exit=0
+$ python scripts/validate_trace.py --us US-00.4 -> Traçabilité conforme.                       exit=0
+
+$ grep -rn "check-remote" .github/workflows/                                                   -> aucun résultat (exit 1)
+$ grep -nE "-X (PUT|POST|PATCH|DELETE)|requests\.(put|post|patch|delete)" scripts/check_branch_protection.py -> aucun résultat (exit 1)
+$ grep -niE '"(PUT|POST|PATCH|DELETE)"|method=.(PUT|POST|PATCH|DELETE)|-X ' scripts/check_branch_protection.py -> aucun résultat (exit 1)
+$ grep -ci "conform" reports/US-00.4/check_remote_exit2.txt                                     -> 0
+$ python -m py_compile scripts/check_branch_protection.py                                       -> OK
+
+$ python scripts/run_gates.py --all
+✅ app.format · ✅ app.analyze · ✅ app.test (couverture 89.5% ≥ 80%) · ✅ app.deps_audit · ✅ app.build
+Tous les gates bloquants passent (5 exécutés).
+EXIT=0
+```
+
+**`ci.yml` (T21) n'a pas cassé la résolution des status checks** : `factory_sync.py --check` reste
+**exit 0**, ce qui prouve que les 4 libellés de `status_checks` correspondent toujours à des jobs
+(`secrets-scan`, `governance`, `app-quality`, `check-branch-name`). Seul l'en-tête de commentaires a
+changé — aucune ligne de logique.
+
+**Garantie d'import paresseux revérifiée après T20** (le module a beaucoup changé) :
+
+```
+$ (module temporairement remplacé par un fichier au contenu syntaxiquement invalide)
+$ python scripts/factory_sync.py --check   -> exit 0
+$ (module restauré ; py_compile -> OK)
+```
+
+Une erreur d'import du comparateur ne peut donc toujours **pas** casser `--check`, qui est un gate CI
+bloquant.
+
+**Les 8 chemins du comparateur, rejoués** (`check_remote_simulated.txt`) :
+
+```
+ · invocations archivées avec leur code de sortie : 8 (8 attendues)
+ · invocations dont le code OBTENU == code ATTENDU : 8 / 8
+ · lignes préfixées `[SIMULATION] ` : 137
+ · mention « SOURCE SIMULÉE, n'atteste PAS l'état réel du dépôt » : 2 (2 attendues : [1/8] et [8/8])
+ · issues « MAPPING INCOMPLET » (correctif B-2) : 3 (3 attendues : [5/8], [6/8], [7/8])
+ · lignes « IGNORÉ — NEUTRE » (champs additifs nommés, jamais silencieux) : 6
+ · lignes d'outil sans préfixe [SIMULATION] : 0
+```
+
+## 12. ✅ Réserve gitleaks — LEVÉE
+
+L'audit Sécurité (contexte frais) a **retrouvé le binaire hors `PATH`** et exécuté le scan réellement :
+`gitleaks 8.30.1` → **`no leaks found`** sur le working tree (89.82 MB) **et** sur **30 commits**
+d'historique. J'ai rejoué le scan **sur les fichiers du correctif** avec le même binaire
+(`…\AppData\Local\Microsoft\WinGet\Packages\Gitleaks.Gitleaks_…\gitleaks.exe`) :
+
+```
+$ gitleaks version
+8.30.1
+
+$ gitleaks detect --no-git --source tests/fixtures/US-00.4 --config .gitleaks.toml --redact
+INF scanned ~18289 bytes (18.29 KB) in 282ms
+INF no leaks found                                          -> exit 0
+
+$ gitleaks detect --no-git --source reports/US-00.4 --config .gitleaks.toml --redact
+INF scanned ~199737 bytes (199.74 KB) in 255ms
+INF no leaks found                                          -> exit 0
+
+$ gitleaks detect --no-git --source scripts/check_branch_protection.py --config .gitleaks.toml --redact
+INF scanned ~47464 bytes (47.46 KB) in 163ms
+INF no leaks found                                          -> exit 0
+
+$ gitleaks detect --no-git --source .github/workflows/ci.yml --config .gitleaks.toml --redact
+INF scanned ~2968 bytes (2.97 KB) in 303ms
+INF no leaks found                                          -> exit 0
+```
+
+Le critère #21 est donc gagé par **l'outil de référence**, y compris sur les 4 nouvelles fixtures. Le
+grep de substitution du §6 reste documenté : il décrit la méthode employée **à défaut** d'outil, et
+n'est plus la seule preuve.
 
 ### Réserve « validation non automatisée »
 

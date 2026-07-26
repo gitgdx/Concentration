@@ -158,16 +158,36 @@ corrigé**. Voir §6 (transmission à US-00.5).
 
 **Ce qui doit être corrigé, et pourquoi c'est obligatoire** : `CLAUDE.md` (règle 2) et la Constitution
 (Art. 4) déclarent la règle « jamais de commit/push sur la branche principale » *enforced* « par
-protection de branche ». **Cette déclaration reste FAUSSE après US-00.4.** C'est la **dernière
-affirmation fausse restante du corpus de gouvernance** — et une factory dont la constitution affirme
-un enforcement inexistant produit exactement la fausse confiance que cette US dénonce.
+protection de branche ». **Cette déclaration reste FAUSSE après US-00.4** — et une factory dont la
+constitution affirme un enforcement inexistant produit exactement la fausse confiance que cette US
+dénonce.
 
-**Les deux emplacements exacts** :
+> ⚠️ **Rectification du 2026-07-26 (finding B-1 de l'audit Revue).** Cette section affirmait que
+> c'était « la **dernière** affirmation fausse restante du corpus de gouvernance ». **C'était faux.**
+> Un balayage par motif **toutes extensions** en a trouvé d'autres — dont deux dans des artefacts
+> d'**enforcement** (`.github/workflows/ci.yml`, `scripts/githooks/pre-push`) et une dans une **US
+> certifiée** (`docs/stories/US-00.1-secrets-scan-depot.md`). Aucune revendication d'exhaustivité
+> n'est maintenue : voir §6 quater pour la **méthode**, son **périmètre réel** et ce qui **reste
+> ouvert**. La leçon est inscrite au §6 quater.
 
-| Fichier | Emplacement | Texte à remplacer |
-|---|---|---|
-| `CLAUDE.md` | **Règles dures**, règle **2**, ligne **20** | `*Enforced : hooks Claude Code + hooks git + protection de branche.*` |
-| `docs/governance/CONSTITUTION.md` | **Art. 4**, ligne **49** | `**Enforcement** : CI ci.yml jobs qualité, requis par la protection de branche (scripts/apply_branch_protection.sh) ; job governance (synchro).` |
+**Les emplacements exacts à corriger dans US-00.5** :
+
+| # | Fichier | Emplacement | Texte à remplacer |
+|---|---|---|---|
+| **S1** | `CLAUDE.md` | **Règles dures**, règle **2**, ligne **20** | `*Enforced : hooks Claude Code + hooks git + protection de branche.*` |
+| **S2** | `docs/governance/CONSTITUTION.md` | **Art. 4**, ligne **49** | `**Enforcement** : CI ci.yml jobs qualité, requis par la protection de branche (scripts/apply_branch_protection.sh) ; job governance (synchro).` |
+| **S11** | `docs/stories/US-00.1-secrets-scan-depot.md` | **T8**, ligne **198** *et* **critère de test #6**, ligne **215** | « job `secrets-scan` **rouge** → **merge empêché par la protection de branche** » · « Job `secrets-scan` rouge + **merge bloqué par la protection de branche** » |
+
+> 🔴 **S11 — pourquoi elle n'est PAS éditée ici, et pourquoi elle compte plus que les deux autres.**
+> **US-00.1 est CERTIFIÉE Prod.** L'anti-pattern « modifier une US certifiée sans re-audit » (`CLAUDE.md`
+> §Anti-patterns) impose une **ré-ouverture de cycle** : la corriger en catimini depuis US-00.4 serait
+> précisément le contournement de process que la factory interdit. **Décision humaine rendue le
+> 2026-07-26 : on signale et on transmet, sans toucher une ligne.**
+> Sa gravité propre : c'est un **critère de test** et une **tâche** d'une US certifiée qui décrivent un
+> mécanisme de blocage **inexistant**. Le test négatif CI de US-00.1 ne peut donc pas prouver ce qu'il
+> annonce — le job `secrets-scan` devient rouge, mais **rien n'empêche la fusion**. La certification de
+> US-00.1 n'est pas invalidée pour autant (elle repose sur gitleaks réellement exécuté, pas sur le
+> blocage de fusion), mais **le libellé de son critère est faux** et doit être requalifié.
 
 **Formulation de remplacement suggérée** (à arbitrer par @PO / @Architect) :
 
@@ -176,10 +196,13 @@ un enforcement inexistant produit exactement la fausse confiance que cette US d�
 > techniquement possible.*
 
 **Actions attendues de @ProductOwner** :
-1. Inscrire cette correction au périmètre de **US-00.5**, par une **PR dédiée**.
-2. La qualifier **OBLIGATOIRE** (et non « nice to have ») : c'est la mise en cohérence d'un texte
-   normatif avec la réalité de la plateforme.
-3. Y joindre la dette **#8** ci-dessus (en-tête « Status check requis » du bloc généré de
+1. Inscrire ces corrections (**S1**, **S2**, **S11**) au périmètre de **US-00.5**, par une **PR dédiée**.
+2. Les qualifier **OBLIGATOIRES** (et non « nice to have ») : c'est la mise en cohérence de textes
+   normatifs avec la réalité de la plateforme.
+3. Pour **S11**, décider explicitement du **véhicule** : ré-ouverture de cycle sur US-00.1
+   (nouveaux événements de trace, re-audit) **ou** requalification tracée depuis US-00.5. Ne pas
+   trancher laisserait un critère de test faux dans une US certifiée.
+4. Y joindre la dette **#8** ci-dessus (en-tête « Status check requis » du bloc généré de
    `GIT_PROTECTION.md`, dont la correction impose une édition de `scripts/factory_sync.py`, Art. 6).
 
 **Hors périmètre de US-00.5, à arbitrer séparément** : la dette **#6** (revue humaine du track FULL
@@ -211,8 +234,13 @@ cherche justement à vérifier.
 ### 6 ter. Balayage par MOTIF — 3 occurrences supplémentaires *(2026-07-26, @Architect)*
 
 La leçon ci-dessus a été **appliquée immédiatement** : un balayage par motif (`apply_branch_protection`,
-`[Ee]nforced`, « protection de branche ») sur tout le dépôt a trouvé **3 fausses affirmations que la
-relecture T14 par liste de fichiers avait manquées**. Toutes **corrigées** :
+`[Ee]nforced`, « protection de branche ») a trouvé **3 fausses affirmations que la relecture T14 par
+liste de fichiers avait manquées**. Toutes **corrigées** :
+
+> ⚠️ **Rectification du 2026-07-26 (finding B-1).** Cette section revendiquait un balayage « **sur tout
+> le dépôt** ». **C'était inexact** : il était limité aux fichiers `*.md`, ce qui a laissé passer
+> `.github/workflows/ci.yml` (**YAML**) et `scripts/githooks/pre-push` (**shell**) — les deux artefacts
+> d'**enforcement**. Périmètre réel et résultats du balayage **toutes extensions** : §6 quater.
 
 | # | Fichier · ligne | Ce qui était faux | Correction |
 |---|---|---|---|
@@ -224,9 +252,62 @@ relecture T14 par liste de fichiers avait manquées**. Toutes **corrigées** :
 affirmation, et l'a propagée dans la synthèse d'ouverture de session. Un angle mort de vérification ne
 se contente pas de ne rien voir — il **produit activement** de la fausse confiance chez qui le consulte.
 
-**Bilan consolidé de la relecture** : **11 corrections** dans le périmètre @Developer (C1→C11), **4**
-occurrences hors périmètre corrigées par @Architect (S3→S6), **3** trouvées par balayage par motif et
-corrigées (S7→S9), **2** délibérément maintenues pour US-00.5 (S1, S2 — textes normatifs, PR dédiée).
+### 6 quater. Balayage par motif **TOUTES EXTENSIONS** — méthode, périmètre réel, et ce qui reste ouvert *(2026-07-26, @Developer, correctif B-1)*
+
+**Aucune revendication d'exhaustivité n'est faite ici.** Ce qui est énoncé, c'est une **méthode**, son
+**périmètre**, et ses **limites connues** — la leçon du bloquant B-1 étant précisément qu'une relecture
+qui se croit complète est plus dangereuse qu'une relecture qui déclare ses angles morts.
+
+**Méthode** — deux passes `grep -rniE … --include="*"` (donc **toutes extensions** : Markdown, YAML,
+shell, Python, JSON, `.feature`), exclusions explicites : `.git/`, `build/`, `.dart_tool/`,
+`scripts/__pycache__/`, `.claude/settings.local.json`.
+
+| Passe | Motifs |
+|---|---|
+| **1** | `requis par la protection` · `status checks requis` · `checks bloquants` · `gates? .{0,20}bloquants?` · `merge (empêché\|bloqué) par` · `protection de branche (active\|appliquée\|vérifiée\|en place)` · `est protégée` · `enforced par protection` · `effectivement.{0,5}enforced` |
+| **2** *(ajoutée après constat que la passe 1 ratait `CLAUDE.md:20`)* | `\+ protection de branche` · `hooks git \+` · `insensibles? aux bypass` · `bloquantes? sur PR` · `Enforced *:.*protection` |
+
+> 🔴 **Aveu de méthode, à ne pas enjoliver** : la **passe 1 ne trouvait pas `CLAUDE.md:20`**
+> (`*Enforced : hooks Claude Code + hooks git + protection de branche.*`) — le motif
+> `enforced par protection` ne matche pas une énumération. Il a fallu une **seconde passe**. Un
+> balayage par motif est donc **exactement aussi complet que la liste de motifs**, ce qui reproduit,
+> un cran plus haut, le défaut du balayage par liste de fichiers. **Conclusion honnête : ni la liste
+> de fichiers, ni la liste de motifs ne garantit l'exhaustivité.** La seule garantie serait une
+> relecture intégrale du corpus, qui n'a pas été faite.
+
+**Résultats — 4 occurrences supplémentaires, aucune n'était déclarée avant l'audit** :
+
+| # | Fichier · ligne | Ce qui est faux | Traitement | Par |
+|---|---|---|---|---|
+| **C12** | `.github/workflows/ci.yml:3-4` | « Gates qualité **bloquants** sur CHAQUE PR » + « Ces jobs **sont les status checks requis par la protection de branche** » | ✅ **CORRIGÉ** → « exécutés et **RAPPORTÉS** », « **RAPPORTÉS, PAS BLOQUANTS** », 403 de plan nommé, « une PR peut être fusionnée **AVEC LA CI ROUGE** », statut de **contextes de la cible armée** | @Developer |
+| **S10** | `scripts/githooks/pre-push:2-3` | « Le merge passe par une PR (**protection de branche GitHub** : `scripts/apply_branch_protection.sh`) » — le hook justifie son existence par une protection **inexistante**, alors qu'il **est** l'élément (a) du filet de discipline de l'AC-7 | ⛔ **NON ÉDITÉ** — `scripts/githooks/*` est **Art. 6**. **Diff exact fourni** en tâche **T22 [action humaine]** du Story File | @Developer → humain |
+| **S11** | `docs/stories/US-00.1-secrets-scan-depot.md:198,215` | « merge **empêché** / **bloqué** par la protection de branche » dans une **tâche** et un **critère de test** | ⛔ **NON ÉDITÉ — décision humaine** : US-00.1 est **certifiée Prod**, l'anti-pattern « modifier une US certifiée sans re-audit » impose une ré-ouverture de cycle. **Transmis à US-00.5** (§6) | @Developer → @PO |
+| **S12** | `docs/SQUAD_GUIDE.md:36` *(nœud Mermaid)* | « 🚦 Gates CI **bloquants sur PR** … **insensibles aux bypass locaux** » — **deux** affirmations fausses : ils ne bloquent pas, et rien n'est insensible à un bypass puisque aucun check n'est requis | ⚠️ **SIGNALÉ, non édité** — hors des fichiers déclarés de l'US. **3ᵉ occurrence du même fichier** (après S3 et S7) | @Developer → @Architect |
+
+**Observation complémentaire, sans action demandée** : `docs/epics/EPIC_00-fondations.md:13` (« chaque
+règle de gouvernance est effectivement *enforced* ») a été traité par **ajout d'une réserve 🔴 adjacente**
+(S8), la phrase elle-même étant conservée. Elle **reste donc fausse lue isolément** — c'est une
+mitigation, pas une correction. Choix légitime (l'objectif d'EPIC est un texte de cadrage), mais à
+connaître : un `grep` la remontera toujours.
+
+**Ce qui reste OUVERT après ce balayage** :
+1. **S1, S2, S11** → US-00.5 (textes normatifs + US certifiée).
+2. **S10** → action humaine T22 (Art. 6).
+3. **S12** → arbitrage @Architect.
+4. **L'exhaustivité elle-même** → non garantie, par construction (voir l'aveu de méthode ci-dessus).
+
+**Leçon à porter à `/audit-methodo`** — en trois temps, parce qu'elle a été apprise trois fois :
+(i) balayer par **liste de fichiers** rate les fichiers non listés (S3) ; (ii) balayer par **motif sur
+les `*.md`** rate les artefacts d'enforcement en YAML et shell (C12, S10) ; (iii) balayer par **motif
+toutes extensions** rate encore ce que la liste de motifs ne prévoit pas (`CLAUDE.md:20`). Une
+relecture « aucune fausse affirmation » doit donc **déclarer sa méthode et ses angles morts**, et
+**jamais** revendiquer l'exhaustivité.
+
+**Bilan consolidé de la relecture** : **12 corrections** dans le périmètre @Developer (C1→C12), **4**
+occurrences hors périmètre corrigées par @Architect (S3→S6), **3** trouvées par balayage `*.md` et
+corrigées (S7→S9), **3** signalées et non éditées (**S10** action humaine, **S11** US certifiée,
+**S12** @Architect), **2** délibérément maintenues pour US-00.5 (S1, S2). **Exhaustivité : non
+revendiquée.**
 
 ---
 
