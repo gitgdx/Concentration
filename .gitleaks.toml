@@ -1,16 +1,3 @@
-# ═══════════════════════════════════════════════════════════════════════════════
-#  PROPOSITION de .gitleaks.toml — US-00.1 (rédigée par @Developer)
-#
-#  ⚠️ ACTION HUMAINE (T1) : ce fichier est une PROPOSITION. Copie-le à la racine
-#     du dépôt sous le nom `.gitleaks.toml` (l'agent ne peut pas l'y écrire :
-#     `.gitleaks.toml` est verrouillé par .claude/hooks/protect_files.sh).
-#     Commande suggérée :  cp reports/US-00.1/gitleaks.toml.proposed .gitleaks.toml
-#
-#  Fichier UNIQUE consommé à la fois par :
-#    - le hook pre-commit  : gitleaks protect --staged --config .gitleaks.toml
-#    - le job CI secrets-scan : gitleaks-action@v2 (auto-détection à la racine)
-# ═══════════════════════════════════════════════════════════════════════════════
-
 title = "Concentration — configuration gitleaks (US-00.1)"
 
 # Hérite de TOUTES les règles gitleaks par défaut (large filet de sécurité).
