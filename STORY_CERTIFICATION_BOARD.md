@@ -12,7 +12,7 @@
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.3 | Migrations réversibles | quality_assurance | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -127,9 +127,24 @@
 - **Track** : `STANDARD` — critères `docs/governance/TRACKS.md` : docs/politique (0 fichier de code),
   aucune migration de schéma concrète, pas de surface auth/sécurité, pas de nouvelle page/API, pas de
   nouvelle EPIC. Doute QUICK↔STANDARD tranché vers STANDARD (US de plateforme certifiable).
-- **Prochaine étape** : `EVT_STORY_READY` (visa PO complet) → validation technique @Architect
-  (+ ADR de convention à assigner). **Bloque US-01.2** (qui applique la convention et instancie le
-  patron de test aller-retour).
+- **Design Data ✅ + Code ✅** (2026-07-26) : `EVT_STORY_READY` → `EVT_ARCHI_VALIDATED` →
+  `EVT_DATA_DESIGN_COMPLETED` (convention `docs/architecture/MIGRATIONS.md` par @DataEngineer :
+  versionnement monotone, contrat up/down + invariant aller-retour, additif par défaut / destructif
+  encadré, patron de test round-trip) → `EVT_DESIGN_COMPLETED` (Lock : Data ✅ + UX N/A, **ADR-005
+  Accepté**) → `EVT_CODE_READY`. Livrables docs (aucun code Dart compilé). Preuves : `reports/US-00.3/README.md`.
+  Phase → `parallel_audit`. **Bloque US-01.2** (qui applique la convention + instancie le patron de test).
+- **Audit Rev 🔍** (2026-07-26, `EVT_CODE_REVIEW_PASSED`, contexte frais) : **PASS**, 0 bloquant.
+  AC-1..4 conformes, ADR-005 Accepté sans collision, `analyze` vert, 0 fichier d'enforcement touché,
+  6 scénarios Gherkin couverts. 2 suggestions non bloquantes (pour l'instanciation US-01.2). Rapport : `reports/US-00.3/code_review.md`.
+- **Audit Sec 🛡️** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **PASS**, 0 bloquant.
+  Diff 100 % documentaire, gitleaks 0 fuite, deps 0 CVE, portée sécurité classique sans objet (justifié) ;
+  posture de la convention validée (réversibilité, non-destructif par défaut, exception traçable via
+  `EVT_WAIVER_GRANTED`). 2 points d'attention LOW reportés à **US-01.2** (chiffrement au repos ; non-banalisation
+  du destructif). Rapport : `reports/US-00.3/security.md`.
+- **QA Status 🧪 PASS** (2026-07-26, `EVT_QA_PASSED`) : revue de conformité (AC-1..4 couverts, ADR-005
+  Accepté) + non-régression `analyze`/`format` verts + enforcement intact + **6/6 scénarios BDD**.
+  Exécution round-trip = US-01.2. Rapport : `reports/US-00.3/qa.md`.
+- **Prochaine étape** : déploiement (merge sur `main`, US de convention sans runtime → staging N/A) → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
