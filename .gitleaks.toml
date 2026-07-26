@@ -1,0 +1,71 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PROPOSITION de .gitleaks.toml — US-00.1 (rédigée par @Developer)
+#
+#  ⚠️ ACTION HUMAINE (T1) : ce fichier est une PROPOSITION. Copie-le à la racine
+#     du dépôt sous le nom `.gitleaks.toml` (l'agent ne peut pas l'y écrire :
+#     `.gitleaks.toml` est verrouillé par .claude/hooks/protect_files.sh).
+#     Commande suggérée :  cp reports/US-00.1/gitleaks.toml.proposed .gitleaks.toml
+#
+#  Fichier UNIQUE consommé à la fois par :
+#    - le hook pre-commit  : gitleaks protect --staged --config .gitleaks.toml
+#    - le job CI secrets-scan : gitleaks-action@v2 (auto-détection à la racine)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+title = "Concentration — configuration gitleaks (US-00.1)"
+
+# Hérite de TOUTES les règles gitleaks par défaut (large filet de sécurité).
+# On ne fait qu'AJOUTER des règles/allowlists ciblées — jamais repartir d'une config vide.
+[extend]
+useDefault = true
+
+# ───────────────────────────────────────────────────────────────────────────────
+#  Règles ciblées (en plus du filet par défaut). Chaque règle porte sa justification.
+# ───────────────────────────────────────────────────────────────────────────────
+
+# Clé API Google/Stitch (format AIza…). Le serveur MCP Stitch consomme une clé Google
+# via l'en-tête X-Goog-Api-Key. Règle explicite (double la règle par défaut, robustesse).
+[[rules]]
+id = "google-api-key-stitch"
+description = "Cle API Google/Stitch (AIza...) — ne jamais committer en clair"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+keywords = ["aiza"]
+
+# Jeton Stitch éventuel au format AQ.<token>. Regex bornée (>= 20 caractères après
+# 'AQ.') pour éviter les faux positifs sur un 'AQ.' isolé.
+# ⚠️ À CALIBRER par l'humain qui détient la vraie clé, SANS jamais coller la clé ici.
+[[rules]]
+id = "stitch-token-aq"
+description = "Jeton Stitch AQ.<token> — ne jamais committer en clair"
+regex = '''AQ\.[A-Za-z0-9_\-]{20,}'''
+keywords = ["aq."]
+
+# ───────────────────────────────────────────────────────────────────────────────
+#  Allowlist chirurgicale — chaque entrée vise un placeholder PROUVÉ ou un fichier
+#  légitime, avec justification. Jamais de désactivation globale d'une règle.
+# ───────────────────────────────────────────────────────────────────────────────
+[allowlist]
+description = "Placeholders prouves et fichiers de config legitimes du depot"
+
+regexes = [
+  '''changeme''',              # placeholder des gabarits .env.example (valeur factice prouvée)
+  '''\$\{[A-Z_]+\}''',         # interpolation d'environnement (${STITCH_API_KEY}) — pas un secret
+]
+
+paths = [
+  '''\.env\.example$''',                  # gabarit de secrets : placeholders uniquement
+  '''\.mcp\.json$''',                      # config MCP : ${STITCH_API_KEY} interpolé, pas de secret en clair
+  '''\.env$''',                            # secrets locaux, gitignorés — jamais committés
+  '''\.claude/settings\.local\.json$''',   # config locale (peut contenir STITCH_API_KEY), gitignorée
+  '''reports/US-00\.1/gitleaks\.toml\.proposed$''',  # CE fichier de proposition (contient des regexes, pas des secrets)
+]
+
+# ───────────────────────────────────────────────────────────────────────────────
+#  NOTE d'ingénierie (@Developer) — artefacts de signature mobile
+#  Les keystores Android (.jks/.keystore) et certificats iOS (.p12/.mobileprovision)
+#  sont des binaires porteurs de secrets : gitleaks détecte des secrets DANS le texte,
+#  il ne « bloque » pas un binaire par son extension. La bonne barrière est le
+#  .gitignore (ne jamais suivre ces fichiers) + secret de plateforme en CI.
+#  → À arbitrer avec @DevOps quand la signature mobile arrivera (hors périmètre du MVP,
+#    RNF-07 offline-first : aucun secret runtime aujourd'hui). Volontairement PAS de
+#    règle gitleaks factice ici (elle serait non fonctionnelle).
+# ───────────────────────────────────────────────────────────────────────────────

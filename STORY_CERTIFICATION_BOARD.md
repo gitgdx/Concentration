@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
-| US-00.1 | Secrets & scan de dépôt | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.1 | Secrets & scan de dépôt | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | US-00.2 | Qualité statique de référence | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -44,8 +44,33 @@
 - **Clarify résolu** : scan historique + working tree ; secret trouvé → révoquer/roter (réécriture
   d'historique = dernier recours humain) ; allowlist `.env`/`settings.local.json`/placeholders
   (`changeme`, `${...}`) ; couverture Dart `N/A` (pas de code applicatif). Historique vérifié propre.
-- **Prochaine étape** : `EVT_STORY_READY` → validation @Architect → Integration Lock (design N/A) →
-  développement (T1 = création de `.gitleaks.toml` par l'humain).
+- **Story Ready + Integration Lock** (2026-07-25) : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED`
+  (@Architect : story enrichie, faisabilité OK, track STANDARD, aucun ADR) → `EVT_DESIGN_COMPLETED`
+  (Integration Lock : **Design Data N/A** — aucun schéma ; **Design UX N/A** — aucune interface).
+  **Codage autorisé** selon T1–T10. Phase SCB → `development_start`, branche
+  `feat/US-00.1-secrets-scan-depot` (partie du nouveau `main`).
+- **Code (Dev)** (2026-07-25, `EVT_CODE_READY`) : T1–T10 terminées. `.gitleaks.toml` posé par l'humain
+  (identique à la proposition auditée) + suivi Git ; gitleaks 8.30.1 installé. **Preuves** (`reports/US-00.1/`) :
+  T5 scan historique (11 commits) **0 fuite**, T6 working tree (~89 MB, inclut la vraie clé Stitch locale)
+  **0 fuite** → allowlist validée, T7 test négatif pre-commit (faux `AQ.<token>` → `leaks found:1`, exit 1),
+  T8 test négatif CI (PR jetable #2 → job `secrets-scan` **failure**, branche supprimée). Procédure de
+  rotation : `docs/security/SECRET_ROTATION.md`. Note : `gitleaks protect` reste un alias fonctionnel en
+  8.30.1 → hook `pre-commit` OK sans modification.
+- **Audit Rev 🔍** (2026-07-26, `EVT_CODE_REVIEW_PASSED`, contexte frais) : **PASS**, 0 finding bloquant.
+  Prouvé par outils : config unique confirmée, re-scan gitleaks indépendant (13 commits + working tree → 0 fuite),
+  test négatif refait (`leaks found:1`), gates app verts, redaction OK. Rapport : `reports/US-00.1/code_review.md`.
+- **Audit Sec 🛡️** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **PASS**, 0 finding bloquant.
+  Contre-test **sans config** → `no leaks found` (l'allowlist ne masque aucun vrai secret) ; `git ls-files` sans
+  fichier secret suivi ; `dart pub outdated` sans CVE. Rapport : `reports/US-00.1/security.md`.
+- **Suivi non bloquant** (hors périmètre certif US-00.1) : en-tête « PROPOSITION » périmé dans `.gitleaks.toml`
+  (fichier verrouillé → correctif humain) ; couverture keystore/cert mobile différée à @DevOps (`.gitignore`,
+  hors MVP RNF-07) ; `reports/US-00.1/gitleaks.toml.proposed` duplique la config racine (dérive potentielle).
+- **QA Status 🧪 PASS** (2026-07-26, `EVT_QA_PASSED`) : `run_gates.py --component app` → **5 gates verts**
+  (0 fail/0 skip, non-régression — aucun code Dart) ; confirmation secrets indépendante (14 commits, 0 fuite) ;
+  **8/8 scénarios BDD** couverts par preuves outillées. Rapport : `reports/US-00.1/qa.md`.
+- **Prochaine étape** : décision de **déploiement @DevOps** (pour une US de gouvernance de dépôt, le
+  « déploiement » = PR → merge sur `main`, rendant la config active sur `main` + enforcement CI repo-wide)
+  → puis `/certify` (gate scripté ; `Certifié Prod = 🚀 OUI` exige `Déploiement = 🚀 DEPLOYED`).
 
 ### [US-00.2] Qualité statique de référence
 
