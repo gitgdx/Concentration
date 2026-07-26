@@ -1,0 +1,6 @@
+{
+  "_fixture": "SIMULATION US-00.4 du 2026-07-26 — réponse d'API FABRIQUÉE à la main pour exercer les chemins exit 0 / exit 1. N'atteste PAS l'état réel du dépôt.",
+  "message": "Branch not protected",
+  "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+  "status": "404"
+}
