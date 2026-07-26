@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | development_start | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -202,14 +202,24 @@
      seulement dans une description de schéma et un docstring) et sa sémantique documentée est « *US
      sans trace tolérées* », pas « commits hors PR » ; la renseigner aurait été un no-op risquant de
      **masquer la dette US-INIT-01→06**.
-  4. **Aucun amendement de `CLAUDE.md` ni de la Constitution** : cette US rend la déclaration
-     « *enforced par protection de branche* » **vraie** — il n'y a rien à corriger. Le constat daté de
-     l'AC-7 suffit.
-- **Prérequis / actions humaines identifiées** : `gh` CLI **n'est pas installé** (`gh: not recognized`)
-  alors que `scripts/apply_branch_protection.sh` en dépend → installation + authentification (droits
-  admin) = action humaine, comme l'installation de `gitleaks` en US-00.1. `factory.config.json` et
-  `scripts/factory_sync.py` sont des **fichiers d'enforcement** (Art. 6) non éditables par un agent :
-  les diffs exacts sont pré-rédigés dans le Story File (T5, T6, T6b).
+  4. ~~**Aucun amendement de `CLAUDE.md` ni de la Constitution** : cette US rend la déclaration
+     « *enforced par protection de branche* » **vraie** — il n'y a rien à corriger.~~
+     🔴 **DÉCISION INVALIDÉE le 2026-07-26** (signalée par la relecture T14 « aucune fausse
+     affirmation », occurrence S5). Elle reposait sur la prémisse que la protection serait appliquée.
+     Le blocage 403 la renverse : la déclaration « *enforced par protection de branche* » **reste
+     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux
+     emplacements exacts `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
+     de remplacement suggérée : « *enforced par hook local `pre-push` + PR ; protection de plateforme
+     indisponible sur ce plan — cf. ADR-006* ». Transmission formelle en §dédiée de
+     `reports/US-00.4/enforcement_gap.md` (T15).
+- **Prérequis / actions humaines** : ✅ **`gh` CLI installé** (2.96.0) et authentifié `gitgdx` avec
+  `admin: true` — *(mention « `gh` n'est pas installé » périmée, corrigée le 2026-07-26, occurrence
+  S6)*. Chemin absolu si absent du `PATH` d'une session ouverte avant l'installation :
+  `C:\Program Files\GitHub CLI\gh.exe` — sans ce `PATH`, `--check-remote` rend un exit 2 dont la cause
+  est « `gh` introuvable » et **non** le 403 de plan. ✅ **T4 fait** par l'humain
+  (`scripts/factory_sync.py`) et **T5 fait**. ✅ `factory.config.json` porte déjà la cible.
+  ⏳ **T6 restant** (nettoyage cosmétique : ligne vide à 2 espaces, ligne 63) — fichier Art. 6, action
+  humaine. Les diffs exacts restent pré-rédigés dans le Story File.
 - **Portée bornée (AC-7)** : cette US **ne réécrit pas** l'historique Git et **ne remet pas en cause**
   les certifications de US-00.1/00.2/00.3 (audits à contexte frais, gates CI réellement exécutés,
   preuves archivées). Elle constate le trou d'enforcement, le documente et le ferme pour la suite.
@@ -253,10 +263,39 @@
   **21 critères de test**, tous exécutables sans écrire sur `main`. Contrainte de preuve : exit 0 et
   exit 1 sur **fixtures** avec préfixe `[SIMULATION]` obligatoire ; **exit 2 (403) est le seul chemin
   observable in vivo** ; le chemin 404 n'est pas observable sur ce dépôt.
-- **Prochaine étape** : développement T1→T15 par @Developer (T4 et T6 = **actions humaines**, fichiers
-  Art. 6, diffs exacts dans le Story File) → `/audit-us` (Rev + Sec, contextes frais) → QA → DevOps →
-  `/certify`. **Priorité relevée pour US-00.5** : `CLAUDE.md` (règle 2) et la Constitution (Art. 4)
-  affirment un enforcement qui **restera faux** après cette US — à corriger dès la clôture d'US-00.4.
+- **Code (Dev) ✅** (2026-07-26, `EVT_CODE_READY`) : **T1→T15 livrées** ; **T16→T19 reportées** au
+  déblocage et **non exécutées**. Livrables : `scripts/check_branch_protection.py` (comparateur
+  **lecture seule**, mapping PUT→GET, exits 0/1/2, désambiguïsation 403-plan / 403-droits / 401 / 404) ·
+  5 fixtures `tests/fixtures/US-00.4/` · en-tête **NON APPLICABLE** de `apply_branch_protection.sh`
+  (logique `PUT` **intacte**) · réécriture de `docs/GIT_PROTECTION.md` (bloc `FACTORY_SYNC`
+  **byte-identique**) · point de contrôle périodique dans `/audit-methodo` · **13 fichiers de preuves**
+  dans `reports/US-00.4/`. **Preuves** : `--check-remote` → **exit 2** nommant le 403 de plan (seul
+  chemin observable in vivo) ; exits 0/1/404 démontrés sur **fixtures** préfixées `[SIMULATION]` ;
+  `run_gates --all` **5/5 verts** ; 3 contrôles négatifs (aucun `check-remote` en CI, aucune méthode
+  d'écriture dans le module, aucun jeton dans `reports/`).
+- **🔍 Relecture « aucune fausse affirmation » (T14) — le garde-fou central de cette US** : **11**
+  corrections dans le périmètre @Developer (dont **2 sur ses propres livrables** : un fichier de preuve
+  qui contenait le mot interdit dans sa ligne de contrôle, et une cellule de `/audit-methodo` affirmant
+  une issue jamais obtenue) · **4** occurrences hors périmètre corrigées par @Architect (**S3**
+  `SQUAD_GUIDE.md:321`, **S4** `EPIC_00:25` qui contredisait les critères de clôture du même fichier,
+  **S5** la décision du matin « cette US rend la déclaration *enforced* vraie » désormais **barrée et
+  marquée INVALIDÉE**, **S6** mention périmée de `gh`) · **3** trouvées ensuite par **balayage par
+  MOTIF** — méthode adoptée après que S3 eut échappé à la liste de fichiers *a priori* de T14 : **S7**
+  `SQUAD_GUIDE.md:285` (« jobs **requis** », « CI **bloquante** » — 2ᵉ occurrence du fichier de S3, donc
+  corrigé partiellement), **S8** `EPIC_00:13` (enforcement présenté comme acquis), **S9**
+  `.claude/commands/sprint-status.md:9` — **c'est cette ligne qui a effectivement trompé
+  l'orchestrateur en ouverture de session**, le rituel de constat d'état portant lui-même la fausse
+  affirmation. **S1** (`CLAUDE.md:20`) et **S2** (`CONSTITUTION.md:49`) sont **délibérément maintenues**
+  → textes normatifs, PR dédiée en US-00.5.
+- **Réserves honnêtes portées à l'audit** (à ne pas lire comme des PASS) : `gitleaks` **non installé**
+  localement → l'absence de secret dans `reports/` est *vraisemblable*, **le gage réel est le job CI**
+  `🔐 Secrets scan` ; le **repli `urllib`** n'est **pas exercé** in vivo (aucun jeton en session) ; le
+  chemin **404 n'est pas observable** sur ce dépôt (403) ; les exits **0 et 1 sont prouvés sur
+  fixtures**, jamais sur l'état réel ; le critère « 4 checks verts sur la PR » reste **à lever** par
+  @DevOps/@QA après ouverture de la PR (et ces checks doivent être **lus**, ils ne bloquent rien).
+- **Prochaine étape** : `/audit-us` (Rev + Sec, **contextes frais**) → QA → DevOps → `/certify`.
+  ⏳ **T6 restant** (humain, cosmétique). **Priorité relevée pour US-00.5** : `CLAUDE.md:20` et
+  `CONSTITUTION.md:49` affirment un enforcement qui **reste faux** après cette US.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

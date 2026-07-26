@@ -1,0 +1,42 @@
+══════════════════════════════════════════════════════════════════════════════
+ T8 — EXIT 2 RÉEL sur gitgdx/Concentration (AC-3 limite) — US-00.4
+ Horodatage UTC : 2026-07-26T19:32:35Z
+══════════════════════════════════════════════════════════════════════════════
+ SOURCE : dépôt RÉEL, API GitHub interrogée en LECTURE SEULE (2 GET, aucun PUT).
+ Un exit 2 n'est NI un succès, NI un échec de l'US : c'est un constat à SIGNALER.
+ La dette « enforcement de plateforme absent » reste OUVERTE.
+
+ PRÉREQUIS D'EXÉCUTION (piège vérifié) : `gh` doit être joignable via le PATH de la
+ session. Sur cette machine, gh 2.96.0 est installé dans C:\Program Files\GitHub CLI
+ mais absent du PATH des sessions ouvertes AVANT son installation. Sans lui (et sans
+ GH_TOKEN/GITHUB_TOKEN), la commande rend bien 2 — mais avec la cause « gh introuvable »
+ et NON le 403 de plan : le constat attendu serait manqué. Ces deux captures ont donc
+ été faites avec PATH augmenté de "/c/Program Files/GitHub CLI".
+
+──────────────────────────────────────────────────────────────────────────────
+ [1/2] Invocation DIRECTE du module
+ $ python scripts/check_branch_protection.py
+──────────────────────────────────────────────────────────────────────────────
+Lecture SEULE de l'API GitHub (GET uniquement) — gitgdx/Concentration:main · GET repos/gitgdx/Concentration/branches/main → 200 · GET repos/gitgdx/Concentration/branches/main/protection → 403
+VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+  Code HTTP : 403 — protection de branche INDISPONIBLE SUR CE PLAN (dépôt privé sans GitHub Pro) — ni un défaut de droits, ni un défaut de configuration : aucune commande ne peut lire ni appliquer la protection en l'état. Message API : 'Upgrade to GitHub Pro or make this repository public to enable this feature.'
+  Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie : 2
+
+──────────────────────────────────────────────────────────────────────────────
+ [2/2] Via le drapeau du fichier d'enforcement (T4, import paresseux)
+ $ python scripts/factory_sync.py --check-remote
+──────────────────────────────────────────────────────────────────────────────
+Lecture SEULE de l'API GitHub (GET uniquement) — gitgdx/Concentration:main · GET repos/gitgdx/Concentration/branches/main → 200 · GET repos/gitgdx/Concentration/branches/main/protection → 403
+VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+  Code HTTP : 403 — protection de branche INDISPONIBLE SUR CE PLAN (dépôt privé sans GitHub Pro) — ni un défaut de droits, ni un défaut de configuration : aucune commande ne peut lire ni appliquer la protection en l'état. Message API : 'Upgrade to GitHub Pro or make this repository public to enable this feature.'
+  Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie : 2
+
+══════════════════════════════════════════════════════════════════════════════
+ CONTRÔLES SUR CE FICHIER
+══════════════════════════════════════════════════════════════════════════════
+ · « VERIFICATION IMPOSSIBLE — ce n'est PAS un succès » présent : 2 fois (2 attendues)
+ · cause « 403 … INDISPONIBLE SUR CE PLAN » nommée : 2 fois (2 attendues)
+ · le mot autorise au SEUL exit 0 (critere #9) est-il absent de tout ce fichier ? OUI — 0 occurrence
+ · aucun `-X PUT/POST/PATCH/DELETE` n'existe dans le module (contrôle négatif : non_regression.md)

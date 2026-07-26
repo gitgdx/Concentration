@@ -12,6 +12,13 @@ qualité statique de référence, migrations réversibles, CI et protection de b
 stack + Constitution adaptée, couverture initiale avec ratchet. À l'issue de cet EPIC, la factory
 est opérationnelle et chaque règle de gouvernance est effectivement *enforced*.
 
+> 🔴 **Réserve au 2026-07-26** : cet objectif **n'est PAS atteint** et ne peut pas l'être sur le plan
+> actuel. La protection de la branche principale est **indisponible** (403 de plateforme, dépôt privé —
+> cf. risque #5 et [ADR-006](../adr/ADR-006-protection-branche-principale.md)). La règle « jamais de
+> push direct sur la branche principale » reste **NON enforced par la plateforme** : dérogation humaine
+> tracée (`EVT_WAIVER_GRANTED`, US-00.4). **EPIC_00 ne peut donc pas être déclarée complète** sur la
+> base de ce critère. *(Réserve ajoutée le 2026-07-26 — balayage par motif.)*
+
 **HORS périmètre** : toute valeur métier utilisateur (matérialisation des échéances, tuiles, CRUD…)
 qui relève d'EPIC_01 et suivants. EPIC_00 ne produit pas de fonctionnalité visible par l'utilisateur
 final.
@@ -22,7 +29,12 @@ final.
   valeurs de démo ont fuité.
 - Lint + typecheck + formatter exécutés sans erreur sur le squelette de l'adapter ; 0 règle
   désactivée sans justification.
-- `ci.yml` vert sur une PR de test ; protection de branche appliquée et vérifiée.
+- `ci.yml` vert sur une PR de test ✅ *(démontré — PR #3/#6/#8/#9, CI 4/4 verte)*.
+- 🔴 ~~protection de branche appliquée et vérifiée~~ — **NON ATTEIGNABLE sur ce plan** (403 de plateforme
+  sur la protection classique **et** les rulesets ; dépôt privé). Dérogation humaine tracée
+  (`EVT_WAIVER_GRANTED`, US-00.4). Voir **risque #5** et les critères de clôture. *(Ligne corrigée le
+  2026-07-26 : elle contredisait les critères de clôture du même fichier — signalée par la relecture
+  T14 « aucune fausse affirmation ».)*
 - Seuils de couverture de `factory.config.json` mesurés réellement sur le squelette (ratchet).
 - Convention de migrations réversibles (aller-retour up/down) établie ; aucune migration destructive
   par défaut, extensibilité des futurs modules préservée (RF-21).

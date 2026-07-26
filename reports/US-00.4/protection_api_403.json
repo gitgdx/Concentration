@@ -1,0 +1,16 @@
+# ─────────── PREUVE BRUTE D'API — US-00.4 (Constitution Art. 3) ───────────
+# Commande exacte : gh api repos/gitgdx/Concentration/branches/main/protection > reports/US-00.4/protection_api_403.json 2> reports/US-00.4/protection_api_403.stderr.txt
+# Horodatage UTC  : 2026-07-26T19:16:10Z
+# Statut HTTP     : 403
+# Code de sortie de `gh` : 1
+#
+# ⚠️ Code de sortie 1 = LA PREUVE ATTENDUE, PAS un échec de tâche. Sur une erreur HTTP,
+#    `gh` écrit le CORPS JSON sur stdout, le message humain sur stderr, et sort en 1.
+#    Le statut réel se lit dans le champ "status" du corps ci-dessous.
+# Rédaction : aucun en-tête Authorization, aucun jeton (vérifié par grep — voir
+#             non_regression.md ; gitleaks est le gate bloquant en pre-commit et en CI).
+# Le corps ci-dessous est la réponse de l'API, NON reformatée. Ce fichier n'est donc pas
+# du JSON parsable en l'état : `grep -v '^#' reports/US-00.4/protection_api_403.json` isole le corps.
+# stderr : archivé dans reports/US-00.4/protection_api_403.stderr.txt
+# ──────────────────────────────────────────────────────────────────────────
+{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature.","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branch-protection","status":"403"}

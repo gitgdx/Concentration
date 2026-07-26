@@ -280,12 +280,20 @@ Une décision structurante = un ADR immuable (`docs/adr/ADR-XXX-*.md`, template
 | `commit-msg` | `type(scope): description` + trailer `US: US-XX.X` (ou `US: none — justification`) |
 | `pre-push` | refuse la branche principale |
 
-#### Étage 3 — CI bloquante sur PR (`.github/workflows/ci.yml`)
+#### Étage 3 — CI sur PR (`.github/workflows/ci.yml`) — ⚠️ **rapportée, PAS bloquante**
 
-Jobs requis par la protection de branche (`scripts/apply_branch_protection.sh`, source des status
-checks = `factory.config.json`) : `secrets-scan` (gitleaks) · `governance` (SCB + trace + synchro
-config) · gates qualité de l'adapter (`python scripts/run_gates.py`). Les E2E tournent à part
-(`e2e.yml` — voir [`docs/qa/E2E_RUNBOOK.md`](qa/E2E_RUNBOOK.md)).
+Jobs **destinés** à être requis par la protection de branche (source des status checks =
+`factory.config.json`) : `secrets-scan` (gitleaks) · `governance` (SCB + trace + synchro config) ·
+gates qualité de l'adapter (`python scripts/run_gates.py`) · `check-branch-name`. Les E2E tournent à
+part (`e2e.yml` — voir [`docs/qa/E2E_RUNBOOK.md`](qa/E2E_RUNBOOK.md)).
+
+> 🔴 **Au 2026-07-26, aucun de ces jobs n'est *requis*.** La protection de branche est **indisponible**
+> sur ce dépôt (403 de plateforme, cf. [ADR-006](adr/ADR-006-protection-branche-principale.md)) : les
+> checks s'exécutent et **rapportent**, mais une fusion avec CI rouge reste techniquement possible. Le
+> mot « bloquante » ne décrit donc pas l'état réel — il faut **lire** les checks
+> (`gh pr checks <n>`). Vérification de l'état : `python scripts/factory_sync.py --check-remote`.
+> *(Ligne corrigée le 2026-07-26 — occurrence trouvée par un balayage par **motif**, après que la
+> relecture T14 par liste de fichiers l'avait manquée.)*
 
 ---
 
@@ -317,8 +325,15 @@ initialisé depuis le starter kit : seuils posés sans complaisance dès le prem
 
 ### 6.3 Axes d'amélioration (roadmap)
 
-- Dérouler le Sprint 0 (`US-INIT-01` → `US-INIT-06` du `BACKLOG.md`) si ce n'est pas déjà fait.
-- Exécuter `sh scripts/apply_branch_protection.sh` (droits admin requis).
+- Dérouler le Sprint 0 (`US-00.1` → `US-00.6` du `BACKLOG.md`) si ce n'est pas déjà fait.
+  *(État au 2026-07-26 : US-00.1/00.2/00.3 certifiées, US-00.4 en cours, US-00.5/00.6 à créer.)*
+- 🔴 ~~Exécuter `sh scripts/apply_branch_protection.sh` (droits admin requis).~~ **⛔ NE PAS EXÉCUTER
+  aujourd'hui** : la protection de branche est **indisponible** sur ce dépôt (403 « Upgrade to GitHub
+  Pro or make this repository public » sur la protection classique **et** les rulesets). Le script est
+  **prêt et conditionné au déblocage** (dépôt public **ou** GitHub Pro) — voir
+  [`docs/GIT_PROTECTION.md`](GIT_PROTECTION.md) et
+  [ADR-006](adr/ADR-006-protection-branche-principale.md). Vérification de l'état réel :
+  `python scripts/factory_sync.py --check-remote`.
 - Passer `/audit-methodo` à échéance régulière pour garder cette section vivante.
 
 ---
