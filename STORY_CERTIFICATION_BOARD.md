@@ -10,7 +10,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
-| US-00.1 | Secrets & scan de dépôt | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.1 | Secrets & scan de dépôt | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | US-00.2 | Qualité statique de référence | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -65,7 +65,12 @@
 - **Suivi non bloquant** (hors périmètre certif US-00.1) : en-tête « PROPOSITION » périmé dans `.gitleaks.toml`
   (fichier verrouillé → correctif humain) ; couverture keystore/cert mobile différée à @DevOps (`.gitignore`,
   hors MVP RNF-07) ; `reports/US-00.1/gitleaks.toml.proposed` duplique la config racine (dérive potentielle).
-- **Prochaine étape** : **QA** (exécution réelle des suites + non-régression) → transition phase `quality_assurance`.
+- **QA Status 🧪 PASS** (2026-07-26, `EVT_QA_PASSED`) : `run_gates.py --component app` → **5 gates verts**
+  (0 fail/0 skip, non-régression — aucun code Dart) ; confirmation secrets indépendante (14 commits, 0 fuite) ;
+  **8/8 scénarios BDD** couverts par preuves outillées. Rapport : `reports/US-00.1/qa.md`.
+- **Prochaine étape** : décision de **déploiement @DevOps** (pour une US de gouvernance de dépôt, le
+  « déploiement » = PR → merge sur `main`, rendant la config active sur `main` + enforcement CI repo-wide)
+  → puis `/certify` (gate scripté ; `Certifié Prod = 🚀 OUI` exige `Déploiement = 🚀 DEPLOYED`).
 
 ### [US-00.2] Qualité statique de référence
 
