@@ -11,7 +11,7 @@
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.2 | Qualité statique de référence | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.2 | Qualité statique de référence | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -105,7 +105,10 @@
 - **Audit Sec 🛡️** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **PASS**, 0 finding.
   Diff 100 % documentaire (0 code/pubspec/analysis_options touché) → portée sécurité classique sans objet
   (justifié) ; gitleaks 0 fuite, `dart pub outdated` 0 CVE, aucun affaiblissement de lint. Rapport : `reports/US-00.2/security.md`.
-- **Prochaine étape** : **QA** → déploiement (merge sur `main`) → `/certify`.
+- **QA Status 🧪 PASS** (2026-07-26, `EVT_QA_PASSED`) : `run_gates --component app` **5 gates verts**,
+  gates cœur format (exit 0) + analyze (« No issues found! »), **6/6 scénarios BDD** couverts. Aucune
+  régression. Rapport : `reports/US-00.2/qa.md`.
+- **Prochaine étape** : déploiement (merge sur `main`, US de gouvernance sans runtime → staging N/A) → `/certify`.
 
 ### [US-00.3] Migrations réversibles
 
