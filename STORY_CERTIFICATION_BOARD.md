@@ -12,7 +12,7 @@
 | US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.3 | Migrations réversibles | business_alignment | ✅ @PO | ⏳ | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.3 | Migrations réversibles | parallel_audit | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -127,9 +127,13 @@
 - **Track** : `STANDARD` — critères `docs/governance/TRACKS.md` : docs/politique (0 fichier de code),
   aucune migration de schéma concrète, pas de surface auth/sécurité, pas de nouvelle page/API, pas de
   nouvelle EPIC. Doute QUICK↔STANDARD tranché vers STANDARD (US de plateforme certifiable).
-- **Prochaine étape** : `EVT_STORY_READY` (visa PO complet) → validation technique @Architect
-  (+ ADR de convention à assigner). **Bloque US-01.2** (qui applique la convention et instancie le
-  patron de test aller-retour).
+- **Design Data ✅ + Code ✅** (2026-07-26) : `EVT_STORY_READY` → `EVT_ARCHI_VALIDATED` →
+  `EVT_DATA_DESIGN_COMPLETED` (convention `docs/architecture/MIGRATIONS.md` par @DataEngineer :
+  versionnement monotone, contrat up/down + invariant aller-retour, additif par défaut / destructif
+  encadré, patron de test round-trip) → `EVT_DESIGN_COMPLETED` (Lock : Data ✅ + UX N/A, **ADR-005
+  Accepté**) → `EVT_CODE_READY`. Livrables docs (aucun code Dart compilé). Preuves : `reports/US-00.3/README.md`.
+  Phase → `parallel_audit`. **Bloque US-01.2** (qui applique la convention + instancie le patron de test).
+- **Prochaine étape** : `/audit-us US-00.3` (Rev 🔍 + Sec 🛡️, contextes frais) → QA → deploy → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
