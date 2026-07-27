@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -432,10 +432,42 @@
   sonde de l'auditeur** (littéral de force-push), qu'il a reformulée **sans jamais le contourner**. Son
   observation : « sur ce dépôt, la seule barrière qui ait dit *non* pendant tout l'audit est un **hook
   local**, jamais la plateforme ». **C'est exactement la thèse de cette US.**
-- **Prochaine étape** : **double ✅ obtenu** → **QA** (@QA_Tester, exécution réelle) → DevOps →
-  `/certify`. ⏳ **T22** (humain, Art. 6 — commentaire de `pre-push`) et **T6** (humain, cosmétique).
-  **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story File l. 198/215 **et**
-  `.feature` l. 54).
+- **✅ QA Status 🧪 PASS** (2026-07-27, `EVT_QA_PASSED`) — **avec une réserve bloquante pour `/certify`**.
+  Rapport `reports/US-00.4/qa.md`. **Décomptes** : `run_gates --all` **5/5 verts** · tests Dart **2
+  passed / 0 failed** · couverture **89,5 %** (inchangée, aucun fichier Dart au diff) · 3/3 gates
+  gouvernance · **16/16** invocations de `check_branch_protection.py` conformes à la spécification ·
+  `gitleaks` 8.30.1 **2/2** → `no leaks found` · **20/20 scénarios Gherkin couverts** (15 par exécution
+  d'outil, 5 par revue d'artefact — **aucun runner Gherkin n'existe dans cette stack**, dette déclarée) ·
+  **24/26 critères** pleinement satisfaits, 2 partiels (#20/#21, conditionnés à une PR) · **8/8 AC
+  conformes, aucun orphelin**.
+  - **Constat du 2026-07-26 REPRODUIT à la date du 2026-07-27** (4 `gh api` en lecture seule) :
+    `protected:false`, **403 identique** sur protection **et** rulesets, `private:true`, `admin:true`,
+    **1 seul collaborateur**. `--check-remote` in vivo → **exit 2**, mot « conforme » absent.
+  - **Réserve « repli `urllib` non exercé » PARTIELLEMENT LEVÉE** : en retirant `gh` du `PATH` avec un
+    jeton factice, @QA a **réellement atteint le transport `urllib`** sur le réseau → `exit 2 / 401 Bad
+    credentials`. **Le 401 est donc distingué du 403 in vivo**, et non plus seulement sur fixture.
+  - **AC-1 fait (b)** : l'inférence est écrite **explicitement comme telle en 2 endroits** (en-tête de
+    `check_runs.json` ; `enforcement_gap.md` §1.1, statut de preuve « Mixte : lecture directe +
+    INFÉRENCE »). **L'AC ne tombe pas sur sa propre règle de preuve.**
+  - **3 écarts que les deux audits n'avaient pas relevés** : **É-3** le préambule de la DoD affirmait
+    être « intégralement cochable en l'état » — **faux**, 2 cases exigent une PR ouverte
+    (`gh pr checks` → `no pull requests found`) → **rectifié par @Architect** ; **É-4**
+    `false_claims_sweep.md` §4 bis n'indexe pas `tests/features/US-00.1-*.feature:54` (le motif exigeait
+    « merge », le texte dit « la fusion … est empêchée par ») — désynchronisation d'index, l'occurrence
+    est consignée ailleurs ; **É-5** les lignes sans préfixe de `check_remote_simulated.txt` sont
+    l'encadrement de l'archive, pas des sorties d'outil (contre-preuve : 0 sur 8 à la réexécution).
+  - **🔴 Réserve de @QA — `T22` est BLOQUANT en entrée de `/certify`** (non bloquant pour le PASS) :
+    `scripts/githooks/pre-push:2-3` justifie encore son existence par « **protection de branche
+    GitHub** », alors que ce hook est l'élément **(a)** de l'AC-7 — « c'est exactement la fausse
+    confiance que l'US existe pour supprimer, **dans un fichier d'enforcement** ». Un FAILED aurait
+    renvoyé l'US à un agent qui **ne peut légalement pas la corriger** (Art. 6), d'où le PASS ; mais
+    **certifier « zéro fausse confiance » en le laissant serait incohérent**. **T6** jugé non bloquant
+    (JSON valide, aucun AC ne porte sur la propreté du diff), à faire dans la même passe.
+- **Prochaine étape** : ⛔ **T22 (action humaine, Art. 6)** avant `/certify` — diff exact dans le Story
+  File. Puis **@DevOps** : ouvrir la PR (lève les critères #20 « 4 status checks **rapportés** verts — à
+  **lire**, ils ne bloquent rien » et #21 « `gitleaks` vert en CI ») → merge = déploiement → `/certify`.
+  ⏳ **T6** (cosmétique). **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story
+  File l. 198/215 **et** `.feature` l. 54).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
