@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | deployment_prod | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -463,10 +463,46 @@
     renvoyé l'US à un agent qui **ne peut légalement pas la corriger** (Art. 6), d'où le PASS ; mais
     **certifier « zéro fausse confiance » en le laissant serait incohérent**. **T6** jugé non bloquant
     (JSON valide, aucun AC ne porte sur la propreté du diff), à faire dans la même passe.
-- **Prochaine étape** : ⛔ **T22 (action humaine, Art. 6)** avant `/certify` — diff exact dans le Story
-  File. Puis **@DevOps** : ouvrir la PR (lève les critères #20 « 4 status checks **rapportés** verts — à
-  **lire**, ils ne bloquent rien » et #21 « `gitleaks` vert en CI ») → merge = déploiement → `/certify`.
-  ⏳ **T6** (cosmétique). **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story
+- **✅ T22 + T6 faits par l'humain** (2026-07-27) : `scripts/githooks/pre-push:2-3` ne justifie plus le
+  hook par « protection de branche GitHub » — il est désormais qualifié de **filet de discipline LOCAL**
+  avec ses limites nommées (absent d'un clone frais, contournable depuis un autre poste ou via
+  l'interface web, `--no-verify` reposant sur la **même** discipline). C'était la **dernière fausse
+  affirmation logée dans un fichier d'enforcement**, et l'élément (a) de l'AC-7. **Logique du hook
+  intacte** (refus de push sur `main`, l. 20-25), `sh -n` exit 0. `factory.config.json` nettoyé.
+  **Réserve bloquante de @QA levée.**
+- **🚀 Déploiement DEPLOYED** (2026-07-27, chaîne `EVT_READY_FOR_DEPLOY` → `EVT_STAGING_DEPLOYED`
+  (**N/A justifié** — US documentaire sans runtime ; validation pré-prod équivalente = CI verte sur la
+  PR) → `EVT_DEPLOYMENT_SUCCESS`) : **PR #10 fusionnée sur `main`**, sha de merge **`15121d8`**
+  (`main` : `801a046` → `15121d8`). **CI 4/4 VERTE, lue et non supposée** — `gh pr checks 10` : les 4
+  libellés attendus tous `pass` (5 check-runs pour 4 libellés distincts : `check-branch-name` est
+  rapporté **deux fois** sur le même sha, sur l'événement `push` **et** sur `pull_request`). Health-check
+  post-merge sur `main` : CI 3/3 `success` (run `30269458325`), SCB + trace + synchro verts. Preuves :
+  `reports/US-00.4/pr_checks.json`, `reports/US-00.4/deployment.md`. Plan de retour : `git revert -m 1
+  15121d8` en PR dédiée (aucun runtime ni schéma à restaurer).
+  - **⚠️ La thèse de l'US confirmée par sa propre PR** : `mergeStateStatus: CLEAN` et
+    `reviewDecision: ""`. **`CLEAN` signifie « rien ne bloque », pas « checks requis satisfaits »** — la
+    PR était **fusionnable en rouge**. La lecture manuelle des checks a été le **seul contrôle réel**.
+  - **Livrable actif en production** : sur `main`, `factory_sync.py --check` annonce désormais
+    « vérification **DOCUMENTAIRE**, aucun appel réseau » + l'avertissement que l'état réel n'est pas
+    vérifié. L'angle mort qui a permis ce défaut est fermé **sur `main`**.
+  - **Limite de preuve déclarée** : le push a exercé le hook `pre-push` (exit 0, `feat/*` accepté
+    silencieusement) mais **la branche de refus n'a pas été testée** — interdiction explicite, et le push
+    aurait réussi côté serveur. Le refus n'est établi que par **lecture de code**. C'est précisément le
+    sujet de l'US.
+  - **Ce qui n'est PAS déployé** : `main` **n'est toujours pas protégée** et ne peut pas l'être (403 de
+    plan) · `apply_branch_protection.sh` reste **armé, non appliqué** · **aucun status check requis** ·
+    **risque #2 d'EPIC_00 OUVERT** · T16→T19 non exécutées.
+- **🔧 Écart de trace relevé par @DevOps, assumé** : `EVT_READY_FOR_DEPLOY` a été émis avec
+  `--agent devops` alors que `scripts/events_catalog.json` déclare `"emitter": "architect"` (et que
+  US-00.1/00.2/00.3 l'ont toutes émis en `architect`). **Erreur du brief de @Architect**, pas de
+  @DevOps, qui a exécuté l'instruction **en inscrivant l'écart dans le rationale** pour que la trace ne
+  soit pas trompeuse — le bon réflexe. La trace étant append-only, l'événement reste tel quel, documenté.
+  **Découverte corollaire, à porter à `/audit-methodo`** : `scripts/trace_append.py` **ne lit jamais** le
+  champ `emitter` du catalogue (vérifié : 0 occurrence). Les émetteurs sont donc **déclarés mais non
+  enforced** — **exactement la classe de défaut que cette US dénonce**, cette fois dans le système de
+  traçabilité lui-même. Nouvelle dette.
+- **Prochaine étape** : `/certify` (@Architect, gate scripté) depuis la branche post-merge
+  `feat/US-00.4-certif`. **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story
   File l. 198/215 **et** `.feature` l. 54).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
