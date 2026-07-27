@@ -49,11 +49,13 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-00.4 — Enforcement `main` : constat + outillage (cible armée)** (EPIC_00,
-track STANDARD), phase `development_start` (**Integration Lock posé**, Data N/A + UX N/A), branche
-`feat/US-00.4-ci-protection-branche`. **US re-cadrée le 2026-07-26** : 8 AC, 20 scénarios, T1→T19,
-ADR-006 Accepté. Prochaine étape : développement T1→T15 (T4 et T6 = actions humaines, Art. 6) →
-`/audit-us` → QA → DevOps → `/certify`. **T16→T19 reportées et interdites à l'exécution.**
+**Chantier actif** : — *(aucun)*. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10, `main` =
+`15121d8` ; certification sur la branche post-merge `feat/US-00.4-certif`). ⚠️ **Sa portée est
+étroite** : elle certifie la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas**
+la protection de `main` — voir l'encadré ci-dessous. **Prochaine US à décider** : **US-00.5** (ADR-001
+stack + Constitution — **priorité relevée**, elle doit corriger le texte encore faux) ou **US-00.6**
+(couverture + ratchet). US-01.1 (EPIC_01, FULL) reste en pause en `business_alignment`, **à rebaser sur
+`main`**, et son Lock exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 
 > 🔴 **À LIRE AVANT TOUT AUDIT** — La règle 2 ci-dessus (« jamais de commit/push sur la branche
 > principale, *enforced par protection de branche* ») est **FAUSSE aujourd'hui**. La protection de
@@ -63,8 +65,10 @@ ADR-006 Accepté. Prochaine étape : développement T1→T15 (T4 et T6 = actions
 > public). Ce qui protège `main` = hook `pre-push` **local** + CI qui **rapporte** sans pouvoir
 > **bloquer** = **filet de discipline, pas contrainte de plateforme**. **Risque #2 d'EPIC_00 OUVERT** ;
 > la certification d'US-00.4 ne le clôt pas. Correction du texte de la règle = **US-00.5**.
-**Sprint 0 (EPIC_00) : 3 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3 🚀 ; restent US-00.4 (en
-cours), US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture + ratchet). ⚠️ La mention
+**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; restent
+US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture + ratchet). 🔴 **EPIC_00 ne pourra PAS être
+déclarée complète** même après US-00.5/00.6 : son critère de clôture « protection de branche vérifiée »
+est **impossible à cocher** sur ce plan (403), et le **risque #2 reste OUVERT**. ⚠️ La mention
 « SPRINT 0 COMPLET » du PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau).
 US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
@@ -75,8 +79,20 @@ US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à 
   d'US-00.4. Réévaluation à chaque `/audit-methodo`.
 - 🔴 **Le texte de gouvernance affirme un enforcement inexistant** : règle 2 de ce fichier + Art. 4 de
   la Constitution. Correction = **US-00.5** (priorité relevée, à enchaîner juste après US-00.4).
-- 🔴 **`factory_sync.py --check` n'appelle jamais l'API GitHub** et annonce pourtant « protection
-  conforme » — angle mort traité par US-00.4 (libellé *documentaire* + `--check-remote` hors CI).
+- ✅ **RÉSOLU par US-00.4** : `factory_sync.py --check` annonce désormais une vérification
+  **DOCUMENTAIRE** et avertit que l'état réel n'est pas vérifié ; `--check-remote` interroge l'API
+  (hors CI, droits admin). **Actif sur `main`.**
+- 🔴 **NB-1 — trou résiduel DÉMONTRÉ dans le comparateur, correctif à 1 ligne** :
+  `scripts/check_branch_protection.py:503` passe `MAPPED_TOP_KEYS` (constante **statique**) au lieu de
+  `MAPPED_TOP_KEYS & set(expected)` → **exit 0 possible sur un relâchement réel** avec une cible
+  amputée. Verrouillé derrière une édition Art. 6, d'où le classement non bloquant.
+- 🔴 **Aucun `selftest` en CI** pour `check_branch_protection.py` : les 12 chemins sont exercés par
+  fixtures versionnées mais **lancées à la main**. Recommandation forte du re-audit — « c'est lui, pas
+  le hook, qui arrête une régression » de la frontière de couverture.
+- ⚠️ **Émetteurs d'événements déclarés mais NON enforced** : `scripts/trace_append.py` **ne lit jamais**
+  le champ `emitter` de `events_catalog.json` (vérifié, 0 occurrence) → un agent peut émettre n'importe
+  quel événement sous n'importe quel rôle. Même classe de défaut que celle qu'US-00.4 dénonce, dans le
+  système de traçabilité lui-même. Candidat `/audit-methodo`.
 - ⚠️ **`TRACKS.md` (track FULL) exige une « revue humaine explicite de la PR » qu'aucune barrière
   machine ne soutient** — ni maintenant, ni après déblocage (cible à `0` approbation). **US-01.1 est en
   FULL** → arbitrage à poser **avant son Integration Lock** : requalifier l'exigence en obligation de
@@ -95,12 +111,12 @@ US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à 
 - ✅ **FAIT** : `gh` CLI installé (2.96.0) et authentifié `gitgdx` avec `admin: true`. Chemin absolu si
   absent du `PATH` d'une session ouverte avant l'install : `C:\Program Files\GitHub CLI\gh.exe`.
 - ✅ **FAIT** : `factory.config.json` porte `required_approving_review_count: 0` (`enforce_admins: true`).
-- 🔴 **US-00.4, T4** : éditer `scripts/factory_sync.py` (Art. 6) — 4 diffs exacts dans le Story File
-  (docstring ×2, message de `do_check` → « DOCUMENTAIRE », drapeau `--check-remote` + dispatch paresseux).
-- ⚠️ **US-00.4, T6** (cosmétique) : retirer la ligne vide à 2 espaces avant `"branch_protection"` dans
-  `factory.config.json`, introduite lors de l'édition manuelle. Sans impact fonctionnel.
-- **Décider du déblocage de la protection de branche** (dépôt public vs GitHub Pro vs statu quo) — la
-  dérogation actuelle est tracée mais reste une dette majeure ouverte.
+- ✅ **FAIT** : T4 (`scripts/factory_sync.py`), T5, T6 et T22 (`scripts/githooks/pre-push` — le hook ne
+  se réclame plus de la protection de branche) — toutes les actions humaines d'US-00.4 sont soldées.
+- 🔴 **Décider du déblocage de la protection de branche** (dépôt public vs GitHub Pro ~4 USD/mois vs
+  statu quo) — la dérogation est tracée, mais c'est **la** dette majeure du projet. Le jour du
+  déblocage : T16→T19 d'US-00.4 sont prêtes à être reprises **telles quelles**.
+- **Planifier les dettes techniques d'US-00.4** : correctif NB-1 (1 ligne) et `selftest` en CI.
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).
 - Décider la création de US-01.2 (Gestion des événements).
 - Arbitrages design ci-dessus.
