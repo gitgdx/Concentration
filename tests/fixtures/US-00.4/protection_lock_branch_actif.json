@@ -1,0 +1,65 @@
+{
+  "_fixture": "SIMULATION US-00.4 du 2026-07-26 — réponse d'API FABRIQUÉE à la main. N'atteste PAS l'état réel du dépôt. Dérivée de protection_conforme.json pour exercer le correctif du finding B-2 de l'audit Revue : `lock_branch: {\"enabled\": true}` verrouille TOUTE écriture sur la branche — état matériellement divergent qui sortait en exit 0 « conforme » avant le correctif.",
+  "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection",
+  "required_status_checks": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_status_checks",
+    "strict": true,
+    "contexts": [
+      "🔐 Secrets scan (gitleaks)",
+      "📋 Governance (SCB + traçabilité + synchro)",
+      "check-branch-name",
+      "📱 App (gates run_gates.py)"
+    ],
+    "contexts_url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_status_checks/contexts",
+    "checks": [
+      {
+        "context": "🔐 Secrets scan (gitleaks)",
+        "app_id": null
+      },
+      {
+        "context": "📋 Governance (SCB + traçabilité + synchro)",
+        "app_id": null
+      },
+      {
+        "context": "check-branch-name",
+        "app_id": null
+      },
+      {
+        "context": "📱 App (gates run_gates.py)",
+        "app_id": null
+      }
+    ]
+  },
+  "required_pull_request_reviews": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_pull_request_reviews",
+    "dismiss_stale_reviews": false,
+    "require_code_owner_reviews": false,
+    "require_last_push_approval": false,
+    "required_approving_review_count": 0
+  },
+  "enforce_admins": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/enforce_admins",
+    "enabled": true
+  },
+  "required_linear_history": {
+    "enabled": false
+  },
+  "allow_force_pushes": {
+    "enabled": false
+  },
+  "allow_deletions": {
+    "enabled": false
+  },
+  "block_creations": {
+    "enabled": false
+  },
+  "required_conversation_resolution": {
+    "enabled": true
+  },
+  "lock_branch": {
+    "enabled": true
+  },
+  "allow_fork_syncing": {
+    "enabled": false
+  }
+}

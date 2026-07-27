@@ -5,10 +5,17 @@ Synchroniseur de la config factory — élimine les divergences entre factory.co
 
   --write                   régénère scripts/factory_env.sh (sourcé par les hooks) et le
                             bloc status-checks de docs/GIT_PROTECTION.md (entre marqueurs).
-  --check                   exit 1 si une projection a dérivé de la config : factory_env.sh,
-                            bloc GIT_PROTECTION.md, status checks absents des workflows CI,
-                            seuils de couverture incohérents avec les fichiers de l'adapter.
+  --check                   vérification DOCUMENTAIRE uniquement (aucun appel réseau) : exit 1 si
+                            une projection a dérivé de la config : factory_env.sh, bloc
+                            GIT_PROTECTION.md, status checks absents des workflows CI, seuils de
+                            couverture incohérents avec les fichiers de l'adapter. N'atteste PAS
+                            l'état réel de la protection de branche sur GitHub (voir --check-remote).
                             Exécuté par le job CI `governance` — la synchro est un gate bloquant.
+  --check-remote            compare CHAMP PAR CHAMP la protection RÉELLE de la branche principale
+                            (API GitHub) au payload de --emit-branch-protection. Exige des droits
+                            ADMIN → commande d'administration MANUELLE, jamais exécutée par la CI
+                            (le GITHUB_TOKEN n'a pas ces droits).
+                            exit 0 = conforme · 1 = dérive · 2 = vérification impossible.
   --emit-branch-protection  imprime le JSON de protection de branche pour `gh api`
                             (consommé par scripts/apply_branch_protection.sh).
   --print-main-branch       imprime git.main_branch (usage shell).
@@ -171,7 +178,11 @@ def do_check(cfg: dict) -> int:
         for err in errors:
             print(f"  - {err}")
         return 1
-    print("Synchro factory conforme (env, protection, workflows, seuils).")
+    print("Synchro factory conforme — vérification DOCUMENTAIRE, aucun appel réseau "
+          "(env, bloc GIT_PROTECTION.md, libellés de jobs des workflows, seuils).")
+    print("[AVERTISSEMENT] l'état RÉEL de la protection de branche sur GitHub n'est PAS vérifié "
+          "ici : lancer `python scripts/factory_sync.py --check-remote` (droits admin requis).")
+
     return 0
 
 
@@ -180,6 +191,7 @@ def main() -> int:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--write", action="store_true")
     group.add_argument("--check", action="store_true")
+    group.add_argument("--check-remote", action="store_true")
     group.add_argument("--emit-branch-protection", action="store_true")
     group.add_argument("--print-main-branch", action="store_true")
     args = parser.parse_args()
@@ -195,6 +207,12 @@ def main() -> int:
         return do_write(cfg)
     if args.check:
         return do_check(cfg)
+    if args.check_remote:
+        # Import PARESSEUX : une absence ou une erreur d'import de ce module ne doit jamais
+        # pouvoir casser --check, qui est un gate CI bloquant.
+        import check_branch_protection
+        return check_branch_protection.main_from_sync()
+
     if args.emit_branch_protection:
         print(emit_branch_protection(cfg))
         return 0

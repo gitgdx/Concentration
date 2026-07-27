@@ -1,8 +1,19 @@
 name: ✅ CI
 
-# Gates qualité bloquants sur CHAQUE PR (et sur la branche principale).
-# Ces jobs sont les status checks requis par la protection de branche
-# (scripts/apply_branch_protection.sh). Constitution : docs/governance/CONSTITUTION.md.
+# Gates qualité exécutés et RAPPORTÉS sur CHAQUE PR (et sur la branche principale).
+#
+# ⚠️ RAPPORTÉS, PAS BLOQUANTS — constat daté du 2026-07-26 : aucun de ces jobs n'est un status
+#    check REQUIS, parce que `main` n'est PAS protégée et ne peut pas l'être sur ce plan
+#    (dépôt privé, compte User : GET/PUT .../protection ET .../rulesets renvoient 403
+#    « Upgrade to GitHub Pro or make this repository public to enable this feature. »).
+#    Conséquence à assumer : une PR peut être fusionnée AVEC LA CI ROUGE. Il faut donc LIRE
+#    activement les checks (`gh pr checks`) — aucune barrière machine ne le fera.
+#    Ces 4 jobs sont les contextes de la CIBLE ARMÉE (factory.config.json → status_checks),
+#    destinés à devenir requis LE JOUR DU DÉBLOCAGE, via scripts/apply_branch_protection.sh
+#    (PRÊT mais NON APPLICABLE aujourd'hui).
+#    Détail : docs/GIT_PROTECTION.md · docs/adr/ADR-006-protection-branche-principale.md.
+#
+# Constitution : docs/governance/CONSTITUTION.md.
 
 on:
   pull_request:

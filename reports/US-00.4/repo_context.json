@@ -1,0 +1,15 @@
+# ─────────── PREUVE BRUTE D'API — US-00.4 (Constitution Art. 3) ───────────
+# Commande exacte : gh api repos/gitgdx/Concentration --jq '{private, visibility, owner_type: .owner.type, permissions}' > reports/US-00.4/repo_context.json 2> reports/US-00.4/repo_context.stderr.txt
+# Note : le corps est la PROJECTION produite par le filtre `--jq` de la commande ci-dessus
+#        (pas la réponse intégrale) — re-jouer la commande à l'identique la reproduit.
+# Horodatage UTC  : 2026-07-26T19:16:14Z
+# Statut HTTP     : 200
+# Code de sortie de `gh` : 0
+# Rédaction : aucun en-tête Authorization, aucun jeton (vérifié par grep — voir
+#             non_regression.md ; gitleaks est le gate bloquant en pre-commit et en CI).
+# Le corps ci-dessous est la réponse de l'API, NON reformatée. Ce fichier n'est donc pas
+# du JSON parsable en l'état : `grep -v '^#' reports/US-00.4/repo_context.json` isole le corps.
+# stderr : <vide> (0 octet) — fichier .stderr.txt non conservé.
+# ──────────────────────────────────────────────────────────────────────────
+{"owner_type":"User","permissions":{"admin":true,"maintain":true,"pull":true,"push":true,"triage":true},"private":true,"visibility":"private"}
+

@@ -1,0 +1,254 @@
+══════════════════════════════════════════════════════════════════════════════
+ T9 — EXITS 0 / 1 / 2 DÉMONTRÉS SUR RÉPONSES **SIMULÉES** — 8 invocations
+ US-00.4 · AC-3 nominal + erreur + limite · Horodatage UTC : 2026-07-26T20:31:30Z
+ (v2 — inclut les 4 cas du correctif du finding B-2 de l'audit Revue)
+══════════════════════════════════════════════════════════════════════════════
+
+ ⛔ CE FICHIER N'EST PAS UNE PREUVE DE L'ÉTAT RÉEL DU DÉPÔT. ⛔
+
+ Les chemins exit 0 et exit 1 ne sont PAS observables sur gitgdx/Concentration : la
+ lecture de la protection y renvoie 403 (limite de plan). Ils sont donc exercés sur les
+ fixtures de tests/fixtures/US-00.4/ — des réponses FABRIQUÉES à la main.
+ L'état réel du dépôt est dans check_remote_exit2.txt (exit 2), et NULLE PART ailleurs.
+
+ Mitigation du risque R1 : chaque ligne produite par le comparateur porte le préfixe
+ `[SIMULATION] ` et le message d'exit 0 porte « SOURCE SIMULÉE, n'atteste PAS l'état
+ réel du dépôt ». Sans ce marquage, une sortie « exit 0 » archivée pourrait être relue
+ comme un constat réel — c'est-à-dire reproduire exactement le défaut que l'US dénonce.
+
+ Exécuté SANS `gh` dans le PATH et SANS GH_TOKEN/GITHUB_TOKEN : aucun appel réseau
+ n'est possible ici, ce qui prouve que le mode fixture n'en émet aucun.
+
+──────────────────────────────────────────────────────────────────────────────
+ [1/8] Fixture CONFORME (200) — code de sortie attendu : 0
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_conforme.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_conforme.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 12 champ(s) alignés, 0 écart(s), 6 champ(s) additionnel(s) neutre(s), 0 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+[SIMULATION]   [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, lock_branch, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] conforme à la cible générée — SOURCE SIMULÉE, n'atteste PAS l'état réel du dépôt
+  → code de sortie OBTENU : 0 (attendu 0)
+
+──────────────────────────────────────────────────────────────────────────────
+ [2/8] Fixture DIVERGENTE (200, 4 écarts) — code de sortie attendu : 1
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_divergente.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_divergente.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 9 champ(s) alignés, 4 écart(s), 6 champ(s) additionnel(s) neutre(s), 0 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, lock_branch, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] DÉRIVE DÉTECTÉE — protection divergente sur <owner/repo SIMULÉ>:main
+[SIMULATION]   4 écart(s) entre la cible générée et l'état lu :
+[SIMULATION]   champ | attendu | réel
+[SIMULATION]   required_status_checks.contexts (MANQUANT) | "📱 App (gates run_gates.py)" | <absent de la réponse GET>
+[SIMULATION]   required_status_checks.contexts (EN TROP) | <absent de la cible générée> | "🧪 E2E smoke (nightly)"
+[SIMULATION]   required_pull_request_reviews.required_approving_review_count | 0 | 1
+[SIMULATION]   enforce_admins (GET: enforce_admins.enabled) | true | false
+  → code de sortie OBTENU : 1 (attendu 1)
+
+──────────────────────────────────────────────────────────────────────────────
+ [3/8] 404 + protected:false → dérive réelle — code de sortie attendu : 1
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/http_404.json --from-branch tests/fixtures/US-00.4/branch_protected_false.json --from-protection-status 404
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/http_404.json (statut simulé : 404)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_false.json (statut simulé : 200)
+[SIMULATION] GET /repos/<owner/repo SIMULÉ>/branches/main/protection → 404 et GET /repos/<owner/repo SIMULÉ>/branches/main → "protected": false : la branche n'est réellement PAS protégée (ce n'est pas un défaut de droits).
+[SIMULATION] DÉRIVE DÉTECTÉE — protection ABSENTE sur <owner/repo SIMULÉ>:main (404 + protected == false)
+[SIMULATION]   7 écart(s) entre la cible générée et l'état lu :
+[SIMULATION]   champ | attendu | réel
+[SIMULATION]   required_status_checks | "objet présent (strict + contexts)" | <clé absente de la réponse GET — aucun status check requis>
+[SIMULATION]   required_pull_request_reviews | "objet présent, required_approving_review_count=0 (pull request EXIGÉE)" | <objet absent de la réponse GET — aucune pull request exigée>
+[SIMULATION]   enforce_admins (GET: enforce_admins.enabled) | true | <clé absente de la réponse GET>
+[SIMULATION]   allow_force_pushes (GET: allow_force_pushes.enabled) | false | <clé absente de la réponse GET>
+[SIMULATION]   allow_deletions (GET: allow_deletions.enabled) | false | <clé absente de la réponse GET>
+[SIMULATION]   required_linear_history (GET: required_linear_history.enabled) | false | <clé absente de la réponse GET>
+[SIMULATION]   required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | <clé absente de la réponse GET>
+  → code de sortie OBTENU : 1 (attendu 1)
+
+──────────────────────────────────────────────────────────────────────────────
+ [4/8] 404 + protected:true → droits insuffisants — code de sortie attendu : 2
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/http_404.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json --from-protection-status 404
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/http_404.json (statut simulé : 404)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+[SIMULATION]   Code HTTP : 404 — 404 sur la protection alors que GET /repos/<owner/repo SIMULÉ>/branches/main annonce "protected": true → la protection existe mais reste ILLISIBLE : droits insuffisants (admin requis)
+[SIMULATION]   Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie OBTENU : 2 (attendu 2)
+
+==============================================================================
+ CORRECTIF DU FINDING B-2 (audit Revue) — GARDE SYMÉTRIQUE CÔTÉ RÉPONSE RÉELLE
+==============================================================================
+ Avant correctif, toute clé SUPPLÉMENTAIRE de la réponse GET était ignorée EN SILENCE :
+ une protection portant lock_branch:{enabled:true} (branche entièrement verrouillée en
+ écriture) ressortait en EXIT 0. C'était le seul chemin de FAUX VERT du dispositif —
+ dans l'outil de preuve lui-même. Les 4 cas ci-dessous verrouillent le correctif.
+
+──────────────────────────────────────────────────────────────────────────────
+ [5/8] lock_branch ACTIF — LE cas du faux vert — code de sortie attendu : 2
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_lock_branch_actif.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_lock_branch_actif.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 12 champ(s) alignés, 0 écart(s), 5 champ(s) additionnel(s) neutre(s), 1 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+[SIMULATION]   [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+[SIMULATION]   Code HTTP : 200 — MAPPING INCOMPLET — la réponse GET porte 1 champ(s) ACTIF(S) non couvert(s) par le mapping PUT → GET d'US-00.4 : lock_branch = {"enabled": true}. Ces champs peuvent modifier l'enforcement réel de la branche (ex. `lock_branch` verrouille toute écriture, `bypass_pull_request_allowances` dispense de PR) : la comparaison est INCOMPLÈTE et ne peut donc RIEN conclure
+[SIMULATION]   Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie OBTENU : 2 (attendu 2)
+
+──────────────────────────────────────────────────────────────────────────────
+ [6/8] block_creations ACTIF — code de sortie attendu : 2
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_block_creations_actif.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_block_creations_actif.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 12 champ(s) alignés, 0 écart(s), 5 champ(s) additionnel(s) neutre(s), 1 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+[SIMULATION]   [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, lock_branch, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+[SIMULATION]   Code HTTP : 200 — MAPPING INCOMPLET — la réponse GET porte 1 champ(s) ACTIF(S) non couvert(s) par le mapping PUT → GET d'US-00.4 : block_creations = {"enabled": true}. Ces champs peuvent modifier l'enforcement réel de la branche (ex. `lock_branch` verrouille toute écriture, `bypass_pull_request_allowances` dispense de PR) : la comparaison est INCOMPLÈTE et ne peut donc RIEN conclure
+[SIMULATION]   Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie OBTENU : 2 (attendu 2)
+
+──────────────────────────────────────────────────────────────────────────────
+ [7/8] clé INCONNUE truthy + bypass_pull_request_allowances non vide (SOUS-objet mappé) — code de sortie attendu : 2
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_cle_inconnue_active.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_cle_inconnue_active.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 12 champ(s) alignés, 0 écart(s), 6 champ(s) additionnel(s) neutre(s), 2 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+[SIMULATION]   [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, lock_branch, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] VERIFICATION IMPOSSIBLE — ce n'est PAS un succès
+[SIMULATION]   Code HTTP : 200 — MAPPING INCOMPLET — la réponse GET porte 2 champ(s) ACTIF(S) non couvert(s) par le mapping PUT → GET d'US-00.4 : require_signed_commits_v2 = {"enabled": true} · required_pull_request_reviews.bypass_pull_request_allowances = {"users": [{"login": "octocat"}], "teams": [], "apps": []}. Ces champs peuvent modifier l'enforcement réel de la branche (ex. `lock_branch` verrouille toute écriture, `bypass_pull_request_allowances` dispense de PR) : la comparaison est INCOMPLÈTE et ne peut donc RIEN conclure
+[SIMULATION]   Portée : l'état réel de la protection n'a PAS été lu — ce constat n'atteste ni la présence, ni l'absence de dérive. À SIGNALER (dette maintenue ouverte).
+  → code de sortie OBTENU : 2 (attendu 2)
+
+──────────────────────────────────────────────────────────────────────────────
+ [8/8] clés additives NEUTRES — doivent rester EXIT 0 — code de sortie attendu : 0
+ $ python scripts/check_branch_protection.py --from-protection tests/fixtures/US-00.4/protection_cles_additives_neutres.json --from-branch tests/fixtures/US-00.4/branch_protected_true.json
+──────────────────────────────────────────────────────────────────────────────
+[SIMULATION] Source SIMULÉE (fixtures locales) — AUCUN appel réseau, aucune lecture du dépôt réel. Cette sortie n'atteste RIEN de l'état de GitHub.
+[SIMULATION]   Fixture protection : tests/fixtures/US-00.4/protection_cles_additives_neutres.json (statut simulé : 200)
+[SIMULATION]   Fixture branche    : tests/fixtures/US-00.4/branch_protected_true.json (statut simulé : 200)
+[SIMULATION] Comparaison champ par champ — <owner/repo SIMULÉ>:main · 12 champ(s) alignés, 0 écart(s), 10 champ(s) additionnel(s) neutre(s), 0 champ(s) ACTIF(S) non couvert(s).
+[SIMULATION]   [OK] required_status_checks.strict | true | true
+[SIMULATION]   [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+[SIMULATION]   [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+[SIMULATION]   [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+[SIMULATION]   [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+[SIMULATION]   [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+[SIMULATION]   [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+[SIMULATION]   [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+[SIMULATION]   [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+[SIMULATION]   [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+[SIMULATION]   [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+[SIMULATION]   [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+[SIMULATION]   [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, future_flag_absent, future_liste_vide, lock_branch, require_signed_commits_v2, required_pull_request_reviews.bypass_pull_request_allowances, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+[SIMULATION] conforme à la cible générée — SOURCE SIMULÉE, n'atteste PAS l'état réel du dépôt
+  → code de sortie OBTENU : 0 (attendu 0)
+
+══════════════════════════════════════════════════════════════════════════════
+ FRONTIÈRE DE COUVERTURE DU MAPPING (correctif B-2) — documentée dans le module
+══════════════════════════════════════════════════════════════════════════════
+ 1. INERTE — liste EXPLICITE (url, contexts_url, checks, protection_url, name, protection,
+    + préfixe « _ » des métadonnées de fixture) → ignorée sans bruit.
+ 2. MAPPÉE — comparée champ par champ (mapping PUT → GET du §Patterns imposés).
+ 3. TOUT LE RESTE, classé par la SÉMANTIQUE DE SA VALEUR :
+      · NEUTRE (absente, false, {enabled:false}, null, conteneur vide) → ignorée mais NOMMÉE
+        dans la sortie. Cas [8/8] : reste EXIT 0. L'API GitHub étant ADDITIVE, un outil qui
+        rougirait à chaque nouveau champ neutre finirait ignoré ou rendu non bloquant.
+      · ACTIVE (true, conteneur non vide, nombre, chaîne, type inattendu) → EXIT 2 en NOMMANT
+        la clé. Cas [5/8], [6/8], [7/8].
+ La frontière porte donc sur la VALEUR, pas sur la connaissance du NOM de la clé : une clé
+ active inconnue est traitée comme NON VÉRIFIABLE, jamais comme inoffensive.
+ L'incomplétude DOMINE la dérive : si un champ actif non couvert coexiste avec de vrais écarts,
+ les écarts sont imprimés PUIS l'issue est exit 2 — une comparaison incomplète ne peut affirmer
+ ni la conformité, ni l'exhaustivité de la liste d'écarts.
+
+══════════════════════════════════════════════════════════════════════════════
+ PORTÉE ET LIMITES DE CETTE DÉMONSTRATION
+══════════════════════════════════════════════════════════════════════════════
+ · R3 — le chemin 404 n'est validé QUE sur fixture : sur ce dépôt l'API rend 403, jamais
+   404. Le comportement en 404 RÉEL reste NON OBSERVÉ, à revérifier au déblocage (T17).
+ · R4 — protection_conforme.json est un instantané STATIQUE daté du 2026-07-26 de la cible
+   générée (les 4 fixtures du correctif B-2 en sont dérivées). Si status_checks /
+   branch_protection évoluent dans factory.config.json, le cas [1/8] échouera bruyamment :
+   c'est voulu (une fixture auto-générée comparerait la config à elle-même).
+ · Aucune écriture sur le dépôt réel, aucun appel réseau, aucun jeton employé.
+
+══════════════════════════════════════════════════════════════════════════════
+ CONTRÔLES SUR CE FICHIER
+══════════════════════════════════════════════════════════════════════════════
+ · invocations archivées avec leur code de sortie : 8 (8 attendues)
+ · invocations dont le code OBTENU == code ATTENDU : 8 / 8
+ · lignes préfixées `[SIMULATION] ` : 137
+ · mention « SOURCE SIMULÉE, n'atteste PAS l'état réel du dépôt » : 2 (2 attendues : [1/8] et [8/8])
+ · écart de contexte MANQUANT listé séparément : 1
+ · écart de contexte EN TROP listé séparément : 1
+ · issues « MAPPING INCOMPLET » (correctif B-2) : 3 (3 attendues : [5/8], [6/8], [7/8])
+ · lignes « IGNORÉ — NEUTRE » (champs additifs nommés, jamais silencieux) : 6

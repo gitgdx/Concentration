@@ -1,0 +1,26 @@
+# ─────────── PREUVE BRUTE D'API — US-00.4 (Constitution Art. 3) ───────────
+# Commande exacte : gh api repos/gitgdx/Concentration/commits/dd5b9155e0a2ec29f2abbbf7f49f2c520212e5fa/check-runs --jq '[.check_runs[] | {name, conclusion}]' > reports/US-00.4/check_runs.json 2> reports/US-00.4/check_runs.stderr.txt
+# Note : le corps est la PROJECTION produite par le filtre `--jq` de la commande ci-dessus
+#        (pas la réponse intégrale) — re-jouer la commande à l'identique la reproduit.
+#
+# CHOIX DU SHA — dd5b915 est la TÊTE DE LA BRANCHE DE LA PR #9 (la PR la plus récente fusionnée).
+# La branche de CETTE US (feat/US-00.4-ci-protection-branche, tête 90fad83) n'est PAS encore
+# poussée (`git ls-remote origin refs/heads/feat/US-00.4-ci-protection-branche` → vide) : aucun
+# check-run n'existe encore pour elle. Le Story File (T7) autorise explicitement « la tête de la
+# branche de cette US OU d'une PR récente ». La tête de `main` (801a046) n'aurait montré que 3
+# checks (branch-naming.yml ne se déclenche pas sur `main`) : elle n'aurait PAS prouvé les 4.
+#
+# ⚠️ PORTÉE DE CETTE PREUVE — elle établit UNIQUEMENT que les 4 checks S'EXÉCUTENT et sont verts.
+#    Elle NE dit RIEN de leur caractère requis ou bloquant. Voir enforcement_gap.md §fait (b) :
+#    la seconde moitié du fait est une INFÉRENCE, pas une lecture d'API.
+# Horodatage UTC  : 2026-07-26T19:16:15Z
+# Statut HTTP     : 200
+# Code de sortie de `gh` : 0
+# Rédaction : aucun en-tête Authorization, aucun jeton (vérifié par grep — voir
+#             non_regression.md ; gitleaks est le gate bloquant en pre-commit et en CI).
+# Le corps ci-dessous est la réponse de l'API, NON reformatée. Ce fichier n'est donc pas
+# du JSON parsable en l'état : `grep -v '^#' reports/US-00.4/check_runs.json` isole le corps.
+# stderr : <vide> (0 octet) — fichier .stderr.txt non conservé.
+# ──────────────────────────────────────────────────────────────────────────
+[{"conclusion":"success","name":"🔐 Secrets scan (gitleaks)"},{"conclusion":"success","name":"📋 Governance (SCB + traçabilité + synchro)"},{"conclusion":"success","name":"📱 App (gates run_gates.py)"},{"conclusion":"success","name":"check-branch-name"},{"conclusion":"success","name":"check-branch-name"}]
+

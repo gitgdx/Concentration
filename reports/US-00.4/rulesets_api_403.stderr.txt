@@ -1,0 +1,5 @@
+# stderr de : gh api repos/gitgdx/Concentration/rulesets
+# Horodatage UTC : 2026-07-26T19:16:11Z · code de sortie de `gh` : 1
+# Message HUMAIN de gh (le corps JSON, lui, est sur stdout → rulesets_api_403.json).
+# ──────────────────────────────────────────────────────────────────────────
+gh: Upgrade to GitHub Pro or make this repository public to enable this feature. (HTTP 403)
