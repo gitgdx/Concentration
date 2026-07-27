@@ -14,6 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -527,6 +528,78 @@
     l. 54).
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
+
+### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
+
+- **PO Visa** (2026-07-27) : Story File `docs/stories/US-00.7-application-protection-branche.md` — **8 AC**
+  en Nominal/Erreur/Limite, **24 scénarios** Gherkin, DoD **34 cases**. Créée après un **changement
+  d'environnement décidé par l'humain**.
+- **🎉 DÉBLOCAGE EFFECTIF** : le dépôt est passé en **PUBLIC** (`{"private": false,
+  "visibility": "public"}`). Le **403 de plateforme est levé** — `GET …/branches/main/protection` renvoie
+  désormais **404 « Branch not protected »** (disponible, **non appliquée**) et `GET …/rulesets` renvoie
+  **200 `[]`**. La dérogation `EVT_WAIVER_GRANTED` d'US-00.4 (« ni Pro, ni public ») **devient sans
+  objet**.
+- **✅ L'outil livré par US-00.4 s'est validé SEUL en production, sans une ligne de changement** :
+  `--check-remote` est passé d'**exit 2** (« vérification impossible — 403 de plan ») à **exit 1**
+  (« DÉRIVE DÉTECTÉE — protection ABSENTE », 404 + `protected: false`, **7 écarts** listés). Le chemin
+  **404**, que le risque **R3** d'US-00.4 déclarait « **non observable in vivo** », est désormais
+  **observé pour de vrai** → **R3 clos par l'observation**. La distinction « je ne peux pas vérifier »
+  vs « j'ai vérifié, c'est absent » — cœur de la conception — a fait ses preuves.
+- **🔴 Justification de l'US : le corpus vivant est devenu FAUX.** `CLAUDE.md` — document **injecté à
+  chaque démarrage de session** — affirme encore que la protection est « indisponible », « 403 », qu'elle
+  « **ne peut pas l'être sur ce plan** » et que le critère de clôture est « **impossible à cocher** ».
+  **C'est le défaut même qu'US-00.4 a éliminé, réintroduit en sens inverse par un changement
+  d'environnement.** @Architect a porté le décompte de **3 à 11 documents vivants** concernés — dont
+  **3 créés par US-00.4 en réponse à son propre finding B-1** : les laisser reproduirait le défaut à
+  l'endroit exact où il avait été corrigé.
+- **Track** : `STANDARD` **+ trois renforcements empruntés à FULL** (ADR-007 obligatoire · plan de retour
+  arrière écrit · revue humaine explicite de la PR). **Arbitrage assumé, non recopié d'US-00.4** :
+  @Architect reconnaît que le critère littéral « surface admin » de `TRACKS.md:14` **est** satisfait au
+  sens strict, mais FULL imposerait « Design Data **et** UX sans N/A » → **deux designs vides** pour une
+  US sans UI, sans schéma et sans code applicatif, soit une **fiction de gouvernance** : précisément le
+  défaut que cette US solde. **Delta réel STANDARD+3 vs FULL = nul**, aux deux N/A creux près. **Dette
+  nommée** : `TRACKS.md:14` devrait dire « surface **applicative** ».
+- **⚠️ Risque R-1 — VERROUILLAGE TOTAL (impact critique)** : avec `enforce_admins: true`, un contexte
+  requis **jamais rapporté** (libellé divergeant d'un caractère) rend **toute** PR infusionnable,
+  **administrateur inclus**. Probabilité réduite (le gate CI `governance` exige déjà que chaque libellé
+  résolve dans le workflow ; @Architect a vérifié l'absence de `U+FE0F` et la forme **NFC**), mais
+  **non couverte** : `--check` compare la config au *fichier* de workflow, jamais au libellé que GitHub
+  **rapporte**. **Plan de retour arrière écrit AVANT le `PUT`** : `enforce_admins` interdit le *bypass*,
+  **pas l'édition ni la suppression** de la règle → `DELETE` tracé, correction dans la **source unique**,
+  ré-application par le script, `--check-remote` exit 0. **Interdits** : `--admin`, retrait d'un contexte
+  requis, correction dans l'interface, aligner la config sur l'état constaté.
+- **⚠️ Contrainte permanente nouvelle (R-4)** : toute branche hors `^feat/US-[0-9]+\.[0-9]+.*$` produira
+  un `check-branch-name` **rouge** → PR **définitivement infusionnable**. `chore/`, `docs/`, `hotfix/`
+  deviennent impossibles à fusionner. Plus `strict: true` qui **sérialise** les merges et
+  `required_conversation_resolution` qui bloque sur un commentaire d'audit non résolu.
+- **NB-1 rattaché à cette US** (dette d'US-00.4) : elle est la **première consommatrice** du chemin
+  `exit 0`, dont elle fait une **preuve d'état de sécurité** (AC-2) — or c'est le chemin troué.
+  **Séquence imposée** : correctif validé sur fixtures **puis seulement** capture de l'`exit 0` réel.
+  ⚠️ **Deux corrections apportées à l'AC-7 après sonde** : le correctif fait **3 lignes et non une**
+  (`_guard_actual` n'a pas accès à `expected`), et il **ne ferme pas** la dette — résidu **`NB-1bis`**
+  nommé et laissé ouvert (une clé absente de la cible et de valeur *neutre* reste en exit 0, alors que
+  `enforce_admins: false` ou `required_pull_request_reviews` absent sont des **relâchements réels** : la
+  doctrine de neutralité assimile à tort « valeur fausse » et « inerte »). **Risque du jour neutralisé**
+  par le contrôle compensatoire T2 (`set(payload) == MAPPED_TOP_KEYS` → `True`, vérifié).
+- **Design Data / UX** : `⏳` → **N/A attendus** au Integration Lock (aucun schéma, aucune interface).
+- **Tâches** : **T1→T24 en 5 phases** (0 préalables sans écriture distante · 1 application · 2 preuve par
+  l'effet · 3 corpus · 4 clôture). **28 critères de test** : **13 levables avant le `PUT`**, **11 après**,
+  **4 sur PR uniquement**. **Deux opérations en `[confirmation humaine explicite]`** : le **`PUT`** (T8)
+  et le **test négatif serveur** (T10, qui pointe `push`/`--force`/`--delete` vers `main`).
+- **Portée bornée** : les documents **datés** d'US-00.4 (Story File **certifié**, `reports/US-00.4/`,
+  **ADR-006**) **ne sont PAS réécrits** — ils étaient exacts à leur date. On les **référence**.
+  `CLAUDE.md:20` (règle 2) n'est **pas édité** non plus : l'application **la rend vraie telle quelle**.
+- **Effets de bord actés** : **risques #2 et #5 d'EPIC_00 → CLOS**, critère de clôture **cochable**,
+  **EPIC_00 redevient complétable** après US-00.5/00.6 · le périmètre d'**US-00.5 se réduit** (S1 et S2
+  deviennent factuellement **vrais** → leur correction « obligatoire » devient **sans objet**) · la
+  **dette #6 de `GIT_PROTECTION.md`** devient sans objet · **S11/US-00.1** : **requalification tracée**
+  recommandée, **pas** de ré-ouverture de cycle, le critère devenant vrai.
+- **⚠️ Dette du système de traçabilité relevée** : **aucun événement du catalogue ne permet d'éteindre
+  une dérogation** (26 événements vérifiés). L'extinction du `EVT_WAIVER_GRANTED` d'US-00.4 est donc
+  **documentaire** + mentionnée dans le `rationale` d'`EVT_DOCS_UPDATED`. Absence nommée comme dette.
+- **Prochaine étape** : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED` **avec ADR-007** → Integration
+  Lock (Data N/A + UX N/A) → phase 0 (préalables, **aucune écriture distante**) → **confirmation humaine
+  du `PUT`**.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
