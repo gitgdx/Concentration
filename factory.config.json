@@ -60,7 +60,6 @@
       "workflow": "ci.yml"
     }
   ],
-  
   "branch_protection": {
     "required_approving_review_count": 0,
     "enforce_admins": true,

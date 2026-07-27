@@ -1,6 +1,16 @@
 #!/bin/sh
-# Refuse le push direct vers la branche principale. Le merge passe par une PR
-# (protection de branche GitHub : scripts/apply_branch_protection.sh).
+# Refuse le push direct vers la branche principale. Le merge passe par une PR.
+#
+# ⚠️ CE HOOK EST LE SEUL ENFORCEMENT RÉEL DE CETTE RÈGLE — et c'est un FILET DE DISCIPLINE
+#    LOCAL, pas une contrainte de plateforme (constat daté du 2026-07-26) : `main` n'est PAS
+#    protégée côté GitHub et ne peut pas l'être sur ce plan (403 « Upgrade to GitHub Pro or
+#    make this repository public to enable this feature. » sur la protection classique ET sur
+#    les rulesets). Limites à connaître : ce hook est ABSENT d'un clone frais (tant que
+#    scripts/install_hooks.sh n'a pas été lancé), contournable depuis un autre poste ou via
+#    l'interface web, et l'interdiction de `--no-verify` (Constitution Art. 1) repose sur la
+#    MÊME discipline. scripts/apply_branch_protection.sh est PRÊT mais NON APPLICABLE — cf.
+#    docs/GIT_PROTECTION.md et docs/adr/ADR-006-protection-branche-principale.md.
+
 
 [ -f scripts/factory_env.sh ] && . ./scripts/factory_env.sh
 : "${FACTORY_MAIN_BRANCH:=main}"
