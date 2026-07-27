@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ❌ | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -385,10 +385,57 @@
     l'affaiblissement (retirer une clé de `INERT_GET_KEYS`, inverser `_is_neutral`) **rétablirait
     silencieusement le faux vert**. Les 8 chemins sont exercés par fixtures versionnées, mais
     **manuellement**. C'est la classe de risque que B-2 vient de matérialiser → **à arbitrer**.
-- **Prochaine étape** : **re-audit Revue en contexte frais** (nouvel auditeur — jamais celui qui a rendu
-  le FAILED). Phase SCB **inchangée** (`parallel_audit`) jusqu'au verdict. Puis QA → DevOps →
+- **✅ Audit Rev 🔍 — PASS au 2ᵉ cycle** (2026-07-27, `EVT_CODE_REVIEW_PASSED`, **contexte frais, auditeur
+  différent** de celui du FAILED) : **0 bloquant**, 11 non bloquants, 6 suggestions. Rapport
+  `reports/US-00.4/code_review_2.md` (711 l. — `code_review.md` **conservé intact** comme preuve du
+  cycle 1).
+  - **B-2 fermé, vérifié PAR L'ATTAQUE** : **26 fixtures d'attaque écrites hors du dépôt**, et
+    l'auditeur **n'a pas réussi** à fabriquer une réponse qui *relâche* l'enforcement réel et sorte en
+    exit 0, **pour toute forme que l'endpoint GitHub émet réellement**. Correctement rejetés : types
+    inattendus (dont `0`, où `0 is False` est faux en Python), profondeurs 2 et 4, sous-objets mappés
+    (`bypass_pull_request_allowances`), `restrictions` présent, `required_pull_request_reviews` absent,
+    divergence `contexts`/`checks`. `""`/`[]`/`{}`/`null` → **neutres et nommés**, conformément à la
+    doctrine écrite. **La frontière est juste.**
+  - **B-1 fermé** : les deux affirmations falsifiables ont **disparu du corpus** (ne subsistent que leurs
+    auto-citations dans le paragraphe qui les rétracte) ; `false_claims_sweep.md:140` s'intitule
+    « l'exhaustivité n'est **PAS** revendiquée » avec ses 3 angles morts nommés ; `ci.yml` corrigé **sans
+    casser** le gate `governance`.
+  - **Arbitrage rendu — comparateur non protégé et sans harnais : ACCEPTABLE, non bloquant.** Le code
+    n'est pas non testé (12 chemins, 8 fixtures versionnées et concordantes, **rejouées par
+    l'auditeur**) : ce qui manque est le **harnais**, et aucun `pytest` n'existe dans cette factory
+    (arbitrage tracé). Les affaiblissements redoutés sont **bruyants** (rouge permanent), le risque ne se
+    matérialise **qu'au déblocage**, et la moitié « hook » de la parade est **hors du pouvoir d'un agent**
+    par l'Art. 6 que cette US respecte. **Recommandation forte** : un `selftest` en CI — « c'est lui, pas
+    le hook, qui arrête une régression ».
+  - **Autres vérifications** : lecture seule prouvée y compris **contre injection par `--repo`** ·
+    `[SIMULATION]` sur **100 %** des lignes de résultat (16 formes d'invocation) · `--raw-out` refusé en
+    mode fixture · **import paresseux revérifié module cassé** · bloc `FACTORY_SYNC` **sha256 identique**
+    à `main` · Art. 6 respecté · T16→T19 décochées, **aucun test négatif** · `origin/main` = `801a046`
+    **intacte** · `run_gates --component app` **5/5**.
+- **🔴 Dettes ouvertes issues du re-audit — à traiter, hors périmètre de certification d'US-00.4** :
+  - **NB-1 — trou résiduel DÉMONTRÉ, correctif à 1 ligne.**
+    `check_branch_protection.py:503` passe `MAPPED_TOP_KEYS` (**constante statique**) au lieu d'un
+    ensemble **dérivé de `expected`**. Une clé absente de la cible mais **active** dans la réponse est
+    donc traitée comme « couverte » sans être comparée → l'auditeur a produit un **exit 0 sur un
+    relâchement réel** (force-push autorisé) avec une cible amputée. **Reproduit et confirmé par
+    @Architect.** **Non bloquant** car `emit_branch_protection()`
+    (`scripts/factory_sync.py:60-77`) code les 8 clés **en dur** : l'atteindre exige d'éditer un fichier
+    **Art. 6**. **Correctif** : `MAPPED_TOP_KEYS & set(expected)`.
+  - **`selftest` en CI** exerçant les 12 chemins sur les fixtures versionnées — la seule parade
+    réellement à portée d'agent contre une régression silencieuse de la frontière.
+  - **1 fausse affirmation résiduelle non déclarée** : `tests/features/US-00.1-secrets-scan-depot.feature:54`
+    — même famille que **S11** (US **certifiée**) → **à joindre à la transmission US-00.5**. L'auditeur
+    la classe non bloquante car « **elle ne falsifie plus aucune affirmation**, puisque plus aucune n'est
+    faite ». *(4ᵉ échec d'exhaustivité du balayage : l'extension `.feature` n'avait été couverte par
+    aucune des trois passes précédentes.)*
+- **🎓 Constat de posture, relevé par l'auditeur** : un **hook local** de la factory a **bloqué la propre
+  sonde de l'auditeur** (littéral de force-push), qu'il a reformulée **sans jamais le contourner**. Son
+  observation : « sur ce dépôt, la seule barrière qui ait dit *non* pendant tout l'audit est un **hook
+  local**, jamais la plateforme ». **C'est exactement la thèse de cette US.**
+- **Prochaine étape** : **double ✅ obtenu** → **QA** (@QA_Tester, exécution réelle) → DevOps →
   `/certify`. ⏳ **T22** (humain, Art. 6 — commentaire de `pre-push`) et **T6** (humain, cosmétique).
-  **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + le critère de test de US-00.1 (S11).
+  **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story File l. 198/215 **et**
+  `.feature` l. 54).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
