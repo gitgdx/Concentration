@@ -13,7 +13,7 @@
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | deployment_prod | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | ⏳ |
+| US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -501,9 +501,32 @@
   champ `emitter` du catalogue (vérifié : 0 occurrence). Les émetteurs sont donc **déclarés mais non
   enforced** — **exactement la classe de défaut que cette US dénonce**, cette fois dans le système de
   traçabilité lui-même. Nouvelle dette.
-- **Prochaine étape** : `/certify` (@Architect, gate scripté) depuis la branche post-merge
-  `feat/US-00.4-certif`. **US-00.5** : `CLAUDE.md:20` + `CONSTITUTION.md:49` + `US-00.1` (S11 : Story
-  File l. 198/215 **et** `.feature` l. 54).
+- **🚀 Certifié Prod = OUI** (2026-07-27, `EVT_CERTIFIED_PROD`, gate `/certify`) — **6 gates verts**.
+  ⚠️ **Le gate 4 a d'abord ÉCHOUÉ** : les **33 cases de la DoD étaient non cochées**, jamais renseignées
+  au fil du workflow. La certification a été **arrêtée**, chaque case **vérifiée pièce par pièce** contre
+  les preuves (PR #10 fusionnée et 4/4 verte, ADR-006 `Accepté`, Story File archivé, `gitleaks` vert,
+  `check-remote` absent de la CI), **puis** cochée. Le gate a fait exactement son travail : il a été
+  **levé par vérification, pas par complaisance**. T6 et T22 cochées ; **T16→T19 restent décochées**
+  (reportées au déblocage).
+  - **Faux positif levé au passage** : un grep de jetons sur `reports/US-00.4/` a d'abord renvoyé
+    « jeton trouvé » — en réalité **les motifs regex eux-mêmes**, documentés dans les rapports (chercher
+    un motif trouve la documentation du motif). **3ᵉ occurrence de ce piège** dans cette US, après le
+    docstring `-X PUT` et le mot « conforme » du fichier de contrôle. Démenti par **`gitleaks`
+    `no leaks found`** (331 Ko) **et** par le job CI `🔐 Secrets scan` **vert sur PR #10** — le gage
+    autoritatif.
+  - **⚠️ PORTÉE EXACTE DE CETTE CERTIFICATION — à lire avant toute réutilisation** : elle atteste la
+    **valeur, l'honnêteté et la sûreté de l'OUTILLAGE et du CONSTAT**. Elle **n'atteste PAS** que `main`
+    est protégée. **`main` N'EST PAS protégée**, ne peut pas l'être sur ce plan, et le **risque #2
+    d'EPIC_00 reste OUVERT**. **EPIC_00 ne peut pas être déclarée complète** sur cette base — il reste
+    en outre US-00.5 et US-00.6.
+  - **Dettes ouvertes transmises** : **NB-1** (correctif 1 ligne : `MAPPED_TOP_KEYS & set(expected)`) ·
+    **`selftest` en CI** (recommandation forte du re-audit — seule parade à portée d'agent contre une
+    régression silencieuse de la frontière) · **émetteurs de trace déclarés mais non enforced**
+    (`trace_append.py` ne lit jamais `emitter`) · **US-00.5** : `CLAUDE.md:20`,
+    `docs/governance/CONSTITUTION.md:49`, et `US-00.1` (S11 : Story File l. 198/215 **et** `.feature`
+    l. 54).
+  - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
+    **4 sur 6** (restent US-00.5 et US-00.6).
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
