@@ -49,54 +49,118 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : — *(aucun)*. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10, `main` =
-`15121d8` ; certification sur la branche post-merge `feat/US-00.4-certif`). ⚠️ **Sa portée est
-étroite** : elle certifie la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas**
-la protection de `main` — voir l'encadré ci-dessous. **Prochaine US à décider** : **US-00.5** (ADR-001
-stack + Constitution — **priorité relevée**, elle doit corriger le texte encore faux) ou **US-00.6**
-(couverture + ratchet). US-01.1 (EPIC_01, FULL) reste en pause en `business_alignment`, **à rebaser sur
-`main`**, et son Lock exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
+**Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
+renforcements), **phases 3-4** (mise en cohérence du corpus, clôture). **`main` EST PROTÉGÉE depuis le
+2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
+elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
+protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
+(ADR-001 stack + Constitution — **périmètre RÉDUIT**, cf. dettes) ou **US-00.6** (couverture + ratchet).
+US-01.1 (EPIC_01, FULL) reste en pause en `business_alignment`, **à rebaser sur `main`**, et son Lock
+exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 
-> 🔴 **À LIRE AVANT TOUT AUDIT** — La règle 2 ci-dessus (« jamais de commit/push sur la branche
-> principale, *enforced par protection de branche* ») est **FAUSSE aujourd'hui**. La protection de
-> branche est **indisponible** sur ce dépôt : `GET …/branches/main/protection` **et** `GET …/rulesets`
-> renvoient un **403 « Upgrade to GitHub Pro or make this repository public »** (dépôt privé, jeton
-> admin). Une **dérogation humaine** est tracée (`EVT_WAIVER_GRANTED`, Art. 5 : ni Pro, ni dépôt
-> public). Ce qui protège `main` = hook `pre-push` **local** + CI qui **rapporte** sans pouvoir
-> **bloquer** = **filet de discipline, pas contrainte de plateforme**. **Risque #2 d'EPIC_00 OUVERT** ;
-> la certification d'US-00.4 ne le clôt pas. Correction du texte de la règle = **US-00.5**.
-**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; restent
-US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture + ratchet). 🔴 **EPIC_00 ne pourra PAS être
-déclarée complète** même après US-00.5/00.6 : son critère de clôture « protection de branche vérifiée »
-est **impossible à cocher** sur ce plan (403), et le **risque #2 reste OUVERT**. ⚠️ La mention
-« SPRINT 0 COMPLET » du PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau).
-US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à rebaser sur `main`.
+> ✅ **ÉTAT DE L'ENFORCEMENT DE `main` — 2026-07-28, avec ses bornes.** La **règle 2** ci-dessus est
+> désormais **VRAIE telle qu'elle est écrite** : la protection de branche est **APPLIQUÉE**. Preuves
+> brutes datées : [`reports/US-00.7/applied_state/`](reports/US-00.7/applied_state/).
+>
+> **Périmètre EXACT de la règle 2 — ce qui est prouvé, et rien de plus** :
+> * `GET …/branches/main` → **`"protected": true"`** · `GET …/branches/main/protection` → **200** portant
+>   la cible **générée** depuis `factory.config.json` (`protection_applied.json`).
+> * **PR obligatoire** · **4 status checks REQUIS** · **`enforce_admins` en vigueur** — l'administrateur
+>   est **inclus** (`enforcement_level: "everyone"`).
+> * **Effet prouvé par le SERVEUR**, depuis un clone **sans hooks** (`negative_test_server.txt`) : push
+>   direct, force-push et suppression **refusés** — `GH006 Protected branch update failed`, « *Changes
+>   must be made through a pull request* », « ***4 of 4 required status checks are expected*** ».
+> * `python scripts/factory_sync.py --check-remote` → **exit 0 RÉEL** (12 champs alignés, 0 écart, 0
+>   champ actif non couvert), **sans** préfixe `[SIMULATION]` — **première observation in vivo**.
+>
+> **Ce qui n'est PAS prouvé, et ne doit pas être affirmé** :
+> * **Le refus d'une tentative de FUSION n'a pas été observé** — seul le refus du **push direct** l'est. Que
+>   la fusion soit bloquée tant qu'un contexte requis n'est pas vert **découle** de l'état constaté, mais
+>   reste une **inférence** : c'est la tâche **T11** d'US-00.7, **non exécutée**.
+> * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
+>   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
+>   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont
+>   prouvés par l'**état de l'API**, pas par l'effet.
+> * Rien n'est prouvé pour un **autre acteur**, un **jeton d'application**, l'**interface web**, une PR
+>   issue d'un **fork** ou **réouverte**, ni pour la **persistance** de l'état (aucune détection
+>   automatique de dérive — dette ci-dessous).
+>
+> ⚠️ **CONDITIONNEL** : tout l'édifice dépend de la **visibilité PUBLIQUE** du dépôt. Un retour en privé
+> ramènerait le **403**, rendrait la protection **indisponible** et **rouvrirait la dérogation**.
+>
+> **Ce qui reste de la discipline** : le hook local `pre-push` — **toujours utile** (il refuse avant
+> l'aller-retour réseau, et vaudrait encore si la protection était désactivée) et **toujours absent d'un
+> clone frais**. Détail : [`docs/GIT_PROTECTION.md`](docs/GIT_PROTECTION.md) ·
+> [ADR-007](docs/adr/ADR-007-application-protection-branche.md) *(remplace ADR-006)*.
+
+> 🔕 **Dérogation `EVT_WAIVER_GRANTED` (2026-07-26, US-00.4, Art. 5) — ÉTEINTE / SANS OBJET au
+> 2026-07-28.** Elle portait sur « **ni GitHub Pro, ni dépôt public** » ; l'humain a choisi la **voie (a)
+> — dépôt public — le 2026-07-27**, et la protection a été appliquée le **2026-07-28**. Son motif
+> (impossibilité de plateforme) **n'existe plus**. ⛔ **La trace n'est pas réécrite** (append-only) : on
+> **éteint** une dérogation, on ne l'**effface** pas. ⚠️ **L'extinction est DOCUMENTAIRE** : **aucun** des
+> **25** événements du catalogue ne permet d'éteindre une dérogation → **dette du système de traçabilité**
+> (ci-dessous). **Conditionnel** : un retour du dépôt en privé **rouvrirait la question**.
+
+**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; **US-00.7**
+en cours (hors décompte initial) ; restent US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture +
+ratchet). ✅ **Le critère de clôture « protection de branche vérifiée » est désormais COCHABLE et COCHÉ**,
+les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_state/`) →
+**EPIC_00 redevient complétable après US-00.5 et US-00.6**. ⚠️ La mention « SPRINT 0 COMPLET » du
+PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
+reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
-- 🔴 **DETTE MAJEURE — `main` n'est PAS protégée et ne peut pas l'être sur ce plan** (403 sur la
-  protection classique **et** les rulesets ; dépôt privé). **Risque #2 d'EPIC_00 OUVERT** ; le critère
-  de clôture « protection de branche vérifiée » est **impossible à cocher** → **EPIC_00 ne peut pas
-  être déclarée complète**. Déblocage : dépôt public **ou** GitHub Pro (~4 USD/mois), puis T16→T19
-  d'US-00.4. Réévaluation à chaque `/audit-methodo`.
-- 🔴 **Le texte de gouvernance affirme un enforcement inexistant** : règle 2 de ce fichier + Art. 4 de
-  la Constitution. Correction = **US-00.5** (priorité relevée, à enchaîner juste après US-00.4).
+- ⚠️ **Nouvelles CONTRAINTES PERMANENTES, actives depuis le 2026-07-28** — à connaître avant de les vivre
+  comme une panne : toute branche hors `^feat/US-[0-9]+\.[0-9]+.*$` rend sa PR **définitivement
+  infusionnable** (`check-branch-name` est un contexte **requis**) → `chore/`, `docs/`, `hotfix/` sont
+  **impossibles à fusionner**, et le **track QUICK** repose sur des noms libres · **toute PR issue d'un
+  FORK** dont la branche ne suit pas ce motif est **infusionnable** (dépôt **public** : ouvert en
+  proposition, fermé en fusion par sa propre convention) · une PR de fork reçoit un `GITHUB_TOKEN`
+  **restreint** alors que le job `secrets-scan` exige `pull-requests: write` · `strict: true`
+  **sérialise** les merges (toute fusion périme les autres branches) · `required_conversation_resolution`
+  bloque sur **une seule** discussion ouverte. Détail : `docs/GIT_PROTECTION.md` §Conditions de fusion.
+- 🔴 **Aucune détection automatique de dérive** config ↔ dépôt réel : `--check-remote` exige des droits
+  **admin**, absents du `GITHUB_TOKEN` → contrôle **manuel et hors CI**. Un administrateur peut supprimer
+  la règle **sans qu'aucun mécanisme ne le signale**. Seul porteur : `/audit-methodo`, **sans déclencheur
+  calendaire** (la dette la plus susceptible de pourrir silencieusement).
 - ✅ **RÉSOLU par US-00.4** : `factory_sync.py --check` annonce désormais une vérification
   **DOCUMENTAIRE** et avertit que l'état réel n'est pas vérifié ; `--check-remote` interroge l'API
   (hors CI, droits admin). **Actif sur `main`.**
-- 🔴 **NB-1 — trou résiduel DÉMONTRÉ dans le comparateur, correctif à 1 ligne** :
-  `scripts/check_branch_protection.py:503` passe `MAPPED_TOP_KEYS` (constante **statique**) au lieu de
-  `MAPPED_TOP_KEYS & set(expected)` → **exit 0 possible sur un relâchement réel** avec une cible
-  amputée. Verrouillé derrière une édition Art. 6, d'où le classement non bloquant.
-- 🔴 **Aucun `selftest` en CI** pour `check_branch_protection.py` : les 12 chemins sont exercés par
-  fixtures versionnées mais **lancées à la main**. Recommandation forte du re-audit — « c'est lui, pas
-  le hook, qui arrête une régression » de la frontière de couverture.
-- ⚠️ **Émetteurs d'événements déclarés mais NON enforced** : `scripts/trace_append.py` **ne lit jamais**
-  le champ `emitter` de `events_catalog.json` (vérifié, 0 occurrence) → un agent peut émettre n'importe
-  quel événement sous n'importe quel rôle. Même classe de défaut que celle qu'US-00.4 dénonce, dans le
-  système de traçabilité lui-même. Candidat `/audit-methodo`.
+- 🔴 **NB-1bis — résidu OUVERT du correctif NB-1** *(NB-1 lui-même est **CORRIGÉ** par US-00.7 :
+  `_guard_actual` filtre par `MAPPED_TOP_KEYS & set(expected)`, **3 lignes** et non « une »)*. Après
+  correctif, une clé absente de la cible dont la valeur réelle est **ACTIVE** est nommée et **interdit
+  l'exit 0** ; mais si sa valeur est **NEUTRE** (`{"enabled": false}`) elle est **seulement nommée** et
+  l'exit 0 **subsiste**, et si elle est **absente des deux côtés** elle n'est **pas même nommée** — or
+  `enforce_admins: false` autorise le bypass admin et `required_pull_request_reviews` absent signifie
+  **aucune PR exigée**. **Le correctif est un progrès strict, pas une fermeture.** Correctif complet
+  identifié (complétude de la cible dans `_guard_mapping`), **hors périmètre**. **Compensé aujourd'hui** :
+  `set(payload) == MAPPED_TOP_KEYS` → `True` (cible **non amputée**).
+- 🔴 **Aucun `selftest` en CI** pour `check_branch_protection.py` : ses fixtures versionnées sont lancées
+  **à la main**, y compris pour valider le correctif NB-1. Recommandation forte du re-audit d'US-00.4 —
+  « c'est lui, pas le hook, qui arrête une régression » de la frontière de couverture. **Contrôle négatif
+  maintenu** : `grep -rn "check-remote" .github/workflows/` doit rester **vide**.
+- 🔴 **Aucun événement d'extinction de dérogation dans le catalogue** — dette **structurelle du système
+  de traçabilité**, révélée par US-00.7 : ses **25** événements (+ 4 alias dépréciés) ne comportent
+  **aucun** mécanisme de révocation, extinction ou expiration. Une dérogation y est donc **irrévocable par
+  construction** : un audit qui ne lirait que `docs/trace/**` verrait un `EVT_WAIVER_GRANTED` **sans
+  contrepartie** et pourrait croire l'exception encore active. Mitigation retenue : consignation
+  documentaire (3 emplacements) + mention dans le `rationale` d'`EVT_DOCS_UPDATED` — **convention non
+  enforced** (champ libre, non validé par `validate_trace.py`) : elle **réduit** le risque, elle ne le
+  supprime pas. En ajouter un modifierait la **machine à états** → exige son propre ADR.
+- ⚠️ **Émetteurs d'événements déclarés mais NON enforced** : le champ `emitter` de `events_catalog.json`
+  n'est lu par **AUCUN** script ni hook (vérifié le 2026-07-28 : **0** occurrence dans `scripts/*.py` et
+  `.claude/hooks/*`) → **un agent peut émettre n'importe quel événement sous n'importe quel rôle, y
+  compris `EVT_WAIVER_GRANTED`** dont le catalogue déclare pourtant `emitter: "human"`. Corollaire direct
+  de la dette précédente : le système peut **accorder** une dérogation sans humain et ne peut pas
+  l'**éteindre**. Même classe de défaut que celle qu'US-00.4 dénonce, dans le système de traçabilité
+  lui-même. Candidat `/audit-methodo`.
 - ⚠️ **`TRACKS.md` (track FULL) exige une « revue humaine explicite de la PR » qu'aucune barrière
-  machine ne soutient** — ni maintenant, ni après déblocage (cible à `0` approbation). **US-01.1 est en
+  machine ne soutient** — ni avant, ni après l'application (cible à **`0`** approbation). **US-01.1 est en
   FULL** → arbitrage à poser **avant son Integration Lock** : requalifier l'exigence en obligation de
-  process avec preuve tracée, ou engager la voie « 2ᵉ compte relecteur ».
+  process avec preuve tracée, ou engager la voie « 2ᵉ compte relecteur ». **Amendement joint, suggéré par
+  US-00.7** : `TRACKS.md:14` dit « Surface auth / sécurité / **admin** / paiement » là où la pratique
+  constante du projet (4 US certifiées, interprétation inscrite au SCB) lit « surface **applicative** » —
+  le critère littéral **est** satisfait par US-00.7 au sens strict. ⛔ `TRACKS.md` **n'est pas édité** par
+  US-00.7.
 - **Périmètre Art. 6 déclaré ≠ appliqué** : `.github/workflows/*` et `apply_branch_protection.sh` ne
   sont protégés ni par `protect_files.sh` ni par la Constitution → candidat `/audit-methodo`.
 - **`governance.grandfathering_date` est une clé morte** : lue par aucun script, sémantique décalée
@@ -113,10 +177,15 @@ US-01.1 (EPIC_01, track FULL) reste **en pause** en `business_alignment` — à 
 - ✅ **FAIT** : `factory.config.json` porte `required_approving_review_count: 0` (`enforce_admins: true`).
 - ✅ **FAIT** : T4 (`scripts/factory_sync.py`), T5, T6 et T22 (`scripts/githooks/pre-push` — le hook ne
   se réclame plus de la protection de branche) — toutes les actions humaines d'US-00.4 sont soldées.
-- 🔴 **Décider du déblocage de la protection de branche** (dépôt public vs GitHub Pro ~4 USD/mois vs
-  statu quo) — la dérogation est tracée, mais c'est **la** dette majeure du projet. Le jour du
-  déblocage : T16→T19 d'US-00.4 sont prêtes à être reprises **telles quelles**.
-- **Planifier les dettes techniques d'US-00.4** : correctif NB-1 (1 ligne) et `selftest` en CI.
+- ✅ **FAIT (2026-07-27)** : **déblocage** de la protection de branche — **voie (a), dépôt rendu PUBLIC**
+  (Art. 5). ⚠️ **Exposition irréversible** de tout l'historique pour ce qui a été publié ; `gitleaks`
+  devient une barrière **critique**. **FAIT (2026-07-28)** : le **`PUT`** d'application (T8 d'US-00.7) et
+  le **test négatif serveur** (T10) — les deux seules opérations à confirmation humaine explicite.
+- 🔒 **US-00.7 T20 — `scripts/githooks/pre-push` (Art. 6, action humaine)** : son en-tête affirme encore
+  « CE HOOK EST LE SEUL ENFORCEMENT RÉEL » et « `main` … ne peut pas l'être sur ce plan » — **devenu
+  faux**. Diff exact fourni dans le Story File d'US-00.7 (T20) et dans `reports/US-00.7/transmissions.md`.
+- **Planifier les dettes techniques restantes** : **NB-1bis** (complétude de la cible dans
+  `_guard_mapping`) et **`selftest` en CI** — de préférence dans la **même** US de dette.
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).
 - Décider la création de US-01.2 (Gestion des événements).
 - Arbitrages design ci-dessus.

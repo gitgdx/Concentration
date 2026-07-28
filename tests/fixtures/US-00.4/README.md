@@ -1,5 +1,32 @@
 # Fixtures US-00.4 — réponses d'API **SIMULÉES** (2026-07-26)
 
+> ## 🕓 Encadré ajouté le 2026-07-28 par US-00.7 — **historisation ADDITIVE, aucune ligne ci-dessous n'est réécrite**
+>
+> **Le constat du 2026-07-26 rappelé au paragraphe suivant (« les chemins exit 0 et exit 1 ne sont pas
+> observables sur ce dépôt : 403 — *Upgrade to GitHub Pro…* ») était EXACT À SA DATE. Il a été levé.**
+> Le dépôt a été rendu **public** le **2026-07-27** (décision humaine, Constitution Art. 5), puis la
+> protection de branche a été **appliquée** le **2026-07-28** :
+>
+> * le chemin **exit 1** a été observé **en réel** le 2026-07-27 (404 « *Branch not protected* » +
+>   `protected == false` → dérive) — `reports/US-00.7/entry_state/check_remote_exit1.txt` ;
+> * le chemin **exit 0** a été observé **en réel** le 2026-07-28 (12 champs alignés, 0 écart) —
+>   `reports/US-00.7/applied_state/check_remote_exit0_reel.txt`.
+>
+> **Ces fixtures restent NÉCESSAIRES, et le resteront.** Les cas qu'elles exercent ne sont **pas
+> reproductibles à volonté** sur le dépôt réel : reproduire un `exit 1` ou un `exit 2` exigerait de
+> **dégrader la protection de la branche principale**, et les cas `lock_branch`, `block_creations`, clé
+> inconnue active ou clés additives neutres ne dépendent pas de nous. Elles restent aussi le **seul** moyen
+> d'exercer ces chemins **sans droits admin** et **sans réseau**.
+>
+> ⚠️ **Ce que cet encadré ne change pas** : une sortie de fixture reste **préfixée `[SIMULATION]`** et ne
+> vaut **jamais** preuve de l'état réel (risque **R1**) ; la dérive de fixture (risque **R4**) reste
+> entière ; et **aucun `selftest` en CI** ne les exécute — elles sont toujours lancées **à la main**
+> (dette maintenue OUVERTE). Ce fichier est le **matériel de test vivant** d'une US **certifiée** : il est
+> **complété**, jamais réécrit. Décision de référence :
+> `docs/adr/ADR-007-application-protection-branche.md` *(remplace ADR-006)*.
+>
+> *(Fixtures ajoutées par US-00.7 pour le correctif **NB-1** : `tests/fixtures/US-00.7/`.)*
+
 Ces 5 fichiers sont des **simulations fabriquées à la main**, au format d'une réponse `GET` de l'API GitHub : ils ne sont **jamais** une preuve de l'état réel du dépôt (les preuves brutes datées vivent dans `reports/US-00.4/`).
 Ils existent parce que les chemins **exit 0** et **exit 1** de `scripts/check_branch_protection.py` ne sont **pas observables** sur ce dépôt : `GET …/branches/main/protection` y renvoie **403 — « Upgrade to GitHub Pro… »** (limite de plan, cf. `docs/adr/ADR-006-protection-branche-principale.md`).
 Toute exécution consommant `--from-protection` / `--from-branch` préfixe **chaque ligne** de sa sortie par `[SIMULATION] ` et son exit 0 porte « SOURCE SIMULÉE, n'atteste PAS l'état réel du dépôt » — mitigation du risque **R1** (une sortie « conforme » archivée ne doit jamais pouvoir être relue comme un constat réel).

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Comparateur EN LECTURE SEULE entre la protection RÉELLE de la branche principale (API GitHub)
-et la cible GÉNÉRÉE par `factory_sync.py --emit-branch-protection` (US-00.4, ADR-006).
+et la cible GÉNÉRÉE par `factory_sync.py --emit-branch-protection` (US-00.4, ADR-006 — cible
+CONSERVÉE sans rediscussion par ADR-007, qui remplace ADR-006 : ne pas lire ADR-006 comme la
+décision courante).
 
 Trois issues honnêtes, jamais de faux vert :
 
@@ -21,8 +23,9 @@ POST, PATCH, DELETE), aucun drapeau de méthode passé à `gh api`, aucun chemin
 contrôle négatif du Story File (critère #11) ne trouve AUCUNE occurrence de drapeau de méthode
 d'écriture, pas même en commentaire. La seule écriture disque est l'archive `--raw-out`.
 Le seul écrivain reste
-`scripts/apply_branch_protection.sh`, PRÊT mais CONDITIONNÉ AU DÉBLOCAGE (403 de plan au
-2026-07-26 sur gitgdx/Concentration — cf. docs/adr/ADR-006-protection-branche-principale.md).
+`scripts/apply_branch_protection.sh`, APPLICABLE depuis le 2026-07-27 sur gitgdx/Concentration
+(dépôt public) et validé en production le 2026-07-28 — cf.
+docs/adr/ADR-007-application-protection-branche.md (remplace ADR-006).
 
 La cible est toujours GÉNÉRÉE, jamais dupliquée ici : aucun JSON de protection n'est écrit en dur
 dans ce fichier (source unique = factory.config.json via factory_sync.py).
@@ -33,7 +36,10 @@ Usage :
                                             [--from-protection-status CODE]
 
 Le mode fixture (`--from-*`) n'émet AUCUN appel réseau (il fonctionne sans `gh` et sans jeton) :
-il sert à exercer les chemins exit 0 et exit 1, non observables sur ce dépôt. Toutes ses lignes
+il sert à exercer les chemins exit 0, exit 1 et exit 2 de façon REPRODUCTIBLE À VOLONTÉ. (Les
+chemins exit 1 et exit 0 ont désormais été observés EN RÉEL sur ce dépôt — respectivement le
+2026-07-27 et le 2026-07-28, cf. reports/US-00.7/ — mais les reproduire exigerait de dégrader la
+protection de la branche principale : les fixtures restent donc nécessaires.) Toutes ses lignes
 sont préfixées `[SIMULATION] ` — une sortie simulée ne doit jamais pouvoir être relue comme une
 preuve de l'état réel du dépôt (risque R1 du Story File US-00.4).
 

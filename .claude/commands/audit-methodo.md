@@ -13,12 +13,17 @@ Rituel d'audit méthodologie (trimestriel, ou à la demande).
    - process : nb d'US livrées hors workflow depuis le dernier audit (grep EVT_WORKFLOW_VIOLATION
      et EVT_WAIVER_GRANTED dans docs/trace/*/events.jsonl).
 
-   **1 bis. Point de contrôle « enforcement de la branche principale » (axe Gouvernance — US-00.4,
-   [ADR-006](../../docs/adr/ADR-006-protection-branche-principale.md)) — OBLIGATOIRE, jamais silencieux.**
+   **1 bis. Point de contrôle « enforcement de la branche principale » (axe Gouvernance — US-00.4 puis
+   **US-00.7**, [ADR-007](../../docs/adr/ADR-007-application-protection-branche.md) *(remplace
+   ADR-006)*) — OBLIGATOIRE, jamais silencieux.**
 
-   Ce point de contrôle est le **porteur de la dette** « `main` n'est pas protégée » : sans lui, le
-   constat daté du 2026-07-26 pourrirait sans que personne ne le sache. Il est **manuel et hors CI**
-   (droits **admin**, absents du `GITHUB_TOKEN`).
+   ✅ **La protection est APPLIQUÉE depuis le 2026-07-28** (`"protected": true`, PR obligatoire, 4 status
+   checks **REQUIS**, `enforce_admins` en vigueur ; effet prouvé par 3 refus serveur —
+   `reports/US-00.7/applied_state/`). **Ce point de contrôle est CONSERVÉ et RÉORIENTÉ** : il ne porte
+   plus la dette « `main` n'est pas protégée » (close), mais la **surveillance de sa PERSISTANCE** — qui
+   est désormais **la seule barrière** contre une révocation silencieuse. Il est **manuel et hors CI**
+   (droits **admin**, absents du `GITHUB_TOKEN`), **sans déclencheur calendaire**, et c'est **la dette la
+   plus susceptible de pourrir** : sans lui, personne ne saurait que la protection a disparu.
 
    a. **Exécuter** — exige des droits **admin** sur le dépôt :
       ```
@@ -27,37 +32,56 @@ Rituel d'audit méthodologie (trimestriel, ou à la demande).
       ⚠️ **Prérequis** : `gh` doit être joignable dans le `PATH` de la session (vérifier
       `gh --version` ; sous Windows l'installation standard est `C:\Program Files\GitHub CLI`).
       Sans `gh` **et** sans `GH_TOKEN`/`GITHUB_TOKEN`, la commande rend bien **2**, mais avec la cause
-      « `gh` introuvable » **et non** le 403 de plan : **le constat attendu serait manqué**.
+      « `gh` introuvable » **et non** l'état réel : **le constat attendu serait manqué**.
 
    b. **Consigner le code de sortie dans le rapport d'audit** — le code, pas une paraphrase :
 
       | Code | Lecture | Action obligatoire |
       |---|---|---|
-      | **2** | `VERIFICATION IMPOSSIBLE` (403 de plan au 2026-07-26) | **La dette reste OUVERTE** et doit être **SIGNALÉE**. ⛔ Jamais consigné comme un succès, **jamais** utilisé pour clore la dette |
-      | **1** | **Dérive** (protection absente ou divergente) | Ré-appliquer **depuis la configuration** : `sh scripts/apply_branch_protection.sh` — jamais à la main dans l'interface |
-      | **0** | Signifierait que la protection est applicable **et** appliquée — **issue JAMAIS obtenue sur ce dépôt à ce jour** | Le déblocage a eu lieu → exécuter le **test négatif serveur reporté** (US-00.4 T18 : push direct, force-push, suppression, depuis un clone jetable sans hooks et **sans** `--no-verify`) et revérifier le chemin **404** réel, jamais observé (R3) |
+      | **0** | ✅ **L'ÉTAT ATTENDU** : protection **conforme** à la cible générée. *(Obtenu en réel pour la première fois le 2026-07-28 — 12 champs alignés, 0 écart.)* | **Consigner le code.** ⚠️ Il vaut **à l'instant de la mesure** : il n'installe **aucune** surveillance continue. Vérifier tout de même **c**, **d** et **e** |
+      | **1** | 🔴 **DÉRIVE** — protection absente ou divergente. **C'est une ALERTE** : quelqu'un a modifié ou supprimé la règle | **Ré-appliquer depuis la configuration** : `sh scripts/apply_branch_protection.sh gitgdx/Concentration` — jamais à la main dans l'interface. **Archiver les deux passages** (avant/après), tracer une ligne PROJECT_LOG et un événement |
+      | **2** | 🔴 `VERIFICATION IMPOSSIBLE` — **ni un succès, ni un échec** : 403 de plan *(reviendrait si le dépôt repassait en privé)*, 403 de droits, 401, 404 non désambiguïsé, `gh` absent **et** aucun jeton, `MAPPING INCOMPLET` | **À SIGNALER**, cause **NOMMÉE**. ⛔ Jamais consigné comme un succès. ⛔ **Jamais** d'ajustement d'`INERT_GET_KEYS` ni du mapping « pour forcer le vert » |
 
       **Aucune de ces trois issues ne peut rester silencieuse.**
 
-   c. **Réévaluer la condition de déblocage** — la limitation porte sur le **plan** du compte **et**
-      la **visibilité** du dépôt, **pas** sur le nombre de contributeurs (ajouter un collaborateur ne
-      débloque rien) :
+   c. **Vérifier que la VISIBILITÉ du dépôt n'a PAS changé** — c'est la **condition d'invalidation de
+      tout l'édifice** : la protection n'est disponible que parce que le dépôt est **public** (voie (a),
+      retenue le 2026-07-27). Un **retour en privé ⇒ retour du 403 ⇒ protection INDISPONIBLE ⇒ la
+      dérogation `EVT_WAIVER_GRANTED` (US-00.4), aujourd'hui ÉTEINTE, redeviendrait OUVERTE** :
       ```
       gh api repos/gitgdx/Concentration --jq '{private, visibility, owner_type: .owner.type}'
       ```
-      Deux voies, et seulement deux : dépôt **public** (coût nul, **exposition irréversible de
-      l'historique complet**) ou **GitHub Pro** (dépôt privé conservé, **coût** par utilisateur et par
-      mois). Engager l'une ou l'autre exige une **décision humaine explicite et tracée** — hors pouvoir
-      d'un agent. Détail : `docs/GIT_PROTECTION.md` §Conditions de déblocage.
+      Attendu : **`{"private": false, "visibility": "public"}`**. Toute autre valeur est une **alerte de
+      premier ordre** à remonter immédiatement. ⚠️ Rappel : ajouter un collaborateur ne change **rien** à
+      cette condition. Détail : `docs/GIT_PROTECTION.md`.
 
-   d. **Réévaluer la condition de retour à `1` approbation** — `required_approving_review_count: 0`
-      est un réglage **daté et conditionnel** (dépôt mono-collaborateur) :
+   d. **Vérifier que les 4 LIBELLÉS RAPPORTÉS correspondent toujours aux 4 contextes requis** — un
+      libellé divergent d'un seul caractère (emoji, sélecteur `U+FE0F`, espace, parenthèse) produit un
+      contexte requis **jamais rapporté**, donc un **VERROUILLAGE** : plus aucune PR fusionnable,
+      administrateur inclus.
+      ```
+      gh api repos/gitgdx/Concentration/branches/main/protection --jq '.required_status_checks.contexts'
+      gh pr checks <n>      # sur une PR ouverte : les noms RÉELLEMENT rapportés
+      ```
+      Les deux listes doivent être **identiques caractère pour caractère**. Divergence ⇒ appliquer
+      `docs/GIT_PROTECTION.md` §**Plan de retour arrière**, **sans tenter de fusionner**.
+
+   e. **Réévaluer la condition de retour à `1` approbation** — `required_approving_review_count: 0`
+      est un réglage **daté et conditionnel** (dépôt mono-collaborateur), **entièrement valable** :
       ```
       gh api repos/gitgdx/Concentration/collaborators --jq '[.[] | select(.permissions.push) | .login]'
       ```
       Si **≥ 2** comptes en écriture : **ouvrir une US** remettant
-      `required_approving_review_count: 1` dans `factory.config.json` (ADR-006, décision 13). En
-      dessous, consigner le décompte pour tracer que le contrôle a bien eu lieu.
+      `required_approving_review_count: 1` dans `factory.config.json` (ADR-006 décision 13, **conservée
+      par ADR-007**). En dessous, consigner le décompte pour tracer que le contrôle a bien eu lieu.
+
+   f. **Passer en revue les dettes que l'application n'a PAS closes** — elles sont listées dans
+      `docs/GIT_PROTECTION.md` §Dettes : **#2** (aucune détection automatique de dérive), **#4**
+      (`grandfathering_date`), **#5** (périmètre Art. 6 déclaré ≠ appliqué), **#7** (revue humaine du
+      track FULL sans barrière machine), **#8** (ce point de contrôle lui-même, sans déclencheur
+      calendaire), **#9** (repli `urllib` jamais exercé), **#10** (`NB-1bis`), **#11** (pas de `selftest`
+      CI), **#12** (aucun événement d'extinction de dérogation + champ `emitter` non lu → **un agent peut
+      émettre `EVT_WAIVER_GRANTED`**). ⛔ **Aucune ne doit être présentée comme close par effet de bord.**
 2. **Comparer** avec `docs/audit/METRICS.md` (série temporelle) et le dernier rapport
    `docs/audit/AUDIT_METHODOLOGIE_*.md`.
 3. **Produire** :

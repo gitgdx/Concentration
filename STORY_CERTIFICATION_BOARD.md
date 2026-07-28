@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -597,9 +597,94 @@
 - **⚠️ Dette du système de traçabilité relevée** : **aucun événement du catalogue ne permet d'éteindre
   une dérogation** (26 événements vérifiés). L'extinction du `EVT_WAIVER_GRANTED` d'US-00.4 est donc
   **documentaire** + mentionnée dans le `rationale` d'`EVT_DOCS_UPDATED`. Absence nommée comme dette.
-- **Prochaine étape** : `EVT_STORY_READY` (@PO) → `EVT_ARCHI_VALIDATED` **avec ADR-007** → Integration
-  Lock (Data N/A + UX N/A) → phase 0 (préalables, **aucune écriture distante**) → **confirmation humaine
-  du `PUT`**.
+- **✅ Integration Lock** (2026-07-27, `EVT_ARCHI_VALIDATED` **avec ADR-007 Accepté** →
+  `EVT_DESIGN_COMPLETED`) : Data N/A + UX N/A justifiés. **ADR-007 remplace ADR-006**, qui reste
+  **INTOUCHÉ** (pas même sa ligne `Statut` : `Accepté`, commité **et certifié**) — la réécriture en place
+  d'ADR-006 n'avait été licite que parce qu'il était alors `untracked`, donc jamais entré en vigueur.
+  **17 énoncés d'ADR-006 renversés**, cités et datés, avec une colonne « Effectif » séparant l'**acquis**
+  du **conditionné**. **11 décisions conservées** nommément.
+- **🔒 PROTECTION APPLIQUÉE ET PROUVÉE** (2026-07-28) — chaîne T8 → T10, **deux confirmations humaines
+  explicites** :
+  - **T8** : `PUT` accepté. Payload **généré** par `--emit-branch-protection`, consommé par
+    `apply_branch_protection.sh` — **aucun JSON saisi à la main**.
+  - **T9** : `"protected": true` · `enforcement_level: "everyone"` (manifestation d'`enforce_admins` :
+    **l'administrateur est inclus**) · **`--check-remote` → `exit 0` RÉEL** : 12 champs alignés, 0 écart,
+    7 champs additionnels neutres **nommés**, 0 champ actif non couvert — **sans** `[SIMULATION]`, sans
+    « SOURCE SIMULÉE ». **Premier `exit 0` non simulé depuis la création de l'outil.**
+  - **T10** — test négatif **exécuté par l'humain** depuis un clone **sans hooks** (0 hook exécutable) :
+    les **3 refus viennent du SERVEUR**. `GH006 Protected branch update failed` · « *Changes must be made
+    through a pull request* » · « ***4 of 4 required status checks are expected*** » ·
+    `protected branch hook declined` ; suppression → « *refusing to delete the current branch* ».
+    ⚠️ **Pourquoi l'humain et pas l'agent** : le hook `block_dangerous_bash.sh` interdit à l'agent le
+    push direct (l. 25) et le force-push (l. 28) ; **le contourner pour fabriquer la preuve aurait vidé
+    la preuve de son sens** (Art. 1). **Zéro contournement** sur toute l'US.
+  - **🎯 Résultat inattendu** : « **4 of 4 required status checks are expected** » est la **LECTURE
+    DIRECTE** du fait qu'US-00.4 ne pouvait établir que par **inférence** (son AC-1 fait (b), qu'elle
+    avait honnêtement déclaré comme telle). **Son inférence est confirmée a posteriori — sans qu'une
+    ligne de son texte ait eu besoin d'être corrigée.** Deuxième fois après la clôture de son risque R3.
+- **⚠️ Ce qui N'EST PAS prouvé — à lire avant tout audit** : le **refus d'une tentative de FUSION** n'a
+  **pas** été observé (**T11 non exécutée**) — toute phrase du type « aucune fusion possible avec la CI
+  rouge » est une **inférence raisonnée, pas une preuve** ; le refus prouvé porte sur le **push direct**,
+  qui n'est pas la même opération. Et `allow_force_pushes: false` / `allow_deletions: false` ne sont
+  **pas isolés** par le test négatif (même `GH006` pour le force-push, la règle « PR obligatoire » se
+  déclenchant d'abord ; GitHub refuse la suppression de la **branche par défaut** indépendamment du
+  réglage) → prouvés par l'**état de l'API**, pas par l'effet.
+- **🔕 MISE À JOUR DATÉE DU 2026-07-28 — portée des visas d'US-00.4 ci-dessus** : les mentions
+  « `main` n'est toujours pas protégée **et ne peut pas l'être** » figurant dans les visas **datés**
+  d'US-00.4 (notamment aux lignes ~493 et ~520) étaient **exactes à leur date** et **ne sont pas
+  réécrites** (ce sont des preuves de cycle). **Elles sont périmées depuis le 2026-07-28.** De même, la
+  dérogation **`EVT_WAIVER_GRANTED`** (2026-07-26, Art. 5 — « ni Pro, ni public ») est **ÉTEINTE / SANS
+  OBJET** : l'humain a choisi la **voie (a)**, dépôt **public**, le 2026-07-27. ⛔ La trace est
+  **append-only** : l'événement n'est ni supprimé ni édité — on **éteint** une dérogation, on ne
+  l'effface pas. ⚠️ **L'extinction est DOCUMENTAIRE** : **aucun** des **25** événements du catalogue
+  (+ 4 alias) ne permet de révoquer une dérogation → **dette structurelle du système de traçabilité**.
+  **Corollaire vérifié** : le champ `emitter` n'est lu par **aucun script ni hook** → **un agent peut
+  émettre une dérogation qu'il ne peut pas éteindre**.
+- **✅ Code (Dev)** (2026-07-28, `EVT_CODE_READY`) : phase 0 (T1→T7) + phases 3-4 (T12→T19, T21→T23).
+  **Correctif NB-1** livré (**3 lignes**, pas une : `_guard_actual` n'avait pas accès à `expected`) —
+  **progrès strict, PAS une fermeture** : résidu **NB-1bis** mesuré et laissé **ouvert** (une clé absente
+  de la cible et de valeur *neutre* reste en `exit 0`, alors que `enforce_admins: false` ou
+  `required_pull_request_reviews` **absent** sont des **relâchements réels** — la doctrine de neutralité
+  assimile à tort « valeur fausse » et « inerte »). Non atteignable aujourd'hui grâce au contrôle
+  compensatoire T2 (`set(payload) == MAPPED_TOP_KEYS` → `True`). **Corpus** : 9/11 artefacts vivants
+  nettoyés, 2 exceptions arbitrées (`pre-push` = **T20 humain**, Art. 6 ; `fixtures/US-00.4/README.md`
+  = réécriture interdite, démenti placé **en amont**).
+- **🔍 Trois autodétections de @Developer, signalées et corrigées sans affaiblir aucun contrôle** :
+  **(1)** son en-tête T15 avait inséré le littéral `check-remote` dans `.github/workflows/`, **cassant le
+  contrôle négatif du critère 12** — *documenter un contrôle avait cassé le contrôle* ; **(2)** il avait
+  introduit la sur-affirmation « une PR ne peut plus être fusionnée avec la CI rouge », **attrapée par sa
+  propre passe 2** et bornée dans 4 documents ; **(3)** **angle mort #7 matérialisé** — la docstring
+  « chemins `exit 0` et `exit 1` **non observables sur ce dépôt** » était devenue **fausse** et **aucun
+  des 14 motifs ne la détectait** : **5ᵉ manifestation** de la leçon d'exhaustivité d'US-00.4, fermée par
+  **relecture intégrale**.
+- **⚠️ 3 faux positifs du hook `block_dangerous_bash.sh`**, rencontrés en conditions réelles et
+  diagnostiqués dans le code : **(a)** une **lecture** de `core.hooksPath` imbriquée dans `$(...)` est
+  bloquée alors que le commentaire du hook (l. 36-37) l'autorise — sa condition (l. 39) n'accepte le motif
+  qu'en **fin de commande** → **écart déclaré ≠ appliqué dans un hook d'enforcement** ; **(b)** le
+  littéral d'une option interdite écrit **pour attester qu'elle n'a pas été employée** ; **(c)** les
+  commandes de T10 **citées** dans un fichier de preuve. Même famille que le docstring `-X PUT` et le mot
+  « conforme » d'US-00.4 : **documenter une interdiction déclenche son détecteur**. Recommandation
+  bornée : corriger **(a)** ; ⛔ **ne pas relâcher (b) ni (c)** — un faux positif gênant vaut mieux qu'un
+  faux négatif silencieux.
+- **✅ Effets de bord actés** : **risques #2 et #5 d'EPIC_00 → CLOS**, critère de clôture **cochable**,
+  **EPIC_00 redevient complétable** après US-00.5/00.6 · **périmètre d'US-00.5 réduit** (`CLAUDE.md:20`
+  et `CONSTITUTION.md:49` deviennent **vrais** — leur correction « obligatoire » est **sans objet**, et
+  `CLAUDE.md:20` **n'a pas été édité**) · **US-00.1** (S11) : ses critères de test devenaient vrais →
+  **requalification tracée**, ⛔ **aucune** ré-ouverture de cycle, ⛔ **aucune** édition de l'US certifiée.
+- **⚠️ Contraintes permanentes désormais ACTIVES** : branches hors `^feat/US-[0-9]+\.[0-9]+.*$` → PR
+  **infusionnable** (donc `chore/`, `docs/`, `hotfix/` — et le **track QUICK** repose sur des noms
+  libres) · **toute PR issue d'un FORK infusionnable** (dépôt public : **ouvert en proposition, fermé en
+  fusion par sa propre convention**) · `strict: true` **sérialise** les merges ·
+  `required_conversation_resolution` bloque sur une discussion ouverte. **Contrainte assumée par arbitrage
+  humain** (`EVT_DEV_BLOCKER` du 2026-07-27) : la factory **imposait déjà** ce motif — le `PUT` n'a rendu
+  **effectif** que ce qui était la règle. ⛔ Le retrait d'un contexte requis reste **exclu**.
+- **⚠️ CONDITIONNEL — condition d'invalidation de tout l'édifice** : la protection repose sur la
+  **visibilité PUBLIQUE** du dépôt. Un retour en **privé** ramènerait le **403**, rendrait la protection
+  **indisponible** et **rouvrirait la dérogation éteinte**.
+- **Prochaine étape** : ⏳ **T20** (action humaine, Art. 6 — en-tête de `scripts/githooks/pre-push`,
+  diff exact dans `reports/US-00.7/transmissions.md` §8) · **T11** (@DevOps : PR, libellés **réellement
+  rapportés**, refus de fusion, fusion après 4 verts) — **la PR de cette US sera la première à devoir
+  franchir la protection**, elle sert donc de démonstration → `/audit-us` → QA → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

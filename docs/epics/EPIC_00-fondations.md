@@ -10,14 +10,28 @@ Chantier de fondations exécuté avant la première fonctionnalité métier (voi
 §6.3 et le README du kit). Objectif : établir un socle sain et vérifiable — gestion des secrets,
 qualité statique de référence, migrations réversibles, CI et protection de branche réelles, ADR de
 stack + Constitution adaptée, couverture initiale avec ratchet. À l'issue de cet EPIC, la factory
-est opérationnelle et chaque règle de gouvernance est effectivement *enforced*.
+est opérationnelle et chaque règle de gouvernance dispose d'un mécanisme d'application vérifiable.
 
-> 🔴 **Réserve au 2026-07-26** : cet objectif **n'est PAS atteint** et ne peut pas l'être sur le plan
-> actuel. La protection de la branche principale est **indisponible** (403 de plateforme, dépôt privé —
-> cf. risque #5 et [ADR-006](../adr/ADR-006-protection-branche-principale.md)). La règle « jamais de
-> push direct sur la branche principale » reste **NON enforced par la plateforme** : dérogation humaine
-> tracée (`EVT_WAIVER_GRANTED`, US-00.4). **EPIC_00 ne peut donc pas être déclarée complète** sur la
-> base de ce critère. *(Réserve ajoutée le 2026-07-26 — balayage par motif.)*
+> ⚠️ **Formulation bornée, volontairement.** L'objectif ci-dessus ne dit **pas** « toutes les règles sont
+> enforced » : plusieurs obligations de la factory restent **de process, sans barrière machine** (revue
+> humaine du track FULL, émetteurs d'événements déclarés mais non lus, extinction d'une dérogation
+> impossible dans le catalogue). Elles sont **nommées** comme dettes dans `CLAUDE.md` §Dettes ouvertes —
+> jamais présentées comme résolues.
+
+> ✅ **Réserve du 2026-07-26 — LEVÉE le 2026-07-28 par US-00.7.** *(La réserve, ajoutée le 2026-07-26
+> après un balayage par motif, était **exacte à sa date** : elle est conservée ici sous forme historisée,
+> et non supprimée.)* **Ce qui a changé** : le dépôt a été rendu **PUBLIC** le **2026-07-27** (décision
+> humaine, Art. 5 — voie (a) des conditions de déblocage d'ADR-006), et la protection de la branche
+> principale a été **APPLIQUÉE le 2026-07-28** depuis la source unique. La règle « jamais de push direct
+> sur la branche principale » est désormais **enforced par la plateforme** : `"protected": true`, **PR
+> obligatoire**, **4 status checks REQUIS**, `enforce_admins` en vigueur (`enforcement_level: "everyone"`),
+> et **3 refus émis par le serveur** depuis un clone sans hooks. Preuves brutes datées :
+> [`reports/US-00.7/applied_state/`](../../reports/US-00.7/applied_state/) · décision :
+> [ADR-007](../adr/ADR-007-application-protection-branche.md) *(remplace
+> [ADR-006](../adr/ADR-006-protection-branche-principale.md))*. **EPIC_00 redevient complétable** — il
+> reste US-00.5 et US-00.6, plus les critères de clôture non encore satisfaits ci-dessous.
+> ⚠️ **Conditionnel** : l'édifice dépend de la **visibilité publique** du dépôt ; un retour en privé
+> ramènerait le **403** et rouvrirait cette réserve.
 
 **HORS périmètre** : toute valeur métier utilisateur (matérialisation des échéances, tuiles, CRUD…)
 qui relève d'EPIC_01 et suivants. EPIC_00 ne produit pas de fonctionnalité visible par l'utilisateur
@@ -30,11 +44,14 @@ final.
 - Lint + typecheck + formatter exécutés sans erreur sur le squelette de l'adapter ; 0 règle
   désactivée sans justification.
 - `ci.yml` vert sur une PR de test ✅ *(démontré — PR #3/#6/#8/#9, CI 4/4 verte)*.
-- 🔴 ~~protection de branche appliquée et vérifiée~~ — **NON ATTEIGNABLE sur ce plan** (403 de plateforme
-  sur la protection classique **et** les rulesets ; dépôt privé). Dérogation humaine tracée
-  (`EVT_WAIVER_GRANTED`, US-00.4). Voir **risque #5** et les critères de clôture. *(Ligne corrigée le
-  2026-07-26 : elle contredisait les critères de clôture du même fichier — signalée par la relecture
-  T14 « aucune fausse affirmation ».)*
+- ✅ **Protection de branche appliquée et vérifiée** — appliquée le **2026-07-28** (US-00.7) depuis la
+  source unique `factory.config.json`, via `scripts/apply_branch_protection.sh` consommant le payload
+  **généré** ; vérifiée par `python scripts/factory_sync.py --check-remote` → **exit 0 réel** (12 champs
+  alignés, 0 écart) et par **3 refus serveur** archivés. Preuves :
+  [`reports/US-00.7/applied_state/`](../../reports/US-00.7/applied_state/).
+  *(Historique de cette ligne : barrée le 2026-07-26 comme « NON ATTEIGNABLE » — 403 de plateforme, dépôt
+  privé — puis **rétablie le 2026-07-28** après le déblocage par passage du dépôt en public. Les deux
+  états étaient exacts à leur date.)*
 - Seuils de couverture de `factory.config.json` mesurés réellement sur le squelette (ratchet).
 - Convention de migrations réversibles (aller-retour up/down) établie ; aucune migration destructive
   par défaut, extensibilité des futurs modules préservée (RF-21).
@@ -63,17 +80,18 @@ final.
 | US-00.1 (ex US-INIT-01) | Secrets & scan de dépôt | [US-00.1-secrets-scan-depot.md](../stories/US-00.1-secrets-scan-depot.md) | 🚀 **Certifiée Prod** (2026-07-26) |
 | US-00.2 (ex US-INIT-02) | Qualité statique de référence | [US-00.2-qualite-statique.md](../stories/US-00.2-qualite-statique.md) | 🚀 **Certifiée Prod** (2026-07-26) |
 | US-00.3 (ex US-INIT-03) | Migrations réversibles | [US-00.3-migrations-reversibles.md](../stories/US-00.3-migrations-reversibles.md) | 🚀 **Certifiée Prod** (2026-07-26) |
-| US-00.4 (ex US-INIT-04) | Enforcement `main` : constat + outillage (cible armée) — *re-cadrée le 2026-07-26* | [US-00.4-ci-protection-branche.md](../stories/US-00.4-ci-protection-branche.md) | ⏳ development_start (track STANDARD) |
-| US-00.5 (ex US-INIT-05) | ADR-001 stack + Constitution adaptée | _(à créer via `/us-new`)_ | ⏳ à venir |
+| US-00.4 (ex US-INIT-04) | Enforcement `main` : constat + outillage (cible armée) — *re-cadrée le 2026-07-26* | [US-00.4-ci-protection-branche.md](../stories/US-00.4-ci-protection-branche.md) | 🚀 **Certifiée Prod** (2026-07-27) — *son libellé « cible armée » reste **exact à sa date** : elle a livré l'outillage et le constat, **pas** l'application* |
+| US-00.5 (ex US-INIT-05) | ADR-001 stack + Constitution adaptée | _(à créer via `/us-new`)_ | ⏳ à venir — **périmètre RÉDUIT par US-00.7** : `CLAUDE.md` règle 2 et `CONSTITUTION.md` Art. 4 sont devenus **factuellement vrais**, leur correction est **SANS OBJET** |
 | US-00.6 (ex US-INIT-06) | Couverture initiale + ratchet | _(à créer via `/us-new`)_ | ⏳ à venir |
+| **US-00.7** | **Protection de la branche principale : application effective, preuve par l'effet, cohérence du corpus** | [US-00.7-application-protection-branche.md](../stories/US-00.7-application-protection-branche.md) | 🔨 en cours (track **STANDARD + 3** renforcements) — *US non prévue au découpage initial, créée le 2026-07-27 après le déblocage* |
 
 ## ⚠️ Zones d'ombre / Risques identifiés
 
 | # | Risque | Impact | Mitigation proposée |
 |---|---|---|---|
 | 1 | Fuite de valeurs de démo dans l'historique lors de l'init. | Exposition de secrets factices/réels. | Scan `gitleaks` + rotation documentée (US-00.1). |
-| 2 | Dérive entre `factory.config.json` et ses projections (CI, protection de branche, seuils). | Règles déclarées mais non enforced. | ~~`python scripts/factory_sync.py --check` (gate CI `governance`)~~ → **mitigation prouvée INSUFFISANTE**, voir #5. |
-| 5 | **🔴 RISQUE #2 MATÉRIALISÉ *ET NON REFERMABLE SUR CE PLAN* (constaté le 2026-07-26)** : `main` n'est **pas protégée** (`"protected": false`) malgré une règle déclarée *enforced*. Les 4 status checks s'exécutent sans qu'aucun ne soit **requis**. **Double cause racine** : (a) `factory_sync.py --check` ne compare que des artefacts **documentaires** et **n'appelle jamais l'API** — il affichait « conforme (env, *protection*, …) » sur un dépôt grande ouverte ; (b) **la protection est INDISPONIBLE sur ce dépôt** — `GET …/branches/main/protection` **et** `GET …/rulesets` renvoient un **403 « Upgrade to GitHub Pro or make this repository public »** (dépôt privé, jeton admin). `factory.config.json` déclarait donc depuis l'origine un enforcement que le compte **n'a jamais pu appliquer**. | Tous les gates qualité restent contournables par un merge ou un push direct ; la confiance dans `Certifié Prod` repose sur la **seule discipline** des intervenants. | ⚠️ **PARTIELLEMENT mitigé seulement.** **US-00.4 (re-cadrée)** traite la cause (a) — libellé `--check` honnête (*documentaire*), `--check-remote` en lecture seule à 3 issues dont *exit 2 = vérification impossible*, constat daté, cible **armée** non appliquée, conditions de déblocage documentées, point de contrôle `/audit-methodo`. Elle **ne traite PAS** la cause (b) : **dérogation humaine** tracée (`EVT_WAIVER_GRANTED`, Art. 5 — ni GitHub Pro, ni dépôt public). **CE RISQUE RESTE OUVERT.** Déblocage = dépôt public **ou** GitHub Pro, puis T16→T19 d'US-00.4. |
+| 2 | Dérive entre `factory.config.json` et ses projections (CI, protection de branche, seuils). | Règles déclarées mais non enforced. | ✅ **CLOS le 2026-07-28 (US-00.7)** — voir #5. La protection déclarée dans `factory.config.json` est désormais **appliquée** et **vérifiée champ par champ** contre l'API (`--check-remote` → **exit 0 réel**, 12 champs alignés, 0 écart) : la projection « protection de branche » n'est plus une déclaration sans effet. *(⚠️ **Ne pas surinterpréter** : la **détection automatique** de dérive reste **absente** — `--check-remote` exige des droits admin, hors CI. Dette maintenue OUVERTE, portée par `/audit-methodo`.)* |
+| 5 | **🔴 RISQUE #2 MATÉRIALISÉ *ET NON REFERMABLE SUR CE PLAN* (constaté le 2026-07-26)** : `main` n'est **pas protégée** (`"protected": false`) malgré une règle déclarée *enforced*. Les 4 status checks s'exécutent sans qu'aucun ne soit **requis**. **Double cause racine** : (a) `factory_sync.py --check` ne compare que des artefacts **documentaires** et **n'appelle jamais l'API** — il affichait « conforme (env, *protection*, …) » sur un dépôt grande ouverte ; (b) **la protection est INDISPONIBLE sur ce dépôt** — `GET …/branches/main/protection` **et** `GET …/rulesets` renvoient un **403 « Upgrade to GitHub Pro or make this repository public »** (dépôt privé, jeton admin). `factory.config.json` déclarait donc depuis l'origine un enforcement que le compte **n'a jamais pu appliquer**. | Tous les gates qualité restent contournables par un merge ou un push direct ; la confiance dans `Certifié Prod` repose sur la **seule discipline** des intervenants. | ✅ **CLOS le 2026-07-28 par US-00.7 — les DEUX causes sont traitées.** *(Le constat du 2026-07-26 et l'expression « NON REFERMABLE SUR CE PLAN » étaient **exacts à leur date** : ils sont conservés ci-contre, non réécrits — c'est **le plan qui a changé**.)* **Cause (a)** : traitée par **US-00.4** (certifiée le 2026-07-27) — libellé `--check` honnête (*documentaire*), `--check-remote` en lecture seule à 3 issues, constat daté, conditions de déblocage documentées, point de contrôle `/audit-methodo`. **Cause (b)** : levée le **2026-07-27** par une décision humaine (Art. 5) — **dépôt rendu PUBLIC**, voie (a) → `…/protection` passe de **403** à **404** (« *Branch not protected* » : **disponible**, non appliquée), `…/rulesets` à **200 `[]`** ; puis **protection APPLIQUÉE le 2026-07-28** (`"protected": true`, PR obligatoire, **4 checks REQUIS**, `enforce_admins` → `enforcement_level: "everyone"`), **effet prouvé par 3 refus SERVEUR** depuis un clone sans hooks. Preuves : [`reports/US-00.7/applied_state/`](../../reports/US-00.7/applied_state/) · [ADR-007](../adr/ADR-007-application-protection-branche.md) *(remplace ADR-006)*. 🔕 **Dérogation `EVT_WAIVER_GRANTED` (2026-07-26, US-00.4, Art. 5) — ÉTEINTE / SANS OBJET** : elle portait sur « **ni GitHub Pro, ni dépôt public** » ; l'humain a choisi le **dépôt public**, son motif **n'existe plus**. ⛔ La trace reste **append-only** — on **éteint** une dérogation, on ne l'**effface** pas ; l'extinction est **DOCUMENTAIRE**, aucun des 25 événements du catalogue ne permettant de l'éteindre (**dette du système de traçabilité**, nommée dans `CLAUDE.md`). ⚠️ **Conditionnel** : un retour du dépôt **en privé** ramènerait le **403** et **rouvrirait ce risque ET la dérogation**. |
 | 3 | Seuils de couverture arbitraires non mesurés sur le code réel. | Ratchet inopérant. | Mesure réelle sur le squelette (US-00.6). |
 | 4 | **US-00.3 définit une convention de migrations réversibles alors que la techno de persistance est délibérément reportée à US-01.2** (`STACK_PROFILE.md §DataEngineer`) → aucun schéma concret à migrer au Sprint 0. | Convention potentiellement trop abstraite ou non appliquée ; « migration testée » non exécutable tel quel au Sprint 0. | Cadrer US-00.3 comme **convention/politique agnostique de la techno**, **appliquée** et dont le patron de test est **instancié** par US-01.2 ; interdiction de migration destructive par défaut (RF-21). |
 
@@ -87,9 +105,9 @@ d'EPIC_01 en développement.
 
 ## Critères de clôture de l'EPIC
 
-- [ ] Toutes les US listées (US-INIT, US-00.1→US-00.6) sont `Certifié Prod = 🚀 OUI` (ou clôturées/justifiées dans le SCB) — *état au 2026-07-26 : **3 sur 6** (US-00.1, US-00.2, US-00.3)*
+- [ ] Toutes les US listées (US-INIT, US-00.1→US-00.6, **US-00.7**) sont `Certifié Prod = 🚀 OUI` (ou clôturées/justifiées dans le SCB) — *état au 2026-07-28 : **4 sur 7** (US-00.1, US-00.2, US-00.3, US-00.4) ; **US-00.7** en cours ; restent US-00.5, US-00.6 et le statut d'`US-INIT` à clarifier*
 - [x] `ci.yml` vert sur une PR de test — ✅ démontré (PR #3/#6/#8/#9, CI 4/4 verte)
-- [ ] 🔴 **Protection de branche vérifiée — IMPOSSIBLE À COCHER SUR CE PLAN.** Bloqué par un **403** de plateforme sur les deux mécanismes (dépôt privé ; cf. risque #5). **Dérogation humaine tracée** (`EVT_WAIVER_GRANTED`, US-00.4). ⚠️ **EPIC_00 ne peut donc PAS être déclarée complète** tant que ce critère n'est pas soit satisfait (dépôt public ou GitHub Pro → T16→T19 d'US-00.4), soit formellement retiré des critères de clôture par une décision humaine tracée. La certification d'US-00.4 **ne vaut pas** satisfaction de ce critère.
+- [x] ✅ **Protection de branche vérifiée** — **cochée le 2026-07-28 (US-00.7)**. Appliquée depuis la source unique le 2026-07-28 après le déblocage du 2026-07-27 (dépôt **public**, Art. 5) : `"protected": true` · **PR obligatoire** · **4 status checks REQUIS** · `enforce_admins` (`enforcement_level: "everyone"`) · **exit 0 réel** de `--check-remote` (12 champs alignés, 0 écart) · **3 refus SERVEUR** archivés (clone sans hooks). Preuves : [`reports/US-00.7/applied_state/`](../../reports/US-00.7/applied_state/) ; décision : [ADR-007](../adr/ADR-007-application-protection-branche.md). *(Ce critère était marqué « IMPOSSIBLE À COCHER SUR CE PLAN » au 2026-07-26 — **exact à sa date**, le plan ayant changé depuis. La certification d'US-00.4 ne valait **pas** satisfaction de ce critère : c'est bien US-00.7 qui le lève.)* ⚠️ **Ce qui n'est pas coché pour autant** : la **détection automatique** de dérive (contrôle **manuel**, hors CI) et la **persistance** de l'état — un administrateur peut révoquer la règle sans qu'aucun mécanisme ne le signale. **Conditionnel à la visibilité publique du dépôt.**
 - [ ] ADR-001 (stack) publié et Constitution ajustée si besoin
 - [ ] Convention de migrations réversibles documentée (US-00.3) et applicable par la première US de persistance (US-01.2)
 - [ ] Seuils de couverture mesurés et ratchet actif
