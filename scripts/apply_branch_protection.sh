@@ -3,11 +3,22 @@
 # factory.config.json (source unique des status checks) par factory_sync.py.
 # Pré-requis : gh CLI installé et authentifié avec droits admin sur le dépôt.
 #
-# ⚠️ NON APPLICABLE au 2026-07-26 sur gitgdx/Concentration : la protection de branche est
-#    indisponible sur ce plan (dépôt privé, compte User) — GET/PUT .../protection ET .../rulesets
-#    renvoient 403 « Upgrade to GitHub Pro or make this repository public to enable this feature. »
-#    Ce script est PRÊT et CONDITIONNÉ AU DÉBLOCAGE (dépôt public OU GitHub Pro) : il n'est PAS
-#    « à exécuter ». Voir docs/adr/ADR-006-protection-branche-principale.md et docs/GIT_PROTECTION.md.
+# ✅ APPLICABLE depuis le 2026-07-27 sur gitgdx/Concentration (dépôt rendu PUBLIC, décision humaine
+#    Art. 5) — et VALIDÉ EN PRODUCTION le 2026-07-28 : le PUT a été accepté, la protection est en
+#    vigueur, son effet est prouvé (reports/US-00.7/applied_state/). Ce script est la VOIE NORMALE
+#    de (ré-)application de la protection depuis la source unique factory.config.json.
+#    Toute divergence entre le dépôt et la config se corrige en RÉ-APPLIQUANT ce script — jamais en
+#    alignant la config sur l'état constaté, jamais via l'écran Settings → Branches, jamais avec un
+#    JSON écrit à la main.
+#
+# ⚠️ CE SCRIPT MODIFIE L'ENFORCEMENT DE LA BRANCHE PRINCIPALE et exige des DROITS ADMIN. Ce n'est
+#    pas une commande de lecture : après lui, tout merge dépend d'une PR à 4 status checks verts,
+#    SANS bypass administrateur. Lire docs/GIT_PROTECTION.md §Plan de retour arrière AVANT de
+#    l'exécuter — un libellé de contexte divergent rendrait toute PR infusionnable (verrouillage).
+#    Décision de référence : docs/adr/ADR-007-application-protection-branche.md (remplace ADR-006).
+#
+# ⚠️ CONDITIONNEL : l'applicabilité dépend de la VISIBILITÉ PUBLIQUE du dépôt. Un retour en privé
+#    ramènerait le 403 de plan et ce script échouerait de nouveau.
 # Usage : sh scripts/apply_branch_protection.sh [owner/repo]
 set -e
 

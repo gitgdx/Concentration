@@ -1,0 +1,65 @@
+{
+  "_fixture": "SIMULATION US-00.7 T1 — derivee UNE SEULE FOIS de tests/fixtures/US-00.4/protection_conforme.json le 2026-07-27, en ne changeant QUE enforce_admins.enabled (true -> false : le bypass administrateur est AUTORISE — relachement REEL). Scenario B de NB-1bis. N atteste PAS l etat reel du depot.",
+  "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection",
+  "required_status_checks": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_status_checks",
+    "strict": true,
+    "contexts": [
+      "🔐 Secrets scan (gitleaks)",
+      "📋 Governance (SCB + traçabilité + synchro)",
+      "check-branch-name",
+      "📱 App (gates run_gates.py)"
+    ],
+    "contexts_url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_status_checks/contexts",
+    "checks": [
+      {
+        "context": "🔐 Secrets scan (gitleaks)",
+        "app_id": null
+      },
+      {
+        "context": "📋 Governance (SCB + traçabilité + synchro)",
+        "app_id": null
+      },
+      {
+        "context": "check-branch-name",
+        "app_id": null
+      },
+      {
+        "context": "📱 App (gates run_gates.py)",
+        "app_id": null
+      }
+    ]
+  },
+  "required_pull_request_reviews": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/required_pull_request_reviews",
+    "dismiss_stale_reviews": false,
+    "require_code_owner_reviews": false,
+    "require_last_push_approval": false,
+    "required_approving_review_count": 0
+  },
+  "enforce_admins": {
+    "url": "https://api.github.com/repos/OWNER/REPO/branches/main/protection/enforce_admins",
+    "enabled": false
+  },
+  "required_linear_history": {
+    "enabled": false
+  },
+  "allow_force_pushes": {
+    "enabled": false
+  },
+  "allow_deletions": {
+    "enabled": false
+  },
+  "block_creations": {
+    "enabled": false
+  },
+  "required_conversation_resolution": {
+    "enabled": true
+  },
+  "lock_branch": {
+    "enabled": false
+  },
+  "allow_fork_syncing": {
+    "enabled": false
+  }
+}

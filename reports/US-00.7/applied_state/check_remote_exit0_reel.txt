@@ -1,0 +1,20 @@
+# T9 — US-00.7 · --check-remote sur l'etat REEL (premier exit 0 NON simule)
+# commande : python scripts/factory_sync.py --check-remote
+# horodatage UTC : 2026-07-28T07:52:16Z
+Lecture SEULE de l'API GitHub (GET uniquement) — gitgdx/Concentration:main · GET repos/gitgdx/Concentration/branches/main → 200 · GET repos/gitgdx/Concentration/branches/main/protection → 200
+Comparaison champ par champ — gitgdx/Concentration:main · 12 champ(s) alignés, 0 écart(s), 7 champ(s) additionnel(s) neutre(s), 0 champ(s) ACTIF(S) non couvert(s).
+  [OK] required_status_checks.strict | true | true
+  [OK] required_status_checks.contexts | "check-branch-name" | "check-branch-name"
+  [OK] required_status_checks.contexts | "📋 Governance (SCB + traçabilité + synchro)" | "📋 Governance (SCB + traçabilité + synchro)"
+  [OK] required_status_checks.contexts | "📱 App (gates run_gates.py)" | "📱 App (gates run_gates.py)"
+  [OK] required_status_checks.contexts | "🔐 Secrets scan (gitleaks)" | "🔐 Secrets scan (gitleaks)"
+  [OK] required_pull_request_reviews.required_approving_review_count | 0 | 0
+  [OK] enforce_admins (GET: enforce_admins.enabled) | true | true
+  [OK] allow_force_pushes (GET: allow_force_pushes.enabled) | false | false
+  [OK] allow_deletions (GET: allow_deletions.enabled) | false | false
+  [OK] required_linear_history (GET: required_linear_history.enabled) | false | false
+  [OK] required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | true
+  [OK] restrictions | null | <clé absente de la réponse GET — aucune restriction>
+  [IGNORÉ — NEUTRE] champs de la réponse hors mapping, dont la valeur ne peut ni durcir ni relâcher l'enforcement : allow_fork_syncing, block_creations, lock_branch, required_signatures, required_pull_request_reviews.dismiss_stale_reviews, required_pull_request_reviews.require_code_owner_reviews, required_pull_request_reviews.require_last_push_approval
+Protection de gitgdx/Concentration:main — conforme à la cible générée par `factory_sync.py --emit-branch-protection` (comparaison champ par champ ; aucun champ actif non couvert dans la réponse).
+# EXIT=0

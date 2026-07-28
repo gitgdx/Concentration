@@ -1,0 +1,14 @@
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# PREUVE BRUTE D'API — US-00.7, T4 · ETAT D'ENTREE (Constitution Art. 3)
+# Commande exacte        : gh api repos/gitgdx/Concentration --jq "{private,visibility,owner_type:.owner.type,permissions}"
+# Horodatage UTC         : 2026-07-28T07:12:12Z
+# Code de sortie de `gh` : 0
+# Lecture SEULE : GET uniquement. Aucune ecriture distante n'a ete emise.
+# Redaction : aucun en-tete Authorization, aucun jeton dans ce fichier.
+# Fait GENERATEUR de l'US : le depot est PUBLIC au 2026-07-27 — voie (a) des conditions de
+# deblocage d'US-00.4. Au 2026-07-26 : {"private": true, "visibility": "private"}.
+# permissions.admin == true : le jeton a bien les droits d'administration.
+# NB Windows : le filtre --jq doit etre passe en ARGUMENT (pas via cmd.exe avec des
+# apostrophes, que cmd.exe ne traite pas comme des guillemets).
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+{"owner_type":"User","permissions":{"admin":true,"maintain":true,"pull":true,"push":true,"triage":true},"private":false,"visibility":"public"}

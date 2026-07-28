@@ -1,0 +1,8 @@
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# stderr de : gh api repos/gitgdx/Concentration/branches/main/protection
+# Horodatage UTC : 2026-07-28T07:11:32Z
+# Code de sortie de `gh` : 1
+# `gh` sort en 1 sur une erreur HTTP : LE CORPS JSON part sur stdout, le
+# message humain sur stderr. Cet exit 1 est LA PREUVE ATTENDUE, pas un echec.
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+gh: Branch not protected (HTTP 404)

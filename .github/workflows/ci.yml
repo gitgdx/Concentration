@@ -1,17 +1,31 @@
 name: ✅ CI
 
-# Gates qualité exécutés et RAPPORTÉS sur CHAQUE PR (et sur la branche principale).
+# Gates qualité exécutés sur CHAQUE PR (et sur la branche principale).
 #
-# ⚠️ RAPPORTÉS, PAS BLOQUANTS — constat daté du 2026-07-26 : aucun de ces jobs n'est un status
-#    check REQUIS, parce que `main` n'est PAS protégée et ne peut pas l'être sur ce plan
-#    (dépôt privé, compte User : GET/PUT .../protection ET .../rulesets renvoient 403
-#    « Upgrade to GitHub Pro or make this repository public to enable this feature. »).
-#    Conséquence à assumer : une PR peut être fusionnée AVEC LA CI ROUGE. Il faut donc LIRE
-#    activement les checks (`gh pr checks`) — aucune barrière machine ne le fera.
-#    Ces 4 jobs sont les contextes de la CIBLE ARMÉE (factory.config.json → status_checks),
-#    destinés à devenir requis LE JOUR DU DÉBLOCAGE, via scripts/apply_branch_protection.sh
-#    (PRÊT mais NON APPLICABLE aujourd'hui).
-#    Détail : docs/GIT_PROTECTION.md · docs/adr/ADR-006-protection-branche-principale.md.
+# ✅ REQUIS ET BLOQUANTS depuis le 2026-07-28 (US-00.7). La protection de branche est APPLIQUÉE :
+#    3 des 4 status checks REQUIS de main sont portés par ce fichier — "🔐 Secrets scan (gitleaks)",
+#    "📋 Governance (SCB + traçabilité + synchro)", "📱 App (gates run_gates.py)" — le 4e étant
+#    "check-branch-name" (branch-naming.yml). La fusion est CONDITIONNÉE aux 4 verts,
+#    ADMINISTRATEUR INCLUS (enforce_admins en vigueur → enforcement_level "everyone").
+#    Le serveur énumère lui-même les contextes requis : "4 of 4 required status checks are expected"
+#    (reports/US-00.7/applied_state/negative_test_server.txt).
+#    ⚠️ BORNE : le refus PROUVÉ porte sur le PUSH DIRECT. Le refus d'une tentative de FUSION n'a pas
+#    encore été observé (tâche T11 d'US-00.7) : il découle de l'état constaté, il n'en est pas la preuve.
+#    Source unique des libellés : factory.config.json → status_checks.
+#
+# ⛔ NE JAMAIS MODIFIER un `name:` de job de ce fichier sans mettre à jour factory.config.json
+#    dans le MÊME changement : un libellé divergent d'un seul caractère produit un contexte requis
+#    JAMAIS RAPPORTÉ, donc un VERROUILLAGE — plus aucune PR fusionnable, administrateur inclus.
+#    Porte de sortie : docs/GIT_PROTECTION.md §Plan de retour arrière.
+#
+# ⚠️ CONDITIONNEL : l'enforcement dépend de la VISIBILITÉ PUBLIQUE du dépôt. Un retour en privé
+#    ramènerait le 403 de plan et ces jobs redeviendraient seulement RAPPORTÉS. La vérification de
+#    l'état réel se fait HORS CI (droits admin absents du GITHUB_TOKEN) : voir la commande de
+#    comparaison distante documentée dans docs/GIT_PROTECTION.md §Vérification de l'état réel.
+#    ⛔ Ne JAMAIS ajouter cette commande à un workflow : elle produirait un faux rouge permanent, et
+#    un contrôle négatif du Story File US-00.4/US-00.7 vérifie son absence de .github/workflows/.
+#    Détail : docs/GIT_PROTECTION.md · docs/adr/ADR-007-application-protection-branche.md
+#    (remplace ADR-006).
 #
 # Constitution : docs/governance/CONSTITUTION.md.
 

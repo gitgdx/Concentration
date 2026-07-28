@@ -29,21 +29,35 @@ un rôle précis et un périmètre non-négociable, issue du gabarit `factory-st
 Principe cardinal : **une règle sans mécanisme d'application est un vœu, pas une règle**. Chaque
 règle de gouvernance a donc **3 étages d'enforcement** :
 
-> 🔴 **Constat du 2026-07-26 — l'étage 3 ne bloque rien.** La protection de branche est **indisponible**
-> sur ce dépôt (403 « Upgrade to GitHub Pro or make this repository public », sur la protection
-> classique **et** sur les rulesets). **Aucun status check n'est requis** : les gates CI **rapportent**
-> mais une PR peut être fusionnée **avec la CI rouge**, et l'étage 3 n'est donc **pas** « insensible aux
-> bypass locaux » — il est simplement *ailleurs*. Par ce principe cardinal même, l'enforcement de la
-> branche principale est aujourd'hui **un vœu**. Dérogation humaine tracée (`EVT_WAIVER_GRANTED`,
-> US-00.4) ; voir [ADR-006](adr/ADR-006-protection-branche-principale.md) et
-> [`GIT_PROTECTION.md`](GIT_PROTECTION.md). *(3ᵉ fausse affirmation corrigée dans ce fichier — après
-> l. 285 et l. 321.)*
+> ✅ **Depuis le 2026-07-28, l'étage 3 BLOQUE — et c'est la première fois.** La protection de branche est
+> **APPLIQUÉE** : **4 status checks REQUIS**, **PR obligatoire**, `enforce_admins` en vigueur
+> (`enforcement_level: "everyone"`). L'étage 3 est bien, lui, **insensible aux bypass locaux** — il vit
+> côté serveur. Preuves brutes : [`reports/US-00.7/applied_state/`](../reports/US-00.7/applied_state/) —
+> dont 3 refus émis par le serveur depuis un clone sans hooks. Par le principe cardinal ci-dessus,
+> l'enforcement de la branche principale **n'est plus un vœu**.
+>
+> ⚠️ **Quatre bornes, à ne pas franchir dans la lecture.** (0) **Ce qui est PROUVÉ est que les 4 contextes
+> sont REQUIS** — état de l'API, et lecture directe du serveur (« *4 of 4 required status checks are
+> expected* »). Qu'**une tentative de fusion** avec un contexte non vert soit **refusée** en découle
+> logiquement, mais **n'a pas encore été observée** sur ce dépôt : c'est la tâche **T11** d'US-00.7,
+> **non exécutée** à ce jour. Écrire « aucune fusion possible avec la CI rouge » est donc une **inférence
+> raisonnée**, pas une preuve — et doit être lue comme telle. (1) Ce qui est acquis se limite à : **4 gates
+> requis + PR obligatoire + `enforce_admins`, à la date de la mesure, pour les contextes effectivement
+> rapportés et pour l'acteur employé** — rien n'est prouvé pour un jeton d'application, l'interface web,
+> une PR de fork ou réouverte. (2) La règle est **révocable** par un administrateur **sans aucune
+> détection automatique** : la garantie est « contrainte de plateforme **+ audit périodique** », pas
+> davantage. (3) Tout ceci est **conditionné à la visibilité PUBLIQUE** du dépôt — un retour en privé
+> ramènerait le 403, et la **dérogation `EVT_WAIVER_GRANTED`** (US-00.4), **éteinte le 2026-07-28**,
+> redeviendrait ouverte. Voir [ADR-007](adr/ADR-007-application-protection-branche.md) *(remplace
+> ADR-006)* et [`GIT_PROTECTION.md`](GIT_PROTECTION.md).
+> *(Constat inverse du 2026-07-26 — « l'étage 3 ne bloque rien », 3ᵉ fausse affirmation corrigée alors
+> dans ce fichier — **exact à sa date**, levé le 2026-07-27 par le passage du dépôt en public.)*
 
 ```mermaid
 graph TD
-    A["⚡ Hooks Claude Code\n(temps réel — feedback immédiat à l'agent :\n--no-verify bloqué, .env protégés, SCB vérifié à chaque édition)"]
-    B["🔒 Hooks git versionnés\n(pre-commit : ligne PROJECT_LOG AJOUTÉE + SCB + secrets\ncommit-msg : convention + trailer US\npre-push : branche principale interdite)"]
-    C["🚦 Gates CI RAPPORTÉS sur PR — NON bloquants\n(secrets · gouvernance · gates qualité de l'adapter\naucun check n'est REQUIS : fusion possible avec CI rouge\n403 de plateforme — cf. ADR-006)"]
+    A["⚡ Hooks Claude Code\n(temps réel — feedback immédiat à l'agent :\ncontournements de hook bloqués, .env protégés, SCB vérifié à chaque édition)"]
+    B["🔒 Hooks git versionnés\n(pre-commit : ligne PROJECT_LOG AJOUTÉE + SCB + secrets\ncommit-msg : convention + trailer US\npre-push : branche principale interdite — refus AVANT le réseau)"]
+    C["🚦 Gates CI REQUIS sur PR — BLOQUANTS depuis le 2026-07-28\n(secrets · gouvernance · gates qualité de l'adapter · nom de branche\n4 checks REQUIS + PR obligatoire + enforce_admins : aucune fusion CI rouge\nrévocable par un admin, sans détection automatique — cf. ADR-007)"]
 
     A --> B --> C
 
@@ -290,20 +304,30 @@ Une décision structurante = un ADR immuable (`docs/adr/ADR-XXX-*.md`, template
 | `commit-msg` | `type(scope): description` + trailer `US: US-XX.X` (ou `US: none — justification`) |
 | `pre-push` | refuse la branche principale |
 
-#### Étage 3 — CI sur PR (`.github/workflows/ci.yml`) — ⚠️ **rapportée, PAS bloquante**
+#### Étage 3 — CI sur PR (`.github/workflows/ci.yml`) — ✅ **REQUISE et BLOQUANTE**
 
-Jobs **destinés** à être requis par la protection de branche (source des status checks =
-`factory.config.json`) : `secrets-scan` (gitleaks) · `governance` (SCB + trace + synchro config) ·
-gates qualité de l'adapter (`python scripts/run_gates.py`) · `check-branch-name`. Les E2E tournent à
-part (`e2e.yml` — voir [`docs/qa/E2E_RUNBOOK.md`](qa/E2E_RUNBOOK.md)).
+Jobs **requis** par la protection de branche (source des status checks = `factory.config.json`) :
+`secrets-scan` (gitleaks) · `governance` (SCB + trace + synchro config) · gates qualité de l'adapter
+(`python scripts/run_gates.py`) · `check-branch-name`. Les E2E tournent à part (`e2e.yml` — voir
+[`docs/qa/E2E_RUNBOOK.md`](qa/E2E_RUNBOOK.md)) et **ne sont pas** un contexte requis.
 
-> 🔴 **Au 2026-07-26, aucun de ces jobs n'est *requis*.** La protection de branche est **indisponible**
-> sur ce dépôt (403 de plateforme, cf. [ADR-006](adr/ADR-006-protection-branche-principale.md)) : les
-> checks s'exécutent et **rapportent**, mais une fusion avec CI rouge reste techniquement possible. Le
-> mot « bloquante » ne décrit donc pas l'état réel — il faut **lire** les checks
-> (`gh pr checks <n>`). Vérification de l'état : `python scripts/factory_sync.py --check-remote`.
-> *(Ligne corrigée le 2026-07-26 — occurrence trouvée par un balayage par **motif**, après que la
-> relecture T14 par liste de fichiers l'avait manquée.)*
+> ✅ **Depuis le 2026-07-28, ces 4 jobs SONT des status checks REQUIS** — état de l'API, et lecture directe
+> du serveur, qui les énumère lui-même : « *4 of 4 required status checks are expected* ». La fusion en est
+> **conditionnée**, **administrateur inclus** (`enforce_admins`). ⚠️ **Borne** : le refus d'une **tentative
+> de fusion** n'a **pas encore été observé** sur ce dépôt (tâche **T11** d'US-00.7, non exécutée) — il
+> **découle** de l'état constaté, il n'en est pas la preuve. Vérification de l'état :
+> `python scripts/factory_sync.py --check-remote` (**exit 0** attendu).
+> *(Constat inverse du 2026-07-26 — « aucun de ces jobs n'est requis », trouvé alors par un balayage par
+> **motif** après qu'une relecture par liste de fichiers l'avait manqué — **exact à sa date**, levé le
+> 2026-07-27.)*
+>
+> ⚠️ **Conséquences opérationnelles à connaître** : une branche hors `^feat/US-[0-9]+\.[0-9]+.*$` rend sa
+> PR **définitivement infusionnable** (`check-branch-name` requis) — donc `chore/`, `docs/`, `hotfix/`, et
+> cela touche le **track QUICK** ; `strict: true` **sérialise** les merges ; une seule discussion non
+> résolue bloque la fusion. ⛔ **Ne jamais modifier un `name:` de job sans mettre à jour
+> `factory.config.json` dans le même changement** : un libellé divergent produit un **verrouillage**.
+> Détail : [`GIT_PROTECTION.md`](GIT_PROTECTION.md) §Conditions de fusion et §Plan de retour arrière ·
+> [ADR-007](adr/ADR-007-application-protection-branche.md) *(remplace ADR-006)*.
 
 ---
 
@@ -336,15 +360,18 @@ initialisé depuis le starter kit : seuils posés sans complaisance dès le prem
 ### 6.3 Axes d'amélioration (roadmap)
 
 - Dérouler le Sprint 0 (`US-00.1` → `US-00.6` du `BACKLOG.md`) si ce n'est pas déjà fait.
-  *(État au 2026-07-26 : US-00.1/00.2/00.3 certifiées, US-00.4 en cours, US-00.5/00.6 à créer.)*
-- 🔴 ~~Exécuter `sh scripts/apply_branch_protection.sh` (droits admin requis).~~ **⛔ NE PAS EXÉCUTER
-  aujourd'hui** : la protection de branche est **indisponible** sur ce dépôt (403 « Upgrade to GitHub
-  Pro or make this repository public » sur la protection classique **et** les rulesets). Le script est
-  **prêt et conditionné au déblocage** (dépôt public **ou** GitHub Pro) — voir
+  *(État au 2026-07-28 : US-00.1/00.2/00.3/00.4 certifiées, **US-00.7** en cours, US-00.5/00.6 à créer.)*
+- ✅ **FAIT le 2026-07-28** : `sh scripts/apply_branch_protection.sh gitgdx/Concentration` (droits admin
+  requis) — la protection de branche est **appliquée** et son effet **prouvé**
+  ([`reports/US-00.7/applied_state/`](../reports/US-00.7/applied_state/)). C'est désormais la **voie
+  normale de (ré-)application** en cas de dérive, jamais l'écran *Settings → Branches*. Vérification de
+  l'état réel : `python scripts/factory_sync.py --check-remote` (**exit 0** attendu). Voir
   [`docs/GIT_PROTECTION.md`](GIT_PROTECTION.md) et
-  [ADR-006](adr/ADR-006-protection-branche-principale.md). Vérification de l'état réel :
-  `python scripts/factory_sync.py --check-remote`.
-- Passer `/audit-methodo` à échéance régulière pour garder cette section vivante.
+  [ADR-007](adr/ADR-007-application-protection-branche.md) *(remplace ADR-006)*.
+- 🔴 **Passer `/audit-methodo` à échéance régulière** — ce n'est plus seulement pour garder cette section
+  vivante : son **point de contrôle 1 bis** est la **seule** barrière contre une **révocation silencieuse**
+  de la protection de branche (aucune détection automatique n'existe, le contrôle exigeant des droits admin
+  absents du `GITHUB_TOKEN`). Il vérifie aussi que la **visibilité** du dépôt n'a pas changé.
 
 ---
 

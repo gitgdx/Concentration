@@ -1,0 +1,14 @@
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# PREUVE BRUTE D'API — US-00.7, T4 · ETAT D'ENTREE (Constitution Art. 3)
+# Commande exacte        : gh api repos/gitgdx/Concentration/branches/main/protection
+# Horodatage UTC         : 2026-07-28T07:11:32Z
+# Code de sortie de `gh` : 1
+# Lecture SEULE : GET uniquement. Aucune ecriture distante n'a ete emise.
+# Redaction : aucun en-tete Authorization, aucun jeton dans ce fichier.
+# 404 « Branch not protected » — la protection est DISPONIBLE mais NON APPLIQUEE.
+# AU 2026-07-26 (US-00.4) : 403 « Upgrade to GitHub Pro… » = INDISPONIBLE SUR CE PLAN.
+# 404 != 403 : c'est TOUT l'ecart entre les deux constats, et c'est le fait nouveau.
+# Le chemin 404 REEL, declare « non observable in vivo » par le risque R3 d'US-00.4, est
+# ICI OBSERVE POUR DE VRAI → R3 est CLOS par l'observation.
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+{"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branch-protection","status":"404"}

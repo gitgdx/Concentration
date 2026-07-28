@@ -1,31 +1,78 @@
-# 🛡️ Branche principale : enforcement réel, cible armée et vérification
+# 🛡️ Branche principale : enforcement appliqué, effet prouvé et vérification
 
-> # ⛔ `main` N'EST PAS PROTÉGÉE — et ne peut pas l'être sur ce dépôt (constat du 2026-07-26)
+> # ✅ `main` EST PROTÉGÉE — appliquée le **2026-07-28** (US-00.7)
 >
-> `GET /repos/gitgdx/Concentration/branches/main` renvoie **`"protected": false`**.
-> `GET …/branches/main/protection` **et** `GET …/rulesets` renvoient tous deux **403 —
-> « Upgrade to GitHub Pro or make this repository public to enable this feature. »**, avec un jeton
-> authentifié `gitgdx` disposant de `{"admin": true}` sur un dépôt `{"private": true}`.
+> *(Le constat inverse du **2026-07-26** — « `main` n'est pas protégée, et ne peut pas l'être sur ce
+> dépôt », 403 de plan — était **exact à sa date**. Il est **historisé** au §suivant, jamais supprimé :
+> il a été **levé le 2026-07-27** par une décision humaine, **voie (a) — dépôt rendu PUBLIC** — puis la
+> protection a été **appliquée le 2026-07-28**.)*
 >
-> **Ce n'est ni un oubli, ni un défaut de droits, ni un défaut de configuration : c'est une limite de
-> plan.** Les **deux** mécanismes de la plateforme (protection classique **et** rulesets) sont
-> verrouillés à l'identique. **Aucune** commande, aucun script, aucun réglage ne peut protéger `main`
-> en l'état — `scripts/apply_branch_protection.sh` **échouerait en 403**.
+> **Ce qui est PROUVÉ, avec sa preuve brute datée** — [`reports/US-00.7/applied_state/`](../reports/US-00.7/applied_state/) :
 >
-> Ce qui tient lieu d'enforcement aujourd'hui est un **filet de discipline**, pas une contrainte de
-> plateforme : voir §[Ce qui protège réellement `main`](#-ce-qui-protège-réellement-main-aujourdhui).
+> | Fait | Lecture | Preuve |
+> |---|---|---|
+> | La branche est protégée | `GET …/branches/main` → **`"protected": true`** | `branch_main_after.json` |
+> | La règle est **exactement** la cible générée | `GET …/branches/main/protection` → **200** : `strict: true` · **4** contextes · `required_pull_request_reviews` **présent** avec `0` · `enforce_admins.enabled: true` · `required_conversation_resolution: true` · `allow_force_pushes: false` · `allow_deletions: false` · `required_linear_history: false` · `restrictions` **absente** | `protection_applied.json` |
+> | L'administrateur est **inclus** | `required_status_checks.enforcement_level: **"everyone"**` — manifestation d'`enforce_admins` | `branch_main_after.json` |
+> | La comparaison config ↔ dépôt réel est **conforme** | `--check-remote` → **exit 0 RÉEL** : **12** champs alignés, **0** écart, **7** champs additionnels neutres **nommés**, **0** champ actif non couvert. **Sans** `[SIMULATION]`, sans « SOURCE SIMULÉE » | `check_remote_exit0_reel.txt` |
+> | L'**effet** : aucun chemin d'écriture directe | Depuis un clone **sans hooks**, **3 refus émis par le SERVEUR** : `GH006 Protected branch update failed` · « *Changes must be made through a pull request* » · « ***4 of 4 required status checks are expected*** » · suppression → « *refusing to delete the current branch* » | `negative_test_server.txt` |
 >
-> Décision humaine arbitrée le 2026-07-26 : **ni passage du dépôt en public, ni upgrade GitHub Pro.**
-> La cible de protection est donc **armée** — déclarée, prête, applicable en une commande — et
-> **NON active**. Voir [ADR-006](adr/ADR-006-protection-branche-principale.md).
+> ⚠️ **Ce que ces preuves n'établissent PAS — à lire avant tout audit.**
 >
-> **Défense en profondeur locale** (inchangée, et toujours de la discipline) : les hooks versionnés
+> 1. **Le refus d'une tentative de FUSION n'a pas encore été observé.** Ce qui est prouvé est que les 4
+>    contextes **sont REQUIS** (P2 + lecture directe du serveur). Que la fusion soit **refusée** tant qu'un
+>    contexte n'est pas vert en **découle logiquement**, et c'est ainsi que la plateforme est documentée —
+>    mais l'observation manque : c'est la tâche **T11** d'US-00.7 (PR ouverte, libellés réellement
+>    rapportés, tentative de fusion refusée, puis fusion après 4 verts), **non exécutée** à ce jour.
+>    ⚠️ Toute phrase de la forme « *aucune fusion possible avec la CI rouge* » est une **inférence
+>    raisonnée**, **pas** une preuve. Le refus **prouvé** porte sur le **push direct**, ce qui n'est pas la
+>    même opération.
+> 2. **`allow_force_pushes: false` et `allow_deletions: false` ne sont pas isolés** par le test négatif :
+>    le **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche **avant** toute
+>    évaluation propre au force-push), et GitHub refuse la suppression de la **branche par défaut**
+>    indépendamment du réglage. Ces deux-là sont prouvés par l'**état de l'API** (P2), **pas** par l'effet.
+> 3. Ne sont pas prouvés non plus : le comportement pour un **autre acteur**, un **jeton d'application**,
+>    l'**interface web**, une PR issue d'un **fork** ou **réouverte**, ni la **persistance** de l'état
+>    (aucune détection automatique — dette **#2**).
+>
+> ⚠️ **CONDITIONNEL — la condition d'invalidation de tout ce document.** L'édifice repose sur la
+> **visibilité PUBLIQUE** du dépôt. Un retour en **privé** ramènerait le **403**, rendrait la protection
+> **indisponible** et **rouvrirait la dérogation éteinte**. Vérifier par
+> `python scripts/factory_sync.py --check-remote` (**exit 0** attendu) et
+> `gh api repos/gitgdx/Concentration --jq '{private,visibility}'`.
+>
+> 🔕 **Dérogation `EVT_WAIVER_GRANTED` (2026-07-26, US-00.4, Constitution Art. 5) — ÉTEINTE / SANS OBJET
+> au 2026-07-28.** Elle portait sur « **ni upgrade GitHub Pro, ni passage du dépôt en public** » ; l'humain
+> a choisi la **voie (a) — dépôt public — le 2026-07-27**. Son motif (impossibilité de plateforme)
+> **n'existe plus**. ⛔ **La trace est append-only** : l'événement du 2026-07-26 n'est **ni supprimé, ni
+> édité, ni réécrit** — on **éteint** une dérogation, on ne l'**effface** pas. ⚠️ **L'extinction est
+> DOCUMENTAIRE** : **aucun** des **25** événements de `scripts/events_catalog.json` (+ 4 alias dépréciés)
+> ne permet de révoquer, éteindre ou faire expirer une dérogation → **dette du système de traçabilité**
+> (§Dettes, ligne **10**). **Conditionnel** : un retour en privé **rouvrirait la question**.
+>
+> **Décision de référence** : [ADR-007](adr/ADR-007-application-protection-branche.md) — *remplace*
+> [ADR-006](adr/ADR-006-protection-branche-principale.md) *(immuable, `Accepté` le 2026-07-26 : à lire
+> comme un état historique, **jamais** comme la décision courante)*.
+>
+> **Défense en profondeur locale** (inchangée, et toujours de la discipline — elle s'**ajoute** désormais
+> à une contrainte de plateforme au lieu de la remplacer) : les hooks versionnés
 > (`scripts/install_hooks.sh`) bloquent commit et push directs sur la branche principale, et le hook
-> Claude Code `block_dangerous_bash.sh` interdit à l'agent les commandes `--no-verify` / push direct.
+> Claude Code `block_dangerous_bash.sh` interdit à l'agent les commandes de contournement de hook et le
+> push direct.
 
 ---
 
-## 📅 Constat daté du 2026-07-26 — quatre faits, quatre preuves
+## 📅 Constat daté du 2026-07-26 — HISTORISÉ (levé le 2026-07-27, protection appliquée le 2026-07-28)
+
+> 🕓 **Section conservée telle quelle, à valeur d'HISTORIQUE.** Elle était **exacte à sa date** et
+> **n'est pas réécrite** : c'est la référence qui permet à un audit à contexte frais de mesurer le delta.
+> **Ce qui a changé depuis** : `…/protection` est passé de **403** (« *Upgrade to GitHub Pro…* ») à
+> **404** (« *Branch not protected* » — **disponible**, non appliquée) le **2026-07-27**, puis à **200**
+> avec la cible appliquée le **2026-07-28**. Le fait **(b)** ci-dessous, établi par **inférence** faute
+> d'endpoint lisible, a été **confirmé a posteriori par lecture directe** — voir l'encadré à la fin de
+> cette section.
+
+### Les quatre faits du 2026-07-26 — quatre preuves
 
 Preuves **brutes datées de l'API**, archivées telles quelles dans
 [`reports/US-00.4/`](../reports/US-00.4/). Chaque fichier porte sa **commande exacte** et son
@@ -53,28 +100,71 @@ voir**, puisqu'il ne compare que des artefacts *documentaires* sans jamais appel
 vérification verte a donc coexisté, sans la moindre contradiction, avec une branche principale grande
 ouverte **et** une cible inapplicable. C'est cet **angle mort de vérification** que US-00.4 ferme.
 
----
-
-## 🕸️ Ce qui protège réellement `main` aujourd'hui
-
-**Trois éléments, et ce sont trois filets de discipline — aucun n'est une contrainte de plateforme.**
-Les présenter comme un enforcement de plateforme serait un défaut bloquant.
-
-| Élément | Ce qu'il fait | **Ses limites — à ne jamais taire** |
-|---|---|---|
-| Hook **local** `pre-push` (`core.hooksPath = scripts/githooks`, posé par `scripts/install_hooks.sh`) | Refuse `refs/heads/main` depuis ce poste | **Absent d'un clone frais** (tant que `install_hooks.sh` n'est pas lancé) · contournable depuis un autre poste ou via l'**interface web** · `--no-verify` reste interdit (Constitution Art. 1) mais cette interdiction est **elle-même portée par un hook**, donc par la même discipline |
-| CI (`ci.yml`, `branch-naming.yml`) | **Rapporte** 4 status checks sur chaque PR | Ces checks ne sont **requis par rien** : une PR peut être fusionnée **avec la CI rouge**. Ils informent, ils ne bloquent pas |
-| Discipline de process | PR systématiques : **8 fusions** (#1, #3, #4, #5, #6, #7, #8, #9) | Repose sur la **volonté des intervenants**, pas sur une barrière. Seuls `0a2e5ab` et `6483022` (bootstrap) sont arrivés hors PR |
-
-> **Test négatif serveur : explicitement REPORTÉ, jamais exécuté.** Sans protection, un
-> `git push origin main`, un force-push ou une suppression **réussiraient** : les exécuter
-> modifierait `main` hors PR **pour rien**. Cette documentation **ne produit donc aucune preuve de
-> refus serveur et n'en exige aucune**. Conséquence assumée : l'**effet** (aucun chemin d'écriture
-> directe) reste **non démontré** — seule la règle *déclarée* est connue.
+> ### ✅ Le fait (b) est CONFIRMÉ A POSTERIORI par lecture directe — 2026-07-28
+>
+> US-00.4 ne pouvait établir « **aucun check n'est requis** » que par **INFÉRENCE** depuis
+> `"protected": false`, et l'a **déclaré comme telle** plutôt que de la présenter comme une lecture d'API.
+> Le test négatif d'US-00.7 a produit la **lecture directe** qui manquait : le serveur répond
+>
+> ```text
+> remote: - 4 of 4 required status checks are expected.
+> ```
+>
+> — le serveur **énumère lui-même** les contextes requis. Le mécanisme d'inférence d'US-00.4 est donc
+> **validé a posteriori** : sur une branche non protégée, il n'y avait effectivement aucun check requis ;
+> sur une branche protégée par la même cible, il y en a **4 sur 4**. C'est un **résultat**, et pas un
+> détail de forme : l'honnêteté méthodologique d'US-00.4 (nommer une inférence comme telle) se trouve
+> **récompensée par la confirmation**, sans qu'une ligne de son texte ait eu besoin d'être corrigée.
+> Preuve : `reports/US-00.7/applied_state/negative_test_server.txt`.
 
 ---
 
-## 🔓 Conditions de déblocage — deux voies, et seulement deux
+## 🕸️ Ce qui protège `main` — contrainte de plateforme **plus** filet de discipline résiduel
+
+**Depuis le 2026-07-28, l'enforcement de la branche principale est une contrainte de plateforme.** Ce
+qui subsiste de discipline locale ne la **remplace** plus : il s'y **ajoute**. La distinction reste
+essentielle — les présenter comme équivalents serait un défaut.
+
+| Élément | Nature | Ce qu'il fait | **Ses limites — à ne jamais taire** |
+|---|---|---|---|
+| **Protection de branche GitHub** (`…/branches/main/protection`) | 🔒 **contrainte de PLATEFORME** | Refuse toute mise à jour de `refs/heads/main` hors PR, **pour tout acteur**, y compris l'administrateur (`enforce_admins` → `enforcement_level: "everyone"`). **4 status checks REQUIS.** Refus **prouvés** : `GH006`, « *Changes must be made through a pull request* », « *4 of 4 required status checks are expected* » | **Révocable** par un administrateur à tout moment, **sans aucune détection automatique** (dette **#2**) · vaut **à la date de la mesure** · **conditionnée à la visibilité publique** du dépôt · rien n'est prouvé pour un jeton d'application ni pour l'interface web |
+| CI (`ci.yml`, `branch-naming.yml`) | 🔒 **contrainte de plateforme** *(via les contextes requis)* | Les **4** contextes **SONT REQUIS** — état de l'API, et le serveur les énumère lui-même (« *4 of 4 required status checks are expected* ») : la fusion y est **conditionnée** | ⚠️ Le refus d'une **tentative de fusion** n'a **pas encore été observé** (T11 non exécutée) : il **découle** de l'état, il n'en est pas la preuve. Et ne démontre le caractère bloquant que des contextes **effectivement rapportés** : un contexte requis **jamais rapporté** produit un blocage **définitif** (§Plan de retour arrière) |
+| Hook **local** `pre-push` (`core.hooksPath = scripts/githooks`, posé par `scripts/install_hooks.sh`) | 🕸️ **filet de discipline** *(résiduel, et toujours utile)* | Refuse `refs/heads/main` **avant l'aller-retour réseau** (retour immédiat) ; vaudrait encore si la protection serveur était un jour désactivée | **Absent d'un clone frais** — c'est précisément la condition du test négatif d'US-00.7 · l'interdiction des options de contournement de hook (Constitution Art. 1) reste portée par la **même** discipline locale |
+| Discipline de process | 🕸️ **filet de discipline** | PR systématiques : **10 fusions** (#1, #3 → #11) et **2** commits directs, tous deux de bootstrap | Repose sur la volonté des intervenants — mais elle n'est **plus le seul** rempart : `0a2e5ab` et `6483022` (bootstrap) sont les seuls commits jamais arrivés sur `main` hors PR, et un tel commit est désormais **refusé par le serveur** |
+
+> ✅ **Test négatif serveur : EXÉCUTÉ le 2026-07-28** *(il était « explicitement REPORTÉ, jamais
+> exécuté » au 2026-07-26 — le report est soldé)*. Depuis un **clone jetable sans hooks**, hors du dépôt
+> de travail, **sans aucune option de contournement de hook** : les **3** commandes sont **refusées par le
+> serveur**, et `git rev-parse origin/main` est **identique avant et après les trois**. L'**effet** —
+> aucun chemin d'écriture directe vers la branche principale — est donc **démontré**, et non plus
+> seulement déclaré. Preuve brute : `reports/US-00.7/applied_state/negative_test_server.txt`.
+>
+> ⚠️ **Deux précisions d'attribution, à ne pas escamoter.** (1) Le test prouve l'**effet global**, il
+> n'**isole pas** chaque réglage : `allow_force_pushes: false` et `allow_deletions: false` sont prouvés par
+> l'**état de l'API**, pas par ce test (même `GH006` pour le force-push ; refus de supprimer la branche
+> **par défaut** indépendamment du réglage). (2) La preuve vaut **à sa date** et **pour l'acteur employé**.
+>
+> 💡 **Leçon de procédure consignée** : une première tentative lancée **par erreur depuis le vrai dépôt**
+> a vu la suppression refusée par le **hook local** `pre-push`, sans jamais atteindre le serveur. **Un
+> refus local ne prouve rien** — c'est toute la raison d'être du clone sans hooks. L'incident est consigné
+> dans le fichier de preuve, non masqué.
+
+---
+
+## 🔓 Conditions de déblocage — HISTORISÉ : la **voie (a) a été retenue** le 2026-07-27
+
+> ✅ **Décision humaine tracée (Constitution Art. 5) : le dépôt a été rendu PUBLIC le 2026-07-27** —
+> c'est la **voie (a)** du tableau ci-dessous. La section est **conservée** parce qu'elle documente le
+> **coût assumé** de ce choix, et parce que la conditionnalité qu'elle décrit reste **active** : un retour
+> en privé ramènerait le **403**.
+>
+> ⚠️ **L'exposition est IRRÉVERSIBLE, et il faut continuer de le dire.** Repasser le dépôt en privé ne
+> dépublie pas ce qui a été vu, cloné ou indexé : **tout l'historique** du dépôt, y compris la totalité de
+> sa gouvernance, est **définitivement** exposé. **`gitleaks` est désormais une barrière CRITIQUE**, et
+> c'est l'un des 4 contextes requis. L'analyse de coût du 2026-07-26 — qui écartait cette voie — **n'est
+> pas invalidée** par le renversement : elle a été **arbitrée** par l'autorité humaine, seule compétente.
+> **Corollaire opérationnel nouveau** : n'importe qui peut désormais **forker** le dépôt et **ouvrir une
+> PR** (§Conditions de fusion, point 4).
 
 *(État de plan **daté du 2026-07-26**, dépendant de la politique commerciale de la plateforme, qui
 peut évoluer dans les deux sens. Re-vérifier avec la commande du §Vérification — ne jamais figer cet
@@ -82,24 +172,29 @@ peut évoluer dans les deux sens. Re-vérifier avec la commande du §Vérificati
 
 | Voie | Coût | Exposition | À savoir avant de décider |
 |---|---|---|---|
-| **(a) Rendre le dépôt public** | **Nul** | **Exposition publique du code, de toute la gouvernance et de l'HISTORIQUE COMPLET** | ⚠️ **IRRÉVERSIBLE pour ce qui a été publié** : repasser le dépôt en privé ne dépublie pas ce qui a été vu, cloné ou indexé. `gitleaks` devient une barrière **critique**. Un dépôt rendu public « juste pour débloquer la CI » expose **définitivement** tout l'historique |
+| **(a) Rendre le dépôt public** — ✅ **RETENUE le 2026-07-27** | **Nul** | **Exposition publique du code, de toute la gouvernance et de l'HISTORIQUE COMPLET** | ⚠️ **IRRÉVERSIBLE pour ce qui a été publié** : repasser le dépôt en privé ne dépublie pas ce qui a été vu, cloné ou indexé. `gitleaks` devient une barrière **critique**. Un dépôt rendu public « juste pour débloquer la CI » expose **définitivement** tout l'historique |
 | **(b) GitHub Pro** | **Coût par utilisateur et par mois** | **Aucune** — le dépôt reste **privé** | Aucune exposition, mais une dépense récurrente à assumer |
 
-**Ce qui serait débloqué est identique dans les deux cas** : protection classique **et** rulesets,
-status checks **requis**, `enforce_admins` effectif, et le **test négatif serveur** reporté devient
-exécutable.
+**Ce qui a été débloqué** *(identique dans les deux cas)* : protection classique **et** rulesets,
+status checks **requis**, `enforce_admins` effectif, et le **test négatif serveur** reporté est devenu
+exécutable — **il a été exécuté le 2026-07-28**. *(Les rulesets, désormais disponibles (**200 `[]`**),
+ne sont **pas** retenus : la protection classique est déjà outillée, auditée et certifiée de bout en
+bout — arbitrage **ADR-007 D4**, par sobriété et non par indisponibilité.)*
 
-> ⚠️ **Ajouter un collaborateur ne débloque RIEN.** La limitation porte sur le **plan** du compte et
-> la **visibilité** du dépôt — **pas** sur le nombre de contributeurs.
+> ⚠️ **Ajouter un collaborateur ne débloque RIEN.** La limitation portait sur le **plan** du compte et
+> la **visibilité** du dépôt — **pas** sur le nombre de contributeurs. **Cet énoncé était exact et le
+> reste** : c'est bien la visibilité qui a débloqué.
 
-**Engager l'une de ces voies est hors du pouvoir d'un agent** : cela exige une **décision humaine
-explicite et tracée**.
+**Engager l'une de ces voies était hors du pouvoir d'un agent** : cela exigeait une **décision humaine
+explicite et tracée** — elle a été prise le 2026-07-27.
 
 ---
 
-## 🎯 Cible armée — déclarée, prête, **NON active**
+## 🎯 Cible APPLIQUÉE — déclarée, appliquée, vérifiée
 
-`factory.config.json` est la **source unique**. La cible arbitrée le 2026-07-26 y est inscrite :
+`factory.config.json` est la **source unique** — **non modifiée** par l'application. La cible arbitrée le
+2026-07-26 (ADR-006 décision 3, **conservée sans rediscussion** par ADR-007) y est inscrite, et c'est
+**exactement** elle qui est en vigueur depuis le **2026-07-28** :
 
 | Clé | Valeur | Pourquoi |
 |---|---|---|
@@ -114,35 +209,39 @@ explicite et tracée**.
 > Le **retirer** désactiverait « Require a pull request before merging » — **`0` approbation ≠ pas de
 > PR exigée**. `emit_branch_protection()` l'émet **toujours** : ne jamais « optimiser » son omission.
 
-**Le jour du déblocage, l'application est UNE seule commande** — aucune nouvelle décision, aucun
-arbitrage, aucun dossier à re-instruire :
+**L'(ré-)application est UNE seule commande** — c'est la **voie normale**, et la **seule** autorisée :
 
 ```sh
-# ⛔ NE PAS EXÉCUTER AUJOURD'HUI — échouerait en 403 (limite de plan).
-#    Commande conservée telle quelle pour le jour du déblocage.
 sh scripts/apply_branch_protection.sh gitgdx/Concentration
 ```
 
-Ce script consomme le payload **généré** par `python scripts/factory_sync.py
---emit-branch-protection` (jamais un JSON écrit à la main). Il porte en en-tête la mention
-**NON APPLICABLE au 2026-07-26 / PRÊT et CONDITIONNÉ AU DÉBLOCAGE** : il n'est **pas** « à
-exécuter » — l'exécuter aujourd'hui **échouerait en 403**.
+⚠️ Elle **exige des droits admin** et **modifie l'enforcement de `main`** : ce n'est pas une commande de
+lecture. Ce script consomme le payload **généré** par `python scripts/factory_sync.py
+--emit-branch-protection` (**jamais** un JSON écrit à la main, **jamais** l'écran *Settings → Branches*).
+**Toute divergence future entre le dépôt et la configuration se corrige en RÉ-APPLIQUANT depuis la
+config** — jamais en alignant la config sur l'état constaté.
 
-> « Armée » vaut **validation logique** (payload cohérent et complet), **pas** validation
-> **fonctionnelle** : aucun `PUT` n'a jamais été accepté par la plateforme, donc le comportement réel
-> de la règle reste **non démontré**. **Aucune preuve d'application ne peut être produite ni exigée.**
+> ✅ **La validation est désormais FONCTIONNELLE, et non plus seulement logique.** Au 2026-07-26,
+> « armée » ne valait que **validation logique** (payload cohérent et complet) : aucun `PUT` n'avait jamais
+> été accepté par la plateforme. Le `PUT` du **2026-07-28** a été **accepté**, et l'**effet** de la règle
+> est **prouvé** (3 refus serveur + `exit 0` réel de `--check-remote`). Le script vient donc d'être
+> **validé en production**.
 >
-> Corollaire assumé : la « revue humaine explicite de la PR » du track **FULL**
-> (`docs/governance/TRACKS.md`) et le rituel `/audit-us` restent des obligations **de process**, non
-> enforced — et le resteront **même après le déblocage**, puisque la cible est à `0` approbation.
+> ⚠️ **Ce qui n'a PAS changé** : la « revue humaine explicite de la PR » du track **FULL**
+> (`docs/governance/TRACKS.md`) et le rituel `/audit-us` restent des obligations **de process, non
+> enforced** — la cible est à **`0`** approbation, donc **aucune barrière machine** ne les soutient. Dette
+> **#7**, arbitrage **dû avant le lock d'US-01.1**.
 
-### Les 4 contextes de la cible
+### Les 4 contextes de la cible — **REQUIS**
 
-> ⚠️ **Lire l'en-tête du tableau ci-dessous avec prudence** : il est **généré** et intitulé « Status
-> check requis », mais **aucun de ces 4 checks n'est requis aujourd'hui** — ils sont les contextes de
-> la **cible armée**, et sont seulement **rapportés** par la CI. *(L'en-tête généré provient de
-> `scripts/factory_sync.py`, fichier d'enforcement — sa reformulation est une action humaine, cf.
-> §Dettes.)*
+> ✅ **L'en-tête généré du tableau ci-dessous — « Status check requis » — est désormais EXACT.** Ces 4
+> contextes **sont** requis depuis le 2026-07-28 : aucune PR n'est fusionnable tant qu'ils ne sont pas
+> tous verts, administrateur inclus. *(Au 2026-07-26 cet en-tête était trompeur et devait être encadré
+> d'un avertissement ; sa reformulation aurait exigé d'éditer `scripts/factory_sync.py`, fichier
+> **Art. 6**. Cette **dette #6 est devenue SANS OBJET** : l'énoncé est vrai tel quel, il n'y a plus rien
+> à corriger.)* Vérifié le 2026-07-28 : les 4 libellés rapportés par l'API sont **identiques caractère
+> pour caractère** à ceux de `factory.config.json` — `reports/US-00.7/labels_verification.md` et
+> `applied_state/protection_applied.json`.
 
 <!-- FACTORY_SYNC:BEGIN — généré par scripts/factory_sync.py, ne pas éditer -->
 
@@ -161,6 +260,32 @@ est régénéré par `python scripts/factory_sync.py --write`. Toute édition ma
 
 ---
 
+## 🚧 Conditions de fusion désormais ACTIVES — à connaître, pas à découvrir comme une panne
+
+> **Depuis le 2026-07-28, toute PR vers `main` doit satisfaire SIMULTANÉMENT les cinq conditions
+> ci-dessous — administrateur inclus.** Elles ne sont pas des recommandations : ce sont des **conditions
+> de fusion**. Aucune n'est un défaut ; chacune est un **coût assumé** de l'enforcement.
+>
+> ⚠️ **Statut de ce tableau** : il décrit la **configuration appliquée** (état de l'API, prouvé) et le
+> comportement qui en découle **selon la plateforme**. Le **refus effectif d'une tentative de fusion** n'a
+> **pas encore été observé** sur ce dépôt (tâche **T11** d'US-00.7) — à lire comme une inférence
+> documentée, pas comme une preuve.
+
+| # | Condition | Ce qui bloque, concrètement | Comment s'y conformer |
+|---|---|---|---|
+| 1 | **PR obligatoire** (`required_pull_request_reviews` présent) | Tout `git push` direct sur `main` est refusé par le serveur (`GH006`) | Passer par une PR — il n'y a plus d'autre chemin |
+| 2 | **4 status checks REQUIS et verts** | `mergeable_state = blocked` tant qu'un contexte n'est pas vert *(ou n'est pas encore rapporté : « *4 of 4 required status checks are expected* »)* | Attendre `gh pr checks <n>` → **4/4**. Un contexte **jamais rapporté** est un **verrouillage** : voir §Plan de retour arrière |
+| 3 | **Nom de branche conforme** — 🔴 **la contrainte la plus facile à percuter** | `check-branch-name` (`.github/workflows/branch-naming.yml`) sort en **`exit 1`** pour toute branche hors `^feat/US-[0-9]+\.[0-9]+.*$` → contexte requis **ROUGE** → PR **définitivement infusionnable**. **`chore/`, `docs/`, `hotfix/` sont donc impossibles à fusionner.** Touche directement le **track QUICK**, dont les hotfix reposent sur des noms libres | Nommer la branche `feat/US-XX.X-description`, **même** pour un commit de gouvernance ou un correctif urgent. Toute exception exige un arbitrage humain tracé |
+| 4 | **Corollaire du dépôt PUBLIC** — PR issues de **forks** | Le contrôle porte sur `github.head_ref` : **toute PR de fork** dont la branche ne suit pas le motif est **structurellement infusionnable**. Le dépôt est ouvert **en lecture et en proposition**, **fermé en fusion** par sa propre convention. S'y ajoute que le `GITHUB_TOKEN` d'une PR de fork est **restreint**, alors que le job `secrets-scan` demande `pull-requests: write` | **Non résolu — arbitrage requis** si une contribution externe se présente. Ce n'est pas un défaut : c'est un **choix** à assumer explicitement |
+| 5 | **Branche à jour** (`strict: true`) **et zéro discussion ouverte** (`required_conversation_resolution: true`) | `strict: true` **sérialise les merges** : chaque fusion périme toutes les autres branches ouvertes. `required_conversation_resolution` bloque sur **un seul** commentaire d'audit non résolu | Rebaser/mettre à jour avant de fusionner ; **résoudre** les discussions d'audit (elles ne se perdent pas — c'est voulu) |
+
+⚠️ **Distinguer un blocage NORMAL d'un VERROUILLAGE** : un contexte en `FAILURE` est un gate qui a fait
+son travail → **corriger la cause**. Un contexte en `EXPECTED`/absent est un contexte **jamais rapporté**
+→ **appliquer le §Plan de retour arrière**. Confondre les deux conduirait à administrer la règle au lieu
+de corriger le travail — c'est-à-dire à contourner un gate.
+
+---
+
 ## 🔍 Vérification de l'état réel
 
 Deux commandes, deux portées **qu'il ne faut jamais confondre** :
@@ -174,9 +299,9 @@ Deux commandes, deux portées **qu'il ne faut jamais confondre** :
 
 | Code | Signification | Ce qu'il faut en faire |
 |---|---|---|
-| **0** | Protection **strictement conforme** à la cible générée. **Seul** chemin où le mot « conforme » est autorisé. ⚠️ **Cette issue n'a jamais été obtenue sur ce dépôt** — elle n'est démontrée que sur fixture | Signifierait que le déblocage a eu lieu **et** que la protection est appliquée (ce qui **n'est pas le cas au 2026-07-26**) → exécuter alors le **test négatif reporté** |
-| **1** | **Dérive** : protection absente ou divergente. Une ligne `champ \| attendu \| réel` par écart, contextes listés séparément en *manquants* et *en trop* | Ré-appliquer **depuis la configuration** (`apply_branch_protection.sh`), jamais à la main dans l'interface |
-| **2** | `VERIFICATION IMPOSSIBLE — ce n'est PAS un succès` : **403 de plan** (l'issue réelle sur ce dépôt au 2026-07-26), 403 de droits, **401** (non authentifié), **404 non désambiguïsé**, erreur réseau, `gh` absent **et** aucun jeton | **À SIGNALER.** Un exit 2 n'est **ni un succès ni un échec** : c'est un constat, et il **maintient la dette OUVERTE**. Ne jamais le consigner comme un succès, ne jamais s'en servir pour clore la dette |
+| **0** | Protection **strictement conforme** à la cible générée. **Seul** chemin où le mot « conforme » est autorisé. ✅ **Issue OBTENUE EN RÉEL le 2026-07-28** — 12 champs alignés, 0 écart, 0 champ actif non couvert (`reports/US-00.7/applied_state/check_remote_exit0_reel.txt`). C'est **l'état attendu aujourd'hui**, et la **première observation in vivo** de ce chemin *(il n'était démontré que sur fixture jusque-là — écart de preuve n° 3 d'US-00.4, **refermé**)* | **Rien à faire** — consigner le code. ⚠️ L'exit 0 vaut **à l'instant de la mesure** : il n'installe **aucune** surveillance continue |
+| **1** | **Dérive** : protection absente ou divergente. Une ligne `champ \| attendu \| réel` par écart, contextes listés séparément en *manquants* et *en trop* | **Ré-appliquer depuis la configuration** (`sh scripts/apply_branch_protection.sh gitgdx/Concentration`), jamais à la main dans l'interface, puis re-vérifier — et **archiver les deux passages** |
+| **2** | `VERIFICATION IMPOSSIBLE — ce n'est PAS un succès` : **403 de plan** *(l'issue réelle au 2026-07-26 ; elle **redeviendrait** réelle si le dépôt repassait en privé — c'est pourquoi ce cas reste dans l'outil)*, 403 de droits, **401** (non authentifié), **404 non désambiguïsé**, erreur réseau, `gh` absent **et** aucun jeton, `MAPPING INCOMPLET` | **À SIGNALER.** Un exit 2 n'est **ni un succès ni un échec** : c'est un constat. Sa cause doit être **NOMMÉE**. ⛔ **Jamais** d'ajustement d'`INERT_GET_KEYS` ni du mapping « pour forcer le vert » |
 
 **Attribution honnête du code HTTP** — un **403** (plan) n'est ni un **401** (non authentifié) ni un
 **404** (branche non protégée *ou* droits insuffisants). Confondre les trois ferait diagnostiquer un
@@ -184,6 +309,13 @@ problème de droits là où il n'en existe aucun. L'ambiguïté du **404** est l
 `GET …/branches/{branche}` (champ `protected`, lisible **sans** droits admin) : `protected == false`
 → **dérive réelle (exit 1)** ; `protected == true` malgré une protection illisible → **droits
 insuffisants (exit 2)**.
+
+> ✅ **La désambiguïsation du 404 a été VALIDÉE IN VIVO le 2026-07-27** — elle était jusque-là
+> « non observable in vivo » (risque **R3** d'US-00.4, **CLOS par l'observation**). Après le passage du
+> dépôt en public et **avant** l'application, `…/protection` a renvoyé un **404 « Branch not protected »**
+> avec `protected == false` → l'outil a rendu **exit 1** (dérive réelle) et **jamais** exit 2, exactement
+> comme prévu. Preuve : `reports/US-00.7/entry_state/protection_404.json` et `check_remote_exit1.txt`.
+> ⚠️ **Reste non exercé** : le repli `urllib` du comparateur contre l'API réelle (dette **#9**, partielle).
 
 ### ⚠️ Prérequis d'exécution : `gh` doit être joignable dans le `PATH`
 
@@ -201,26 +333,48 @@ un **faux rouge permanent**, soit la tentation de le rendre non bloquant — don
 une commande d'**administration manuelle**, et cette séparation est **testée** par un contrôle
 négatif : `grep -rn "check-remote" .github/workflows/` doit ne rien renvoyer.
 
-### Point de contrôle périodique
+### Point de contrôle périodique — **conservé, et RÉORIENTÉ**
 
-Porté par `/audit-methodo` (axe Gouvernance) : exécuter `--check-remote`, **consigner le code de
-sortie**, puis réévaluer (i) la **condition de déblocage** (visibilité du dépôt **et** plan du
-compte) et (ii) la **condition de retour à `1` approbation** (`gh api
-repos/gitgdx/Concentration/collaborators` — si **≥ 2** comptes en écriture, ouvrir une US remettant
-`required_approving_review_count: 1`). **Aucune des trois issues ne peut rester silencieuse.**
+Porté par `/audit-methodo` (axe Gouvernance). **Son objet a changé le 2026-07-28 ; il n'a pas
+disparu** — il ne porte plus la dette « `main` n'est pas protégée » mais la **surveillance de sa
+persistance**, qui est désormais la seule barrière contre une révocation silencieuse. À chaque passage :
 
-> **Dette assumée** : ce contrôle est **périodique, manuel et humain**. Entre deux passages,
-> **aucune** dérive n'est détectée — et cela **restera vrai après le déblocage**.
+1. `python scripts/factory_sync.py --check-remote` — **exit 0 attendu**. **exit 1** = **dérive** → ré-appliquer
+   **depuis la config**. **exit 2** = **à signaler**, cause **nommée**. **Consigner le code**, pas une paraphrase.
+2. **Vérifier que la VISIBILITÉ du dépôt n'a pas changé** :
+   `gh api repos/gitgdx/Concentration --jq '{private,visibility}'` → un retour en **privé** ramènerait le
+   **403**, rendrait la protection **indisponible** et **rouvrirait la dérogation éteinte**.
+3. **Vérifier que les 4 libellés rapportés** correspondent toujours aux 4 contextes requis (`gh pr checks`
+   sur une PR ouverte, ou `…/protection --jq '.required_status_checks.contexts'`) — un libellé divergent
+   produirait un **verrouillage** (§Plan de retour arrière).
+4. **Réévaluer la condition de retour à `1` approbation** :
+   `gh api repos/gitgdx/Concentration/collaborators --jq '[.[] | select(.permissions.push) | .login]'` — si
+   **≥ 2** comptes en écriture, ouvrir une US remettant `required_approving_review_count: 1`
+   *(ADR-006 décision 13, **entièrement valable**)*. En dessous, consigner le décompte.
+
+**Aucune des trois issues ne peut rester silencieuse.**
+
+> 🔴 **Dette assumée, et elle est désormais PLUS lourde qu'avant** : ce contrôle est **périodique, manuel
+> et humain**, et **sans déclencheur calendaire** (`/audit-methodo` est trimestriel « ou à la demande »).
+> Entre deux passages, **aucune** dérive n'est détectée — et c'est maintenant la **protection elle-même**
+> qui en dépend. C'est la dette la plus susceptible de **pourrir silencieusement** (dettes **#2** et **#8**).
 
 ---
 
-## 📋 Instructions de configuration manuelle (équivalent de la cible armée)
+## 📋 Instructions de configuration manuelle — **équivalent de secours, jamais la voie normale**
 
-> ⚠️ **Ces réglages décrivent la cible ARMÉE, PAS un état en vigueur.** Ils ne sont **pas atteignables
-> aujourd'hui** : sur ce plan, l'écran **Settings → Branches** ne permet pas de créer de règle pour un
-> dépôt privé (même 403 côté interface). **La voie normale est le script**, qui applique la cible
-> **depuis la source unique** ; cette procédure manuelle n'est qu'un **équivalent de secours** — la
-> saisie à la main est une source de **dérive** que `--check-remote` détecterait en exit 1.
+> ⚠️ **Ces réglages décrivent la cible EN VIGUEUR** *(appliquée le 2026-07-28)*, à titre de **référence
+> lisible** et d'**équivalent de secours**. Ils **sont** désormais atteignables via l'écran
+> **Settings → Branches** — le dépôt étant **public**, il n'y a plus de 403 côté interface. *(L'énoncé
+> antérieur « pas atteignables aujourd'hui / même 403 côté interface » était exact au 2026-07-26 et est
+> **devenu faux** ; il est corrigé ici, daté.)*
+>
+> ⛔ **Ce n'est POUR AUTANT PAS la voie autorisée.** La voie normale est **le script**, qui applique la
+> cible **depuis la source unique**. Une saisie à la main est une source de **dérive** que `--check-remote`
+> signalerait en **exit 1**, et le §Plan de retour arrière l'interdit explicitement pendant une
+> récupération de verrouillage. Cette procédure ne sert qu'à **relire** la cible ou à dépanner si le script
+> est indisponible — et toute correction ainsi faite doit être **immédiatement** reportée dans
+> `factory.config.json` puis ré-appliquée par le script.
 
 1. Onglet **Settings** du dépôt → **Code and automation** → **Branches**.
 2. **Add branch protection rule** (ou éditer la règle existante).
@@ -239,7 +393,10 @@ repos/gitgdx/Concentration/collaborators` — si **≥ 2** comptes en écriture,
 - `Require branches to be up to date before merging` **coché** (`strict: true`).
 - Ajouter les **4** contextes du tableau généré ci-dessus, **au libellé exact** — emoji, sélecteur de
   variante, espaces et parenthèses compris. Un libellé divergent d'un seul caractère produirait un
-  check *jamais rapporté*, qui bloquerait la PR indéfiniment après le déblocage.
+  check *jamais rapporté*, qui bloquerait la PR **indéfiniment** — c'est le risque de **verrouillage**,
+  désormais **réel et actif** : voir §Plan de retour arrière. *(Vérifié le 2026-07-27 : les 4 libellés
+  portent `U+1F510`, `U+1F4CB`, `U+1F4F1`, **aucun `U+FE0F`**, et `ç`/`é` sont **précomposés** en NFC —
+  `reports/US-00.7/labels_verification.md`.)*
 
 ### 3. Do not allow bypassing the above settings
 - **Coché** (`enforce_admins: true`) : la règle vaut **aussi** pour les administrateurs et les jetons
@@ -248,9 +405,10 @@ repos/gitgdx/Concentration/collaborators` — si **≥ 2** comptes en écriture,
 ### 4. Restrict who can push to matching branches
 - **Ne pas activer** : la cible générée porte `restrictions: null` (aucune restriction d'acteurs).
 - ⚠️ Ne **pas** « réserver la fusion à l'@Architect » ici : cette exigence est **de process** (revue
-  humaine du track FULL, rituel `/audit-us`) et n'est portée par **aucune** barrière machine — ni
-  aujourd'hui, ni après le déblocage. L'inscrire dans la protection créerait une divergence avec la
-  source unique, que `--check-remote` signalerait en **dérive (exit 1)**.
+  humaine du track FULL, rituel `/audit-us`) et n'est portée par **aucune** barrière machine — elle ne
+  l'était pas avant l'application, elle ne l'est **toujours pas** après (la cible est à **`0`**
+  approbation). Dette **#7**. L'inscrire dans la protection créerait une divergence avec la source
+  unique, que `--check-remote` signalerait en **dérive (exit 1)**.
 
 ---
 
@@ -264,24 +422,136 @@ d'incident `EVT_WORKFLOW_VIOLATION` et bloque la certification de production.
 > réellement exécutés, preuves archivées — **indépendants** de la protection de branche). Les **deux**
 > commits de bootstrap (`0a2e5ab`, `6483022`) sont les seuls jamais arrivés sur `main` hors PR : ils
 > ont **créé** les règles en question et ne donnent lieu à **aucun `EVT_WORKFLOW_VIOLATION`
-> rétroactif** — exemption portée par ADR-006 et par le présent document, **pas** par
-> `governance.grandfathering_date` (clé morte, laissée `null`).
+> rétroactif** — exemption portée par ADR-006 *(remplacé par ADR-007, qui la **conserve**)* et par le
+> présent document, **pas** par `governance.grandfathering_date` (clé morte, laissée `null`).
+
+> ✅ **Depuis le 2026-07-28, un commit direct sur `main` est REFUSÉ PAR LE SERVEUR** : la détection de
+> violation n'est plus le seul recours, elle devient un **filet pour ce que la plateforme ne couvre pas**
+> (fusion hors process, contexte retiré de la cible, règle désactivée « juste pour ce merge »). Relevé au
+> 2026-07-27 par `git log --first-parent --oneline origin/main` : **10 fusions de PR** (#1, #3 → #11) et
+> **exactement 2** commits directs, tous deux de bootstrap. ⛔ L'historique **n'est pas réécrit**.
+
+---
+
+## 🛟 Plan de retour arrière — verrouillage du dépôt
+
+> **Écrit le 2026-07-27, AVANT toute application de la protection** (US-00.7, AC-8, tâche T6) — et
+> **conservé tel quel**. 🔴 **Ce plan n'est plus une précaution théorique : depuis l'application du
+> 2026-07-28, le risque qu'il traite est RÉEL ET ACTIF.** La protection est en vigueur avec
+> `enforce_admins: true` et **exige** quatre contextes de status checks ; si **l'un d'eux n'est jamais
+> rapporté** par GitHub, **plus aucune pull request n'est fusionnable, administrateur inclus** — y compris
+> celle qui voudrait corriger le problème. C'est le risque **R-1** de l'US, de probabilité faible et
+> d'impact **critique**. **Ne pas supprimer cette section** : c'est la seule porte de sortie documentée.
+
+### 1. Symptôme — et comment le distinguer d'un échec normal
+
+```sh
+gh pr view <n> --json mergeableState,statusCheckRollup
+gh pr checks <n>
+```
+
+| Observation | Interprétation | Action |
+|---|---|---|
+| `mergeableState: BLOCKED` **et** un contexte requis en **`EXPECTED`** / **absent** de `gh pr checks` | **VERROUILLAGE** — le contexte n'est **jamais rapporté** (libellé divergent, ou workflow qui ne se déclenche pas sur cet événement). L'attente est **définitive**. | **appliquer ce plan** |
+| `mergeableState: BLOCKED` **et** un contexte en **`FAILURE`** | **échec normal d'un gate** : le code ou la gouvernance sont en faute. | **corriger la cause**, pas la règle |
+| `mergeableState: BLOCKED` **et** tous les checks verts | autre condition de fusion non satisfaite : `strict: true` (**branche pas à jour**) ou `required_conversation_resolution: true` (**discussion ouverte**). | rebaser / résoudre les discussions |
+
+⚠️ Ne **jamais** confondre les deux premières lignes : `EXPECTED` se répare en administrant la règle,
+`FAILURE` se répare en corrigeant le travail. Appliquer ce plan sur un `FAILURE` serait un
+contournement de gate.
+
+### 2. Mécanisme de sortie — **éditer ou supprimer ≠ contourner**
+
+`enforce_admins: true` interdit à l'administrateur de **contourner** la règle (*bypass* : fusionner
+malgré elle). Il **ne lui interdit pas** de l'**éditer** ni de la **supprimer** :
+
+```sh
+# lire l'état courant (toujours en premier)
+gh api repos/gitgdx/Concentration/branches/main/protection
+
+# supprimer la règle — porte de sortie du verrouillage
+gh api -X DELETE repos/gitgdx/Concentration/branches/main/protection
+
+# ré-appliquer depuis la SOURCE UNIQUE (jamais un JSON écrit à la main)
+sh scripts/apply_branch_protection.sh gitgdx/Concentration
+```
+
+> **Ce n'est pas un contournement : c'est de l'administration.** La distinction est la clé de ce
+> plan. Contourner = fusionner une PR que la règle refuse (`gh pr merge --admin`). Administrer =
+> modifier la règle elle-même, de façon **tracée**, puis la remettre en place depuis la
+> configuration. La porte de sortie existe toujours, et elle exige des droits admin.
+
+### 3. Séquence imposée — 5 étapes, dans cet ordre
+
+1. **`DELETE` tracé** de la règle : `gh api -X DELETE repos/gitgdx/Concentration/branches/main/protection`
+   — sortie **archivée brute** (commande + horodatage UTC) dans `reports/US-00.7/`.
+2. **Corriger le libellé dans la SOURCE UNIQUE** : `factory.config.json` → `status_checks[].name`
+   (fichier **Art. 6** → **action humaine**) **ou** le `name:` du job dans
+   `.github/workflows/<workflow>.yml`. ⛔ **Jamais** dans l'interface GitHub.
+3. **Ré-appliquer depuis la configuration** : `sh scripts/apply_branch_protection.sh gitgdx/Concentration`
+   — le script consomme le payload **généré** par `python scripts/factory_sync.py --emit-branch-protection`.
+4. **Re-vérifier** : `python scripts/factory_sync.py --check-remote` → **exit 0** attendu. Un `exit 1`
+   impose de recommencer à l'étape 2 ; un `exit 2` doit être **nommé** (403, 401, 404, `gh`
+   introuvable, `MAPPING INCOMPLET`) et **signalé**.
+5. **Consigner** : ligne dans `PROJECT_LOG.md` + événement `EVT_DEV_BLOCKER` +
+   `python scripts/factory_sync.py --check` (exit 0) pour prouver que config et workflows sont
+   redevenus cohérents.
+
+### 4. Interdits absolus — chacun invalide l'AC-4 et vaut `EVT_WORKFLOW_VIOLATION`
+
+* ⛔ **`gh pr merge --admin`** (ou toute fusion en contournement de la règle).
+* ⛔ **Retirer un contexte requis** de la cible « pour débloquer » — y compris temporairement.
+* ⛔ **Corriger le libellé dans l'interface web** (*Settings → Branches*) : la correction ne
+  remonterait pas dans la source unique, et la prochaine ré-application la perdrait.
+* ⛔ **Aligner `factory.config.json` sur l'état constaté** au lieu de l'inverse. La configuration est
+  la référence ; le dépôt s'y conforme, jamais le contraire.
+* ⛔ **Retirer `required_pull_request_reviews`** du payload : `0` approbation **≠** pas de PR exigée.
+  Le supprimer désactiverait « Require a pull request before merging ».
+* ⛔ **`--no-verify`** (Constitution Art. 1), en toute circonstance.
+
+### 5. Obligation de tracer — jamais de correction silencieuse
+
+Toute exécution de ce plan produit, **sans exception** : la sortie **brute** du `DELETE` et de la
+ré-application, une ligne `PROJECT_LOG.md`, un événement `EVT_DEV_BLOCKER`, et la mention de
+l'incident dans le Story File. Un verrouillage réparé **en silence** laisserait croire que le
+mécanisme n'a jamais failli — c'est précisément la classe de fausse confiance que cette US existe
+pour éliminer.
+
+### 6. Ce que ce plan ne couvre pas
+
+* Il suppose des **droits admin** sur le dépôt. Sans eux, ni le `DELETE` ni la ré-application ne sont
+  possibles : la sortie du verrouillage exige alors l'intervention du propriétaire.
+* Il suppose que la protection soit **disponible** : si le dépôt repassait en **privé**, la
+  protection redeviendrait **indisponible (403)** — le verrouillage disparaîtrait de lui-même, mais
+  l'enforcement aussi.
+* Il ne prévient pas le verrouillage : il en sort. La prévention est la vérification des libellés
+  **avant** application (`reports/US-00.7/labels_verification.md`) et le constat des libellés
+  **réellement rapportés** sur la PR (`gh pr checks`, critère 25) **avant** toute tentative de fusion.
 
 ---
 
 ## 🧾 Dettes ouvertes
 
+> **Mise à jour du 2026-07-28 (US-00.7).** ⛔ **Aucune dette n'est close par effet de bord** : chacune est
+> statuée nommément ci-dessous, et **cinq restent OUVERTES**. Les numéros sont **conservés** pour que les
+> renvois existants (ADR-006, `reports/US-00.4/**`, Story Files) restent valides.
+
 | # | Dette | Statut |
 |---|---|---|
-| 1 | **Enforcement de plateforme absent** — `main` n'est pas protégée ; risque #2 d'EPIC_00 (« règles déclarées mais non enforced ») **OUVERT** | Conditionnée au déblocage (§Conditions de déblocage) |
-| 2 | **Aucune détection automatique de dérive** config ↔ dépôt réel : le contrôle distant est manuel et hors CI (droits admin) | Assumée ; restera vraie après le déblocage |
-| 3 | **`CLAUDE.md` (règle 2) et Constitution (Art. 4)** déclarent la règle *enforced* « par protection de branche » : **factuellement faux, et le reste après US-00.4** | Correction **OBLIGATOIRE**, déléguée à **US-00.5** |
-| 4 | **`governance.grandfathering_date`** n'est lue par **aucun** script (clé morte, sémantique décalée) | À implémenter, redocumenter ou retirer du schéma |
-| 5 | **`scripts/check_branch_protection.py` produit la preuve mais n'est pas protégé** par `.claude/hooks/protect_files.sh` : un agent pourrait l'affaiblir (transformer un exit 2 en exit 0). Même classe de défaut pour `.github/workflows/*` et `scripts/apply_branch_protection.sh` | Périmètre Art. 6 **déclaré ≠ appliqué** — arbitrage humain |
-| 6 | **En-tête du bloc généré** ci-dessus (« Status check requis ») laisse entendre que les checks **sont** requis. Sa reformulation impose d'éditer `scripts/factory_sync.py` (**Art. 6**) | Action humaine — mitigée ici par l'avertissement précédant le bloc |
-| 7 | **Revue humaine de PR du track FULL** (`TRACKS.md`) sans aucune barrière machine, ni avant ni après déblocage. **US-01.1 est en FULL** | Arbitrage à poser **avant le lock de US-01.1** |
-| 8 | **Point de contrôle sans déclencheur calendaire** (`/audit-methodo` est trimestriel « ou à la demande ») : rien ne garantit qu'un passage ait lieu | La dette la plus susceptible de pourrir silencieusement |
-| 9 | **Repli `urllib` du comparateur non exercé** contre l'API réelle (aucun jeton disponible en session) ; **chemin 404 validé sur fixture uniquement** — jamais observé en réel | À revérifier au déblocage |
+| 1 | **Enforcement de plateforme absent** — `main` n'est pas protégée ; risque #2 d'EPIC_00 (« règles déclarées mais non enforced ») **OUVERT** | ✅ **CLOSE le 2026-07-28** — protection **appliquée** et **effet prouvé** (`reports/US-00.7/applied_state/`) ; risques **#2 et #5 d'EPIC_00 CLOS**, critère de clôture **coché**. ⚠️ **Conditionnel** à la visibilité publique |
+| 2 | **Aucune détection automatique de dérive** config ↔ dépôt réel : le contrôle distant est manuel et hors CI (droits admin) | 🔴 **OUVERTE — et désormais plus lourde** : c'est la protection elle-même qui en dépend. Un administrateur peut révoquer la règle **sans aucun signal**. Seul porteur : `/audit-methodo` (voir #8) |
+| 3 | **`CLAUDE.md` (règle 2) et Constitution (Art. 4)** déclarent la règle *enforced* « par protection de branche » : **factuellement faux, et le reste après US-00.4** | ✅ **SANS OBJET le 2026-07-28** — les deux textes sont devenus **factuellement VRAIS sans être édités**. La correction transmise « OBLIGATOIRE » à **US-00.5** est **sans objet** : ⛔ US-00.5 ne doit **pas** « corriger » un texte redevenu exact. Son périmètre s'en trouve **réduit** |
+| 4 | **`governance.grandfathering_date`** n'est lue par **aucun** script (clé morte, sémantique décalée) | 🔴 **OUVERTE** — à implémenter, redocumenter ou retirer du schéma. Laissée `null` **délibérément** |
+| 5 | **`scripts/check_branch_protection.py` produit la preuve mais n'est pas protégé** par `.claude/hooks/protect_files.sh` : un agent pourrait l'affaiblir (transformer un exit 2 en exit 0). Même classe de défaut pour `.github/workflows/*` et `scripts/apply_branch_protection.sh` | 🔴 **OUVERTE — aggravée** : `.github/workflows/*` porte désormais les **libellés des contextes REQUIS** (donc le risque de **verrouillage**), et `apply_branch_protection.sh` est le **seul chemin d'écriture** de la protection. Périmètre Art. 6 **déclaré ≠ appliqué** — traitement = édition de `.claude/hooks/*`, **action humaine** |
+| 6 | **En-tête du bloc généré** ci-dessus (« Status check requis ») laisse entendre que les checks **sont** requis. Sa reformulation impose d'éditer `scripts/factory_sync.py` (**Art. 6**) | ✅ **SANS OBJET le 2026-07-28** — les checks **sont** requis : l'en-tête généré est devenu **exact**. L'édition **Art. 6** qu'elle exigeait n'a **plus lieu d'être**, et l'avertissement qui l'encadrait a été remplacé par une confirmation datée |
+| 7 | **Revue humaine de PR du track FULL** (`TRACKS.md`) sans aucune barrière machine, ni avant ni après déblocage. **US-01.1 est en FULL** | 🔴 **OUVERTE, INCHANGÉE** — la cible est à **`0`** approbation : l'application n'apporte **aucune** barrière ici. **La moitié « ni après déblocage » de l'énoncé reste exacte.** Arbitrage **dû avant le lock d'US-01.1**, avec l'amendement suggéré de `TRACKS.md:14` (« surface **applicative** … ») |
+| 8 | **Point de contrôle sans déclencheur calendaire** (`/audit-methodo` est trimestriel « ou à la demande ») : rien ne garantit qu'un passage ait lieu | 🔴 **OUVERTE — et c'est maintenant la plus critique** : elle porte la surveillance de la protection (#2). Reste la dette la plus susceptible de **pourrir silencieusement** |
+| 9 | **Repli `urllib` du comparateur non exercé** contre l'API réelle (aucun jeton disponible en session) ; **chemin 404 validé sur fixture uniquement** — jamais observé en réel | 🟡 **PARTIELLEMENT CLOSE le 2026-07-27** — le **chemin 404 réel** a été **observé** (404 + `protected: false` → **exit 1**), ce qui **clôt R3** d'US-00.4. **Le repli `urllib` reste NON exercé** contre l'API réelle : cette moitié demeure **OUVERTE** |
+| **10** | 🔴 **NOUVELLE — `NB-1bis`** : après le correctif NB-1 *(3 lignes, `MAPPED_TOP_KEYS & set(expected)`)*, une clé absente de la cible dont la valeur réelle est **ACTIVE** est nommée et **interdit l'exit 0** ; mais si sa valeur est **NEUTRE** (`{"enabled": false}`) elle est **seulement nommée** et **l'exit 0 subsiste**, et si elle est **absente des deux côtés** elle n'est **pas même nommée**. Or `enforce_admins: false` **autorise le bypass admin** et `required_pull_request_reviews` absent signifie **aucune PR exigée** : la doctrine de neutralité assimile à tort « valeur fausse » et « inerte ». **NB-1 est un progrès strict, PAS une fermeture** | 🔴 **OUVERTE.** Correctif identifié : contrôle de **complétude de la cible** dans `_guard_mapping()` (`MAPPED_TOP_KEYS - set(expected)` non vide → exit 2). **Compensé aujourd'hui** : `set(payload) == MAPPED_TOP_KEYS` → `True` (cible **non amputée**) → aucun scénario atteignable tant que `factory.config.json` n'est pas amputé (**Art. 6**, action humaine). À porter **avec** #11 |
+| **11** | 🔴 **NOUVELLE — aucun `selftest` en CI** pour `check_branch_protection.py` : ses fixtures versionnées sont lancées **à la main**, y compris pour valider le correctif NB-1 | 🔴 **OUVERTE.** Contrôle négatif **maintenu** : `grep -rn "check-remote" .github/workflows/` doit rester **vide** — le contrôle distant reste **hors CI** par construction. À porter dans la **même** US de dette que #10 |
+| **12** | 🔴 **NOUVELLE — aucun événement d'extinction de dérogation** dans `scripts/events_catalog.json` (**25** événements + 4 alias dépréciés, vérifiés) : une dérogation y est **irrévocable par construction**. L'extinction d'`EVT_WAIVER_GRANTED` est donc **documentaire**. **Corollaire** : le champ `emitter` (`"human"` pour `EVT_WAIVER_GRANTED`) n'est lu par **aucun** script ni hook → **un agent peut émettre une dérogation** qu'il ne peut pas éteindre | 🔴 **OUVERTE.** Dette du **système de traçabilité**. Mitigation retenue : consignation aux **3** emplacements + mention dans le `rationale` d'`EVT_DOCS_UPDATED` — **convention non enforced**. En ajouter un modifierait la **machine à états** → exige son propre **ADR**. Candidat `/audit-methodo` |
 
-**Détail complet, cause racine et transmission à US-00.5** :
-[`reports/US-00.4/enforcement_gap.md`](../reports/US-00.4/enforcement_gap.md).
+**Détail complet, cause racine et transmission** :
+[`reports/US-00.4/enforcement_gap.md`](../reports/US-00.4/enforcement_gap.md) *(constat du 2026-07-26 —
+document daté, à référencer et non à corriger)* · [`reports/US-00.7/transmissions.md`](../reports/US-00.7/transmissions.md)
+*(mise à jour du 2026-07-28 : périmètres réduits, dettes closes et maintenues)*.
