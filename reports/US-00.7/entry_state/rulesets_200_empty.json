@@ -1,0 +1,11 @@
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# PREUVE BRUTE D'API — US-00.7, T4 · ETAT D'ENTREE (Constitution Art. 3)
+# Commande exacte        : gh api repos/gitgdx/Concentration/rulesets
+# Horodatage UTC         : 2026-07-28T07:11:36Z
+# Code de sortie de `gh` : 0
+# Lecture SEULE : GET uniquement. Aucune ecriture distante n'a ete emise.
+# Redaction : aucun en-tete Authorization, aucun jeton dans ce fichier.
+# 200 avec un tableau VIDE : le mecanisme moderne (rulesets) est DISPONIBLE, et aucun
+# ruleset n'existe. Au 2026-07-26 : 403 (limite de plan) sur ce meme appel.
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+[]

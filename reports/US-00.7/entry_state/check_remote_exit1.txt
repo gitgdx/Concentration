@@ -1,0 +1,30 @@
+──────────────────────────────────────────────────────────────────────────────────────────────────
+ PREUVE D'ETAT REEL — US-00.7, T4 · comparateur distant AVANT le PUT
+ Commande exacte : python scripts/factory_sync.py --check-remote
+ Horodatage UTC  : 2026-07-28T07:12:54Z
+ Code de sortie  : 1   (ATTENDU 1 = DERIVE ; ni 0, ni 2)
+ Prealable R-10  : gh version 2.96.0 (2026-07-02)  resolu dans le PATH de la session
+                   (sans `gh` ET sans jeton, l'issue serait exit 2 « gh introuvable » —
+                    une PREUVE MANQUEE et non l'etat reel. Verifie AVANT archivage.)
+ Cette sortie NE PORTE AUCUN prefixe [SIMULATION] : elle atteste l'etat REEL du depot.
+ Les 7 ecarts = les 8 cles de la cible MOINS `restrictions`, dont l'absence cote GET EST
+ la conformite. Le mapping PUT -> GET est donc complet et non biaise sur ce chemin.
+ Issue conforme a la desambiguisation d'US-00.4 : 404 + protected == false -> exit 1,
+ JAMAIS exit 2. Le risque R3 d'US-00.4 (« chemin 404 non observable in vivo ») est CLOS
+ par cette observation, sans une ligne de changement.
+──────────────────────────────────────────────────────────────────────────────────────────────────
+Lecture SEULE de l'API GitHub (GET uniquement) — gitgdx/Concentration:main · GET repos/gitgdx/Concentration/branches/main → 200 · GET repos/gitgdx/Concentration/branches/main/protection → 404
+GET /repos/gitgdx/Concentration/branches/main/protection → 404 et GET /repos/gitgdx/Concentration/branches/main → "protected": false : la branche n'est réellement PAS protégée (ce n'est pas un défaut de droits).
+DÉRIVE DÉTECTÉE — protection ABSENTE sur gitgdx/Concentration:main (404 + protected == false)
+  7 écart(s) entre la cible générée et l'état lu :
+  champ | attendu | réel
+  required_status_checks | "objet présent (strict + contexts)" | <clé absente de la réponse GET — aucun status check requis>
+  required_pull_request_reviews | "objet présent, required_approving_review_count=0 (pull request EXIGÉE)" | <objet absent de la réponse GET — aucune pull request exigée>
+  enforce_admins (GET: enforce_admins.enabled) | true | <clé absente de la réponse GET>
+  allow_force_pushes (GET: allow_force_pushes.enabled) | false | <clé absente de la réponse GET>
+  allow_deletions (GET: allow_deletions.enabled) | false | <clé absente de la réponse GET>
+  required_linear_history (GET: required_linear_history.enabled) | false | <clé absente de la réponse GET>
+  required_conversation_resolution (GET: required_conversation_resolution.enabled) | true | <clé absente de la réponse GET>
+──────────────────────────────────────────────────────────────────────────────────────────────────
+ code de sortie OBTENU : 1 (attendu 1)
+──────────────────────────────────────────────────────────────────────────────────────────────────

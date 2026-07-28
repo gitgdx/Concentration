@@ -492,15 +492,21 @@ def _classify_extra(obj: dict, mapped: set[str], prefix: str) -> tuple[list[str]
     return neutral, active
 
 
-def _guard_actual(actual: dict) -> tuple[list[str], list[str]]:
+def _guard_actual(actual: dict, expected: dict) -> tuple[list[str], list[str]]:
     """Garde SYMÉTRIQUE côté réponse RÉELLE — top-level ET sous-objets mappés.
 
     Les sous-objets comptent autant que la racine : `required_pull_request_reviews` porte des
     champs d'enforcement absents du mapping (`dismiss_stale_reviews`,
     `require_code_owner_reviews`, `require_last_push_approval`,
     `bypass_pull_request_allowances`…). Les ignorer aurait reproduit B-2 un niveau plus bas.
+
+    `expected` est requis pour le filtrage DYNAMIQUE de la racine (dette NB-1, cf. ci-dessous) :
+    la constante statique `MAPPED_TOP_KEYS` couvrait des clés que la cible ne portait pas.
     """
-    neutral, active = _classify_extra(actual, MAPPED_TOP_KEYS, "")
+    # NB-1 (US-00.7) : filtrer par les clés RÉELLEMENT présentes dans la cible. Avec la constante
+    # statique, une clé mappée mais ABSENTE de la cible (cible amputée) était sautée EN SILENCE —
+    # ni comparée par compare() (`if key not in expected: continue`), ni signalée ici → exit 0.
+    neutral, active = _classify_extra(actual, MAPPED_TOP_KEYS & set(expected), "")
     for parent, mapped in (
         ("required_status_checks", MAPPED_RSC_KEYS),
         ("required_pull_request_reviews", MAPPED_PRR_KEYS),
@@ -576,7 +582,7 @@ def compare(expected: dict, actual: dict) -> Comparison:
     l'exit 0 (correctif du finding B-2).
     """
     _guard_mapping(expected)
-    neutral_ignored, uncovered_active = _guard_actual(actual)
+    neutral_ignored, uncovered_active = _guard_actual(actual, expected)
     ok: list[str] = []
     diffs: list[str] = []
 

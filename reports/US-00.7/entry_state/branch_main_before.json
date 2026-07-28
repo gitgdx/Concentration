@@ -1,0 +1,11 @@
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# PREUVE BRUTE D'API — US-00.7, T4 · ETAT D'ENTREE (Constitution Art. 3)
+# Commande exacte        : gh api repos/gitgdx/Concentration/branches/main --jq "{name,protected}"
+# Horodatage UTC         : 2026-07-28T07:12:15Z
+# Code de sortie de `gh` : 0
+# Lecture SEULE : GET uniquement. Aucune ecriture distante n'a ete emise.
+# Redaction : aucun en-tete Authorization, aucun jeton dans ce fichier.
+# "protected": false — ETAT D'ENTREE de la branche principale, AVANT tout PUT.
+# C'est la lecture non privilegiee qui leve l'ambiguite du 404 de protection_404.json.
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+{"name":"main","protected":false}

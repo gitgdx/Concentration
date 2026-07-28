@@ -1,0 +1,18 @@
+{
+  "_fixture": "SIMULATION US-00.7 T1 — cible GENEREE le 2026-07-27 par python scripts/factory_sync.py --emit-branch-protection, AMPUTEE de la cle required_pull_request_reviews (7 cles). PAS une preuve d etat reel : cible SIMULEE injectee par tests/fixtures/US-00.7/nb1_harness.py. Les cles prefixees _ sont des metadonnees de fixture, retirees par le harnais avant injection.",
+  "required_status_checks": {
+    "strict": true,
+    "contexts": [
+      "🔐 Secrets scan (gitleaks)",
+      "📋 Governance (SCB + traçabilité + synchro)",
+      "check-branch-name",
+      "📱 App (gates run_gates.py)"
+    ]
+  },
+  "enforce_admins": true,
+  "restrictions": null,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "required_linear_history": false,
+  "required_conversation_resolution": true
+}
