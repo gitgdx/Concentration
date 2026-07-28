@@ -118,6 +118,22 @@ les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_
 PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
 reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
+- 🟠 **Findings NON BLOQUANTS de l'audit sécurité d'US-00.7, ouverts et non traités** *(2026-07-28,
+  `reports/US-00.7/security.md`)* : **aucun plancher de sécurité** — `enforce_admins: false` en config
+  produirait une **CI verte** et un `--check-remote` « **conforme** », avec `0` approbation requise ·
+  **NB-1bis confirmé par exécution** mais **NON exploitable par configuration** (les 8 clés sont **en
+  dur** dans `emit_branch_protection` : l'amputation exige de modifier le code Python — **moins grave
+  qu'annoncé jusqu'ici**) · **actions tierces non épinglées** (`actions/checkout@v4`,
+  `gitleaks-action@v2` avec `pull-requests: write`) · **`emitter` non enforcé** — mais ⚠️ **ce n'est pas
+  une faille d'autorisation** : agents et humain partagent le **même compte** et les **mêmes droits**,
+  donc **aucune implémentation ne le rendrait infranchissable** ; le durcissement utile est la
+  **détection**, pas la prévention.
+- 🔴 **AUCUN SAST dans la factory** : `run_gates --gate sast` → **exit 1, ce gate n'existe pas**. Et
+  `dart pub outdated` mesure l'**obsolescence**, pas la **vulnérabilité** → **aucun verdict de sécurité
+  ne peut s'appuyer sur un scan de CVE, il n'y en a pas**. ✅ **Partiellement compensé le 2026-07-28** :
+  `actionlint` (épinglé par SHA256) tourne désormais dans le job **requis** « 📋 Governance » — il aurait
+  trouvé seul le bloquant B-1, dont son absence était la **cause racine**. Reste à décider pour le code
+  applicatif Dart.
 - ⚠️ **Nouvelles CONTRAINTES PERMANENTES, actives depuis le 2026-07-28** — à connaître avant de les vivre
   comme une panne : toute branche hors `^feat/US-[0-9]+\.[0-9]+.*$` rend sa PR **définitivement
   infusionnable** (`check-branch-name` est un contexte **requis**) → `chore/`, `docs/`, `hotfix/` sont

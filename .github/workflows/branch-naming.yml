@@ -11,11 +11,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🔍 Validate Branch Name
+        # ⚠️ SÉCURITÉ — finding B-1 de l'audit sécurité d'US-00.7 (2026-07-28), HIGH.
+        #    Le nom de branche est une donnée CONTRÔLÉE PAR L'ATTAQUANT : le dépôt est
+        #    PUBLIC depuis le 2026-07-27 et les forks sont autorisés.
+        #    Il ne doit JAMAIS être interpolé par ${{ }} dans le corps d'un `run:` :
+        #    GitHub Actions substitue le template AVANT que le shell ne s'exécute, donc
+        #    une branche nommée `feat/US-1.1-$(…)` faisait EXÉCUTER la substitution par
+        #    bash dès l'AFFECTATION — avant même le test du motif. Pire : une telle charge
+        #    SATISFAIT le motif, donc le job RÉUSSISSAIT sans laisser aucun check rouge.
+        #    Aggravé par US-00.7 : ce contexte est devenu REQUIS, donc exécuté sur CHAQUE
+        #    PR, forks compris.
+        #    CORRECTIF : passer les valeurs par `env:` puis les lire comme des VARIABLES
+        #    SHELL ("$HEAD_REF"), jamais comme du texte injecté dans le script.
+        #    Contrôle automatique : `actionlint` est exécuté par le job requis
+        #    « 📋 Governance » (ci.yml) — c'est lui qui empêche la régression.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BRANCH="${{ github.head_ref }}"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            BRANCH="$HEAD_REF"
           else
-            BRANCH="${{ github.ref_name }}"
+            BRANCH="$REF_NAME"
           fi
 
           echo "Checking branch: $BRANCH"

@@ -749,10 +749,35 @@
   `tests/fixtures/US-00.4/README.md:31` porte toujours l'affirmation au présent (réécriture **interdite**
   par arbitrage). L'état exact est **10/11**, et `non_regression.md:466` — plus juste — le disait déjà.
   **Une sur-affirmation dans l'US dont c'est précisément la thèse.**
-- **⛔ PHASE INCHANGÉE : `parallel_audit`.** Un audit FAILED ⇒ retour à **@Developer**. **QA et `/certify`
-  sont interdits** tant que **B-1** n'est pas corrigé et **re-audité**.
-- **Prochaine étape** : correctif **B-1** (`env:` dans `branch-naming.yml`) → **re-audit sécurité** →
-  QA → `/certify`, depuis la branche post-fusion **`feat/US-00.7-certif`**.
+- **🔧 Correctif B-1 + `actionlint` — @Developer, 2026-07-28** *(`EVT_CODE_READY` ré-émis)*.
+  - **B-1 corrigé** : `branch-naming.yml` n'interpole plus `github.head_ref` dans le corps du `run:` —
+    les valeurs passent par **`env:`** et sont lues comme des **variables shell**. Le **job id
+    `check-branch-name` est INCHANGÉ** : le contexte requis n'est pas cassé.
+  - **PREUVE PAR L'EFFET** *(simulation locale, ⛔ aucune branche ni PR créée)* : **AVANT**, la charge
+    `feat/US-1.1-<substitution>` rendait **`feat/US-1.1-guillaume.decroix`** — la commande était
+    **EXÉCUTÉE** ; **APRÈS**, elle reste la **chaîne littérale**, non évaluée.
+  - **`actionlint` ajouté en CI comme *STEP* du job DÉJÀ REQUIS « 📋 Governance », et NON comme job
+    séparé.** Un nouveau job **ne serait pas un contexte requis** (les 4 sont figés dans
+    `factory.config.json`, **Art. 6**) : il serait **RAPPORTÉ sans BLOQUER** — l'anti-pattern même
+    qu'US-00.4 et US-00.7 ont supprimé. Ici, un lint rouge fait échouer un contexte **requis**.
+  - **Épinglage** : version **et** empreinte **SHA256 codée en dur** (v1.7.12), vérifiée par
+    `sha256sum -c`. Si l'asset publié est un jour remplacé, **la CI s'arrête**. Réponse à la **MEDIUM 4**
+    (actions tierces non épinglées) : `rhysd/actionlint` **n'est pas une GitHub Action** (aucun
+    `action.yml`, vérifié par API) → binaire de release **vérifié**, plutôt qu'une action wrapper non
+    épinglée.
+  - **✅ VALIDATION CROISÉE** : `actionlint` exécuté localement **avant** correctif signale
+    **exactement B-1 et rien d'autre** — confirmation **indépendante** du finding par un **troisième
+    outil non-LLM**, et de la **cause racine** avancée par l'auditeur. **Après** correctif : **exit 0**.
+    Aucun autre problème préexistant ⇒ l'ajout au job requis ne casse rien.
+  - 📌 **Incident consigné** : la première émission de l'événement a été **corrompue par PowerShell**,
+    qui a **substitué la substitution de commande citée en exemple dans le rationale lui-même** — la
+    faille décrite, reproduite par l'outil qui la documentait. Ligne retirée car **NON COMMITÉE**
+    (9 lignes commitées, 10 dans le fichier) donc **jamais entrée en vigueur** : **même doctrine
+    qu'ADR-007 applique à ADR-006**, l'immuabilité protège le registre des décisions **effectives**.
+- **⛔ PHASE INCHANGÉE : `parallel_audit`.** **QA et `/certify` restent interdits** : un correctif ne
+  lève pas un verdict — seul un **re-audit sécurité à contexte frais** le peut. Les **4 MEDIUM** et
+  **4 LOW** de `security.md` restent **ouverts et non traités** (hors périmètre du bloquant).
+- **Prochaine étape** : **re-audit sécurité** (@CyberSecurity, contexte frais) → QA → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
