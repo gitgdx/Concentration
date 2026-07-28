@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ❌ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -704,8 +704,55 @@
   **Preuve encore obtenable** sur la **PR de certification** (`feat/US-00.7-certif`), qui franchira les
   **mêmes** 4 contextes : tenter la fusion **immédiatement après l'ouverture**. Rapport :
   `reports/US-00.7/merge_block.md`.
-- **Prochaine étape** : `/audit-us` (Rev + Sec, contextes frais) → QA → `/certify`, depuis la branche
-  post-fusion **`feat/US-00.7-certif`**.
+- **🔍 Audit Rev — ✅ PASSED (2026-07-28, @CodeReviewer, contexte frais)** · `reports/US-00.7/code_review.md`
+  (30 709 o, 42 blocs d'exécution) · `EVT_CODE_REVIEW_PASSED`. **0 bloquant** · 1 majeur *(hors périmètre
+  d'une revue de code)* · 4 mineurs · 3 suggestions. **Vérifications indépendantes** : périmètre du diff
+  recalculé seul (`f4400ca..HEAD` = 47 fichiers, contre 6 pour `main...HEAD`) · diff des fichiers
+  d'enforcement **filtré de tout commentaire** → **0 ligne de logique modifiée** dans `ci.yml`,
+  `apply_branch_protection.sh` et `pre-push` · contrôle négatif d'écriture distante dans
+  `check_branch_protection.py` → 0 résultat · **4 scénarios NB-1 rejoués sans lire `nb1_fix.md` d'abord**
+  (A→exit 2, B→exit 0, C→exit 0, D→exit 2) : **la portée annoncée correspond à la portée réelle**,
+  NB-1bis authentiquement ouvert · état réel du dépôt re-constaté à `16:07:35Z` · **séquence de sûreté
+  prouvée dans l'historique git** (`27464a9` plan+correctif < `6932fea` PUT < `66d2bab` test négatif).
+- **🛡️ Audit Sec — ❌ FAILED (2026-07-28, @CyberSecurity, contexte frais)** · `reports/US-00.7/security.md`
+  (26 287 o, 36 blocs) · `EVT_SECURITY_AUDIT_FAILED`. **CRITICAL 0 · HIGH 1 (bloquant) · MEDIUM 4 · LOW 4**.
+  - 🔴 **B-1 (HIGH, BLOQUANT) — injection de commande dans `.github/workflows/branch-naming.yml:16`** :
+    `BRANCH="${{ github.head_ref }}"` interpole un nom de branche **contrôlé par l'attaquant** dans un
+    `run:` shell. GitHub Actions substitue **avant** l'exécution ⇒ une branche `feat/US-1.1-$(…)` fait
+    exécuter la substitution par bash **à l'affectation**, donc **avant même le test du motif**, et la
+    charge **satisfait** le motif ⇒ le job **réussit**, **aucun check rouge**. PoC local de l'auditeur :
+    `$(id -un)` a rendu `guillaume.decroix`. **Confirmé par lecture directe de l'orchestrateur.**
+    ⚠️ **Le fichier est préexistant et hors diff, mais c'est CETTE US qui crée l'exposition** : dépôt
+    rendu **PUBLIC** (`allow_forking: true`) **et** `check-branch-name` rendu **REQUIS**, donc exécuté sur
+    **chaque PR, forks compris**. Atténué par `default_workflow_permissions: read` et l'absence de secrets
+    dans le job → **HIGH, pas CRITICAL**. **Correctif : 3 lignes, passer par `env:`.**
+  - **MEDIUM** : (2) **aucun plancher de sécurité** — `enforce_admins: false` en config produirait une CI
+    verte et un `--check-remote` « conforme » · (3) **NB-1bis confirmé par exécution** mais **NON
+    exploitable par configuration** (les 8 clés sont en dur dans `emit_branch_protection` ; l'amputation
+    exige de modifier le code Python) · (4) actions tierces non épinglées · (5) `emitter` non enforcé.
+  - **Axes déclarés PROPRES** : aucun jeton ni en-tête `Authorization` dans les artefacts publiés
+    (`gitleaks` vert sur l'arbre **et** sur les 47 commits d'historique) · `check_branch_protection.py`
+    **réellement en lecture seule** (`method="GET"` explicite, pas de `shell=True`) ·
+    `apply_branch_protection.sh` délègue à `gh` sans manipuler de jeton · **aucun `pull_request_target`**
+    → le vecteur « pwn request » est **absent**.
+  - ⚠️ **Deux nuances qui CONTREDISENT l'énoncé transmis à l'auditeur** : **NB-1bis est moins exploitable
+    qu'annoncé** ; et le défaut **`emitter` n'est pas une faille d'autorisation** au sens strict — agents
+    et humain partagent le même compte et les mêmes droits, donc aucune implémentation ne le rendrait
+    infranchissable : **le durcissement utile est la détection, pas la prévention**.
+  - ⚠️ **`run_gates --gate sast` → exit 1 : ce gate N'EXISTE PAS.** Il n'y a **aucun SAST** dans la
+    factory. **Aucun PASS n'est prononcé sur la foi d'un scan de CVE** — `dart pub outdated` mesure
+    l'obsolescence, pas la vulnérabilité. Recommandation de l'auditeur : **`actionlint` en CI**, qui
+    aurait trouvé B-1 seul — son absence en est la **cause racine**.
+- **⛑️ m-1 — sur-affirmation de l'orchestrateur, relevée par l'audit Rev et CORRIGÉE le 2026-07-28** :
+  `t20_pre_push.md`, le Story File (T20) et cette entrée affirmaient que `pre-push` était « le **dernier**
+  des 11 » et le critère #22 « **entièrement levable** ». **Faux** :
+  `tests/fixtures/US-00.4/README.md:31` porte toujours l'affirmation au présent (réécriture **interdite**
+  par arbitrage). L'état exact est **10/11**, et `non_regression.md:466` — plus juste — le disait déjà.
+  **Une sur-affirmation dans l'US dont c'est précisément la thèse.**
+- **⛔ PHASE INCHANGÉE : `parallel_audit`.** Un audit FAILED ⇒ retour à **@Developer**. **QA et `/certify`
+  sont interdits** tant que **B-1** n'est pas corrigé et **re-audité**.
+- **Prochaine étape** : correctif **B-1** (`env:` dans `branch-naming.yml`) → **re-audit sécurité** →
+  QA → `/certify`, depuis la branche post-fusion **`feat/US-00.7-certif`**.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
