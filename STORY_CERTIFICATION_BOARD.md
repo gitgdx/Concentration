@@ -844,11 +844,24 @@
     capturé : **un état calculé, pas une action refusée**. ⚠️ **C'est exactement la distinction *état de
     l'API* vs *effet* que cette US existe pour poser.** Sur les 4 preuves annoncées comme neuves,
     **3 sont acquises** (push direct, force-push, suppression), **la 4ᵉ manque**.
-  - 🟠 **Aggravants non rédhibitoires — critères 20 et 21 PARTIELS** : le `core.hooksPath` **vide** du
-    clone jetable et sa **suppression** ne sont **pas archivés** ; la garde de sûreté est attestée **une
-    seule fois**, sans le **triplet** exigé ; la phrase de portée est **absente** du fichier de preuve
-    que le critère nomme *(vérifié par `grep`, aucun résultat)*. ⚠️ **Non retro-archivables sans
-    ré-exécuter le test négatif** — le clone jetable a été supprimé. **Rien ne sera fabriqué.**
+  - 🟠 **Critères 20 et 21 PARTIELS — ⚖️ ARBITRAGE HUMAIN DU 2026-07-28 : ASSUMÉS TELS QUELS, ÉCRITS,
+    NON COMBLÉS.** Constat **revérifié par @Architect** avant arbitrage, et non repris sur la foi de la
+    QA :
+    | Élément exigé par le critère | État dans `negative_test_server.txt` |
+    |---|---|
+    | Absence de hooks dans le clone | 🟠 **assertion en commentaire** (l. 10), **pas** une sortie de `git config --get core.hooksPath` |
+    | `git rev-parse origin/main` avant / après | 🔴 **ABSENT** |
+    | Suppression du clone jetable | 🔴 **ABSENTE** |
+    | Garde de sûreté avant **chacune** des 3 commandes | 🟠 **une seule** occurrence (l. 13) |
+    | Phrase de portée *(autre acteur / jeton d'application / interface web)* | 🔴 **ABSENTE de ce fichier** — elle est écrite dans `CLAUDE.md`, `GIT_PROTECTION.md` et `reports/US-00.7/README.md`, **mais pas là où le critère la cherche** |
+    **Acquis malgré tout** : **aucune** occurrence d'option de contournement de hook dans les commandes
+    archivées, et la référence `main` **n'a pas bougé** (`f4400ca`).
+    ⛔ **Non retro-archivables** : le clone jetable n'existe plus. **Le fichier de preuve n'est PAS
+    retouché** — y inscrire aujourd'hui une garde qui n'a pas été relue trois fois serait **fabriquer une
+    preuve**, c'est-à-dire commettre exactement ce que cette US combat. **Deux critères 🟠 restent donc
+    NON LEVÉS, et c'est écrit dans le Story File en regard de chacun.**
+    **Portée de l'arbitrage** : il **ne change rien** au verdict QA (le `🧪 FAIL` porte sur **D-1**, pas
+    sur 20/21) et **n'autorise aucune case de DoD supplémentaire**.
   - 🔧 **Rectification apportée par la QA** : la **DoD réelle est 30/34, non 28/34** — les cases **27**
     et **28** étaient **décochées à tort** (les deux audits sont PASSED en trace **et** au SCB). Le bloc
     d'état avait été écrit **avant** les audits. **Corrigé.** Aucune case cochée à tort ; **réserve sur
