@@ -50,7 +50,10 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 ## État courant du projet *(maintenu par @Architect)*
 
 **Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
-renforcements), **phases 3-4** (mise en cohérence du corpus, clôture). **`main` EST PROTÉGÉE depuis le
+renforcements). **PR #12 FUSIONNÉE le 2026-07-28** (`main` = `9fdb7fd`) — première fusion du dépôt
+réellement conditionnée par les gates. **DoD 28/34.** Suite sur la branche post-fusion
+**`feat/US-00.7-certif`** : `/audit-us` → QA → `/certify`. ⛔ **Reste dû : la preuve du REFUS de fusion
+(T11(d), case 13)** — à capturer sur la PR de certification, **immédiatement après son ouverture**. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
 protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
@@ -74,9 +77,15 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 >   champ actif non couvert), **sans** préfixe `[SIMULATION]` — **première observation in vivo**.
 >
 > **Ce qui n'est PAS prouvé, et ne doit pas être affirmé** :
-> * **Le refus d'une tentative de FUSION n'a pas été observé** — seul le refus du **push direct** l'est. Que
->   la fusion soit bloquée tant qu'un contexte requis n'est pas vert **découle** de l'état constaté, mais
->   reste une **inférence** : c'est la tâche **T11** d'US-00.7, **non exécutée**.
+> * **Le refus d'une tentative de FUSION n'a TOUJOURS PAS été observé** — seul le refus du **push direct**
+>   l'est. **T11 a été partiellement exécutée le 2026-07-28** (PR **#12**, fusionnée en `9fdb7fd`) : les 4
+>   libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux contextes requis, et
+>   `mergeStateStatus: **BLOCKED**` a été capturé à `15:25:30Z` **avant** la complétion de 3 contextes —
+>   **renversement exact** du `CLEAN` d'US-00.4, où la PR #10 était **fusionnable en rouge**. Mais
+>   **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** : aucune tentative de fusion n'a été
+>   **refusée**, la fenêtre déterministe (**~80 s**) s'étant refermée avant. ⇒ **AC-4 nominal NON
+>   satisfait**, case 13 de la DoD **décochée**. Preuve encore obtenable sur la **PR de certification**.
+>   Détail et procédure corrigée : [`reports/US-00.7/merge_block.md`](reports/US-00.7/merge_block.md).
 > * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
 >   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
 >   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont

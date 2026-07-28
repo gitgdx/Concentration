@@ -686,13 +686,26 @@
   (`main` → `exit 1`, `feat/` → `exit 0`). Preuves : `reports/US-00.7/t20_pre_push.md`. → **critère de
   test #22 entièrement levable** (`pre-push` était le dernier des 11 artefacts vivants à affirmer une
   impossibilité au présent) et **case 33 de la DoD complète**.
-- **DoD (2026-07-28)** : **24 cases sur 34 levées et cochées** contre preuves revérifiées ce jour.
-  **10 restent ouvertes**, toutes pour un motif nommé : **2 · 13 · 14 · 26** *(moitié CI)* · **34**
-  dépendent de la **PR** (T11) · **27 · 28 · 29** des audits et de la QA · **23** d'un **arbitrage @PO**
-  non tranché (véhicule de mise à jour d'US-00.1) · **31** de la fin de cycle.
-- **Prochaine étape** : ⏳ **T11** (@DevOps : PR, libellés **réellement rapportés**, refus de fusion,
-  fusion après 4 verts) — **la PR de cette US sera la première à devoir franchir la protection**, elle
-  sert donc de démonstration → `/audit-us` → QA → `/certify`.
+- **DoD (2026-07-28)** : **28 cases sur 34** levées contre preuves revérifiées. **6 restent ouvertes**,
+  motif nommé : **13** *(voir ci-dessous — **non levable en l'état**)* · **27 · 28 · 29** audits et QA ·
+  **23** arbitrage **@PO** non tranché (véhicule de mise à jour d'US-00.1) · **31** fin de cycle.
+- 🔶 **T11 — PARTIELLEMENT EXÉCUTÉE (2026-07-28).** PR **[#12](https://github.com/gitgdx/Concentration/pull/12)**
+  ouverte et **fusionnée** en `9fdb7fd` — **première fusion de l'histoire du dépôt réellement
+  conditionnée par les gates**, par `gitgdx` (**`is_bot: false`** → case 34 satisfaite).
+  **Acquis** : les 4 libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux
+  contextes requis *(le contrôle que T3 ne pouvait pas faire)* · `mergeStateStatus: **BLOCKED**` capturé
+  à `15:25:30Z`, **avant** la complétion de 3 contextes requis — **renversement exact** du `CLEAN`
+  d'US-00.4, où la PR #10 était **fusionnable en rouge**.
+  ⛔ **NON ACQUIS — le refus d'une tentative de fusion.** T11(d) n'a pas eu lieu : la fenêtre
+  déterministe a duré **~80 s** (gate `📱 App` = **1 min 23 s en CI**, contre > 3 min en local — c'est
+  cette extrapolation qui a fauté), refermée à `15:26:49Z` ; la fusion est intervenue à `15:34:21Z`.
+  **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** — même distinction que pour
+  `allow_force_pushes`/`allow_deletions`. **⇒ AC-4 nominal NON satisfait, case 13 DÉCOCHÉE.**
+  **Preuve encore obtenable** sur la **PR de certification** (`feat/US-00.7-certif`), qui franchira les
+  **mêmes** 4 contextes : tenter la fusion **immédiatement après l'ouverture**. Rapport :
+  `reports/US-00.7/merge_block.md`.
+- **Prochaine étape** : `/audit-us` (Rev + Sec, contextes frais) → QA → `/certify`, depuis la branche
+  post-fusion **`feat/US-00.7-certif`**.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
