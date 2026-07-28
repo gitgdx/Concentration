@@ -1,0 +1,4 @@
+# T9 — US-00.7 · etat de la branche apres application
+# commande : gh api repos/gitgdx/Concentration/branches/main
+# horodatage UTC : 2026-07-28T07:52:16Z
+{"name":"main","protected":true,"protection":{"enabled":true,"required_status_checks":{"checks":[{"app_id":15368,"context":"🔐 Secrets scan (gitleaks)"},{"app_id":15368,"context":"📋 Governance (SCB + traçabilité + synchro)"},{"app_id":15368,"context":"check-branch-name"},{"app_id":15368,"context":"📱 App (gates run_gates.py)"}],"contexts":["🔐 Secrets scan (gitleaks)","📋 Governance (SCB + traçabilité + synchro)","check-branch-name","📱 App (gates run_gates.py)"],"enforcement_level":"everyone"}}}
