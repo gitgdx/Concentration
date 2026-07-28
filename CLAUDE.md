@@ -181,9 +181,13 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (Art. 5). ⚠️ **Exposition irréversible** de tout l'historique pour ce qui a été publié ; `gitleaks`
   devient une barrière **critique**. **FAIT (2026-07-28)** : le **`PUT`** d'application (T8 d'US-00.7) et
   le **test négatif serveur** (T10) — les deux seules opérations à confirmation humaine explicite.
-- 🔒 **US-00.7 T20 — `scripts/githooks/pre-push` (Art. 6, action humaine)** : son en-tête affirme encore
-  « CE HOOK EST LE SEUL ENFORCEMENT RÉEL » et « `main` … ne peut pas l'être sur ce plan » — **devenu
-  faux**. Diff exact fourni dans le Story File d'US-00.7 (T20) et dans `reports/US-00.7/transmissions.md`.
+- ✅ **FAIT (2026-07-28) : US-00.7 T20 — `scripts/githooks/pre-push` (Art. 6)**. Son en-tête ne se
+  réclame plus d'être « le seul enforcement réel » ni d'une impossibilité de plateforme. **Copie
+  humaine** (l'agent en est bloqué par `protect_files.sh`), diff de `reports/US-00.7/transmissions.md`
+  **§8** — *et non celui du Story File, rédigé le 27 et rectifié depuis*. Logique **inchangée** (un seul
+  hunk) et **exercée sans réseau** : `main` → `exit 1`, `feat/` → `exit 0`. Preuves :
+  [`reports/US-00.7/t20_pre_push.md`](reports/US-00.7/t20_pre_push.md). **C'était la dernière action
+  humaine Art. 6 d'US-00.7.**
 - **Planifier les dettes techniques restantes** : **NB-1bis** (complétude de la cible dans
   `_guard_mapping`) et **`selftest` en CI** — de préférence dans la **même** US de dette.
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).

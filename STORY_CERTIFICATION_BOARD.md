@@ -681,10 +681,18 @@
 - **⚠️ CONDITIONNEL — condition d'invalidation de tout l'édifice** : la protection repose sur la
   **visibilité PUBLIQUE** du dépôt. Un retour en **privé** ramènerait le **403**, rendrait la protection
   **indisponible** et **rouvrirait la dérogation éteinte**.
-- **Prochaine étape** : ⏳ **T20** (action humaine, Art. 6 — en-tête de `scripts/githooks/pre-push`,
-  diff exact dans `reports/US-00.7/transmissions.md` §8) · **T11** (@DevOps : PR, libellés **réellement
-  rapportés**, refus de fusion, fusion après 4 verts) — **la PR de cette US sera la première à devoir
-  franchir la protection**, elle sert donc de démonstration → `/audit-us` → QA → `/certify`.
+- ✅ **T20 FAIT (2026-07-28)** — dernière action humaine Art. 6 : en-tête de `scripts/githooks/pre-push`
+  corrigé par copie humaine (diff de `transmissions.md` §8). Logique inchangée, vérifiée **sans réseau**
+  (`main` → `exit 1`, `feat/` → `exit 0`). Preuves : `reports/US-00.7/t20_pre_push.md`. → **critère de
+  test #22 entièrement levable** (`pre-push` était le dernier des 11 artefacts vivants à affirmer une
+  impossibilité au présent) et **case 33 de la DoD complète**.
+- **DoD (2026-07-28)** : **24 cases sur 34 levées et cochées** contre preuves revérifiées ce jour.
+  **10 restent ouvertes**, toutes pour un motif nommé : **2 · 13 · 14 · 26** *(moitié CI)* · **34**
+  dépendent de la **PR** (T11) · **27 · 28 · 29** des audits et de la QA · **23** d'un **arbitrage @PO**
+  non tranché (véhicule de mise à jour d'US-00.1) · **31** de la fin de cycle.
+- **Prochaine étape** : ⏳ **T11** (@DevOps : PR, libellés **réellement rapportés**, refus de fusion,
+  fusion après 4 verts) — **la PR de cette US sera la première à devoir franchir la protection**, elle
+  sert donc de démonstration → `/audit-us` → QA → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

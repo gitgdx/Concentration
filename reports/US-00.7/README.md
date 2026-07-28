@@ -23,7 +23,8 @@
 | Dates | phase 0 : **2026-07-27** · phases 1-2 : **2026-07-28** · phases 3-4 : **2026-07-28** |
 | `origin/main` | **`f4400ca2edd5a53e8879a7568818650eeb32d0d4`** — **inchangée sur tout le cycle** |
 | Opérations à confirmation humaine explicite | **T8** (le `PUT`) et **T10** (test négatif) — **exécutées par l'humain**, jamais par l'agent |
-| ⛔ **Non exécuté** | **T11** (PR · libellés rapportés · refus de fusion · fusion après 4 verts) · **T20** (`scripts/githooks/pre-push`, **Art. 6 → action humaine**) · **T24** (ADR-007, @Architect — *rédigé*) |
+| ⛔ **Non exécuté** | **T11** (PR · libellés rapportés · refus de fusion · fusion après 4 verts) |
+| ✅ **Exécuté depuis** *(mise à jour du 2026-07-28)* | **T20** — `scripts/githooks/pre-push`, **Art. 6**, **copie humaine** → `t20_pre_push.md` · **T24** — ADR-007 **rédigé et `Accepté`** (`EVT_ARCHI_VALIDATED`) |
 
 ---
 
@@ -86,7 +87,7 @@ Détail : `transmissions.md` §1 · `docs/GIT_PROTECTION.md` (encadré du 2026-0
 | **T17** | **`scripts/check_branch_protection.py`** — docstring | ✅ | ⛔ tableau d'attribution HTTP, `PLAN_MARKER`, §*Frontière de couverture* **intacts** · ⚠️ **angle mort #7 matérialisé** : `non_regression.md` §6.1 |
 | **T18** | **Rituels** — `audit-methodo.md` (point 1 bis **conservé et RÉORIENTÉ**, 6 points) · `sprint-status.md` (**exit 0 = état attendu**) | ✅ | `git diff .claude/commands/` |
 | **T19** | **`docs/SQUAD_GUIDE.md`** (étages 1-3, Mermaid, roadmap) · **`tests/fixtures/US-00.4/README.md`** (**additif seul : 27+/0−**) | ✅ | `non_regression.md` §3.1 |
-| **T20** | 🔒 **`scripts/githooks/pre-push`** — en-tête **devenu faux** | ⛔ **ACTION HUMAINE (Art. 6)** | **Diff exact CORRIGÉ** : `transmissions.md` §8. *(Le diff du Story File porte **2 inexactitudes** : date de l'application, et un chemin de preuve inexistant.)* |
+| **T20** | 🔒 **`scripts/githooks/pre-push`** — en-tête **devenu faux** | ✅ **FAIT le 2026-07-28** *(action humaine, Art. 6)* | **Diff appliqué** : celui de `transmissions.md` §8 — **pas** celui du Story File *(2 inexactitudes : date de l'application, chemin de preuve inexistant)*. Preuves et vérifications : [`t20_pre_push.md`](t20_pre_push.md) — un seul hunk, blob identique à la proposition, LF pur, logique **exercée sans réseau** |
 | **T21** | **ÉTEINDRE la dérogation `EVT_WAIVER_GRANTED`** | ✅ | Consignée **datée** aux **3** emplacements : `CLAUDE.md` · `docs/GIT_PROTECTION.md` · `EPIC_00` **risque #5**. ⛔ Trace **non réécrite** (`git diff docs/trace/` **vide**). ⚠️ Extinction **DOCUMENTAIRE** → **dette du système de traçabilité** |
 | **T22** | **Transmissions nommées** | ✅ | `transmissions.md` — 11 sections |
 | **T23** | **Non-régression, re-balayage, index** | ✅ | `non_regression.md` + le présent fichier |
@@ -176,7 +177,12 @@ de `block_dangerous_bash.sh`.
 
 * **Le refus de FUSION n'est pas prouvé** — **T11** non exécutée. Le refus prouvé porte sur le **push
   direct**.
-* **`scripts/githooks/pre-push` porte encore 3 affirmations fausses** → **T20, action humaine (Art. 6)**.
+* ~~**`scripts/githooks/pre-push` porte encore 3 affirmations fausses**~~ → **CORRIGÉ le 2026-07-28**
+  par **T20** (action humaine, Art. 6) : [`t20_pre_push.md`](t20_pre_push.md). ⚠️ **`corpus_sweep.md`
+  (T7) et `non_regression.md` (T23) sont ANTÉRIEURS à T20** — leurs mentions « `pre-push` reste à
+  faire » et « critère 22 levé sur **9/11** » étaient **exactes à leur date** et **ne sont pas
+  réécrites** *(rapports datés, Art. 3)*. **État courant : 10/11**, la 11ᵉ exception étant
+  `tests/fixtures/US-00.4/README.md`, arbitrée en **historisation additive**.
 * **L'exhaustivité du balayage n'est pas revendiquée** : **10 angles morts déclarés**, dont **un s'est
   matérialisé** en phase 3 (`non_regression.md` §6.1). L'angle **#7** (paraphrases sémantiques) **ne se
   ferme que par relecture humaine**.
