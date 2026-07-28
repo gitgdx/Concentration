@@ -1,0 +1,99 @@
+# T10 — US-00.7 · TEST NEGATIF SERVEUR — sorties BRUTES
+# horodatage UTC : 2026-07-28T08:10:00Z
+#
+# EXECUTE PAR L'HUMAIN — et c'est un fait de conception, pas une commodite.
+#   Le hook Claude Code .claude/hooks/block_dangerous_bash.sh interdit a l'agent le push
+#   direct vers la branche principale (l. 25-26) et le force-push (l. 28-29). Le contourner
+#   pour fabriquer la preuve aurait vide la preuve de son sens (Constitution Art. 1).
+#   L'agent a donc redige la procedure ; l'humain l'a executee.
+#
+# CLONE JETABLE SANS HOOKS : 0 hook executable, 0 configuration de hook dans le clone
+#   -> tout refus constate ci-dessous vient du SERVEUR, jamais du pre-push local.
+# Aucune option de contournement de hook employee (Art. 1 respecte).
+# Garde relue immediatement avant execution : protected=true, main=f4400ca.
+#
+# SORT EXACT DU COMMIT JETABLE cabb360 — precision apportee apres verification,
+# car la formulation initiale (« n'est jamais parvenu sur le serveur ») etait FAUSSE :
+#   * L'OBJET a bien ete televerse : les sorties montrent « Writing objects: 100% (1/1),
+#     221 bytes ». Le transfert d'objets PRECEDE l'evaluation de la protection.
+#     Consequence verifiable : GET /repos/.../commits/cabb360 renvoie bien son sha.
+#   * La REFERENCE, elle, n'a PAS bouge : GET /repos/.../git/ref/heads/main renvoie
+#     f4400ca. Le parent de cabb360 est f4400ca, et AUCUNE reference du depot ne designe
+#     cabb360 (git ls-remote : 0 occurrence) — c'est un objet ORPHELIN, voue au ramasse-
+#     miettes de GitHub.
+#   * C'est precisement le sens de « protected branch hook declined » : ce qui est refuse
+#     est la MISE A JOUR DE LA REFERENCE, pas le transfert des objets. A savoir pour tout
+#     audit futur : constater qu'un objet existe cote serveur ne prouve PAS qu'un push a
+#     reussi.
+
+===== [1/3] Push direct vers la branche principale -> REFUSE PAR LE SERVEUR =====
+
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote:
+remote: - Changes must be made through a pull request.
+remote:
+remote: - 4 of 4 required status checks are expected.
+To https://github.com/gitgdx/Concentration.git
+ ! [remote rejected] main -> main (protected branch hook declined)
+error: failed to push some refs to 'https://github.com/gitgdx/Concentration.git'
+
+===== [2/3] Force-push vers la branche principale -> REFUSE PAR LE SERVEUR =====
+
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote:
+remote: - Changes must be made through a pull request.
+remote:
+remote: - 4 of 4 required status checks are expected.
+To https://github.com/gitgdx/Concentration.git
+ ! [remote rejected] main -> main (protected branch hook declined)
+error: failed to push some refs to 'https://github.com/gitgdx/Concentration.git'
+
+===== [3/3] Suppression de la branche principale -> REFUSEE PAR LE SERVEUR =====
+
+To https://github.com/gitgdx/Concentration.git
+ ! [remote rejected] main (refusing to delete the current branch: refs/heads/main)
+error: failed to push some refs to 'https://github.com/gitgdx/Concentration.git'
+
+===== ATTRIBUTION HONNETE DES REFUS — A LIRE AVANT TOUT AUDIT =====
+
+Ce test prouve l'EFFET : aucun chemin d'ecriture directe vers la branche principale
+n'existe. Il n'ISOLE PAS chaque reglage de la protection. Attribution exacte :
+
+  * [1] et [2] : refus par la regle « Changes must be made through a pull request »
+        (required_pull_request_reviews PRESENT dans la cible appliquee). Le MEME message
+        GH006 sort dans les deux cas : la regle « PR obligatoire » se declenche AVANT toute
+        evaluation propre au force-push.
+        => allow_force_pushes:false n'est donc PAS isole par ce test. Il est prouve par
+           l'ETAT DE L'API (voir protection_applied.json).
+
+  * [3] : « refusing to delete the current branch ». GitHub refuse la suppression de la
+        BRANCHE PAR DEFAUT independamment du reglage allow_deletions.
+        => allow_deletions:false n'est PAS isole non plus. Prouve par l'etat de l'API.
+        (Ce point avait ete anticipe par l'audit de revue d'US-00.4, qui refusait de
+         laisser croire a trois preuves distinctes la ou il n'y en a qu'une.)
+
+  * PREUVE DIRECTE OBTENUE EN BONUS — la plus interessante :
+        « 4 of 4 required status checks are expected » etablit par LECTURE DIRECTE que les
+        4 contextes sont REQUIS. US-00.4 ne pouvait etablir ce fait que par INFERENCE
+        depuis "protected": false (son AC-1 fait (b), explicitement declare comme une
+        inference et non comme une lecture d'API). L'inference d'US-00.4 est donc
+        CONFIRMEE A POSTERIORI par l'observation directe.
+
+===== INCIDENT DE PROCEDURE — CONSIGNE, NON MASQUE =====
+
+Une premiere tentative a ete lancee par erreur depuis le VRAI depot au lieu du clone
+jetable (le changement de repertoire n'avait pas ete applique) :
+
+  * Le force-push a repondu « Everything up-to-date » : la branche locale etait identique
+    a la distante, git s'est arrete AVANT de contacter le serveur. Non-evenement, pas un
+    refus.
+  * La suppression a ete refusee par le HOOK LOCAL pre-push (message « PUSH BLOQUE — push
+    direct vers main interdit », texte de la factory), sans jamais atteindre le serveur.
+
+AUCUNE des deux ne prouvait quoi que ce soit sur l'enforcement de PLATEFORME, et aucun
+degat n'a ete cause (branche principale inchangee, verifie apres coup).
+Corrige en supprimant le changement de repertoire au profit d'un ciblage explicite du
+clone a chaque commande.
+
+LECON, qui est exactement la raison d'etre du clone sans hooks : un refus LOCAL ne prouve
+rien. Un outil qui ne passe pas par le git local le contournerait sans effort.
