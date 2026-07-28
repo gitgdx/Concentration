@@ -808,11 +808,19 @@
     car *blanket policy* et **strictement préexistants** (`git diff f4400ca..HEAD -- .github/workflows/`
     sur `uses:`/`permissions:` → **VIDE**).
 - **🆕 Findings du re-audit — AUCUN bloquant, TOUS OUVERTS** :
-  - **N-1 (MED) — interblocage structurel** : si l'asset `actionlint` devient indisponible, `governance`
-    passe en `FAILURE` sur **toute** PR, et corriger exigerait de fusionner une PR qui **exige ce
-    contexte**. Le **§Plan de retour arrière s'interdit lui-même** (« appliquer ce plan sur un `FAILURE`
-    serait un contournement »). **Récupérable** — `enforce_admins` interdit de *contourner*, pas
-    d'*administrer*. **Il manque une 3ᵉ ligne au tableau du plan de retour arrière.**
+  - **N-1 (MED) — interblocage structurel — ✅ TRAITÉ le 2026-07-28** : si l'asset `actionlint` devient
+    indisponible, `governance` passe en `FAILURE` sur **toute** PR, et corriger exigerait de fusionner une
+    PR qui **exige ce contexte** — **circulaire**. Le **§Plan de retour arrière s'interdisait lui-même**
+    (« appliquer ce plan sur un `FAILURE` serait un contournement »).
+    **Correctif** : **4ᵉ ligne ajoutée** au tableau du plan (`docs/GIT_PROTECTION.md`) pour le cas
+    « `FAILURE` d'origine **externe**, **non corrigeable par une PR** » → **administrer**, puis corriger
+    en amont et ré-appliquer. **Et l'avertissement qui suivait a été NUANCÉ** : il était **trop absolu**
+    — vrai d'un `FAILURE` dont la cause est **dans** le dépôt, faux d'une **panne de disponibilité qui a
+    pris la forme d'un gate**. Test retenu, non assouplissant : **« la cause est-elle corrigeable par une
+    PR ? »** — oui ⇒ corriger le travail, non ⇒ administrer **en le traçant**. ⛔ Dans les **deux** cas,
+    `gh pr merge --admin` reste **interdit**. **Surface exposée nommée** : `actionlint` *(épinglé
+    version + SHA256)*, `pip install jsonschema` *(**nu** — N-2, pire)*, et les 3 actions à tag mutable.
+    Renvoi croisé ajouté dans `ci.yml`. `actionlint` → **exit 0** · bloc `FACTORY_SYNC` **non édité**.
   - **N-2 (MED)** : `ci.yml` — `pip install jsonschema` **nu** dans le **même job requis**, manqué par le
     1ᵉʳ cycle et **plus faible** que le step qu'on lui reproche.
   - **N-3 (MED)** : sur PR de **fork**, les workflows viennent du **commit de fusion** — l'attaquant

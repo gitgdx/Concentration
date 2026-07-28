@@ -73,6 +73,14 @@ jobs:
       #    identifié l'absence d'actionlint comme la CAUSE RACINE du finding B-1.
       #    Épinglage : version ET empreinte SHA256 codées en dur. Si l'asset publié est
       #    un jour remplacé, `sha256sum -c` échoue et la CI s'arrête — c'est voulu.
+      #    ⚠️ CONTREPARTIE ASSUMÉE (finding N-1 du re-audit sécurité d'US-00.7) : si
+      #    l'asset devient INDISPONIBLE (release supprimée, incident CDN), ce job REQUIS
+      #    échoue sur TOUTE PR, et corriger exigerait de fusionner une PR qui exige ce
+      #    même contexte — c'est CIRCULAIRE. La sortie est documentée : voir la 4e ligne
+      #    du tableau §Plan de retour arrière de docs/GIT_PROTECTION.md (ADMINISTRER la
+      #    règle, ce qui n'est PAS la contourner). Risque faible et AUTO-RÉVÉLATEUR : il
+      #    se manifeste à la première PR, jamais silencieusement. Même propriété, en pire,
+      #    pour le `pip install jsonschema` NU quelques lignes plus bas (finding N-2).
       - name: 🔎 Lint des workflows (actionlint, épinglé par SHA256)
         run: |
           set -euo pipefail
