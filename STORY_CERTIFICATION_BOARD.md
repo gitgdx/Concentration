@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ❌ | ⏳ | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -774,10 +774,58 @@
     faille décrite, reproduite par l'outil qui la documentait. Ligne retirée car **NON COMMITÉE**
     (9 lignes commitées, 10 dans le fichier) donc **jamais entrée en vigueur** : **même doctrine
     qu'ADR-007 applique à ADR-006**, l'immuabilité protège le registre des décisions **effectives**.
-- **⛔ PHASE INCHANGÉE : `parallel_audit`.** **QA et `/certify` restent interdits** : un correctif ne
-  lève pas un verdict — seul un **re-audit sécurité à contexte frais** le peut. Les **4 MEDIUM** et
-  **4 LOW** de `security.md` restent **ouverts et non traités** (hors périmètre du bloquant).
-- **Prochaine étape** : **re-audit sécurité** (@CyberSecurity, contexte frais) → QA → `/certify`.
+- **🛡️ RE-AUDIT sécurité — ✅ PASSED (2026-07-28, @CyberSecurity, contexte frais, 0 bloquant)** ·
+  `reports/US-00.7/security_reaudit.md` (36 291 o, 44 blocs) · `EVT_SECURITY_AUDIT_PASSED`.
+  ⛔ `security.md` **non écrasé** — la preuve datée du 1ᵉʳ cycle est **intacte** (vérifié par `git diff`).
+  - **B-1 neutralisé, prouvé par TROIS moyens indépendants** : **effet** (4 charges — substitution,
+    backticks, `;id;`, `*` — rendues **littérales** ; reproduction pré-correctif → commande **exécutée**) ·
+    **`actionlint`** (avant : exit 1 sur exactement B-1 ; après : exit 0) · **`zizmor` 1.28.0** (avant :
+    **2** `template-injection` HIGH ; après : **0**).
+  - 🟢 **LACUNE DU 1ᵉʳ CYCLE CORRIGÉE** : il y avait **DEUX** injections, pas une. `zizmor` relève aussi
+    **`github.ref_name`** (chemin `push`), **jamais nommée** par le premier audit. **Le correctif ferme
+    les deux** — il va plus loin que le finding qui l'a motivé.
+  - **Motif cherché ailleurs** (le 1ᵉʳ cycle n'avait examiné **qu'un** fichier) : les 5 interpolations
+    des **3** workflows énumérées — **`e2e.yml`, jamais audité, n'en contient aucune** ; `ci.yml:38` est
+    une clé `concurrency:`, pas un `run:` ; **aucun `pull_request_target`**.
+  - **Step `actionlint` audité comme du code neuf** : empreinte **recalculée et concordante sur 3
+    sources** (téléchargement + `sha256sum`, fichier de checksums officiel, `digest` de l'API) ·
+    **fail-closed PROUVÉ** (empreinte falsifiée → exit 1, `tar` **jamais exécuté** ; 404 → exit 22) ·
+    ordre vérifier → extraire → exécuter respecté · **aucun contenu non vérifié n'est exécuté** · aucun
+    cache, aucune permission ajoutée. **Job id `check-branch-name` inchangé** (comparaison
+    `f4400ca:` vs `HEAD:`).
+  - ⚠️ **Risque trouvé PUIS CLOS par l'auditeur lui-même** : `actionlint` invoque **`shellcheck`**
+    automatiquement — absent de son poste, **pré-installé sur `ubuntu-latest`** ⇒ son exit 0 local
+    **n'était pas concluant**. Il a installé shellcheck 0.10.0, **prouvé par contrôle négatif que
+    l'intégration est vivante**, puis re-obtenu exit 0.
+  - 📌 **Incident de méthode qu'il consigne contre lui-même** : son **premier** contrôle négatif
+    indiquait faussement que `set -euo pipefail` n'abortait pas — ce qui aurait rendu la vérification
+    d'empreinte **décorative**. Artefact de **son propre harnais**, refait avec de vrais fichiers de
+    script.
+  - **MEDIUM/LOW du 1ᵉʳ cycle** : **ouverts, non traités, NON AGGRAVÉS** — vérifié par
+    `git diff --quiet 0194078 HEAD` sur `factory_sync.py`, `check_branch_protection.py`,
+    `trace_append.py`, `events_catalog.json`, `.gitleaks.toml`, `factory.config.json` → **tous inchangés**.
+  - **Downgrade motivé et assumé** : `zizmor` rapporte **8 HIGH `unpinned-uses`** — **non bloquants**,
+    car *blanket policy* et **strictement préexistants** (`git diff f4400ca..HEAD -- .github/workflows/`
+    sur `uses:`/`permissions:` → **VIDE**).
+- **🆕 Findings du re-audit — AUCUN bloquant, TOUS OUVERTS** :
+  - **N-1 (MED) — interblocage structurel** : si l'asset `actionlint` devient indisponible, `governance`
+    passe en `FAILURE` sur **toute** PR, et corriger exigerait de fusionner une PR qui **exige ce
+    contexte**. Le **§Plan de retour arrière s'interdit lui-même** (« appliquer ce plan sur un `FAILURE`
+    serait un contournement »). **Récupérable** — `enforce_admins` interdit de *contourner*, pas
+    d'*administrer*. **Il manque une 3ᵉ ligne au tableau du plan de retour arrière.**
+  - **N-2 (MED)** : `ci.yml` — `pip install jsonschema` **nu** dans le **même job requis**, manqué par le
+    1ᵉʳ cycle et **plus faible** que le step qu'on lui reproche.
+  - **N-3 (MED)** : sur PR de **fork**, les workflows viennent du **commit de fusion** — l'attaquant
+    fournit la CI qui produit ses propres checks requis. Atténué par
+    `approval_policy: "first_time_contributors"`.
+  - **N-4 / N-5 (LOW)** : épinglage qui rancira · ⚠️ **le `ci.yml` corrigé N'A JAMAIS TOURNÉ EN CI**
+    (branche non poussée) — **inférence outillée, pas observation**.
+  - **Bornes que l'auditeur refuse d'escamoter** : **aucun scanner de CVE n'existe** dans cette factory,
+    donc son PASS **ne s'appuie sur aucun scan de vulnérabilité**.
+- **✅ DOUBLE AUDIT OBTENU** : Rev ✅ 🔍 · Sec ✅ 🛡️. **Phase maintenue à `parallel_audit`** : le hook
+  `check_scb_compliance.py` **refuse** `quality_assurance` tant que `QA Status` est `⏳` — la phase ne
+  s'annonce pas avant que la QA n'ait tourné.
+- **Prochaine étape** : **QA** (@QA_Tester) — exécution réelle des suites, puis `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
