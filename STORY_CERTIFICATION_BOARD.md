@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -833,7 +833,43 @@
 - **✅ DOUBLE AUDIT OBTENU** : Rev ✅ 🔍 · Sec ✅ 🛡️. **Phase maintenue à `parallel_audit`** : le hook
   `check_scb_compliance.py` **refuse** `quality_assurance` tant que `QA Status` est `⏳` — la phase ne
   s'annonce pas avant que la QA n'ait tourné.
-- **Prochaine étape** : **QA** (@QA_Tester) — exécution réelle des suites, puis `/certify`.
+- **🧪 QA — ❌ FAIL (2026-07-28, @QA_Tester, contexte frais)** · `reports/US-00.7/qa.md` (43 674 o) ·
+  `EVT_QA_FAILED`. **25 critères LEVÉS / 3 NON LEVÉS** (🟢 **13/13** · 🟠 **9/11** · 🔵 **3/4**).
+  - **Exécutions réelles** : tests Flutter **2 passed / 0 failed**, couverture **89,5 %** (seuil 80) ·
+    `run_gates --component app` **5/5 exit 0** · `factory_sync --check`, `check_scb_compliance`,
+    `validate_trace` **verts** · **`gitleaks` : 0 fuite sur 51 commits**.
+  - 🔴 **D-1 (BLOQUANT) — critère 26 / DoD case 13 / AC-4 nominal** : aucune tentative de fusion n'a
+    **jamais** été lancée sur la PR #12 — pas de refus, pas de motif brut,
+    `applied_state/merge_refusal_raw.txt` **inexistant**. Seul un `mergeStateStatus: BLOCKED` a été
+    capturé : **un état calculé, pas une action refusée**. ⚠️ **C'est exactement la distinction *état de
+    l'API* vs *effet* que cette US existe pour poser.** Sur les 4 preuves annoncées comme neuves,
+    **3 sont acquises** (push direct, force-push, suppression), **la 4ᵉ manque**.
+  - 🟠 **Aggravants non rédhibitoires — critères 20 et 21 PARTIELS** : le `core.hooksPath` **vide** du
+    clone jetable et sa **suppression** ne sont **pas archivés** ; la garde de sûreté est attestée **une
+    seule fois**, sans le **triplet** exigé ; la phrase de portée est **absente** du fichier de preuve
+    que le critère nomme *(vérifié par `grep`, aucun résultat)*. ⚠️ **Non retro-archivables sans
+    ré-exécuter le test négatif** — le clone jetable a été supprimé. **Rien ne sera fabriqué.**
+  - 🔧 **Rectification apportée par la QA** : la **DoD réelle est 30/34, non 28/34** — les cases **27**
+    et **28** étaient **décochées à tort** (les deux audits sont PASSED en trace **et** au SCB). Le bloc
+    d'état avait été écrit **avant** les audits. **Corrigé.** Aucune case cochée à tort ; **réserve sur
+    la case 12** (couple `rev-parse` avant/après non archivé tel que décrit).
+  - **AC orphelins : AUCUN.** Les 8 AC sont **couverts** — mais *couvert* ≠ *prouvé* : **AC-4 a un test
+    qui n'a pas été exécuté**, et un scénario non exécuté n'est pas un scénario vert.
+  - **E2E BDD : 0 exécuté** — aucun runner, **0 step definition** : les **24 scénarios Gherkin sont
+    documentaires**. Constat de la QA, à ne pas confondre avec une suite verte.
+  - ✅ **Écart É-7 refermé par la QA** : `gitleaks` **réellement exécuté** (absent du `PATH` de
+    @Developer lors du cycle) → **0 fuite / 51 commits**.
+  - **À décharge, mot de la QA** : *« Je n'ai trouvé **aucune sur-affirmation**. Les trois défauts que je
+    prononce avaient tous été déclarés par l'US elle-même — `merge_block.md` place l'échec de T11(d) en
+    tête, en gras, avant toute réussite. Une US qui documente son propre échec au premier paragraphe ne
+    triche pas ; elle n'est pas finie. »*
+- **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
+  **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
+  **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.
+  ⚠️ **Procédure corrigée, l'erreur à ne pas refaire** : tenter la fusion **IMMÉDIATEMENT après
+  l'ouverture**, **avant toute autre capture**. Le re-passage QA pourra être **ciblé sur le seul
+  critère 26**.
+- **Prochaine étape** : PR de certification → capture du refus (D-1) → **re-QA ciblée** → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
