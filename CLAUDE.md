@@ -178,6 +178,17 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   de la dette précédente : le système peut **accorder** une dérogation sans humain et ne peut pas
   l'**éteindre**. Même classe de défaut que celle qu'US-00.4 dénonce, dans le système de traçabilité
   lui-même. Candidat `/audit-methodo`.
+- 🔴 **PROVENANCE NON PROUVABLE — dette FUSIONNÉE avec celle de `TRACKS.md` ci-dessous, même solution.**
+  Établi le 2026-07-29 par une **violation réelle** (`reports/US-00.7/merge_proof_and_violation.md`) :
+  **`mergedBy.is_bot` rend `false` même pour une fusion exécutée par un AGENT**, parce que les agents
+  opèrent avec **le jeton de l'humain**. Vérifié le même jour : `collaborators` = **`gitgdx` seul**,
+  `restrictions` = **absente**, identité `gh` **identique**. ⇒ **Sur ce dépôt, aucune preuve machine de
+  provenance n'existe** : « la fusion ne vient pas d'un agent » (case 34, renforcement R-c) est une
+  **obligation de process**, désormais attestée de façon **déclarative et assumée** — jamais plus par
+  `is_bot`, qui était **faussement rassurant**. **Voie de sortie unique et commune aux deux dettes** :
+  une **identité distincte pour les agents** (2ᵉ compte ou GitHub App), puis `restrictions` → la fusion
+  par un agent devient **impossible**, pas seulement interdite. ⚠️ Réserve **non levée** : `restrictions`
+  pourrait être **réservé aux dépôts d'organisation** — à vérifier. **Porté par US-00.8.**
 - ⚠️ **`TRACKS.md` (track FULL) exige une « revue humaine explicite de la PR » qu'aucune barrière
   machine ne soutient** — ni avant, ni après l'application (cible à **`0`** approbation). **US-01.1 est en
   FULL** → arbitrage à poser **avant son Integration Lock** : requalifier l'exigence en obligation de
