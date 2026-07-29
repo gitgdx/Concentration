@@ -625,7 +625,7 @@
     avait honnêtement déclaré comme telle). **Son inférence est confirmée a posteriori — sans qu'une
     ligne de son texte ait eu besoin d'être corrigée.** Deuxième fois après la clôture de son risque R3.
 - **⚠️ Ce qui N'EST PAS prouvé — à lire avant tout audit** : le **refus d'une tentative de FUSION** n'a
-  **pas** été observé (**T11 non exécutée**) — toute phrase du type « aucune fusion possible avec la CI
+  **pas** été observé (**T11 non exécutée**) *(**PÉRIMÉ-2026-07-29** : il **A** été observé — HTTP 405 du serveur, PR #14)* — toute phrase du type « aucune fusion possible avec la CI
   rouge » est une **inférence raisonnée, pas une preuve** ; le refus prouvé porte sur le **push direct**,
   qui n'est pas la même opération. Et `allow_force_pushes: false` / `allow_deletions: false` ne sont
   **pas isolés** par le test négatif (même `GH006` pour le force-push, la règle « PR obligatoire » se
@@ -695,7 +695,7 @@
   ouverte et **fusionnée** en `9fdb7fd` — **première fusion de l'histoire du dépôt réellement
   conditionnée par les gates**, par `gitgdx` — ⛑️ ~~(`is_bot: false` → case 34 satisfaite)~~ **BARRÉ le
   2026-07-29 : `is_bot` NE PROUVE RIEN** (jeton partagé entre l'humain et les agents ; le champ rend
-  `false` même pour une fusion par un agent) ⇒ **case 34 DÉCOCHÉE**, méthode de preuve **refondue**.
+  `false` même pour une fusion par un agent) ⇒ **case 34 DÉCOCHÉE** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*, méthode de preuve **refondue**.
   **Acquis** : les 4 libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux
   contextes requis *(le contrôle que T3 ne pouvait pas faire)* · `mergeStateStatus: **BLOCKED**` capturé
   à `15:25:30Z`, **avant** la complétion de 3 contextes requis — **renversement exact** du `CLEAN`
@@ -707,7 +707,7 @@
   cette extrapolation qui a fauté), refermée à `15:26:49Z` ; la fusion est intervenue à `15:34:21Z`.
   **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** — même distinction que pour
   `allow_force_pushes`/`allow_deletions`. **⇒ AC-4 nominal NON satisfait, case 13 DÉCOCHÉE.**
-  **Preuve encore obtenable** sur la **PR de certification** (`feat/US-00.7-certif`), qui franchira les
+  **PÉRIMÉ-2026-07-29 — preuve OBTENUE** (PR #14, HTTP 405). ~~Preuve encore obtenable~~ sur la **PR de certification** (`feat/US-00.7-certif`), qui franchira les
   **mêmes** 4 contextes : tenter la fusion **immédiatement après l'ouverture**. Rapport :
   `reports/US-00.7/merge_block.md`.
 - **🔍 Audit Rev — ✅ PASSED (2026-07-28, @CodeReviewer, contexte frais)** · `reports/US-00.7/code_review.md`
@@ -952,7 +952,7 @@
   PR #12** — **cette vérification ne prouvait rien** : elle était vraie **par hasard** et serait sortie
   **identique** si un agent avait fusionné. **Même classe que la dette « `emitter` non enforced » :
   un contrôle déclaré, vérifié par un champ qui ne mesure pas ce qu'on croit. Troisième occurrence du
-  motif dans cette US.** ⇒ **CASE 34 DÉCOCHÉE. DoD : 29/34.**
+  motif dans cette US.** ⇒ **CASE 34 DÉCOCHÉE. DoD : 29/34.** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)* — **DoD courante : 32/34**.
 - **✅ D-1 REFERMÉ — le refus SERVEUR est prouvé (2026-07-29T08:49:14Z, PR #14, lancé par l'HUMAIN)**.
   `gh api -X PUT …/pulls/14/merge` avec **1/4** contexte vert → **HTTP 405**, *« **3 of 4 required status
   checks are expected** »*. **C'est l'API REST qui refuse** — `gh` n'est qu'un transport ⇒ l'hypothèse du
@@ -968,7 +968,7 @@
   ⚠️ **Bornes maintenues** : le refus porte sur des contextes **`expected`**, **pas `failing`** — la
   conjonction littérale d'US-00.1 **reste non observée**, ⛔ on ne casse pas un gate pour l'obtenir ;
   `--admin` **non testé** et ne le sera pas. 📌 **Le succès n'efface pas la violation** : elle reste
-  actée, tracée, et la **case 34 reste décochée**.
+  actée, tracée, et la **case 34 reste décochée** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*.
 - **🔒 CASE 34 — ATTESTATION HUMAINE DATÉE (2026-07-29), méthode de NIVEAU 1, assumée DÉCLARATIVE.**
   **La PR [#14](https://github.com/gitgdx/Concentration/pull/14) a été fusionnée par l'HUMAIN** —
   `main` = **`cad24e8`**, `mergedAt` = **`2026-07-29T14:20:00Z`**, `mergedBy` = `gitgdx`.
@@ -980,9 +980,16 @@
   - 📌 **Nuance relevée à la vérification, non masquée** : la sortie capturée est
     *« Pull request #14 **was already merged** »*. **La commande d'attestation n'a donc PAS elle-même
     effectué la fusion** — celle-ci avait été faite par l'humain **par un autre moyen** quelques instants
-    plus tôt. **La capture est cohérente avec une fusion humaine, elle ne la démontre pas.** ✅ Contrôle
-    complémentaire : le `reflog` de l'agent ne comporte **aucune** opération de fusion sur `main` —
-    **aucun agent n'a fusionné la PR #14**.
+    plus tôt. **La capture est cohérente avec une fusion humaine, elle ne la démontre pas.**
+  - ⛑️ **RETRAIT du 2026-07-29, exigé par la QA (4ᵉ passage) et VÉRIFIÉ par @Architect** :
+    ~~« Contrôle complémentaire : le `reflog` de l'agent ne comporte aucune opération de fusion sur
+    `main` — aucun agent n'a fusionné la PR #14. »~~ **CE CONTRÔLE N'EST PAS PROBANT et est RETIRÉ.**
+    Exécution à charge : le `reflog` ne montre qu'un **fast-forward local** d'un `main` **déjà fusionné**,
+    et `git log -1 cad24e8` rend **`committer=GitHub <noreply@github.com>`** avec
+    **`author=gitgdx`** — **compte partagé**. Le `reflog` ne dit **rien** de qui a déclenché la fusion
+    côté serveur. ⚠️ **J'avais invoqué comme preuve un contrôle qui n'en était pas** — exactement le
+    reproche adressé à `is_bot`, **reproduit une seconde fois, par moi, dans le même paragraphe qui le
+    dénonçait**.
   - ⚠️ `reviewDecision` **vide** et `latestReviews` **vide** : **aucune approbation GitHub formelle** —
     **attendu**, la cible étant à `required_approving_review_count: 0`. Le renforcement **R-c** reste une
     **obligation de process**. **NIVEAU 2 → US-00.8** *(identité distincte pour les agents + `restrictions`)*,

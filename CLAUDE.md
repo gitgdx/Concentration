@@ -50,10 +50,13 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 ## État courant du projet *(maintenu par @Architect)*
 
 **Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
-renforcements). **PR #12 FUSIONNÉE le 2026-07-28** (`main` = `9fdb7fd`) — première fusion du dépôt
-réellement conditionnée par les gates. **DoD 28/34.** Suite sur la branche post-fusion
-**`feat/US-00.7-certif`** : `/audit-us` → QA → `/certify`. ⛔ **Reste dû : la preuve du REFUS de fusion
-(T11(d), case 13)** — à capturer sur la PR de certification, **immédiatement après son ouverture**. **`main` EST PROTÉGÉE depuis le
+renforcements). **PR #12, #13 et #14 fusionnées** — `main` = **`cad24e8`**. **DoD 32/34** *(restent **29**
+QA et **31** fin de cycle)*. Audits **✅ 🔍** et **✅ 🛡️** · QA **🧪 FAIL ×4**, motifs réels et **tous
+différents**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du REFUS de fusion EST
+OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
+⛔ **Reste dû** : la **QA** (case 29) et un **arbitrage sur le critère 27**, dont le 3ᵉ volet (R-c) est
+**structurellement inatteignable** sur un dépôt à un seul compte *(`reviewDecision` vide, l'auteur ne
+pouvant approuver sa propre PR)*. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
 protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
@@ -92,7 +95,10 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > * ⛔ **VIOLATION DE WORKFLOW du 2026-07-29, actée et NON effacée** : à `07:08:59Z`, **un agent a fusionné
 >   la PR #13** — enfreint la **case 34** / renforcement **R-c**. **Pas un contournement** (4 gates verts,
 >   fusion licite) mais une **violation de PROVENANCE**. `EVT_WORKFLOW_VIOLATION` tracé, **case 34
->   décochée**. A révélé que **`mergedBy.is_bot` ne prouve rien** — voir la dette « provenance » ci-dessous.
+>   **décochée à l'époque** — ⚠️ **PÉRIMÉ-2026-07-29 : la case 34 est depuis RECOCHÉE**, au titre d'une
+>   **attestation humaine datée** *(niveau 1, assumée **déclarative**)* après la fusion de la PR #14 par
+>   l'humain. **Elle ne lève pas pour autant le 3ᵉ volet du critère 27** *(`reviewDecision` vide)*.
+>   A révélé que **`mergedBy.is_bot` ne prouve rien** — voir la dette « provenance » ci-dessous.
 > * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
 >   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
 >   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont

@@ -1,5 +1,41 @@
 # US-00.7 · T7 — **Balayage inverse du corpus** : deux passes, toutes extensions, exhaustivite NON revendiquee
 
+> ## 🔴 AJOUT DU 2026-07-29 — **IL MANQUAIT UNE TROISIÈME PASSE. C'est la cause des QUATRE `🧪 FAIL`.**
+>
+> *(Établi par le 4ᵉ passage QA — `qa_reaudit3.md`. Cette section est **additive** : le corps du rapport
+> ci-dessous, daté du 2026-07-28, n'est **pas** réécrit.)*
+>
+> Ce balayage comporte **deux** passes : **(1) affirmation d'impossibilité** et **(2) sur-affirmation**.
+> **Aucune des deux ne détecte la classe qui a fait échouer l'US quatre fois** :
+>
+> ### 🆕 PASSE 3 — **SOUS-AFFIRMATION PÉRIMÉE**
+> > *« Le corpus vivant affirme qu'une preuve **obtenue depuis** manque encore. »*
+>
+> Ce n'est **ni** une impossibilité, **ni** une sur-affirmation : c'est une **modestie devenue fausse**.
+> Elle est **invisible** aux deux passes d'origine — et d'autant plus insidieuse qu'elle a l'apparence
+> de la rigueur. **Une US qui prouve quelque chose crée mécaniquement cette classe de défaut** dans tout
+> texte rédigé avant la preuve.
+>
+> ### 🆕 PASSE 4 — **ÉTAT DE DÉCISION PÉRIMÉ**
+> > *« Le corpus affirme qu'une case / un critère / une dette est dans un état qu'il a quitté depuis. »*
+>
+> Révélée par la case 34, **décochée puis recochée le même jour** : le corpus s'est retrouvé
+> **incohérent dans les deux sens simultanément**.
+>
+> ### Deux leçons de méthode, payées par quatre échecs
+>
+> 1. **⛔ `~~texte~~` est INVISIBLE à `grep`** — or ce projet audite son corpus **par `grep`**. Barrer
+>    donne l'apparence de la rigueur **en la soustrayant à l'outil qui la vérifie**. → marqueur
+>    **littéral** `PÉRIMÉ-<date>`, posé **sur la ligne même** de l'assertion, jamais sur une ligne voisine.
+> 2. **La correction doit suivre le DÉFAUT, pas le RENVOI.** *« Un renvoi cite un exemple ; le défaut a
+>    une extension. »* Trois corrections successives ont échoué pour avoir traité les lignes **citées**
+>    au lieu de la **classe**. Méthode : **définir la classe → balayer tout le corpus → vérifier par
+>    l'outil que 0 occurrence subsiste non marquée**.
+>
+> ⚠️ **Conséquence pour la grille des 28 critères de test** : elle **n'a aucun contrôle** pour ces deux
+> classes. Les critères **22** et **24** sont **légitimement levés** — ils ne couvrent simplement pas ce
+> cas. **C'est une lacune de la grille, pas une tricherie sur les critères.** → à porter en **US-00.8**.
+
 > ⛔ **L'EXHAUSTIVITE DE CE BALAYAGE N'EST PAS REVENDIQUEE.** C'est la lecon des **quatre** echecs
 > d'exhaustivite d'US-00.4 (liste de fichiers -> `*.md` -> toutes extensions -> index) : **ni une liste
 > de fichiers, ni une liste de motifs ne garantit l'exhaustivite**. Ce qui est revendique ici : la
