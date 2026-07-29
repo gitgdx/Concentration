@@ -876,6 +876,41 @@
     prononce avaient tous été déclarés par l'US elle-même — `merge_block.md` place l'échec de T11(d) en
     tête, en gras, avant toute réussite. Une US qui documente son propre échec au premier paragraphe ne
     triche pas ; elle n'est pas finie. »*
+- **⚖️ ARBITRAGE @PO — case 23 (2026-07-28, contexte frais)** · `reports/US-00.7/po_arbitrage_s11.md`
+  (26 536 o). **Aucun événement émis, délibérément** : le catalogue (25 événements) **ne couvre aucun
+  arbitrage @PO** ; `EVT_STORY_READY` serait *accepté* par la machine à états mais affirmerait une US
+  prête pour validation technique alors qu'elle est en `parallel_audit` **après un `🧪 FAIL`**.
+  *« On ne pollue pas une trace append-only pour satisfaire un format. »* → **nouvelle instance de la
+  dette #12**, transmise à `/audit-methodo`.
+  - **S11 — voie (a) sur le fond, mais NI aujourd'hui, NI dans US-00.7** : requalification tracée
+    **additive, datée, différée**, portée par une **US de dette `US-00.8` à créer via `/us-new`**.
+  - 🟢 **Voie (b) écartée AU FOND, pas seulement pour disproportion** — vérification **absente de ma
+    saisine** : **l'AC-3 d'US-00.1 (l. 85-94) n'invoque nulle part la protection de branche** ; il exige
+    le blocage `pre-commit` **et** l'échec du job CI, **tous deux prouvés**. **Aucun AC n'est en cause**,
+    la certification d'US-00.1 est **saine**, l'anti-pattern — qui vise la **modification des AC** — **ne
+    se déclenche pas**. Les 3 emplacements fautifs sont une **tâche non cochée**, une **colonne
+    « résultat attendu »** et une **étape Gherkin non automatisée**.
+  - 🔴 **Motif RÉDHIBITOIRE du report, que personne n'avait vu** : éditer `docs/stories/US-00.1-*` depuis
+    la branche d'US-00.7 **ferait tomber son critère 23**, aujourd'hui **LEVÉ** (le diff sur les
+    artefacts certifiés doit rester **vide**). **Interdiction ferme.**
+  - **Réponse à la question centrale** : S11 est *« plus proche du vrai »*, **pas vrai**. Moitié
+    « `secrets-scan` rouge » : prouvée **par l'effet** depuis le 2026-07-25. Moitié « fusion bloquée » :
+    prouvée **par l'état de l'API** seulement. **La conjonction littérale n'a jamais été observée et ne
+    le sera pas** — le refus à venir portera sur des contextes **`expected`**, pas **rouges**.
+  - 🔧 **A-1 — RECTIFICATION MAJEURE, manquée par les 2 audits de code, les 2 audits de sécurité ET la
+    QA** : `transmissions.md:112` **et** le Story File d'US-00.7 **l. 290** affirmaient que le test
+    négatif d'US-00.1 « n'a jamais été exécuté ». **FAUX** — il a tourné le **2026-07-25** (faux secret,
+    PR draft **#2**, job `secrets-scan` = **`failure`**, run `30155284206`). **Un texte d'AC portait un
+    fait faux sur une US certifiée.** ✅ **Vérifié par @Architect** puis **rectifié aux 2 emplacements,
+    texte d'origine barré et non supprimé.**
+  - **S1/S2 — CONFIRMÉS, avec rectification** : règle 2 vraie et prouvée **par l'effet**, Art. 4 vrai,
+    dette #6 sans objet. Mais **`BACKLOG.md` n'a jamais porté ces corrections** → **rien à retrancher**,
+    c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+    alors que le **4ᵉ contexte requis vient de `branch-naming.yml`**.
+  - **Case 23 — NON COCHABLE en l'état** : son libellé affirme « preuve fournie par **AC-4** », **qui
+    n'existe pas**. Déblocage par **C-1** *(fermer D-1 — voie retenue, **gratuite** puisque la PR de
+    certification le fera)* **ou C-2** *(rectifier le libellé)*. ⚠️ **Elle n'est plus le chemin
+    critique** : 13, 29 et 31 restent ouvertes de toute façon.
 - **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
   **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
   **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.

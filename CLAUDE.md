@@ -197,6 +197,16 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
+- 🆕 **Créer `US-00.8` (US de dette) via `/us-new`** — décidé par l'**arbitrage @PO du 2026-07-28**
+  (`reports/US-00.7/po_arbitrage_s11.md`). Porte la **requalification tracée d'US-00.1** (S11), en
+  **additif daté**, ⛔ **jamais depuis la branche d'US-00.7** : y éditer `docs/stories/US-00.1-*` ferait
+  **tomber son critère 23**. Y joindre les dettes déjà identifiées : **NB-1bis**, **`selftest` en CI**,
+  et les **findings non bloquants** des audits (N-1 traité, **N-2** `pip install` nu, **N-3** forks,
+  actions à tag mutable, `emitter` non enforced).
+- 📌 **US-00.5 — périmètre RÉDUIT mais NON VIDE** : S1 (règle 2) et S2 (Art. 4) sont **devenus vrais**,
+  donc leur correction est **sans objet**. ⚠️ Mais US-00.5 **gagne un item**, relevé par le @PO :
+  l'**Art. 4 de la Constitution nomme `ci.yml`** alors que le **4ᵉ contexte requis provient de
+  `branch-naming.yml`**. Et **`BACKLOG.md` n'a jamais porté ces corrections** → **rien à en retrancher**.
 - ✅ **FAIT** : `gh` CLI installé (2.96.0) et authentifié `gitgdx` avec `admin: true`. Chemin absolu si
   absent du `PATH` d'une session ouverte avant l'install : `C:\Program Files\GitHub CLI\gh.exe`.
 - ✅ **FAIT** : `factory.config.json` porte `required_approving_review_count: 0` (`enforce_admins: true`).
