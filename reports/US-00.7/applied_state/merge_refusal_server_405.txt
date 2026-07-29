@@ -1,0 +1,8 @@
+# PREUVE BRUTE - US-00.7 T11(d) - refus SERVEUR via API REST (contourne toute verif cote client de gh)
+# gh api -X PUT repos/gitgdx/Concentration/pulls/14/merge -f merge_method=merge
+# Horodatage UTC : 2026-07-29T08:49:14Z | contextes verts au moment de l appel : 1/4
+# Aucun --admin, aucune regle desactivee, aucun contexte retire.
+gh: 3 of 4 required status checks are expected. (HTTP 405)
+{"message":"3 of 4 required status checks are expected.","documentation_url":"https://docs.github.com/articles/about-protected-branches","status":"405"}
+
+exit=1

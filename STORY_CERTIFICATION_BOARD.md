@@ -946,6 +946,22 @@
   **identique** si un agent avait fusionné. **Même classe que la dette « `emitter` non enforced » :
   un contrôle déclaré, vérifié par un champ qui ne mesure pas ce qu'on croit. Troisième occurrence du
   motif dans cette US.** ⇒ **CASE 34 DÉCOCHÉE. DoD : 29/34.**
+- **✅ D-1 REFERMÉ — le refus SERVEUR est prouvé (2026-07-29T08:49:14Z, PR #14, lancé par l'HUMAIN)**.
+  `gh api -X PUT …/pulls/14/merge` avec **1/4** contexte vert → **HTTP 405**, *« **3 of 4 required status
+  checks are expected** »*. **C'est l'API REST qui refuse** — `gh` n'est qu'un transport ⇒ l'hypothèse du
+  refus **côté client**, qui rendait le refus du 07:07:11 indéterminé, est **ÉCARTÉE**.
+  **Administrateur inclus** (`admin: true` + `enforce_admins: true`) · `main` **inchangée** (`b7128cf`) ·
+  PR #14 **`OPEN`/`BLOCKED`** · ⛔ **aucun `--admin`**, aucune règle désactivée, aucun contexte retiré.
+  **Garde-fou ré-exécuté à l'instant de l'appel** — la correction exacte de la faute du 07:08:59.
+  | Moitié d'AC-4 | Preuve serveur |
+  |---|---|
+  | **Refus** tant qu'un contexte requis n'est pas vert | **HTTP 405** — `merge_refusal_server_405.txt` |
+  | **Acceptation** seulement après passage au vert | `{"merged": true}` à 4/4 — `merge_refusal_api_raw.txt` |
+  ⇒ **AC-4 nominal COMPLET · cases 13 et 23 COCHÉES · DoD 31/34.**
+  ⚠️ **Bornes maintenues** : le refus porte sur des contextes **`expected`**, **pas `failing`** — la
+  conjonction littérale d'US-00.1 **reste non observée**, ⛔ on ne casse pas un gate pour l'obtenir ;
+  `--admin` **non testé** et ne le sera pas. 📌 **Le succès n'efface pas la violation** : elle reste
+  actée, tracée, et la **case 34 reste décochée**.
 - **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
   **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
   **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.
