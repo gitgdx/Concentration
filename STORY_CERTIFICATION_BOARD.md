@@ -995,6 +995,23 @@
     **obligation de process**. **NIVEAU 2 → US-00.8** *(identité distincte pour les agents + `restrictions`)*,
     **fusionné avec la dette `TRACKS.md`**.
   ⇒ **CASE 34 COCHÉE au titre du niveau 1. DoD : 32/34.** Restent **29** *(QA)* et **31** *(fin de cycle)*.
+- **⚖️ ARBITRAGE HUMAIN DU 2026-07-29 — CRITÈRE 27, 3ᵉ VOLET : STRUCTURELLEMENT INATTEIGNABLE.**
+  *(Voie **(a)** retenue par l'humain, sur le modèle de l'arbitrage rendu pour les critères 20/21.)*
+  - **Volets 1 et 2 : TENUS** — aucun `--admin` *(l'outil l'a **proposé**, il a été **refusé**)*, aucun
+    contexte retiré, aucune règle désactivée, bornes écrites *(`expected` ≠ `failing`)*.
+  - **Volet 3 : NON TENU et NON TENABLE.** La QA le lit comme exigeant une **approbation GitHub
+    formelle** ; `reviewDecision` et `reviews` sont **vides**. ⛔ **Ce dépôt ne peut pas produire cet
+    artefact** : **un seul collaborateur** (`gitgdx`, vérifié), et **GitHub interdit à l'auteur
+    d'approuver sa propre PR**. La cible est à `required_approving_review_count: **0**` **précisément
+    pour cette raison** — l'exiger à `1` rendrait **toute fusion impossible** *(arbitrage d'US-00.4)*.
+  - ⚠️ **LE CRITÈRE 27 DEMEURE NON LEVÉ.** Conformément à la doctrine posée par les 2ᵉ et 3ᵉ passages
+    QA — ***« un arbitrage ne lève JAMAIS un critère »*** — il n'est **pas** requalifié : il est **assumé
+    non levé, pour une cause de PLATEFORME et non de TRAVAIL**. **Rien n'est coché de plus.**
+  - **Ce qui EST fait** : R-c **consigné documentairement** *(case 34, niveau 1, attestation datée)*.
+    **Levée réelle → US-00.8** *(identité distincte + `restrictions`)*, **fusionnée avec la dette
+    `TRACKS.md`**.
+  - 📌 **Même classe que le `403` d'US-00.4** : une **impossibilité de plateforme** se règle par un
+    **arbitrage humain tracé**, pas par un cycle de correction de plus.
 - **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
   **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
   **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.

@@ -54,9 +54,10 @@ renforcements). **PR #12, #13 et #14 fusionnées** — `main` = **`cad24e8`**. *
 QA et **31** fin de cycle)*. Audits **✅ 🔍** et **✅ 🛡️** · QA **🧪 FAIL ×4**, motifs réels et **tous
 différents**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du REFUS de fusion EST
 OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
-⛔ **Reste dû** : la **QA** (case 29) et un **arbitrage sur le critère 27**, dont le 3ᵉ volet (R-c) est
-**structurellement inatteignable** sur un dépôt à un seul compte *(`reviewDecision` vide, l'auteur ne
-pouvant approuver sa propre PR)*. **`main` EST PROTÉGÉE depuis le
+⛔ **Reste dû** : la **QA** (case 29). ⚖️ **Le critère 27 est ARBITRÉ (2026-07-29, voie a)** : son 3ᵉ
+volet est **structurellement inatteignable** sur un dépôt à **un seul compte** *(`reviewDecision` vide —
+GitHub interdit à l'auteur d'approuver sa propre PR)*. Il **DEMEURE NON LEVÉ** — *« un arbitrage ne lève
+jamais un critère »* — **assumé pour cause de PLATEFORME, non de travail**. Levée réelle → **US-00.8**. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
 protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
