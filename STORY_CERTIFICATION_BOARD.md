@@ -487,7 +487,9 @@
     « vérification **DOCUMENTAIRE**, aucun appel réseau » + l'avertissement que l'état réel n'est pas
     vérifié. L'angle mort qui a permis ce défaut est fermé **sur `main`**.
   - **Limite de preuve déclarée** : le push a exercé le hook `pre-push` (exit 0, `feat/*` accepté
-    silencieusement) mais **la branche de refus n'a pas été testée** — interdiction explicite, et le push
+    silencieusement) mais **la branche de refus n'a pas été testée** *(**PÉRIMÉ-2026-07-29** : **elle l'a
+  été** par **T20** d'US-00.7 — hook alimenté par son `stdin`, **sans réseau** : `refs/heads/main` →
+  « PUSH BLOQUÉ » + `exit 1`. Le constat d'US-00.4 était exact **à sa date**)* — interdiction explicite, et le push
     aurait réussi côté serveur. Le refus n'est établi que par **lecture de code**. C'est précisément le
     sujet de l'US.
   - **Ce qui n'est PAS déployé** : `main` **n'est toujours pas protégée** et ne peut pas l'être (403 de
@@ -698,7 +700,9 @@
   contextes requis *(le contrôle que T3 ne pouvait pas faire)* · `mergeStateStatus: **BLOCKED**` capturé
   à `15:25:30Z`, **avant** la complétion de 3 contextes requis — **renversement exact** du `CLEAN`
   d'US-00.4, où la PR #10 était **fusionnable en rouge**.
-  ⛔ **NON ACQUIS — le refus d'une tentative de fusion.** T11(d) n'a pas eu lieu : la fenêtre
+  ✅ **PÉRIMÉ-2026-07-29** — *le paragraphe ci-dessous vaut pour la **PR #12** et pour cette date seule ;
+  le refus **A ÉTÉ obtenu** depuis, par le **serveur**, sur la PR #14 (HTTP 405) — voir l'entrée
+  « D-1 REFERMÉ » plus bas.* ⛔ **PÉRIMÉ-2026-07-29 · NON ACQUIS — le refus d'une tentative de fusion** *(vrai pour la **PR #12** seule)*. T11(d) n'a pas eu lieu : la fenêtre
   déterministe a duré **~80 s** (gate `📱 App` = **1 min 23 s en CI**, contre > 3 min en local — c'est
   cette extrapolation qui a fauté), refermée à `15:26:49Z` ; la fusion est intervenue à `15:34:21Z`.
   **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** — même distinction que pour
@@ -842,7 +846,8 @@
     `validate_trace` **verts** · **`gitleaks` : 0 fuite sur 51 commits**.
   - 🔴 **D-1 (BLOQUANT) — critère 26 / DoD case 13 / AC-4 nominal** : aucune tentative de fusion n'a
     **jamais** été lancée sur la PR #12 — pas de refus, pas de motif brut,
-    `applied_state/merge_refusal_raw.txt` **inexistant**. Seul un `mergeStateStatus: BLOCKED` a été
+    `applied_state/merge_refusal_raw.txt` **inexistant** *(**PÉRIMÉ-2026-07-29** : ce fichier **EXISTE**
+    depuis le commit `cb73997` — 298 o ; le constat de la QA était exact **à sa date**)*. Seul un `mergeStateStatus: BLOCKED` a été
     capturé : **un état calculé, pas une action refusée**. ⚠️ **C'est exactement la distinction *état de
     l'API* vs *effet* que cette US existe pour poser.** Sur les 4 preuves annoncées comme neuves,
     **3 sont acquises** (push direct, force-push, suppression), **la 4ᵉ manque**.

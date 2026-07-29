@@ -33,20 +33,31 @@
 
 ---
 
-## ⛔ EN TÊTE, PARCE QU'ON NE L'ENTERRE PAS : **la preuve du REFUS DE FUSION n'a PAS été obtenue**
+## PÉRIMÉ-2026-07-29 · ⛔ *(titre d'origine, portée corrigée)* : **sur la PR #12, la preuve du REFUS DE FUSION n'a PAS été obtenue**
 
-**T11(d) — la tentative de fusion réelle refusée, motif brut archivé — n'a pas eu lieu.** La fenêtre
-déterministe s'est refermée **avant** que la tentative ne soit lancée. Aucun `gh pr merge` n'a été
-refusé ; aucun message de refus n'existe ; `reports/US-00.7/applied_state/merge_refusal_raw.txt`
-**n'a jamais été créé**.
+> ✅ **PÉRIMÉ-2026-07-29 — cette section vaut POUR LA PR #12 SEULEMENT.** Elle était rédigée comme un
+> constat **global** ; elle ne l'est pas. **Le refus de fusion A ÉTÉ obtenu depuis, sur la PR #14**
+> (`08:49:14Z`, **HTTP 405** du **serveur**, par l'humain) — voir la rectification ② en tête de ce
+> rapport. ⛔ **Rien n'est supprimé ci-dessous** : c'est le constat exact de l'épisode PR #12.
+
+**PÉRIMÉ-2026-07-29 *(portée corrigée)* — T11(d), la tentative de fusion réelle refusée, n'a pas eu lieu *sur la PR #12*.**
+La fenêtre déterministe s'est refermée **avant** que la tentative ne soit lancée. Aucun `gh pr merge`
+n'a été refusé **ce jour-là** ; ~~aucun message de refus n'existe~~
+**PÉRIMÉ-2026-07-29 : `applied_state/merge_refusal_raw.txt` EXISTE** *(298 o, commit `cb73997`)* — il
+archive le refus du **07:07:11Z** obtenu **le lendemain**, sur la PR #13.
 
 **Cause, nommée sans détour** : l'agent a annoncé « une fenêtre de quelques minutes » en extrapolant la
 durée **locale** du gate `📱 App` (build Flutter web, > 3 min sur le poste). **En CI, ce même job a duré
 1 min 23 s.** La fenêtre réelle a été de **~1 min 20 s**, non de « quelques minutes ». L'humain a reçu
 la consigne **après** sa fermeture.
 
-**Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
-décochée**. Aucune formulation de ce rapport ne doit laisser croire l'inverse.
+~~**Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
+décochée**. Aucune formulation de ce rapport ne doit laisser croire l'inverse.~~
+✅ **PÉRIMÉ-2026-07-29** : **l'AC-4 nominal EST satisfait** et la **case 13 est COCHÉE** *(PR #14,
+HTTP 405 serveur + acceptation à 4/4)*. ⚠️ La consigne « *aucune formulation ne doit laisser croire
+l'inverse* » **s'inverse donc aussi** : depuis le 2026-07-29, c'est **affirmer que le refus n'est pas
+prouvé** qui serait faux. La consigne d'origine est conservée ci-dessus **barrée** : elle était juste
+à sa date, et son renversement est précisément ce que ce rapport doit rendre lisible.
 
 ---
 
@@ -170,4 +181,6 @@ casse volontaire d'un gate pour obtenir un rouge.
 | Fichier | Contenu |
 |---|---|
 | [`applied_state/merge_block_pending.json`](applied_state/merge_block_pending.json) | Réponse brute `gh pr view 12 --json …` à **15:25:30Z** : `mergeStateStatus: BLOCKED`, `mergeable: MERGEABLE`, rollup complet |
-| *(absent — assumé)* `applied_state/merge_refusal_raw.txt` | **N'existe pas.** La tentative de fusion refusée n'a pas eu lieu. **Ce vide est la preuve de l'absence de preuve**, il n'est pas comblé par un substitut |
+| `applied_state/merge_refusal_raw.txt` | ✅ **PÉRIMÉ-2026-07-29 — CE FICHIER EXISTE** *(298 o, commit `cb73997`)*. ~~« N'existe pas. Ce vide est la preuve de l'absence de preuve. »~~ **Un index n'a pas de date : il décrit ce qui EST.** Il archive le refus de `gh pr merge` du **07:07:11Z** sur la PR #13 — refus dont l'attribution client/serveur est **restée indéterminée** |
+| `applied_state/merge_refusal_server_405.txt` | 🆕 **Le refus SERVEUR** — PR #14, `08:49:14Z`, **1/4** contexte vert, **HTTP 405** *« 3 of 4 required status checks are expected »*. **C'est cette preuve, et elle seule, qui complète l'AC-4 nominal** |
+| `applied_state/merge_refusal_api_raw.txt` | L'**acceptation** à **4/4** (`merged: true`, PR #13) — **et la preuve de la violation de workflow** du `07:08:59Z`, archivée telle quelle |

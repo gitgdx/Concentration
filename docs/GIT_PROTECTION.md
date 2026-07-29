@@ -19,14 +19,20 @@
 >
 > ⚠️ **Ce que ces preuves n'établissent PAS — à lire avant tout audit.**
 >
-> 1. **Le refus d'une tentative de FUSION n'a pas encore été observé.** Ce qui est prouvé est que les 4
->    contextes **sont REQUIS** (P2 + lecture directe du serveur). Que la fusion soit **refusée** tant qu'un
->    contexte n'est pas vert en **découle logiquement**, et c'est ainsi que la plateforme est documentée —
->    mais l'observation manque : c'est la tâche **T11** d'US-00.7 (PR ouverte, libellés réellement
->    rapportés, tentative de fusion refusée, puis fusion après 4 verts), **non exécutée** à ce jour.
->    ⚠️ Toute phrase de la forme « *aucune fusion possible avec la CI rouge* » est une **inférence
->    raisonnée**, **pas** une preuve. Le refus **prouvé** porte sur le **push direct**, ce qui n'est pas la
->    même opération.
+> 1. ✅ **PÉRIMÉ-2026-07-29 — LE REFUS DE FUSION EST DÉSORMAIS PROUVÉ, PAR LE SERVEUR.**
+>    *(Cet énoncé affirmait le contraire ; il était exact jusqu'au 2026-07-29 inclus au matin.)*
+>    **Preuve** : PR **#14**, `2026-07-29T08:49:14Z`, **lancée par l'humain**, avec **1/4** contexte vert →
+>    `gh api -X PUT repos/gitgdx/Concentration/pulls/14/merge` → **HTTP 405**,
+>    *« **3 of 4 required status checks are expected** »*. **`gh api` n'est qu'un transport HTTP** : le refus
+>    **n'est pas** un pré-contrôle client. **Administrateur inclus** (`admin: true` + `enforce_admins: true`),
+>    `main` **inchangée**, ⛔ **aucun `--admin`**. L'autre moitié — **acceptation seulement après passage au
+>    vert** — est prouvée par `{"merged": true}` à **4/4** (PR #13).
+>    ⇒ **AC-4 nominal COMPLET.** Ce n'est plus une inférence.
+>    Preuves : [`reports/US-00.7/applied_state/merge_refusal_server_405.txt`](../reports/US-00.7/applied_state/merge_refusal_server_405.txt)
+>    · [`reports/US-00.7/merge_proof_and_violation.md`](../reports/US-00.7/merge_proof_and_violation.md).
+>    ⚠️ **Borne qui SUBSISTE** : le refus porte sur des contextes **`expected`**, **pas `failing`** — une
+>    phrase de la forme « *aucune fusion possible avec la CI **rouge*** » reste une **inférence**, ⛔ et on ne
+>    casse pas un gate pour l'obtenir. **`--admin` n'a pas été testé** et ne le sera pas.
 > 2. **`allow_force_pushes: false` et `allow_deletions: false` ne sont pas isolés** par le test négatif :
 >    le **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche **avant** toute
 >    évaluation propre au force-push), et GitHub refuse la suppression de la **branche par défaut**
