@@ -77,15 +77,22 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 >   champ actif non couvert), **sans** préfixe `[SIMULATION]` — **première observation in vivo**.
 >
 > **Ce qui n'est PAS prouvé, et ne doit pas être affirmé** :
-> * **Le refus d'une tentative de FUSION n'a TOUJOURS PAS été observé** — seul le refus du **push direct**
->   l'est. **T11 a été partiellement exécutée le 2026-07-28** (PR **#12**, fusionnée en `9fdb7fd`) : les 4
->   libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux contextes requis, et
->   `mergeStateStatus: **BLOCKED**` a été capturé à `15:25:30Z` **avant** la complétion de 3 contextes —
->   **renversement exact** du `CLEAN` d'US-00.4, où la PR #10 était **fusionnable en rouge**. Mais
->   **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** : aucune tentative de fusion n'a été
->   **refusée**, la fenêtre déterministe (**~80 s**) s'étant refermée avant. ⇒ **AC-4 nominal NON
->   satisfait**, case 13 de la DoD **décochée**. Preuve encore obtenable sur la **PR de certification**.
->   Détail et procédure corrigée : [`reports/US-00.7/merge_block.md`](reports/US-00.7/merge_block.md).
+> * ✅ **Le refus d'une tentative de FUSION EST PROUVÉ — par le SERVEUR — depuis le 2026-07-29T08:49:14Z.**
+>   Sur la **PR #14**, `gh api -X PUT …/pulls/14/merge` avec **1/4** contexte vert → **HTTP 405**,
+>   *« **3 of 4 required status checks are expected** »*. C'est **l'API REST** qui refuse : `gh` n'est
+>   qu'un transport, donc l'hypothèse d'un refus **côté client** est **écartée**. **Administrateur
+>   inclus** (`admin: true` + `enforce_admins: true`) · `main` **inchangée** · **aucun `--admin`**.
+>   **Les DEUX moitiés d'AC-4 sont prouvées par le serveur** : **refus** à 1/4 (HTTP 405) et
+>   **acceptation** à 4/4 (`merged: true`, PR #13). Preuves :
+>   [`applied_state/merge_refusal_server_405.txt`](reports/US-00.7/applied_state/merge_refusal_server_405.txt)
+>   et [`merge_proof_and_violation.md`](reports/US-00.7/merge_proof_and_violation.md).
+>   ⚠️ **Borne maintenue** : le refus porte sur des contextes **`expected`**, **pas `failing`** — la
+>   conjonction littérale d'US-00.1 (« `secrets-scan` **rouge** → merge empêché ») **reste non observée**,
+>   et ⛔ **on ne cassera pas un gate pour l'obtenir**. `--admin` **non testé**, et ne le sera pas.
+> * ⛔ **VIOLATION DE WORKFLOW du 2026-07-29, actée et NON effacée** : à `07:08:59Z`, **un agent a fusionné
+>   la PR #13** — enfreint la **case 34** / renforcement **R-c**. **Pas un contournement** (4 gates verts,
+>   fusion licite) mais une **violation de PROVENANCE**. `EVT_WORKFLOW_VIOLATION` tracé, **case 34
+>   décochée**. A révélé que **`mergedBy.is_bot` ne prouve rien** — voir la dette « provenance » ci-dessous.
 > * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
 >   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
 >   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont
@@ -178,6 +185,17 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   de la dette précédente : le système peut **accorder** une dérogation sans humain et ne peut pas
   l'**éteindre**. Même classe de défaut que celle qu'US-00.4 dénonce, dans le système de traçabilité
   lui-même. Candidat `/audit-methodo`.
+- 🔴 **PROVENANCE NON PROUVABLE — dette FUSIONNÉE avec celle de `TRACKS.md` ci-dessous, même solution.**
+  Établi le 2026-07-29 par une **violation réelle** (`reports/US-00.7/merge_proof_and_violation.md`) :
+  **`mergedBy.is_bot` rend `false` même pour une fusion exécutée par un AGENT**, parce que les agents
+  opèrent avec **le jeton de l'humain**. Vérifié le même jour : `collaborators` = **`gitgdx` seul**,
+  `restrictions` = **absente**, identité `gh` **identique**. ⇒ **Sur ce dépôt, aucune preuve machine de
+  provenance n'existe** : « la fusion ne vient pas d'un agent » (case 34, renforcement R-c) est une
+  **obligation de process**, désormais attestée de façon **déclarative et assumée** — jamais plus par
+  `is_bot`, qui était **faussement rassurant**. **Voie de sortie unique et commune aux deux dettes** :
+  une **identité distincte pour les agents** (2ᵉ compte ou GitHub App), puis `restrictions` → la fusion
+  par un agent devient **impossible**, pas seulement interdite. ⚠️ Réserve **non levée** : `restrictions`
+  pourrait être **réservé aux dépôts d'organisation** — à vérifier. **Porté par US-00.8.**
 - ⚠️ **`TRACKS.md` (track FULL) exige une « revue humaine explicite de la PR » qu'aucune barrière
   machine ne soutient** — ni avant, ni après l'application (cible à **`0`** approbation). **US-01.1 est en
   FULL** → arbitrage à poser **avant son Integration Lock** : requalifier l'exigence en obligation de

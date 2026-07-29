@@ -1,25 +1,63 @@
 # T11 — PR #12 : ce que la fusion a prouvé, et **ce qu'elle n'a PAS prouvé**
 
+> ## ⛑️ RECTIFICATION DU 2026-07-29 — **deux énoncés de ce rapport sont FAUX**. Rien n'est supprimé.
+>
+> *(Relevé par la **re-QA** — finding « critère 27 régressé ». Ce rapport est **nommé par le critère 27** :
+> tant qu'il porte une assertion fausse, le critère **n'est pas levé**.)*
+>
+> **① §3, l. 91-92 — « case 34 : satisfait, et vérifiable par `mergedBy.is_bot = false` » : FAUX.**
+> ⛔ **`is_bot` NE PROUVE RIEN.** Les agents opèrent avec **le jeton de l'humain** ; le champ rend
+> **`false` même pour une fusion exécutée par un AGENT** — établi le 2026-07-29 par une **violation
+> réelle** (`merge_proof_and_violation.md`). Ce n'est **pas** un fait daté qui s'historise, c'est une
+> **assertion de méthode qui n'a jamais été vraie**. Elle était exacte **par hasard** sur la PR #12
+> — l'humain avait réellement fusionné — et serait sortie **identique** si un agent l'avait fait.
+> ⇒ **La case 34 est DÉCOCHÉE**, sa méthode de preuve **refondue** *(attestation humaine datée, assumée
+> **déclarative**)*, et la dette de provenance est **fusionnée** avec celle de `TRACKS.md` → **US-00.8**.
+>
+> **② §« Ce qui n'est PAS prouvé », point 1 — « le refus d'une tentative de fusion » : PÉRIMÉ.**
+> ✅ **Il EST prouvé depuis le 2026-07-29T08:49:14Z**, **par le SERVEUR** : sur la **PR #14**, lancé par
+> **l'humain** avec **1/4** contexte vert, `gh api -X PUT …/pulls/14/merge` → **HTTP 405**,
+> *« **3 of 4 required status checks are expected** »*. `gh api` n'est qu'un **transport HTTP** : le refus
+> **n'est pas** un pré-contrôle client. **Administrateur inclus** (`admin: true` + `enforce_admins: true`).
+> ⇒ **AC-4 nominal COMPLET**, **cases 13 et 23 cochées**.
+> Preuve : [`applied_state/merge_refusal_server_405.txt`](applied_state/merge_refusal_server_405.txt).
+>
+> **Ce qui reste vrai dans ce rapport, et qui l'était déjà** : la distinction **état calculé** vs **action
+> refusée**, l'analyse du `BLOCKED` de la PR #12, le renversement du `CLEAN` d'US-00.4, et la borne
+> « contexte **`expected`**, pas **`failing`** » — **toujours valable**, la conjonction littérale d'US-00.1
+> n'ayant **jamais** été observée.
+
 > **US** : US-00.7 · **Tâche** : T11 · **AC** : AC-4 · **Date** : 2026-07-28
 > **PR** : [#12](https://github.com/gitgdx/Concentration/pull/12) — `feat/US-00.7-application-protection-branche` → `main`
 > **Commit de fusion** : `9fdb7fd4fdecea5f7d102533843a932cb46a8338`
 
 ---
 
-## ⛔ EN TÊTE, PARCE QU'ON NE L'ENTERRE PAS : **la preuve du REFUS DE FUSION n'a PAS été obtenue**
+## PÉRIMÉ-2026-07-29 · ⛔ *(titre d'origine, portée corrigée)* : **sur la PR #12, la preuve du REFUS DE FUSION n'a PAS été obtenue**
 
-**T11(d) — la tentative de fusion réelle refusée, motif brut archivé — n'a pas eu lieu.** La fenêtre
-déterministe s'est refermée **avant** que la tentative ne soit lancée. Aucun `gh pr merge` n'a été
-refusé ; aucun message de refus n'existe ; `reports/US-00.7/applied_state/merge_refusal_raw.txt`
-**n'a jamais été créé**.
+> ✅ **PÉRIMÉ-2026-07-29 — cette section vaut POUR LA PR #12 SEULEMENT.** Elle était rédigée comme un
+> constat **global** ; elle ne l'est pas. **Le refus de fusion A ÉTÉ obtenu depuis, sur la PR #14**
+> (`08:49:14Z`, **HTTP 405** du **serveur**, par l'humain) — voir la rectification ② en tête de ce
+> rapport. ⛔ **Rien n'est supprimé ci-dessous** : c'est le constat exact de l'épisode PR #12.
+
+**PÉRIMÉ-2026-07-29 *(portée corrigée)* — T11(d), la tentative de fusion réelle refusée, n'a pas eu lieu *sur la PR #12*.**
+La fenêtre déterministe s'est refermée **avant** que la tentative ne soit lancée. Aucun `gh pr merge`
+n'a été refusé **ce jour-là** ; ~~aucun message de refus n'existe~~
+**PÉRIMÉ-2026-07-29 : `applied_state/merge_refusal_raw.txt` EXISTE** *(298 o, commit `cb73997`)* — il
+archive le refus du **07:07:11Z** obtenu **le lendemain**, sur la PR #13.
 
 **Cause, nommée sans détour** : l'agent a annoncé « une fenêtre de quelques minutes » en extrapolant la
 durée **locale** du gate `📱 App` (build Flutter web, > 3 min sur le poste). **En CI, ce même job a duré
 1 min 23 s.** La fenêtre réelle a été de **~1 min 20 s**, non de « quelques minutes ». L'humain a reçu
 la consigne **après** sa fermeture.
 
-**Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
-décochée**. Aucune formulation de ce rapport ne doit laisser croire l'inverse.
+~~**Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
+décochée**. Aucune formulation de ce rapport ne doit laisser croire l'inverse.~~
+✅ **PÉRIMÉ-2026-07-29** : **l'AC-4 nominal EST satisfait** et la **case 13 est COCHÉE** *(PR #14,
+HTTP 405 serveur + acceptation à 4/4)*. ⚠️ La consigne « *aucune formulation ne doit laisser croire
+l'inverse* » **s'inverse donc aussi** : depuis le 2026-07-29, c'est **affirmer que le refus n'est pas
+prouvé** qui serait faux. La consigne d'origine est conservée ci-dessus **barrée** : elle était juste
+à sa date, et son renversement est précisément ce que ce rapport doit rendre lisible.
 
 ---
 
@@ -88,8 +126,10 @@ C'est le même dépôt, le même compte, la même commande. **Seule la protectio
 `gh pr checks 12` → **4/4 `pass`**, puis fusion à 15:34:21Z par `gitgdx`, `is_bot: false`.
 **Première fusion de l'histoire du dépôt dont les gates conditionnaient réellement la recevabilité.**
 
-Renforcement de track **R-c** / **case 34 de la DoD** — « l'approbation/fusion ne vient pas d'un
-agent » : **satisfait**, et vérifiable par `mergedBy.is_bot = false`.
+~~Renforcement de track **R-c** / **case 34 de la DoD** — « l'approbation/fusion ne vient pas d'un
+agent » : **satisfait**, et vérifiable par `mergedBy.is_bot = false`.~~
+⛑️ **BARRÉ le 2026-07-29 — voir la rectification ① en tête de ce rapport.** `is_bot` **ne prouve rien**
+(jeton partagé entre l'humain et les agents) ⇒ **case 34 DÉCOCHÉE**, méthode de preuve **refondue**.
 
 > ⚠️ **Borne** : `reviewDecision` est **vide** et `latestReviews` est un **tableau vide**. Il n'existe
 > donc **aucune approbation GitHub formelle** — c'est **attendu** (la cible est à
@@ -141,4 +181,6 @@ casse volontaire d'un gate pour obtenir un rouge.
 | Fichier | Contenu |
 |---|---|
 | [`applied_state/merge_block_pending.json`](applied_state/merge_block_pending.json) | Réponse brute `gh pr view 12 --json …` à **15:25:30Z** : `mergeStateStatus: BLOCKED`, `mergeable: MERGEABLE`, rollup complet |
-| *(absent — assumé)* `applied_state/merge_refusal_raw.txt` | **N'existe pas.** La tentative de fusion refusée n'a pas eu lieu. **Ce vide est la preuve de l'absence de preuve**, il n'est pas comblé par un substitut |
+| `applied_state/merge_refusal_raw.txt` | ✅ **PÉRIMÉ-2026-07-29 — CE FICHIER EXISTE** *(298 o, commit `cb73997`)*. ~~« N'existe pas. Ce vide est la preuve de l'absence de preuve. »~~ **Un index n'a pas de date : il décrit ce qui EST.** Il archive le refus de `gh pr merge` du **07:07:11Z** sur la PR #13 — refus dont l'attribution client/serveur est **restée indéterminée** |
+| `applied_state/merge_refusal_server_405.txt` | 🆕 **Le refus SERVEUR** — PR #14, `08:49:14Z`, **1/4** contexte vert, **HTTP 405** *« 3 of 4 required status checks are expected »*. **C'est cette preuve, et elle seule, qui complète l'AC-4 nominal** |
+| `applied_state/merge_refusal_api_raw.txt` | L'**acceptation** à **4/4** (`merged: true`, PR #13) — **et la preuve de la violation de workflow** du `07:08:59Z`, archivée telle quelle |

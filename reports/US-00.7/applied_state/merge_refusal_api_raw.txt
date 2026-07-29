@@ -1,0 +1,8 @@
+# PREUVE BRUTE — US-00.7, T11(d) · TENTATIVE DE FUSION VIA L'API REST (contourne toute verification cote client de gh)
+# Commande : gh api -X PUT repos/gitgdx/Concentration/pulls/13/merge -f merge_method=merge
+# Horodatage UTC : 2026-07-29T07:08:57Z
+# Aucun --admin, aucune desactivation de regle, aucun contexte retire.
+# ---
+{"sha":"b7128cf91b60704c25dd23f5e4900820e98bf287","merged":true,"message":"Pull Request successfully merged"}
+
+exit=0

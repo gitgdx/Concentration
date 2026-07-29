@@ -41,10 +41,14 @@
 
 ### 🔴 Ce qui n'est PAS prouvé — à lire AVANT tout audit
 
-1. **Le refus d'une tentative de FUSION n'a pas été observé.** Ce qui est prouvé est que les 4 contextes
-   **SONT REQUIS** (P2 + lecture directe du serveur). Que la fusion soit bloquée en **découle**, mais
-   l'observation manque : c'est **T11**, **non exécutée**. Le refus prouvé porte sur le **push direct** —
-   ce n'est pas la même opération.
+1. ✅ **PÉRIMÉ-2026-07-29 — LE REFUS DE FUSION EST PROUVÉ, PAR LE SERVEUR.** *(Cet énoncé affirmait le
+   contraire ; il était exact jusqu'au matin du 2026-07-29.)* PR **#14**, `08:49:14Z`, **par l'humain**,
+   **1/4** contexte vert → `gh api -X PUT …/pulls/14/merge` → **HTTP 405**, *« 3 of 4 required status
+   checks are expected »*. **`gh api` est un transport HTTP** ⇒ refus **serveur**, pas client.
+   **Administrateur inclus**, `main` inchangée, **aucun `--admin`**. Acceptation à **4/4** prouvée par
+   `{"merged": true}` (PR #13) ⇒ **AC-4 nominal COMPLET**.
+   Preuve : [`applied_state/merge_refusal_server_405.txt`](applied_state/merge_refusal_server_405.txt).
+   ⚠️ **Borne subsistante** : contextes **`expected`**, **pas `failing`**.
 2. **`allow_force_pushes: false`** et **`allow_deletions: false`** ne sont **pas isolés** par le test
    négatif : le **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant),
    et GitHub refuse la suppression de la **branche par défaut** indépendamment du réglage. Prouvés par
@@ -176,7 +180,8 @@ de `block_dangerous_bash.sh`.
 
 ## 6. Ce que ce répertoire n'établit pas
 
-* **Le refus de FUSION n'est pas prouvé** — **T11** non exécutée. Le refus prouvé porte sur le **push
+* ✅ **PÉRIMÉ-2026-07-29 — le refus de FUSION EST prouvé** *(PR #14, HTTP 405, refus **serveur**)*.
+  ~~**PÉRIMÉ-2026-07-29** — Le refus de FUSION n'est pas prouvé, **T11** non exécutée.~~ Le refus **également** prouvé porte sur le **push
   direct**.
 * ~~**`scripts/githooks/pre-push` porte encore 3 affirmations fausses**~~ → **CORRIGÉ le 2026-07-28**
   par **T20** (action humaine, Art. 6) : [`t20_pre_push.md`](t20_pre_push.md). ⚠️ **`corpus_sweep.md`
