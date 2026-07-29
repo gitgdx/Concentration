@@ -63,6 +63,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # ⚠️ actionlint est un STEP de ce job, et NON un job séparé — c'est délibéré.
+      #    Un nouveau job ne serait PAS un contexte requis (les 4 contextes requis sont
+      #    figés dans factory.config.json, fichier Art. 6) : il serait donc RAPPORTÉ sans
+      #    BLOQUER — exactement l'anti-pattern qu'US-00.4 et US-00.7 ont établi puis
+      #    supprimé. Placé ici, dans un job DÉJÀ REQUIS, un lint rouge fait échouer
+      #    « 📋 Governance » et empêche réellement la fusion.
+      #    Origine : recommandation de l'audit sécurité d'US-00.7 (2026-07-28), qui a
+      #    identifié l'absence d'actionlint comme la CAUSE RACINE du finding B-1.
+      #    Épinglage : version ET empreinte SHA256 codées en dur. Si l'asset publié est
+      #    un jour remplacé, `sha256sum -c` échoue et la CI s'arrête — c'est voulu.
+      #    ⚠️ CONTREPARTIE ASSUMÉE (finding N-1 du re-audit sécurité d'US-00.7) : si
+      #    l'asset devient INDISPONIBLE (release supprimée, incident CDN), ce job REQUIS
+      #    échoue sur TOUTE PR, et corriger exigerait de fusionner une PR qui exige ce
+      #    même contexte — c'est CIRCULAIRE. La sortie est documentée : voir la 4e ligne
+      #    du tableau §Plan de retour arrière de docs/GIT_PROTECTION.md (ADMINISTRER la
+      #    règle, ce qui n'est PAS la contourner). Risque faible et AUTO-RÉVÉLATEUR : il
+      #    se manifeste à la première PR, jamais silencieusement. Même propriété, en pire,
+      #    pour le `pip install jsonschema` NU quelques lignes plus bas (finding N-2).
+      - name: 🔎 Lint des workflows (actionlint, épinglé par SHA256)
+        run: |
+          set -euo pipefail
+          VERSION=1.7.12
+          SHA256=8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+          curl -fsSL -o actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_linux_amd64.tar.gz"
+          echo "${SHA256}  actionlint.tar.gz" | sha256sum -c -
+          tar -xzf actionlint.tar.gz actionlint
+          ./actionlint -color
+          rm -f actionlint actionlint.tar.gz
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

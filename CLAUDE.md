@@ -50,7 +50,10 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 ## État courant du projet *(maintenu par @Architect)*
 
 **Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
-renforcements), **phases 3-4** (mise en cohérence du corpus, clôture). **`main` EST PROTÉGÉE depuis le
+renforcements). **PR #12 FUSIONNÉE le 2026-07-28** (`main` = `9fdb7fd`) — première fusion du dépôt
+réellement conditionnée par les gates. **DoD 28/34.** Suite sur la branche post-fusion
+**`feat/US-00.7-certif`** : `/audit-us` → QA → `/certify`. ⛔ **Reste dû : la preuve du REFUS de fusion
+(T11(d), case 13)** — à capturer sur la PR de certification, **immédiatement après son ouverture**. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
 protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
@@ -74,9 +77,15 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 >   champ actif non couvert), **sans** préfixe `[SIMULATION]` — **première observation in vivo**.
 >
 > **Ce qui n'est PAS prouvé, et ne doit pas être affirmé** :
-> * **Le refus d'une tentative de FUSION n'a pas été observé** — seul le refus du **push direct** l'est. Que
->   la fusion soit bloquée tant qu'un contexte requis n'est pas vert **découle** de l'état constaté, mais
->   reste une **inférence** : c'est la tâche **T11** d'US-00.7, **non exécutée**.
+> * **Le refus d'une tentative de FUSION n'a TOUJOURS PAS été observé** — seul le refus du **push direct**
+>   l'est. **T11 a été partiellement exécutée le 2026-07-28** (PR **#12**, fusionnée en `9fdb7fd`) : les 4
+>   libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux contextes requis, et
+>   `mergeStateStatus: **BLOCKED**` a été capturé à `15:25:30Z` **avant** la complétion de 3 contextes —
+>   **renversement exact** du `CLEAN` d'US-00.4, où la PR #10 était **fusionnable en rouge**. Mais
+>   **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** : aucune tentative de fusion n'a été
+>   **refusée**, la fenêtre déterministe (**~80 s**) s'étant refermée avant. ⇒ **AC-4 nominal NON
+>   satisfait**, case 13 de la DoD **décochée**. Preuve encore obtenable sur la **PR de certification**.
+>   Détail et procédure corrigée : [`reports/US-00.7/merge_block.md`](reports/US-00.7/merge_block.md).
 > * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
 >   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
 >   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont
@@ -109,6 +118,22 @@ les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_
 PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
 reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
+- 🟠 **Findings NON BLOQUANTS de l'audit sécurité d'US-00.7, ouverts et non traités** *(2026-07-28,
+  `reports/US-00.7/security.md`)* : **aucun plancher de sécurité** — `enforce_admins: false` en config
+  produirait une **CI verte** et un `--check-remote` « **conforme** », avec `0` approbation requise ·
+  **NB-1bis confirmé par exécution** mais **NON exploitable par configuration** (les 8 clés sont **en
+  dur** dans `emit_branch_protection` : l'amputation exige de modifier le code Python — **moins grave
+  qu'annoncé jusqu'ici**) · **actions tierces non épinglées** (`actions/checkout@v4`,
+  `gitleaks-action@v2` avec `pull-requests: write`) · **`emitter` non enforcé** — mais ⚠️ **ce n'est pas
+  une faille d'autorisation** : agents et humain partagent le **même compte** et les **mêmes droits**,
+  donc **aucune implémentation ne le rendrait infranchissable** ; le durcissement utile est la
+  **détection**, pas la prévention.
+- 🔴 **AUCUN SAST dans la factory** : `run_gates --gate sast` → **exit 1, ce gate n'existe pas**. Et
+  `dart pub outdated` mesure l'**obsolescence**, pas la **vulnérabilité** → **aucun verdict de sécurité
+  ne peut s'appuyer sur un scan de CVE, il n'y en a pas**. ✅ **Partiellement compensé le 2026-07-28** :
+  `actionlint` (épinglé par SHA256) tourne désormais dans le job **requis** « 📋 Governance » — il aurait
+  trouvé seul le bloquant B-1, dont son absence était la **cause racine**. Reste à décider pour le code
+  applicatif Dart.
 - ⚠️ **Nouvelles CONTRAINTES PERMANENTES, actives depuis le 2026-07-28** — à connaître avant de les vivre
   comme une panne : toute branche hors `^feat/US-[0-9]+\.[0-9]+.*$` rend sa PR **définitivement
   infusionnable** (`check-branch-name` est un contexte **requis**) → `chore/`, `docs/`, `hotfix/` sont
@@ -172,6 +197,16 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
+- 🆕 **Créer `US-00.8` (US de dette) via `/us-new`** — décidé par l'**arbitrage @PO du 2026-07-28**
+  (`reports/US-00.7/po_arbitrage_s11.md`). Porte la **requalification tracée d'US-00.1** (S11), en
+  **additif daté**, ⛔ **jamais depuis la branche d'US-00.7** : y éditer `docs/stories/US-00.1-*` ferait
+  **tomber son critère 23**. Y joindre les dettes déjà identifiées : **NB-1bis**, **`selftest` en CI**,
+  et les **findings non bloquants** des audits (N-1 traité, **N-2** `pip install` nu, **N-3** forks,
+  actions à tag mutable, `emitter` non enforced).
+- 📌 **US-00.5 — périmètre RÉDUIT mais NON VIDE** : S1 (règle 2) et S2 (Art. 4) sont **devenus vrais**,
+  donc leur correction est **sans objet**. ⚠️ Mais US-00.5 **gagne un item**, relevé par le @PO :
+  l'**Art. 4 de la Constitution nomme `ci.yml`** alors que le **4ᵉ contexte requis provient de
+  `branch-naming.yml`**. Et **`BACKLOG.md` n'a jamais porté ces corrections** → **rien à en retrancher**.
 - ✅ **FAIT** : `gh` CLI installé (2.96.0) et authentifié `gitgdx` avec `admin: true`. Chemin absolu si
   absent du `PATH` d'une session ouverte avant l'install : `C:\Program Files\GitHub CLI\gh.exe`.
 - ✅ **FAIT** : `factory.config.json` porte `required_approving_review_count: 0` (`enforce_admins: true`).

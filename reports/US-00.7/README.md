@@ -25,6 +25,7 @@
 | Opérations à confirmation humaine explicite | **T8** (le `PUT`) et **T10** (test négatif) — **exécutées par l'humain**, jamais par l'agent |
 | ⛔ **Non exécuté** | **T11** (PR · libellés rapportés · refus de fusion · fusion après 4 verts) |
 | ✅ **Exécuté depuis** *(mise à jour du 2026-07-28)* | **T20** — `scripts/githooks/pre-push`, **Art. 6**, **copie humaine** → `t20_pre_push.md` · **T24** — ADR-007 **rédigé et `Accepté`** (`EVT_ARCHI_VALIDATED`) |
+| 🟠 **Preuve PARTIELLE, assumée** *(arbitrage humain du 2026-07-28)* | **Critères 20 et 21** — `negative_test_server.txt` **ne contient pas** : la sortie de `core.hooksPath`, le couple `rev-parse` avant/après, la preuve de suppression du clone, la garde de sûreté avant **chacune** des 3 commandes, ni la phrase de portée. ⛔ **Non retro-archivables** (le clone jetable n'existe plus) et **le fichier n'est PAS retouché** — l'y ajouter serait **fabriquer une preuve**. Détail en regard des critères dans le Story File |
 
 ---
 

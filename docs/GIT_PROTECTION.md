@@ -455,10 +455,28 @@ gh pr checks <n>
 | `mergeableState: BLOCKED` **et** un contexte requis en **`EXPECTED`** / **absent** de `gh pr checks` | **VERROUILLAGE** — le contexte n'est **jamais rapporté** (libellé divergent, ou workflow qui ne se déclenche pas sur cet événement). L'attente est **définitive**. | **appliquer ce plan** |
 | `mergeableState: BLOCKED` **et** un contexte en **`FAILURE`** | **échec normal d'un gate** : le code ou la gouvernance sont en faute. | **corriger la cause**, pas la règle |
 | `mergeableState: BLOCKED` **et** tous les checks verts | autre condition de fusion non satisfaite : `strict: true` (**branche pas à jour**) ou `required_conversation_resolution: true` (**discussion ouverte**). | rebaser / résoudre les discussions |
+| `mergeableState: BLOCKED` **et** un contexte requis en **`FAILURE`** dont la cause est **HORS DU DÉPÔT** et **non corrigeable par une PR** — asset amont supprimé, dépôt tiers retiré, incident CDN, index de paquets indisponible | **INTERBLOCAGE** — ni un verrouillage de libellé, ni une faute du travail. Corriger exigerait de modifier un workflow ⇒ de fusionner une PR ⇒ que ce **même contexte** soit vert ⇒ que le tiers soit revenu. **C'est circulaire.** *(Ajouté le 2026-07-28 — finding **N-1** du re-audit sécurité d'US-00.7.)* | **appliquer ce plan** *(§2 — **administrer**, pas contourner)*, puis **corriger la cause en amont** et **ré-appliquer la règle** |
 
-⚠️ Ne **jamais** confondre les deux premières lignes : `EXPECTED` se répare en administrant la règle,
-`FAILURE` se répare en corrigeant le travail. Appliquer ce plan sur un `FAILURE` serait un
-contournement de gate.
+⚠️ Ne **jamais** confondre les trois premières lignes : `EXPECTED` se répare en **administrant la
+règle**, `FAILURE` se répare en **corrigeant le travail**, et « tous verts » se répare en **rebasant ou
+en résolvant les discussions**.
+
+> **⚠️ NUANCE AJOUTÉE LE 2026-07-28 — l'avertissement ci-dessus était TROP ABSOLU.** Il disait :
+> « *Appliquer ce plan sur un `FAILURE` serait un contournement de gate* ». **C'est vrai d'un `FAILURE`
+> dont la cause est DANS le dépôt** — et c'est l'écrasante majorité des cas. **C'est faux du cas de la
+> 4ᵉ ligne** : un `FAILURE` d'origine **externe** n'est pas un gate qui fait son travail, c'est une
+> **panne de disponibilité** qui a pris la forme d'un gate. Le distinguer n'est pas un assouplissement :
+> le test reste « **la cause est-elle corrigeable par une PR ?** ». **Oui ⇒ corriger le travail. Non
+> ⇒ administrer, en le traçant.** ⛔ Dans les **deux** cas, `gh pr merge --admin` reste **interdit** :
+> administrer, c'est **modifier la règle**, jamais **fusionner malgré elle**.
+>
+> **Surface exposée à ce risque, nommée** — toute dépendance téléchargée par un job **requis** :
+> `actionlint` *(épinglé par version **et** empreinte SHA256 — la plus rigoureuse du dépôt)* ·
+> `pip install jsonschema` **nu, sans version ni empreinte** *(finding **N-2**, **pré-existant** et
+> **strictement plus faible**)* · `actions/checkout@v4`, `subosito/flutter-action@v2`,
+> `gitleaks-action@v2` *(tags **mutables**, finding MEDIUM 4)*. **La probabilité est faible et la panne
+> est auto-révélatrice** — elle se manifeste à la première PR, jamais silencieusement.
+> Détail : [`reports/US-00.7/security_reaudit.md`](../reports/US-00.7/security_reaudit.md) §5.
 
 ### 2. Mécanisme de sortie — **éditer ou supprimer ≠ contourner**
 

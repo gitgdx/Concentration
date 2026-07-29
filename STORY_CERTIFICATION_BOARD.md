@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -686,13 +686,238 @@
   (`main` → `exit 1`, `feat/` → `exit 0`). Preuves : `reports/US-00.7/t20_pre_push.md`. → **critère de
   test #22 entièrement levable** (`pre-push` était le dernier des 11 artefacts vivants à affirmer une
   impossibilité au présent) et **case 33 de la DoD complète**.
-- **DoD (2026-07-28)** : **24 cases sur 34 levées et cochées** contre preuves revérifiées ce jour.
-  **10 restent ouvertes**, toutes pour un motif nommé : **2 · 13 · 14 · 26** *(moitié CI)* · **34**
-  dépendent de la **PR** (T11) · **27 · 28 · 29** des audits et de la QA · **23** d'un **arbitrage @PO**
-  non tranché (véhicule de mise à jour d'US-00.1) · **31** de la fin de cycle.
-- **Prochaine étape** : ⏳ **T11** (@DevOps : PR, libellés **réellement rapportés**, refus de fusion,
-  fusion après 4 verts) — **la PR de cette US sera la première à devoir franchir la protection**, elle
-  sert donc de démonstration → `/audit-us` → QA → `/certify`.
+- **DoD (2026-07-28)** : **28 cases sur 34** levées contre preuves revérifiées. **6 restent ouvertes**,
+  motif nommé : **13** *(voir ci-dessous — **non levable en l'état**)* · **27 · 28 · 29** audits et QA ·
+  **23** arbitrage **@PO** non tranché (véhicule de mise à jour d'US-00.1) · **31** fin de cycle.
+- 🔶 **T11 — PARTIELLEMENT EXÉCUTÉE (2026-07-28).** PR **[#12](https://github.com/gitgdx/Concentration/pull/12)**
+  ouverte et **fusionnée** en `9fdb7fd` — **première fusion de l'histoire du dépôt réellement
+  conditionnée par les gates**, par `gitgdx` (**`is_bot: false`** → case 34 satisfaite).
+  **Acquis** : les 4 libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux
+  contextes requis *(le contrôle que T3 ne pouvait pas faire)* · `mergeStateStatus: **BLOCKED**` capturé
+  à `15:25:30Z`, **avant** la complétion de 3 contextes requis — **renversement exact** du `CLEAN`
+  d'US-00.4, où la PR #10 était **fusionnable en rouge**.
+  ⛔ **NON ACQUIS — le refus d'une tentative de fusion.** T11(d) n'a pas eu lieu : la fenêtre
+  déterministe a duré **~80 s** (gate `📱 App` = **1 min 23 s en CI**, contre > 3 min en local — c'est
+  cette extrapolation qui a fauté), refermée à `15:26:49Z` ; la fusion est intervenue à `15:34:21Z`.
+  **`BLOCKED` est un ÉTAT calculé, pas une ACTION refusée** — même distinction que pour
+  `allow_force_pushes`/`allow_deletions`. **⇒ AC-4 nominal NON satisfait, case 13 DÉCOCHÉE.**
+  **Preuve encore obtenable** sur la **PR de certification** (`feat/US-00.7-certif`), qui franchira les
+  **mêmes** 4 contextes : tenter la fusion **immédiatement après l'ouverture**. Rapport :
+  `reports/US-00.7/merge_block.md`.
+- **🔍 Audit Rev — ✅ PASSED (2026-07-28, @CodeReviewer, contexte frais)** · `reports/US-00.7/code_review.md`
+  (30 709 o, 42 blocs d'exécution) · `EVT_CODE_REVIEW_PASSED`. **0 bloquant** · 1 majeur *(hors périmètre
+  d'une revue de code)* · 4 mineurs · 3 suggestions. **Vérifications indépendantes** : périmètre du diff
+  recalculé seul (`f4400ca..HEAD` = 47 fichiers, contre 6 pour `main...HEAD`) · diff des fichiers
+  d'enforcement **filtré de tout commentaire** → **0 ligne de logique modifiée** dans `ci.yml`,
+  `apply_branch_protection.sh` et `pre-push` · contrôle négatif d'écriture distante dans
+  `check_branch_protection.py` → 0 résultat · **4 scénarios NB-1 rejoués sans lire `nb1_fix.md` d'abord**
+  (A→exit 2, B→exit 0, C→exit 0, D→exit 2) : **la portée annoncée correspond à la portée réelle**,
+  NB-1bis authentiquement ouvert · état réel du dépôt re-constaté à `16:07:35Z` · **séquence de sûreté
+  prouvée dans l'historique git** (`27464a9` plan+correctif < `6932fea` PUT < `66d2bab` test négatif).
+- **🛡️ Audit Sec — ❌ FAILED (2026-07-28, @CyberSecurity, contexte frais)** · `reports/US-00.7/security.md`
+  (26 287 o, 36 blocs) · `EVT_SECURITY_AUDIT_FAILED`. **CRITICAL 0 · HIGH 1 (bloquant) · MEDIUM 4 · LOW 4**.
+  - 🔴 **B-1 (HIGH, BLOQUANT) — injection de commande dans `.github/workflows/branch-naming.yml:16`** :
+    `BRANCH="${{ github.head_ref }}"` interpole un nom de branche **contrôlé par l'attaquant** dans un
+    `run:` shell. GitHub Actions substitue **avant** l'exécution ⇒ une branche `feat/US-1.1-$(…)` fait
+    exécuter la substitution par bash **à l'affectation**, donc **avant même le test du motif**, et la
+    charge **satisfait** le motif ⇒ le job **réussit**, **aucun check rouge**. PoC local de l'auditeur :
+    `$(id -un)` a rendu `guillaume.decroix`. **Confirmé par lecture directe de l'orchestrateur.**
+    ⚠️ **Le fichier est préexistant et hors diff, mais c'est CETTE US qui crée l'exposition** : dépôt
+    rendu **PUBLIC** (`allow_forking: true`) **et** `check-branch-name` rendu **REQUIS**, donc exécuté sur
+    **chaque PR, forks compris**. Atténué par `default_workflow_permissions: read` et l'absence de secrets
+    dans le job → **HIGH, pas CRITICAL**. **Correctif : 3 lignes, passer par `env:`.**
+  - **MEDIUM** : (2) **aucun plancher de sécurité** — `enforce_admins: false` en config produirait une CI
+    verte et un `--check-remote` « conforme » · (3) **NB-1bis confirmé par exécution** mais **NON
+    exploitable par configuration** (les 8 clés sont en dur dans `emit_branch_protection` ; l'amputation
+    exige de modifier le code Python) · (4) actions tierces non épinglées · (5) `emitter` non enforcé.
+  - **Axes déclarés PROPRES** : aucun jeton ni en-tête `Authorization` dans les artefacts publiés
+    (`gitleaks` vert sur l'arbre **et** sur les 47 commits d'historique) · `check_branch_protection.py`
+    **réellement en lecture seule** (`method="GET"` explicite, pas de `shell=True`) ·
+    `apply_branch_protection.sh` délègue à `gh` sans manipuler de jeton · **aucun `pull_request_target`**
+    → le vecteur « pwn request » est **absent**.
+  - ⚠️ **Deux nuances qui CONTREDISENT l'énoncé transmis à l'auditeur** : **NB-1bis est moins exploitable
+    qu'annoncé** ; et le défaut **`emitter` n'est pas une faille d'autorisation** au sens strict — agents
+    et humain partagent le même compte et les mêmes droits, donc aucune implémentation ne le rendrait
+    infranchissable : **le durcissement utile est la détection, pas la prévention**.
+  - ⚠️ **`run_gates --gate sast` → exit 1 : ce gate N'EXISTE PAS.** Il n'y a **aucun SAST** dans la
+    factory. **Aucun PASS n'est prononcé sur la foi d'un scan de CVE** — `dart pub outdated` mesure
+    l'obsolescence, pas la vulnérabilité. Recommandation de l'auditeur : **`actionlint` en CI**, qui
+    aurait trouvé B-1 seul — son absence en est la **cause racine**.
+- **⛑️ m-1 — sur-affirmation de l'orchestrateur, relevée par l'audit Rev et CORRIGÉE le 2026-07-28** :
+  `t20_pre_push.md`, le Story File (T20) et cette entrée affirmaient que `pre-push` était « le **dernier**
+  des 11 » et le critère #22 « **entièrement levable** ». **Faux** :
+  `tests/fixtures/US-00.4/README.md:31` porte toujours l'affirmation au présent (réécriture **interdite**
+  par arbitrage). L'état exact est **10/11**, et `non_regression.md:466` — plus juste — le disait déjà.
+  **Une sur-affirmation dans l'US dont c'est précisément la thèse.**
+- **🔧 Correctif B-1 + `actionlint` — @Developer, 2026-07-28** *(`EVT_CODE_READY` ré-émis)*.
+  - **B-1 corrigé** : `branch-naming.yml` n'interpole plus `github.head_ref` dans le corps du `run:` —
+    les valeurs passent par **`env:`** et sont lues comme des **variables shell**. Le **job id
+    `check-branch-name` est INCHANGÉ** : le contexte requis n'est pas cassé.
+  - **PREUVE PAR L'EFFET** *(simulation locale, ⛔ aucune branche ni PR créée)* : **AVANT**, la charge
+    `feat/US-1.1-<substitution>` rendait **`feat/US-1.1-guillaume.decroix`** — la commande était
+    **EXÉCUTÉE** ; **APRÈS**, elle reste la **chaîne littérale**, non évaluée.
+  - **`actionlint` ajouté en CI comme *STEP* du job DÉJÀ REQUIS « 📋 Governance », et NON comme job
+    séparé.** Un nouveau job **ne serait pas un contexte requis** (les 4 sont figés dans
+    `factory.config.json`, **Art. 6**) : il serait **RAPPORTÉ sans BLOQUER** — l'anti-pattern même
+    qu'US-00.4 et US-00.7 ont supprimé. Ici, un lint rouge fait échouer un contexte **requis**.
+  - **Épinglage** : version **et** empreinte **SHA256 codée en dur** (v1.7.12), vérifiée par
+    `sha256sum -c`. Si l'asset publié est un jour remplacé, **la CI s'arrête**. Réponse à la **MEDIUM 4**
+    (actions tierces non épinglées) : `rhysd/actionlint` **n'est pas une GitHub Action** (aucun
+    `action.yml`, vérifié par API) → binaire de release **vérifié**, plutôt qu'une action wrapper non
+    épinglée.
+  - **✅ VALIDATION CROISÉE** : `actionlint` exécuté localement **avant** correctif signale
+    **exactement B-1 et rien d'autre** — confirmation **indépendante** du finding par un **troisième
+    outil non-LLM**, et de la **cause racine** avancée par l'auditeur. **Après** correctif : **exit 0**.
+    Aucun autre problème préexistant ⇒ l'ajout au job requis ne casse rien.
+  - 📌 **Incident consigné** : la première émission de l'événement a été **corrompue par PowerShell**,
+    qui a **substitué la substitution de commande citée en exemple dans le rationale lui-même** — la
+    faille décrite, reproduite par l'outil qui la documentait. Ligne retirée car **NON COMMITÉE**
+    (9 lignes commitées, 10 dans le fichier) donc **jamais entrée en vigueur** : **même doctrine
+    qu'ADR-007 applique à ADR-006**, l'immuabilité protège le registre des décisions **effectives**.
+- **🛡️ RE-AUDIT sécurité — ✅ PASSED (2026-07-28, @CyberSecurity, contexte frais, 0 bloquant)** ·
+  `reports/US-00.7/security_reaudit.md` (36 291 o, 44 blocs) · `EVT_SECURITY_AUDIT_PASSED`.
+  ⛔ `security.md` **non écrasé** — la preuve datée du 1ᵉʳ cycle est **intacte** (vérifié par `git diff`).
+  - **B-1 neutralisé, prouvé par TROIS moyens indépendants** : **effet** (4 charges — substitution,
+    backticks, `;id;`, `*` — rendues **littérales** ; reproduction pré-correctif → commande **exécutée**) ·
+    **`actionlint`** (avant : exit 1 sur exactement B-1 ; après : exit 0) · **`zizmor` 1.28.0** (avant :
+    **2** `template-injection` HIGH ; après : **0**).
+  - 🟢 **LACUNE DU 1ᵉʳ CYCLE CORRIGÉE** : il y avait **DEUX** injections, pas une. `zizmor` relève aussi
+    **`github.ref_name`** (chemin `push`), **jamais nommée** par le premier audit. **Le correctif ferme
+    les deux** — il va plus loin que le finding qui l'a motivé.
+  - **Motif cherché ailleurs** (le 1ᵉʳ cycle n'avait examiné **qu'un** fichier) : les 5 interpolations
+    des **3** workflows énumérées — **`e2e.yml`, jamais audité, n'en contient aucune** ; `ci.yml:38` est
+    une clé `concurrency:`, pas un `run:` ; **aucun `pull_request_target`**.
+  - **Step `actionlint` audité comme du code neuf** : empreinte **recalculée et concordante sur 3
+    sources** (téléchargement + `sha256sum`, fichier de checksums officiel, `digest` de l'API) ·
+    **fail-closed PROUVÉ** (empreinte falsifiée → exit 1, `tar` **jamais exécuté** ; 404 → exit 22) ·
+    ordre vérifier → extraire → exécuter respecté · **aucun contenu non vérifié n'est exécuté** · aucun
+    cache, aucune permission ajoutée. **Job id `check-branch-name` inchangé** (comparaison
+    `f4400ca:` vs `HEAD:`).
+  - ⚠️ **Risque trouvé PUIS CLOS par l'auditeur lui-même** : `actionlint` invoque **`shellcheck`**
+    automatiquement — absent de son poste, **pré-installé sur `ubuntu-latest`** ⇒ son exit 0 local
+    **n'était pas concluant**. Il a installé shellcheck 0.10.0, **prouvé par contrôle négatif que
+    l'intégration est vivante**, puis re-obtenu exit 0.
+  - 📌 **Incident de méthode qu'il consigne contre lui-même** : son **premier** contrôle négatif
+    indiquait faussement que `set -euo pipefail` n'abortait pas — ce qui aurait rendu la vérification
+    d'empreinte **décorative**. Artefact de **son propre harnais**, refait avec de vrais fichiers de
+    script.
+  - **MEDIUM/LOW du 1ᵉʳ cycle** : **ouverts, non traités, NON AGGRAVÉS** — vérifié par
+    `git diff --quiet 0194078 HEAD` sur `factory_sync.py`, `check_branch_protection.py`,
+    `trace_append.py`, `events_catalog.json`, `.gitleaks.toml`, `factory.config.json` → **tous inchangés**.
+  - **Downgrade motivé et assumé** : `zizmor` rapporte **8 HIGH `unpinned-uses`** — **non bloquants**,
+    car *blanket policy* et **strictement préexistants** (`git diff f4400ca..HEAD -- .github/workflows/`
+    sur `uses:`/`permissions:` → **VIDE**).
+- **🆕 Findings du re-audit — AUCUN bloquant, TOUS OUVERTS** :
+  - **N-1 (MED) — interblocage structurel — ✅ TRAITÉ le 2026-07-28** : si l'asset `actionlint` devient
+    indisponible, `governance` passe en `FAILURE` sur **toute** PR, et corriger exigerait de fusionner une
+    PR qui **exige ce contexte** — **circulaire**. Le **§Plan de retour arrière s'interdisait lui-même**
+    (« appliquer ce plan sur un `FAILURE` serait un contournement »).
+    **Correctif** : **4ᵉ ligne ajoutée** au tableau du plan (`docs/GIT_PROTECTION.md`) pour le cas
+    « `FAILURE` d'origine **externe**, **non corrigeable par une PR** » → **administrer**, puis corriger
+    en amont et ré-appliquer. **Et l'avertissement qui suivait a été NUANCÉ** : il était **trop absolu**
+    — vrai d'un `FAILURE` dont la cause est **dans** le dépôt, faux d'une **panne de disponibilité qui a
+    pris la forme d'un gate**. Test retenu, non assouplissant : **« la cause est-elle corrigeable par une
+    PR ? »** — oui ⇒ corriger le travail, non ⇒ administrer **en le traçant**. ⛔ Dans les **deux** cas,
+    `gh pr merge --admin` reste **interdit**. **Surface exposée nommée** : `actionlint` *(épinglé
+    version + SHA256)*, `pip install jsonschema` *(**nu** — N-2, pire)*, et les 3 actions à tag mutable.
+    Renvoi croisé ajouté dans `ci.yml`. `actionlint` → **exit 0** · bloc `FACTORY_SYNC` **non édité**.
+  - **N-2 (MED)** : `ci.yml` — `pip install jsonschema` **nu** dans le **même job requis**, manqué par le
+    1ᵉʳ cycle et **plus faible** que le step qu'on lui reproche.
+  - **N-3 (MED)** : sur PR de **fork**, les workflows viennent du **commit de fusion** — l'attaquant
+    fournit la CI qui produit ses propres checks requis. Atténué par
+    `approval_policy: "first_time_contributors"`.
+  - **N-4 / N-5 (LOW)** : épinglage qui rancira · ⚠️ **le `ci.yml` corrigé N'A JAMAIS TOURNÉ EN CI**
+    (branche non poussée) — **inférence outillée, pas observation**.
+  - **Bornes que l'auditeur refuse d'escamoter** : **aucun scanner de CVE n'existe** dans cette factory,
+    donc son PASS **ne s'appuie sur aucun scan de vulnérabilité**.
+- **✅ DOUBLE AUDIT OBTENU** : Rev ✅ 🔍 · Sec ✅ 🛡️. **Phase maintenue à `parallel_audit`** : le hook
+  `check_scb_compliance.py` **refuse** `quality_assurance` tant que `QA Status` est `⏳` — la phase ne
+  s'annonce pas avant que la QA n'ait tourné.
+- **🧪 QA — ❌ FAIL (2026-07-28, @QA_Tester, contexte frais)** · `reports/US-00.7/qa.md` (43 674 o) ·
+  `EVT_QA_FAILED`. **25 critères LEVÉS / 3 NON LEVÉS** (🟢 **13/13** · 🟠 **9/11** · 🔵 **3/4**).
+  - **Exécutions réelles** : tests Flutter **2 passed / 0 failed**, couverture **89,5 %** (seuil 80) ·
+    `run_gates --component app` **5/5 exit 0** · `factory_sync --check`, `check_scb_compliance`,
+    `validate_trace` **verts** · **`gitleaks` : 0 fuite sur 51 commits**.
+  - 🔴 **D-1 (BLOQUANT) — critère 26 / DoD case 13 / AC-4 nominal** : aucune tentative de fusion n'a
+    **jamais** été lancée sur la PR #12 — pas de refus, pas de motif brut,
+    `applied_state/merge_refusal_raw.txt` **inexistant**. Seul un `mergeStateStatus: BLOCKED` a été
+    capturé : **un état calculé, pas une action refusée**. ⚠️ **C'est exactement la distinction *état de
+    l'API* vs *effet* que cette US existe pour poser.** Sur les 4 preuves annoncées comme neuves,
+    **3 sont acquises** (push direct, force-push, suppression), **la 4ᵉ manque**.
+  - 🟠 **Critères 20 et 21 PARTIELS — ⚖️ ARBITRAGE HUMAIN DU 2026-07-28 : ASSUMÉS TELS QUELS, ÉCRITS,
+    NON COMBLÉS.** Constat **revérifié par @Architect** avant arbitrage, et non repris sur la foi de la
+    QA :
+    | Élément exigé par le critère | État dans `negative_test_server.txt` |
+    |---|---|
+    | Absence de hooks dans le clone | 🟠 **assertion en commentaire** (l. 10), **pas** une sortie de `git config --get core.hooksPath` |
+    | `git rev-parse origin/main` avant / après | 🔴 **ABSENT** |
+    | Suppression du clone jetable | 🔴 **ABSENTE** |
+    | Garde de sûreté avant **chacune** des 3 commandes | 🟠 **une seule** occurrence (l. 13) |
+    | Phrase de portée *(autre acteur / jeton d'application / interface web)* | 🔴 **ABSENTE de ce fichier** — elle est écrite dans `CLAUDE.md`, `GIT_PROTECTION.md` et `reports/US-00.7/README.md`, **mais pas là où le critère la cherche** |
+    **Acquis malgré tout** : **aucune** occurrence d'option de contournement de hook dans les commandes
+    archivées, et la référence `main` **n'a pas bougé** (`f4400ca`).
+    ⛔ **Non retro-archivables** : le clone jetable n'existe plus. **Le fichier de preuve n'est PAS
+    retouché** — y inscrire aujourd'hui une garde qui n'a pas été relue trois fois serait **fabriquer une
+    preuve**, c'est-à-dire commettre exactement ce que cette US combat. **Deux critères 🟠 restent donc
+    NON LEVÉS, et c'est écrit dans le Story File en regard de chacun.**
+    **Portée de l'arbitrage** : il **ne change rien** au verdict QA (le `🧪 FAIL` porte sur **D-1**, pas
+    sur 20/21) et **n'autorise aucune case de DoD supplémentaire**.
+  - 🔧 **Rectification apportée par la QA** : la **DoD réelle est 30/34, non 28/34** — les cases **27**
+    et **28** étaient **décochées à tort** (les deux audits sont PASSED en trace **et** au SCB). Le bloc
+    d'état avait été écrit **avant** les audits. **Corrigé.** Aucune case cochée à tort ; **réserve sur
+    la case 12** (couple `rev-parse` avant/après non archivé tel que décrit).
+  - **AC orphelins : AUCUN.** Les 8 AC sont **couverts** — mais *couvert* ≠ *prouvé* : **AC-4 a un test
+    qui n'a pas été exécuté**, et un scénario non exécuté n'est pas un scénario vert.
+  - **E2E BDD : 0 exécuté** — aucun runner, **0 step definition** : les **24 scénarios Gherkin sont
+    documentaires**. Constat de la QA, à ne pas confondre avec une suite verte.
+  - ✅ **Écart É-7 refermé par la QA** : `gitleaks` **réellement exécuté** (absent du `PATH` de
+    @Developer lors du cycle) → **0 fuite / 51 commits**.
+  - **À décharge, mot de la QA** : *« Je n'ai trouvé **aucune sur-affirmation**. Les trois défauts que je
+    prononce avaient tous été déclarés par l'US elle-même — `merge_block.md` place l'échec de T11(d) en
+    tête, en gras, avant toute réussite. Une US qui documente son propre échec au premier paragraphe ne
+    triche pas ; elle n'est pas finie. »*
+- **⚖️ ARBITRAGE @PO — case 23 (2026-07-28, contexte frais)** · `reports/US-00.7/po_arbitrage_s11.md`
+  (26 536 o). **Aucun événement émis, délibérément** : le catalogue (25 événements) **ne couvre aucun
+  arbitrage @PO** ; `EVT_STORY_READY` serait *accepté* par la machine à états mais affirmerait une US
+  prête pour validation technique alors qu'elle est en `parallel_audit` **après un `🧪 FAIL`**.
+  *« On ne pollue pas une trace append-only pour satisfaire un format. »* → **nouvelle instance de la
+  dette #12**, transmise à `/audit-methodo`.
+  - **S11 — voie (a) sur le fond, mais NI aujourd'hui, NI dans US-00.7** : requalification tracée
+    **additive, datée, différée**, portée par une **US de dette `US-00.8` à créer via `/us-new`**.
+  - 🟢 **Voie (b) écartée AU FOND, pas seulement pour disproportion** — vérification **absente de ma
+    saisine** : **l'AC-3 d'US-00.1 (l. 85-94) n'invoque nulle part la protection de branche** ; il exige
+    le blocage `pre-commit` **et** l'échec du job CI, **tous deux prouvés**. **Aucun AC n'est en cause**,
+    la certification d'US-00.1 est **saine**, l'anti-pattern — qui vise la **modification des AC** — **ne
+    se déclenche pas**. Les 3 emplacements fautifs sont une **tâche non cochée**, une **colonne
+    « résultat attendu »** et une **étape Gherkin non automatisée**.
+  - 🔴 **Motif RÉDHIBITOIRE du report, que personne n'avait vu** : éditer `docs/stories/US-00.1-*` depuis
+    la branche d'US-00.7 **ferait tomber son critère 23**, aujourd'hui **LEVÉ** (le diff sur les
+    artefacts certifiés doit rester **vide**). **Interdiction ferme.**
+  - **Réponse à la question centrale** : S11 est *« plus proche du vrai »*, **pas vrai**. Moitié
+    « `secrets-scan` rouge » : prouvée **par l'effet** depuis le 2026-07-25. Moitié « fusion bloquée » :
+    prouvée **par l'état de l'API** seulement. **La conjonction littérale n'a jamais été observée et ne
+    le sera pas** — le refus à venir portera sur des contextes **`expected`**, pas **rouges**.
+  - 🔧 **A-1 — RECTIFICATION MAJEURE, manquée par les 2 audits de code, les 2 audits de sécurité ET la
+    QA** : `transmissions.md:112` **et** le Story File d'US-00.7 **l. 290** affirmaient que le test
+    négatif d'US-00.1 « n'a jamais été exécuté ». **FAUX** — il a tourné le **2026-07-25** (faux secret,
+    PR draft **#2**, job `secrets-scan` = **`failure`**, run `30155284206`). **Un texte d'AC portait un
+    fait faux sur une US certifiée.** ✅ **Vérifié par @Architect** puis **rectifié aux 2 emplacements,
+    texte d'origine barré et non supprimé.**
+  - **S1/S2 — CONFIRMÉS, avec rectification** : règle 2 vraie et prouvée **par l'effet**, Art. 4 vrai,
+    dette #6 sans objet. Mais **`BACKLOG.md` n'a jamais porté ces corrections** → **rien à retrancher**,
+    c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+    alors que le **4ᵉ contexte requis vient de `branch-naming.yml`**.
+  - **Case 23 — NON COCHABLE en l'état** : son libellé affirme « preuve fournie par **AC-4** », **qui
+    n'existe pas**. Déblocage par **C-1** *(fermer D-1 — voie retenue, **gratuite** puisque la PR de
+    certification le fera)* **ou C-2** *(rectifier le libellé)*. ⚠️ **Elle n'est plus le chemin
+    critique** : 13, 29 et 31 restent ouvertes de toute façon.
+- **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
+  **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
+  **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.
+  ⚠️ **Procédure corrigée, l'erreur à ne pas refaire** : tenter la fusion **IMMÉDIATEMENT après
+  l'ouverture**, **avant toute autre capture**. Le re-passage QA pourra être **ciblé sur le seul
+  critère 26**.
+- **Prochaine étape** : PR de certification → capture du refus (D-1) → **re-QA ciblée** → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

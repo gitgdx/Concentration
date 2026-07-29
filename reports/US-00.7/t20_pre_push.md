@@ -78,10 +78,28 @@ qu'une **apparence** d'intégrité.
 
 ## Effet sur les critères de test
 
+> ### ⛑️ CORRECTION du 2026-07-28 — sur-affirmation relevée par l'audit Rev (finding **m-1**)
+>
+> **La version initiale de cette section était FAUSSE** et affirmait ceci : « `pre-push` était le
+> **dernier** des 11 à porter encore une affirmation d'impossibilité au présent. Le critère devient
+> **entièrement levable**. »
+>
+> **C'est inexact.** `tests/fixtures/US-00.4/README.md:31` porte **toujours** l'affirmation au présent
+> (« les chemins exit 0 et exit 1 ne sont pas observables sur ce dépôt ») : sa **réécriture est
+> interdite par arbitrage** — le démenti est placé **en amont**, l. 6, en historisation additive.
+>
+> Le rapport voisin `non_regression.md:466` était **plus juste** et **contredisait** celui-ci :
+> « LEVÉ sur **9/11**, avec 2 exceptions documentées ». **Une sur-affirmation dans l'US dont c'est
+> précisément la thèse** — et elle n'a pas été attrapée par la session qui l'a écrite, mais par un
+> **audit à contexte frais**. C'est la séparation des pouvoirs qui l'a trouvée.
+
 - **Critère #22** (AC-5 nominal — « 0 affirmation d'impossibilité dans les **11** artefacts vivants ») :
-  `scripts/githooks/pre-push` était le **dernier** des 11 à porter encore une affirmation
-  d'impossibilité au présent. Le critère devient **entièrement levable**.
-- **Case 33 de la DoD** : `pre-push` en était le dernier élément non traité.
+  T20 fait passer le décompte de **9/11 à 10/11**. Le critère **n'est PAS entièrement levable** : il
+  subsiste **une** exception, `tests/fixtures/US-00.4/README.md`, **arbitrée** en historisation
+  additive et **assumée comme telle**.
+- **Case 33 de la DoD** : `pre-push` en était le dernier élément non traité — la case, elle, est bien
+  **complète**, car son énoncé porte sur le **traitement** des 8 artefacts hors AC-5, non sur
+  l'éradication de toute occurrence.
 
 ## Artefact temporaire supprimé
 
