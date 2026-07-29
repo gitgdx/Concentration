@@ -1,5 +1,32 @@
 # T11 — PR #12 : ce que la fusion a prouvé, et **ce qu'elle n'a PAS prouvé**
 
+> ## ⛑️ RECTIFICATION DU 2026-07-29 — **deux énoncés de ce rapport sont FAUX**. Rien n'est supprimé.
+>
+> *(Relevé par la **re-QA** — finding « critère 27 régressé ». Ce rapport est **nommé par le critère 27** :
+> tant qu'il porte une assertion fausse, le critère **n'est pas levé**.)*
+>
+> **① §3, l. 91-92 — « case 34 : satisfait, et vérifiable par `mergedBy.is_bot = false` » : FAUX.**
+> ⛔ **`is_bot` NE PROUVE RIEN.** Les agents opèrent avec **le jeton de l'humain** ; le champ rend
+> **`false` même pour une fusion exécutée par un AGENT** — établi le 2026-07-29 par une **violation
+> réelle** (`merge_proof_and_violation.md`). Ce n'est **pas** un fait daté qui s'historise, c'est une
+> **assertion de méthode qui n'a jamais été vraie**. Elle était exacte **par hasard** sur la PR #12
+> — l'humain avait réellement fusionné — et serait sortie **identique** si un agent l'avait fait.
+> ⇒ **La case 34 est DÉCOCHÉE**, sa méthode de preuve **refondue** *(attestation humaine datée, assumée
+> **déclarative**)*, et la dette de provenance est **fusionnée** avec celle de `TRACKS.md` → **US-00.8**.
+>
+> **② §« Ce qui n'est PAS prouvé », point 1 — « le refus d'une tentative de fusion » : PÉRIMÉ.**
+> ✅ **Il EST prouvé depuis le 2026-07-29T08:49:14Z**, **par le SERVEUR** : sur la **PR #14**, lancé par
+> **l'humain** avec **1/4** contexte vert, `gh api -X PUT …/pulls/14/merge` → **HTTP 405**,
+> *« **3 of 4 required status checks are expected** »*. `gh api` n'est qu'un **transport HTTP** : le refus
+> **n'est pas** un pré-contrôle client. **Administrateur inclus** (`admin: true` + `enforce_admins: true`).
+> ⇒ **AC-4 nominal COMPLET**, **cases 13 et 23 cochées**.
+> Preuve : [`applied_state/merge_refusal_server_405.txt`](applied_state/merge_refusal_server_405.txt).
+>
+> **Ce qui reste vrai dans ce rapport, et qui l'était déjà** : la distinction **état calculé** vs **action
+> refusée**, l'analyse du `BLOCKED` de la PR #12, le renversement du `CLEAN` d'US-00.4, et la borne
+> « contexte **`expected`**, pas **`failing`** » — **toujours valable**, la conjonction littérale d'US-00.1
+> n'ayant **jamais** été observée.
+
 > **US** : US-00.7 · **Tâche** : T11 · **AC** : AC-4 · **Date** : 2026-07-28
 > **PR** : [#12](https://github.com/gitgdx/Concentration/pull/12) — `feat/US-00.7-application-protection-branche` → `main`
 > **Commit de fusion** : `9fdb7fd4fdecea5f7d102533843a932cb46a8338`
@@ -88,8 +115,10 @@ C'est le même dépôt, le même compte, la même commande. **Seule la protectio
 `gh pr checks 12` → **4/4 `pass`**, puis fusion à 15:34:21Z par `gitgdx`, `is_bot: false`.
 **Première fusion de l'histoire du dépôt dont les gates conditionnaient réellement la recevabilité.**
 
-Renforcement de track **R-c** / **case 34 de la DoD** — « l'approbation/fusion ne vient pas d'un
-agent » : **satisfait**, et vérifiable par `mergedBy.is_bot = false`.
+~~Renforcement de track **R-c** / **case 34 de la DoD** — « l'approbation/fusion ne vient pas d'un
+agent » : **satisfait**, et vérifiable par `mergedBy.is_bot = false`.~~
+⛑️ **BARRÉ le 2026-07-29 — voir la rectification ① en tête de ce rapport.** `is_bot` **ne prouve rien**
+(jeton partagé entre l'humain et les agents) ⇒ **case 34 DÉCOCHÉE**, méthode de preuve **refondue**.
 
 > ⚠️ **Borne** : `reviewDecision` est **vide** et `latestReviews` est un **tableau vide**. Il n'existe
 > donc **aucune approbation GitHub formelle** — c'est **attendu** (la cible est à

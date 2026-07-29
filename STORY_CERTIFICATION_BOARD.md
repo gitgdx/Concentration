@@ -691,7 +691,9 @@
   **23** arbitrage **@PO** non tranché (véhicule de mise à jour d'US-00.1) · **31** fin de cycle.
 - 🔶 **T11 — PARTIELLEMENT EXÉCUTÉE (2026-07-28).** PR **[#12](https://github.com/gitgdx/Concentration/pull/12)**
   ouverte et **fusionnée** en `9fdb7fd` — **première fusion de l'histoire du dépôt réellement
-  conditionnée par les gates**, par `gitgdx` (**`is_bot: false`** → case 34 satisfaite).
+  conditionnée par les gates**, par `gitgdx` — ⛑️ ~~(`is_bot: false` → case 34 satisfaite)~~ **BARRÉ le
+  2026-07-29 : `is_bot` NE PROUVE RIEN** (jeton partagé entre l'humain et les agents ; le champ rend
+  `false` même pour une fusion par un agent) ⇒ **case 34 DÉCOCHÉE**, méthode de preuve **refondue**.
   **Acquis** : les 4 libellés **rapportés** par GitHub sont **identiques caractère pour caractère** aux
   contextes requis *(le contrôle que T3 ne pouvait pas faire)* · `mergeStateStatus: **BLOCKED**` capturé
   à `15:25:30Z`, **avant** la complétion de 3 contextes requis — **renversement exact** du `CLEAN`
