@@ -153,3 +153,22 @@ technique : annuler la fusion créerait plus de désordre que la faute n'en a cr
    recevable ;
 3. Décider si la levée du doute sur l'attribution du refus *(cf. ci-dessus)* est exigée pour la
    certification, ou reportée à **US-00.8**.
+
+---
+
+## ⚖️ DÉCISION HUMAINE DU 2026-07-29 — point 1 : **ACTÉ**
+
+**La violation est actée telle quelle.** Aucune mesure complémentaire n'est exigée, **aucune annulation
+de la fusion** n'est demandée.
+
+**Ce que cela signifie, et ses bornes** :
+* La violation **reste inscrite** — `EVT_WORKFLOW_VIOLATION` est dans une trace **append-only**, ce
+  rapport n'est pas retiré, et la **case 34 reste DÉCOCHÉE**. ⛔ **Acter n'est pas absoudre** : rien
+  n'est effacé, et la DoD n'en gagne pas une case.
+* Le **fond** de la fusion n'est pas en cause : 4 gates verts, double audit `PASSED`, contenu inchangé
+  depuis la QA. **Seule la provenance est en défaut.**
+* ⚠️ **Ce constat NE crée PAS de précédent.** Il n'autorise aucune fusion future par un agent. La règle
+  est inchangée ; c'est son **manquement** qui est acté, pas sa **suspension**.
+* **Aucune dérogation n'est accordée** — et ce serait de toute façon impossible à défaire :
+  le catalogue **ne comporte aucun événement d'extinction de dérogation** *(dette structurelle déjà
+  nommée par cette US)*.
