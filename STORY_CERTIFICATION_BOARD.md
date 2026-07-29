@@ -969,6 +969,25 @@
   conjonction littérale d'US-00.1 **reste non observée**, ⛔ on ne casse pas un gate pour l'obtenir ;
   `--admin` **non testé** et ne le sera pas. 📌 **Le succès n'efface pas la violation** : elle reste
   actée, tracée, et la **case 34 reste décochée**.
+- **🔒 CASE 34 — ATTESTATION HUMAINE DATÉE (2026-07-29), méthode de NIVEAU 1, assumée DÉCLARATIVE.**
+  **La PR [#14](https://github.com/gitgdx/Concentration/pull/14) a été fusionnée par l'HUMAIN** —
+  `main` = **`cad24e8`**, `mergedAt` = **`2026-07-29T14:20:00Z`**, `mergedBy` = `gitgdx`.
+  Preuve d'accompagnement : `reports/US-00.7/applied_state/merge_pr14_human.txt`.
+  - ⛔ **Ce que cette attestation NE prouve PAS, et c'est écrit dans le fichier lui-même** : elle
+    enregistre la **sortie d'une commande**, **pas la PROVENANCE de l'acte**. Sur un dépôt à **un seul
+    compte**, aucune preuve machine de provenance n'existe — `mergedBy.is_bot` rend **`false` même pour
+    un agent**. **C'est une déclaration, et elle est assumée comme telle.**
+  - 📌 **Nuance relevée à la vérification, non masquée** : la sortie capturée est
+    *« Pull request #14 **was already merged** »*. **La commande d'attestation n'a donc PAS elle-même
+    effectué la fusion** — celle-ci avait été faite par l'humain **par un autre moyen** quelques instants
+    plus tôt. **La capture est cohérente avec une fusion humaine, elle ne la démontre pas.** ✅ Contrôle
+    complémentaire : le `reflog` de l'agent ne comporte **aucune** opération de fusion sur `main` —
+    **aucun agent n'a fusionné la PR #14**.
+  - ⚠️ `reviewDecision` **vide** et `latestReviews` **vide** : **aucune approbation GitHub formelle** —
+    **attendu**, la cible étant à `required_approving_review_count: 0`. Le renforcement **R-c** reste une
+    **obligation de process**. **NIVEAU 2 → US-00.8** *(identité distincte pour les agents + `restrictions`)*,
+    **fusionné avec la dette `TRACKS.md`**.
+  ⇒ **CASE 34 COCHÉE au titre du niveau 1. DoD : 32/34.** Restent **29** *(QA)* et **31** *(fin de cycle)*.
 - **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
   **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
   **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.
