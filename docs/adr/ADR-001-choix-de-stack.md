@@ -23,9 +23,17 @@
 ## Contexte
 
 La factory Concentration a été instanciée le **2026-07-24** depuis un *factory-starter-kit* qui ne
-fournissait qu'un adapter `fastapi-react`. Un adapter **`flutter`** a été écrit pour l'occasion, et la
+fournissait qu'un adapter **`fastapi-react`**. Un adapter **`flutter`** a été écrit pour l'occasion, et la
 stack qu'il impose a été **appliquée immédiatement** : elle porte depuis **cinq US certifiées Prod**
 (US-00.1 → US-00.4 et US-00.7).
+
+> 🔎 **Corroboration de l'adapter d'origine, dans le dépôt lui-même** *(ajoutée le 2026-07-30, finding
+> NB-3 de l'audit de revue : l'affirmation était portée **deux fois sans renvoi**, alors que la preuve
+> était à portée de `grep`)* : les scripts **génériques** du kit en portent les **résidus non ambigus** —
+> `scripts/factory_sync.py` code un composant **`backend`** avec `pytest.ini` / `--cov-fail-under` et un
+> composant **`frontend`** avec `vitest.config.ts`, et `scripts/run_gates.py` prend **`--component
+> backend`** comme exemple d'usage. **Aucun de ces deux composants n'existe dans l'adapter `flutter`**
+> *(composant unique `app`)*.
 
 **Le problème que cet ADR corrige n'est pas un problème de stack — c'est un problème de traçabilité.**
 La décision la plus structurante du projet était, au 2026-07-30, **la seule à ne pas figurer au registre
@@ -50,6 +58,13 @@ trouvait **aucune** réponse à l'endroit prévu pour cela.
 
 **1. Framework : Flutter (channel `stable`, SDK Dart `^3.12.2`), null-safety strict.**
 Cross-platform depuis une base de code unique, ce qui répond à RNF-08 sans doubler l'effort.
+**Et — motif que le PRD donne réellement, et qui manquait ici** *(ajouté le 2026-07-30, finding NB-8 :
+« le registre répondait à *pourquoi Flutter ?* plus faiblement que le PRD qu'il cite », ce qui est
+précisément le trou que cet ADR existe pour combler)* : le PRD **RNF-08** motive Flutter par la **qualité
+du rendu visuel** — *dégradés, typographie, animations* — et par les **besoins des modules futurs**,
+à savoir **animations fluides et audio** pour le module *Respiration*. Le produit repose sur un
+**gradient temporel continu** et des tuiles animées : le rendu **n'est pas un agrément, c'est la
+fonctionnalité**.
 
 **2. Un seul composant applicatif : `app`, à la racine du dépôt.**
 ⛔ **Pas de séparation backend/frontend**, et ce n'est pas une commodité : l'application est
@@ -60,18 +75,28 @@ séparer**. Un découpage back/front aurait matérialisé un composant vide.
 `factory.config.json` → `adapter.components.app.gates` — et exécutés par `python scripts/run_gates.py`.
 ⛔ **Jamais** de commande de stack codée en dur ailleurs.
 
-| Gate | Commande | Bloquant | Ce qu'il prouve |
+> ⚠️ **Commandes citées VERBATIM** *(rectifié le 2026-07-30, finding NB-5 de l'audit de revue)*. La
+> première rédaction abrégeait deux commandes **en leur retirant leur sémantique**, et pour `format`
+> l'abrégé **inversait l'effet** : `dart format` **réécrit** les fichiers, là où le gate réel **vérifie
+> sans écrire**. Ce n'est pas un détail dans un document censé décrire un **gate**.
+
+| Gate | Commande *(verbatim, `factory.config.json`)* | Bloquant | Ce qu'il prouve |
 |---|---|---|---|
-| `app.format` | `dart format` | **oui** | mise en forme normalisée |
+| `app.format` | `dart format --output=none --set-exit-if-changed lib test` | **oui** | mise en forme normalisée — ⚠️ **vérifie sans réécrire**, portée `lib test` |
 | `app.analyze` | `flutter analyze` | **oui** | lint **et** typage statique — *Dart n'a pas d'étape « typecheck » séparée* |
-| `app.test` | `flutter test --coverage` + `check_flutter_coverage.py --min 80` | **oui** | tests + **couverture de lignes ≥ 80 %** |
-| `app.deps_audit` | `dart pub outdated` | 🔴 **NON** | **obsolescence** — ⛔ **pas** la vulnérabilité *(voir Conséquences)* |
+| `app.test` | `flutter test --coverage && python scripts/check_flutter_coverage.py --min 80` | **oui** | tests + **couverture de lignes ≥ 80 %** |
+| `app.deps_audit` | `dart pub outdated --show-all` | 🔴 **NON** | **obsolescence** — ⛔ **pas** la vulnérabilité *(voir Conséquences)* |
 | `app.build` | `flutter build web --release` | **oui** | constructibilité — ⚠️ **preuve de repli**, pas la cible *(voir Conséquences)* |
 
 **4. Seuil de couverture : `coverage_min = 80`**, mesuré par `lcov` via un script dédié
 (`scripts/check_flutter_coverage.py`). ⚠️ **`coverage_ratchet` n'est PAS en vigueur** : la clé existe au
-schéma de configuration mais est **absente de `factory.config.json`** — son activation appartient à
-**US-00.6**.
+schéma de configuration mais est **absente de `factory.config.json`**.
+🔴 **Et il ne suffira PAS d'ajouter la clé** *(précision ajoutée le 2026-07-30, finding NB-4 de l'audit de
+revue — la première rédaction n'en disait que la moitié, et c'était **la moitié qui sous-estime la charge
+d'US-00.6**)* : `scripts/factory_sync.py` ne lit `coverage_ratchet` que sur un composant **`frontend`**,
+lequel **n'existe pas** dans l'adapter `flutter` *(composant unique `app`)*. **Ajouter la clé sous `app`
+serait purement et simplement ignoré.** Son activation exige donc **du code** dans `factory_sync.py`, pas
+une ligne de configuration. → **US-00.6**.
 
 **5. Plateformes matérialisées : Android et Web. iOS n'est pas scaffoldé.** *(voir Conséquences)*
 
@@ -104,10 +129,27 @@ schéma de configuration mais est **absente de `factory.config.json`** — son a
 - **Une** base de code pour Android, Web et — à terme — iOS.
 - Toute la chaîne qualité est **exécutable en ligne de commande** : les gates tournent en CI **et** en
   local, à l'identique, via `run_gates.py`.
-- L'absence de backend **supprime** une surface entière de risques : ni API publique, ni
-  authentification, ni transport de données — cohérent avec RNF-07. *(C'est aussi la raison pour
-  laquelle les audits de sécurité du projet portent, à ce jour, sur l'outillage et la gouvernance plutôt
-  que sur du code applicatif exposé.)*
+- **⏳ AU 2026-07-30, ET SOUS CETTE DATE UNIQUEMENT** — l'absence de backend **retire** une surface
+  entière de risques : ni API publique, ni authentification, ni transport de données — cohérent avec
+  RNF-07. Vérifié à cette date : `lib/` ne contient **qu'un seul fichier**, **aucune** dépendance réseau
+  ni de persistance, **aucun** usage de `dart:io`. *(C'est aussi la raison pour laquelle les audits de
+  sécurité du projet portent, à ce jour, sur l'outillage et la gouvernance plutôt que sur du code
+  applicatif exposé.)*
+
+  > 🔴 **BORNE OBLIGATOIRE — cette affirmation est DATÉE, et volontairement** *(ajoutée le 2026-07-30,
+  > finding NB-2 de l'audit sécurité, et c'est le finding le plus intéressant du lot)*. La première
+  > rédaction disait que l'absence de backend « **supprime** » cette surface, **sans borne de temps**,
+  > alors que les **quatre affirmations négatives** de cet ADR sont, elles, **explicitement datées**.
+  > ⚠️ **Or un ADR est IMMUABLE** : **US-01.2 (persistance) est déjà planifiée**, et elle aurait
+  > transformé cette phrase en **fausse assurance GELÉE**, dont la correction aurait exigé un **ADR
+  > entier**. **C'est EXACTEMENT le mécanisme qui a produit la fausse assurance de l'Art. 4** — un énoncé
+  > positif non borné, vrai le jour où il est écrit, jamais revisité. Le reproduire dans l'US qui le
+  > dénonce aurait été la faute la plus ironique du projet.
+  > **Ce qui invalidera cette ligne, et devra alors être tracé ailleurs** : toute persistance locale
+  > *(US-01.2)*, toute dépendance réseau, tout export de données. ⚠️ **Nuance jointe, à ne pas escamoter** :
+  > la plateforme **Web est matérialisée**, alors que la décision énonce « *aucune donnée ne quitte
+  > l'appareil* » — un build web s'exécute dans un **navigateur**, avec son modèle de stockage et
+  > d'origine propre. L'énoncé RNF-07 vaut pour la **cible mobile**.
 - **Couverture réelle mesurée à 89,5 %** au bootstrap pour un seuil à 80 %. ⚠️ **À ne pas sur-lire** :
   elle porte sur le **squelette** Flutter, non sur une fonctionnalité métier.
 
@@ -156,7 +198,8 @@ serait bloquant ; les corriger ici serait un débordement de périmètre.**
 |---|---|
 | **Aucun SAST pour le code Dart** — la fonction est absente de la factory, pas seulement mal nommée | **US-00.8** *(ou US-00.6 si l'arbitrage la rattache à la qualité)* |
 | **`coverage_ratchet` absent de `factory.config.json`** — la clé est au schéma, le seuil n'est pas en vigueur | **US-00.6** *(couverture + ratchet)* |
-| 🔴 **`docs/governance/CONSTITUTION.md` n'est PAS protégé par `.claude/hooks/protect_files.sh`** — vérifié le 2026-07-30 : le hook couvre les hooks git, `.gitleaks.toml`, `factory.config.json`, `factory_sync.py`, `run_gates.py`, **mais pas `docs/governance/**`**. **Le texte suprême du projet est donc éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des scripts. ⛔ Non corrigeable ici : `protect_files.sh` est **lui-même protégé**, donc l'ajout est une **action humaine** | **US-00.8** |
+| 🔴 **`docs/governance/CONSTITUTION.md` n'est PAS protégé par `.claude/hooks/protect_files.sh`** — vérifié le 2026-07-30. Le hook couvre **9 motifs** *(liste complétée le 2026-07-30, finding NB-6 : la première rédaction en omettait **3 sur 9**, ce qui est une prise inutile dans un projet aussi sévère sur les revendications d'exhaustivité)* : `scripts/githooks/*` · **`.claude/settings.json`** · `.claude/hooks/*` · `.gitleaks.toml` · **`scripts/install_hooks.sh`** · `factory.config.json` · **`scripts/factory_env.sh`** · `scripts/factory_sync.py` · `scripts/run_gates.py`. ⛔ **`docs/governance/**` n'y figure pas** — c'est l'affirmation porteuse, et elle est **vraie**. **Le texte suprême du projet est donc éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des scripts. ⚠️ **Qualification, reprise de l'audit sécurité** : ce n'est **pas** une faille d'autorisation — agents et humain partagent le **même compte** et les **mêmes droits** —, et le hook étant un `PreToolUse(Edit\|Write)`, **tout l'édifice est un garde-fou d'ACCIDENT**, pas une barrière. Ce qui manque est la **DÉTECTION**, pas la prévention. ⛔ Non corrigeable ici : `protect_files.sh` est **lui-même protégé**, donc l'ajout est une **action humaine** | **US-00.8** |
+| 🔴 **Le corps de l'Art. 4 de la Constitution affirme aujourd'hui LE CONTRAIRE des trois lignes ci-dessus** — SAST **bloquant**, audit de dépendances **bloquant**, `coverage_ratchet` **en vigueur** *(ligne ajoutée le 2026-07-30, finding NB-9 : le tableau nommait les **faits** de l'écart mais **jamais la contradiction** ni son destinataire — or un auditeur qui n'ouvrirait que `docs/adr/`, précisément le lecteur que cet ADR existe pour servir, voyait la contradiction **sans la voir nommée**)*. ⚠️ **La contradiction est VIVE et VOULUE jusqu'à la fusion suivante** | **PR nº 2 de CETTE US** *(amendement de l'Art. 4 — la clause **Révision** exigeant une **PR dédiée**)* |
 | **iOS non scaffoldé** et **build Android non validé** — dépendent d'un **matériel absent**, pas d'une décision | **US dédiée, non créée** |
 
 ### 📌 Portée exacte de cet ADR — ce qu'il ne fait pas

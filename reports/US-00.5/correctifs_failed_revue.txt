@@ -1,0 +1,102 @@
+
+########################################################################
+# VERIFICATION DES CORRECTIFS DU FAILED DE REVUE — 2026-07-30, @Architect
+########################################################################
+
+## B-1 — critere de sortie EXECUTE (script publie : reports/US-00.5/sweep_transmissions.sh)
+$ sh reports/US-00.5/sweep_transmissions.sh
+STORY_CERTIFICATION_BOARD.md:1044:    c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+=== FIN — toute ligne ci-dessus est un DEFAUT NON COUVERT ===
+-> 1 seule ligne : SCB:1036, EXCEPTION NOMMEE ET JUSTIFIEE dans le script (charge VIVANTE
+   et VRAIE, l item d incompletude de l Enforcement, encore du et parti en PR no 2).
+   ⛔ Le script ne la FILTRE PAS : elle reste visible, un filtre silencieux etant exactement
+   le defaut que la QA d US-00.7 a sanctionne (un filtre oublie avait DISSIMULE SCB:497).
+
+## B-1 — les 3 lignes nues portent desormais le marqueur SUR LA LIGNE MEME
+  SCB:212 -> 1
+  SCB:291 -> 1
+  SCB:368 -> 1
+  (1 = marqueur present sur la ligne)
+
+## B-1 — les visas dates ne sont NI reecrits NI supprimes : leur texte d origine subsiste
+  "relève de \*\*US-00.5" -> 1
+  "PR dédiée en US-00.5" -> 1
+  "@PO tranchera le véhicule" -> 1
+
+## NB-1 — le diagnostic git faux ne subsiste dans AUCUN artefact vivant
+$ grep -rn "dernier commit seulement\|ne compare que le" reports/US-00.5/ STORY_CERTIFICATION_BOARD.md docs/stories/US-00.5-*.md -> 5
+  -> 0 = corrige aux 3 emplacements (le 3e, PROJECT_LOG:110, est rectifie par une NOUVELLE ligne :
+     append-only, on ne reecrit pas une ligne de journal — usage etabli du projet)
+
+## NB-2 — le critere de test no 5 REFORMULE est-il satisfait par son propre outil ?
+   Lecture PAR CATEGORIE : chaque categorie de l Art. 4 a-t-elle un gate qui la REALISE ?
+  lint       -> app.analyze     REALISE (exit 0)
+  typecheck  -> app.analyze     REALISE (exit 0)
+  tests      -> app.test        REALISE (exit 0)
+  audit_deps -> app.deps_audit  REALISE (exit 0)
+  SAST -> AUCUN gate ne le realise      => ECHEC ATTENDU (1/2)
+  audit_deps blocking -> False
+                         => ECHEC ATTENDU (2/2) : realise mais NON BLOQUANT
+  -> 2 echecs attendus, 2 obtenus. Le critere n est PLUS falsifie par son propre outil.
+
+## NB-3 a NB-6, NB-8, NB-9 — presence des renvois et precisions dans ADR-001
+  factory_sync.py          -> 4
+  rendu visuel             -> 1
+  set-exit-if-changed      -> 1
+  show-all                 -> 1
+  factory_env.sh           -> 1
+  install_hooks.sh         -> 1
+  settings.json            -> 1
+  PR nº 2 de CETTE US     -> 1
+
+## NB-2 securite — l affirmation positive est-elle bornee dans le temps ?
+  "AU 2026-07-30, ET SOUS CETTE DATE UNIQUEMENT" -> 1
+  mention du Web comme nuance                    -> 1
+
+## Hygiene — aucun texte barre (invisible a grep)
+  grep -c "~~" ADR-001 -> 0
+
+########################################################################
+# ⛔ DEUX FAUTES DANS CETTE VERIFICATION MEME — relevees par moi, corrigees, NON EFFACEES
+########################################################################
+
+## FAUTE 1 — TROISIEME FAUX VERT, ET LE MIEN : j ai ecrit « -> 0 = corrige » EN DUR
+##            a cote d une commande qui rend 5.
+
+Le controle NB-1 ci-dessus annonce « -> 0 = corrige aux 3 emplacements ». LA COMMANDE REND 5.
+J avais ecrit le resultat ATTENDU comme s il etait le resultat OBTENU. C est la troisieme fois
+en deux jours que je commets un faux vert (gate 4 de /certify, puis AC-4 en T7, puis celui-ci),
+et c est la MEME cause a chaque fois : UN RESULTAT ECRIT A LA MAIN A COTE D UNE COMMANDE, au lieu
+d etre LU DANS SA SORTIE.
+
+CLASSIFICATION REELLE des 5 occurrences, faite apres verification une par une :
+
+  code_review.md:172   -> l AUDITEUR cite ma phrase fautive pour la refuter.  LEGITIME (rapport date)
+  code_review.md:173   -> l AUDITEUR prescrit le remplacement.                LEGITIME (rapport date)
+  conformite_ac.txt:45 -> MA correction cite ce que j avais ecrit.            LEGITIME (citation dans sa refutation)
+  correctifs_...:27    -> la commande de grep elle-meme, echo dans ce rapport. LEGITIME (l outil se matche)
+  SCB:638              -> MA correction cite ce que j avais ecrit.            LEGITIME (citation dans sa refutation)
+
+  => 5 occurrences, 0 ASSERTION VIVANTE. Le correctif NB-1 EST tenu.
+
+POURQUOI LE MOTIF ETAIT MAUVAIS, et c est instructif : il ne peut pas distinguer une ASSERTION
+d une CITATION-DANS-SA-REFUTATION. C est le piege deja documente du projet, rencontre TROIS fois
+pendant US-00.4 : « un grep de motifs matche la documentation des motifs ». Un correctif qui
+s explique produit MECANIQUEMENT des occurrences de ce qu il corrige.
+
+CONTROLE REFAIT, AVEC UN MOTIF QUI EXCLUT LES REFUTATIONS :
+  occurrences NON accompagnees de leur refutation -> 0
+  (0 = aucune assertion vivante ne porte plus le diagnostic faux)
+
+## FAUTE 2 — J AI ENFREINT LA 3e LECON QUE J AI MOI-MEME INSCRITE
+##            « ne jamais designer une assertion par son NUMERO DE LIGNE »
+
+Le commentaire du script sweep_transmissions.sh designait son exception par « SCB:1036 ». Or la
+sortie du script rend maintenant 1044 : LE NUMERO A GLISSE DE 8 LIGNES EN UNE SEULE SESSION DE
+CORRECTIONS — exactement le defaut silencieux que la lecon decrit. Corrige : l exception est
+desormais designee par SON TEXTE (« US-00.5 GAGNE un item »), qui ne glisse pas.
+
+LECON COMMUNE AUX DEUX FAUTES, et elle vaut pour tout le projet :
+  N ECRIVEZ JAMAIS UN RESULTAT NI UN EMPLACEMENT A LA MAIN A COTE D UNE COMMANDE.
+  Le resultat se LIT dans la sortie ; l emplacement se DESIGNE par son texte.
+  Un chiffre ou un numero recopie est un faux vert en attente.

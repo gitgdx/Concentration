@@ -39,9 +39,19 @@ tests/features/US-00.5-adr-stack-constitution.feature
 $ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> 2
 
 ## ⚠️ CORRECTION DU CRITERE 9 — 2026-07-30, @Architect
-# Le controle ci-dessus etait TROMPEUR : `git diff origin/main...HEAD` ne compare que le
-# DERNIER COMMIT, alors qu ADR-001 et les artefacts T6/T7 n etaient pas encore commites.
-# Il rendait donc un vert qui ne portait pas sur le contenu reel de la PR.
+# Le controle ci-dessus etait TROMPEUR, mais PAS pour la raison que j avais ecrite.
+#
+# ## RECTIFICATION DU 2026-07-30, apres le FAILED de l audit de revue (finding NB-1)
+# J avais ecrit : « `git diff origin/main...HEAD` ne compare que le DERNIER COMMIT ». C EST FAUX,
+# et l auditeur l a prouve sur cette branche meme : la forme a TROIS POINTS compare
+# merge-base(origin/main, HEAD) a HEAD, donc TOUS les commits de la branche — `git diff --stat
+# main...HEAD` rend bien 11 fichiers couvrant les DEUX commits.
+# LA CAUSE REELLE est autre, et plus interessante : un diff compare des COMMITS, or ADR-001
+# n etait PAS ENCORE COMMITE au moment du controle. Un fichier absent de HEAD ne peut apparaitre
+# dans aucun diff, quelle que soit la syntaxe.
+# LA LECON QUE J EN TIRAIS RESTE JUSTE — un controle doit porter sur l OBJET REEL DE LA
+# LIVRAISON — c est son MOTIF qui etait faux. Je ne reecris pas la ligne fautive ci-dessus : je
+# la rectifie ici, comme le veut l usage du projet pour les constats dates.
 # Refait sur l INDEX COMPLET, c est-a-dire l ensemble de ce que la PR no 1 livrera :
 
 $ git diff --cached --name-only origin/main

@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ❌ | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -209,7 +209,7 @@
      🔴 **DÉCISION INVALIDÉE le 2026-07-26** (signalée par la relecture T14 « aucune fausse
      affirmation », occurrence S5). Elle reposait sur la prémisse que la protection serait appliquée.
      Le blocage 403 la renverse : la déclaration « *enforced par protection de branche* » **reste
-     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux
+     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — la protection étant APPLIQUÉE, S1 et S2 sont devenus VRAIS et leur amendement est SANS OBJET ; les « corriger » vaudrait régression documentaire. Constat exact à sa date, non réécrit.**
      emplacements exacts `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
      de remplacement suggérée : « *enforced par hook local `pre-push` + PR ; protection de plateforme
      indisponible sur ce plan — cf. ADR-006* ». Transmission formelle en §dédiée de
@@ -288,7 +288,7 @@
   `.claude/commands/sprint-status.md:9` — **c'est cette ligne qui a effectivement trompé
   l'orchestrateur en ouverture de session**, le rituel de constat d'état portant lui-même la fausse
   affirmation. **S1** (`CLAUDE.md:20`) et **S2** (`CONSTITUTION.md:49`) sont **délibérément maintenues**
-  → textes normatifs, PR dédiée en US-00.5.
+  → textes normatifs, PR dédiée en US-00.5. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — S1 et S2 sont devenus VRAIS le 2026-07-28 ; il n'y a plus rien à y corriger. Constat exact à sa date, non réécrit.**
 - **Réserves honnêtes portées à l'audit** (à ne pas lire comme des PASS) : `gitleaks` **non installé**
   localement → l'absence de secret dans `reports/` est *vraisemblable*, **le gage réel est le job CI**
   `🔐 Secrets scan` ; le **repli `urllib`** n'est **pas exercé** in vivo (aucun jeton en session) ; le
@@ -365,7 +365,7 @@
     (« rapportés, PAS bloquants » ; fusion possible avec CI rouge) — les 4 libellés résolvent toujours,
     `--check` reste exit 0. **S10** `scripts/githooks/pre-push:2-3` → **non édité** (Art. 6), diff exact
     fourni en **T22 [action humaine]**. **S11** `US-00.1:198,215` → **non édité** (**décision humaine** :
-    US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule.
+    US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule. **PÉRIMÉ-2026-07-28 : destinataire RÉEL = US-00.8, par arbitrage @PO du 2026-07-28 (`reports/US-00.7/po_arbitrage_s11.md`). US-00.5 a été créée le 2026-07-30 avec un périmètre SOCLE SEUL qui EXCLUT S11. C'est la ligne que le Story File d'US-00.5 cite mot pour mot, et elle était la seule des 5 à n'avoir rien reçu — relevé par l'audit de revue. Constat exact à sa date, non réécrit.**
   - **S12 — 3ᵉ fausse affirmation du même fichier**, corrigée par @Architect : `docs/SQUAD_GUIDE.md:36`
     (nœud Mermaid « Gates CI **bloquants** sur PR … **insensibles aux bypass locaux** » — **deux**
     affirmations fausses), après S3 (l. 321) et S7 (l. 285). Le principe cardinal du guide (« une règle
@@ -629,17 +629,95 @@
     explicitement, *« Dart n'a pas d'étape typecheck séparée »*. **Elles ne seront PAS touchées** :
     corriger ce qui est exact vaudrait **régression documentaire**. **Les faussetés restent TROIS**, plus
     **une omission** (`app.build`).
-  - ⛔ **FAUX VERT COMMIS PAR MOI EN T7, ET CORRIGÉ EN PLACE** : mon premier contrôle d'AC-4 comparait
-    `origin/main...HEAD`, donc **le dernier commit seulement**, et rendait un vert qui **ne portait pas sur
-    ADR-001**, non encore commité. Refait sur l'**index complet** : `CONSTITUTION.md` **absent**,
-    `factory.config.json` **absent**, **0 fichier Dart**. Preuve : `reports/US-00.5/conformite_ac.txt`,
-    où la correction est **écrite à la suite du contrôle fautif**, pas à sa place.
+  - ⛔ **FAUX VERT COMMIS PAR MOI EN T7, ET CORRIGÉ EN PLACE** : mon premier contrôle d'AC-4 rendait un
+    vert qui **ne portait pas sur ADR-001**, alors **non encore commité**. Refait sur l'**index complet** :
+    `CONSTITUTION.md` **absent**, `factory.config.json` **absent**, **0 fichier Dart**. Preuve :
+    `reports/US-00.5/conformite_ac.txt`, où la correction est **écrite à la suite du contrôle fautif**, pas
+    à sa place.
+    - ⚠️ **PÉRIMÉ-2026-07-30 — ma première EXPLICATION de ce faux vert était elle-même FAUSSE** *(finding
+      **NB-1** de l'audit de revue)*. J'avais écrit que `git diff origin/main...HEAD` « *ne compare que le
+      dernier commit* » : **c'est faux**, et l'auditeur l'a **prouvé sur cette branche même** — la forme à
+      **trois points** compare `merge-base(origin/main, HEAD)` à `HEAD`, donc **tous** les commits.
+      **La cause réelle** : un diff compare des **COMMITS**, et ADR-001 **n'était pas commité** — un
+      fichier absent de `HEAD` n'apparaît dans **aucun** diff, quelle que soit la syntaxe. **La leçon que
+      j'en tirais reste juste** *(un contrôle doit porter sur l'objet réel de la livraison)* ; c'est son
+      **motif** qui était faux, et il avait été **propagé dans 3 artefacts vivants**.
   - ⚠️ **ÉCART DE NOMENCLATURE INSCRIT** : `EVT_CODE_READY` déclare `emitter: developer`, or **aucun
     @Developer n'intervient** *(0 fichier de code)*. L'émettre en `developer` aurait été **factuellement
     faux** → émis en **`architect`**, écart **écrit dans le `rationale`**. Rappel de la dette de fond : le
     champ `emitter` **n'est lu par aucun script** — c'est la **détection** qui manque, pas la prévention.
-- **Prochaine étape** : `/audit-us` *(Rev + Sec, contextes frais)* sur la **PR nº 1**, puis QA. Ensuite
-  **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement de l'Art. 4 *(T10 → T12)*.
+- **🛡️ Audit Sec — ✅ PASS** (2026-07-30, `EVT_SECURITY_AUDIT_PASSED`, contexte frais,
+  `reports/US-00.5/security.md`) : **0 bloquant**, **5 non bloquants** *(dont 4 pré-existants et hors
+  diff)*. Les **4 affirmations de sécurité d'ADR-001 sont EXACTES**, vérifiées **dans les deux sens** — il
+  ne sous-estime pas `actionlint` *(crédité avec son épinglage SHA256)* ni ne le sur-vend *(périmètre borné
+  aux workflows)*. `gitleaks` **×4 passes** → `no leaks found`. ⛔ **Bornes écrites en tête de son rapport,
+  pas en note** : **aucun scanner de CVE n'existe** dans la factory, donc ce `PASS` **ne s'appuie sur aucun
+  scan de vulnérabilité** ; **aucune** recherche d'injection / IDOR / XSS n'a été menée — **il n'y a aucune
+  surface applicative**, et il le dit au lieu de le contourner.
+  - 🔴 **Il MESURE la gravité de la fausse assurance de l'Art. 4, et le constat dépasse le nôtre** :
+    `git log -- docs/governance/CONSTITUTION.md` rend **un seul commit, le 2026-07-24** — le texte suprême
+    annonce un **SAST bloquant inexistant depuis le premier jour du projet**. Surtout : l'absence du gate
+    était **déjà consignée dans un rapport de sécurité le 2026-07-26**, et `grep "Art. 4"` sur les
+    rapports d'US-00.4 et d'US-00.7 rend **0**. **Aucun des cinq audits de sécurité qui ont constaté
+    l'absence n'a jamais ouvert l'Art. 4** : la factory a **su** et **affirmé le contraire simultanément**,
+    en certifiant cinq US — dont US-00.7, dont l'objet était la cohérence du corpus.
+  - **Il DURCIT notre constat sur `CONSTITUTION.md`** : `protect_files.sh` étant un `PreToolUse(Edit|Write)`
+    et `block_dangerous_bash.sh` ne couvrant **aucun** fichier d'enforcement, **même `factory.config.json`
+    reste écrivable via Bash** — **tout l'édifice est un garde-fou d'ACCIDENT**. Et `CONSTITUTION.md` est le
+    **seul artefact normatif sans prévention NI détection**, là où `factory.config.json` en a **deux
+    couches**. **L'asymétrie est le finding.** Corollaire qu'il souligne : **la PR nº 2 éditera précisément
+    ce fichier**, la relecture humaine du diff sera le **seul** contrôle, et `required_approving_review_count: 0`
+    ne l'exige même pas.
+  - **NB-4 à rouvrir** : la fausse assurance de l'Art. 4 **demeure sur `main`** — normal, `CONSTITUTION.md`
+    est hors diff. **L'audit de la PR nº 2 devra rouvrir ce finding.**
+- **🔍 Audit Rev — 🔴 FAILED** (2026-07-30, `EVT_CODE_REVIEW_FAILED`, contexte frais,
+  `reports/US-00.5/code_review.md`) : **1 bloquant**, **9 non bloquants**, **19 contrôles sans faute**.
+  - 🔴 **B-1 — et il est juste au point d'être cinglant** : mon marquage a **suivi DEUX RENVOIS au lieu de
+    couvrir l'EXTENSION du défaut**. Les **5** transmissions de charge vers US-00.5 sont **toutes dans la
+    même section** *(le visa @Architect d'US-00.4)* ; j'en avais marqué **2**. Et **la seule mention que le
+    Story File cite MOT POUR MOT était parmi les trois nues**. Aggravant : `PROJECT_LOG` déclarait
+    l'opération complète — « les **DEUX** transmissions périmées » — **falsifiable par un `grep`**.
+    ⛔ **C'est le motif exact des cinq `FAIL` d'US-00.7, reproduit par moi dans l'US qui en documente la
+    leçon.**
+  - **NB-1 — mon EXPLICATION du faux vert était elle-même fausse**, et **propagée dans 3 artefacts** *(voir
+    ci-dessus)*.
+  - **NB-2 — mon critère de test nº 5 était falsifié par son propre outil sur 3 noms**, et l'aurait été
+    **encore après la PR nº 2** : il encodait une lecture **par NOM** là où l'US défend une lecture **par
+    CATÉGORIE**. Reformulé, puis **exécuté** : **2 échecs attendus, 2 obtenus**.
+  - ✅ **Il TRANCHE la question que je lui avais posée à charge** : la distinction « `lint` et `typecheck`
+    ne sont pas faux » **TIENT, ce n'est pas une commodité** — lecture par catégorie imposée par un kit
+    multi-adapters dont le dépôt porte les **résidus** *(`factory_sync.py` code un `backend`/pytest et un
+    `frontend`/vitest, `run_gates.py` prend `--component backend` en exemple)*, et il note que j'ai retenu
+    la lecture **défavorable à moi-même** en refusant « 4 faussetés sur 5 ».
+- **✅ CORRECTIFS DU FAILED — 2026-07-30, les 6 actions du §7 faites, et VÉRIFIÉES PAR L'OUTIL** :
+  `reports/US-00.5/correctifs_failed_revue.txt`. **Critère de sortie publié comme SCRIPT EXÉCUTABLE**
+  *(`reports/US-00.5/sweep_transmissions.sh`)* et **exécuté** : il rend **une seule ligne**, l'**exception
+  nommée et justifiée** *(la charge « US-00.5 GAGNE un item » est **VIVANTE et VRAIE** — l'incomplétude de
+  l'Enforcement, encore due, partant en PR nº 2)*. ⛔ **Le script ne la filtre pas** : elle reste
+  **visible**, un filtre silencieux étant exactement ce qui, chez la QA d'US-00.7, avait **dissimulé la
+  pire survivance du corpus**.
+  - ⛔ **DEUX FAUTES COMMISES DANS CETTE VÉRIFICATION MÊME, relevées par moi et non effacées.**
+    **(1) TROISIÈME faux vert, et le mien** : j'ai écrit « `-> 0 = corrigé` » **en dur** à côté d'une
+    commande qui rend **5**. Les 5 occurrences sont en réalité des **citations de la phrase fautive dans sa
+    propre réfutation** — le piège déjà documenté du projet *(« un grep de motifs matche la documentation
+    des motifs », rencontré 3 fois en US-00.4)* : **un correctif qui s'explique produit mécaniquement des
+    occurrences de ce qu'il corrige**. Contrôle refait avec un motif excluant les réfutations → **0**.
+    **(2) J'ai enfreint la 3ᵉ leçon que j'ai moi-même inscrite** : le script désignait son exception par
+    « `SCB:1036` », or **le numéro avait déjà glissé de 8 lignes en une seule session**. Corrigé — l'exception
+    est désignée par **son TEXTE**.
+    **Leçon commune, et c'est la même cause pour les trois faux verts de ces deux jours** : ⛔ **ne jamais
+    écrire un résultat ni un emplacement à la main à côté d'une commande.** Le résultat se **lit** dans la
+    sortie, l'emplacement se **désigne** par son texte. **Un chiffre recopié est un faux vert en attente.**
+- **🔴 DÉFAUT DE L'ENFORCEMENT DÉCOUVERT ICI, versé à US-00.8 — une US SANS CODE ne peut pas entrer
+  légalement en `parallel_audit`.** Le hook `post_scb_edit.sh` a **refusé** l'édition : la règle
+  `parallel_audit` de `check_scb_compliance.py` exige **littéralement `✅`** dans `Code (Dev)` et
+  **contourne sa propre fonction `is_satisfied()`**, laquelle accepte pourtant explicitement `N/A`
+  *(« validée (✅) **ou explicitement non applicable (N/A)** »)*. ⛔ **Je n'ai PAS modifié le gate pour
+  faire passer mon US** — ce serait l'anti-pattern « ajuster pour forcer le vert » que ce projet interdit
+  nommément. La phase **reste `development_start`** alors que les deux audits ont tourné : **l'incohérence
+  est dans le script, pas dans le travail**, et elle est **consignée** plutôt que contournée.
+- **Prochaine étape** : **re-audit de revue** sur les correctifs, puis QA. Ensuite **rebase** *(T9)* et
+  **PR nº 2 DÉDIÉE** pour l'amendement de l'Art. 4 *(T10 → T12)*.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 
