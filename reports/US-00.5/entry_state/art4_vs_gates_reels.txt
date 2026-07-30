@@ -1,0 +1,84 @@
+# US-00.5 · T1 — ETAT D ENTREE : GATES REELS vs ART. 4
+# Genere le 2026-07-30 · main = 856c366
+
+## 1. Ce que l Art. 4 AFFIRME (texte integral, AVANT amendement)
+
+## Art. 4 — Seuil qualité unique
+
+Les seuils de couverture et les gates bloquants (lint, typecheck, SAST, audit de dépendances,
+tests) sont définis en **un seul endroit** : `factory.config.json` →
+`adapter.components.*.gates` et `coverage_min` / `coverage_ratchet`. Ils sont vérifiés par
+`python scripts/factory_sync.py --check` (cohérence config ↔ fichiers de l'adapter) et exécutés
+par `python scripts/run_gates.py`.
+
+**Enforcement** : CI `ci.yml` jobs qualité, requis par la protection de branche
+(`scripts/apply_branch_protection.sh`) ; job `governance` (synchro).
+
+
+## 2. Ce que factory.config.json DECLARE reellement
+
+  app.format         blocking=None   (absent => bloquant par defaut)
+  app.analyze        blocking=None   (absent => bloquant par defaut)
+  app.test           blocking=None   (absent => bloquant par defaut)
+  app.deps_audit     blocking=False  (absent => bloquant par defaut)
+  app.build          blocking=None   (absent => bloquant par defaut)
+
+  coverage_min      = 80
+  coverage_ratchet  = None   <-- CLE ABSENTE
+
+## 3. Confrontation — chaque nom cite par l Art. 4 existe-t-il ?
+
+  --gate lint        -> N EXISTE PAS ou echoue (exit non nul)
+  --gate typecheck   -> N EXISTE PAS ou echoue (exit non nul)
+  --gate sast        -> N EXISTE PAS ou echoue (exit non nul)
+  --gate deps_audit  -> EXISTE (exit 0)
+  --gate test        -> EXISTE (exit 0)
+  --gate format      -> EXISTE (exit 0)
+  --gate analyze     -> EXISTE (exit 0)
+  --gate build       -> EXISTE (exit 0)
+
+## 4. INTERPRETATION — @Architect, 2026-07-30. A LIRE AVANT DE CITER LE §3.
+
+⛔ LE §3 CI-DESSUS NE DOIT PAS ETRE SUR-LU. Il montre que 3 des 5 noms cites par l Art. 4
+(`lint`, `typecheck`, `sast`) ne correspondent a aucun gate. On pourrait en conclure « l Art. 4
+est faux 3 fois sur 5 ». CE SERAIT FAUX, et le dire serait exactement la sur-affirmation que
+l AC-5 *erreur* interdit.
+
+DISTINCTION QUI TIENT :
+
+  * `lint` et `typecheck` sont des CATEGORIES GENERIQUES d un texte constitutionnel voulu
+    AGNOSTIQUE DE LA STACK. Dans une stack Dart, elles sont realisees par `dart format`
+    (`app.format`) et `flutter analyze` (`app.analyze`) — `analyze` faisant a la fois l analyse
+    statique et le controle de types. La Constitution nomme la FONCTION, `factory.config.json`
+    nomme l INSTANCE de l adapter. Ce n est PAS un defaut : c est la separation voulue par
+    l Art. 4 lui-meme (« definis en un seul endroit »).
+    -> `lint` et `typecheck` : NON FAUX. Aucune correction due.
+
+  * `tests` -> `app.test` : exact.
+
+LES TROIS FAUSSETES REELLES, et elles le sont sans interpretation possible :
+
+  1. `SAST` — AUCUN gate, et AUCUN equivalent sous quelque nom que ce soit. Ce n est pas un
+     probleme de vocabulaire : la fonction elle-meme est ABSENTE de la factory. `actionlint`
+     (ajoute par US-00.7) couvre les WORKFLOWS, rien ne couvre le code applicatif Dart.
+     -> l Art. 4 annonce un gate bloquant qui N EXISTE PAS.
+
+  2. `audit de dependances` annonce parmi les GATES BLOQUANTS — `app.deps_audit` porte
+     `"blocking": false`. Le gate existe, il n est PAS bloquant.
+     -> l Art. 4 attribue a un gate reel une propriete qu il n a pas.
+     Aggravant deja consigne au CLAUDE.md : `dart pub outdated` mesure l OBSOLESCENCE, pas la
+     VULNERABILITE. Aucun scan de CVE n existe, donc aucun verdict de securite ne peut s y adosser.
+
+  3. `coverage_ratchet` cite comme emplacement de seuil — la cle est ABSENTE de
+     `factory.config.json` (presente au schema seulement). `coverage_min` = 80 existe bien.
+     -> l Art. 4 cite un seuil qui n est pas en vigueur.
+
+UNE OMISSION, de nature differente et moins grave :
+
+  4. `app.build` est un gate REEL et BLOQUANT (blocking absent => bloquant par defaut) que la
+     liste generique de l Art. 4 ne couvre par AUCUNE categorie. Ce n est pas une faussete,
+     c est un TROU : un lecteur de l Art. 4 ne sait pas que la constructibilite est un gate.
+
+CONSEQUENCE POUR L AMENDEMENT (T10) : on corrige 3 faussetes + 1 omission. On NE TOUCHE PAS
+`lint` et `typecheck`. Corriger ce qui est exact vaudrait regression documentaire — c est la
+lecon S1/S2 d US-00.7, appliquee ici contre ma propre tentation d elargir.

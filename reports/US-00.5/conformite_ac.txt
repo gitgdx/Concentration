@@ -1,0 +1,64 @@
+# US-00.5 · T7 — REVUE DE CONFORMITE AC <-> LIVRABLE (PR no 1)
+# @Architect · 2026-07-30 · chaque ligne est une COMMANDE et sa sortie, jamais une relecture
+
+## Critere 1 — ADR-001 existe
+$ ls docs/adr/ADR-001-*.md
+docs/adr/ADR-001-choix-de-stack.md
+
+## Critere 2 — statut Accepte
+$ grep -c "Statut** : **Accepté" -> 1
+
+## Critere 3 — AUCUN ADR accepte edite (immuabilite)
+$ git diff --stat origin/main...HEAD -- docs/adr/ADR-005* docs/adr/ADR-006* docs/adr/ADR-007*
+-> (vide = conforme)
+
+## Critere 4 — les 4 honnetetes dures nommees
+  iOS          -> 6
+  Android      -> 7
+  deps_audit   -> 2
+  SAST         -> 2
+
+## Critere 15 — aucun texte barre (marqueur litteral, jamais ~~)
+$ grep -c '~~' docs/adr/ADR-001-choix-de-stack.md
+0
+-> 0 = conforme
+
+## Critere 9 — AC-4 : la PR no 1 ne touche PAS la Constitution
+$ git diff --name-only origin/main...HEAD
+PROJECT_LOG.md
+STORY_CERTIFICATION_BOARD.md
+docs/epics/EPIC_00-fondations.md
+docs/stories/US-00.5-adr-stack-constitution.md
+docs/trace/US-00.5/events.jsonl
+tests/features/US-00.5-adr-stack-constitution.feature
+
+  CONSTITUTION.md present ? -> 0
+  -> 0 = AC-4 TENU
+
+## Critere 14 — marqueur S11 pose au SCB
+$ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> 2
+
+## ⚠️ CORRECTION DU CRITERE 9 — 2026-07-30, @Architect
+# Le controle ci-dessus etait TROMPEUR : `git diff origin/main...HEAD` ne compare que le
+# DERNIER COMMIT, alors qu ADR-001 et les artefacts T6/T7 n etaient pas encore commites.
+# Il rendait donc un vert qui ne portait pas sur le contenu reel de la PR.
+# Refait sur l INDEX COMPLET, c est-a-dire l ensemble de ce que la PR no 1 livrera :
+
+$ git diff --cached --name-only origin/main
+BACKLOG.md
+PROJECT_LOG.md
+STORY_CERTIFICATION_BOARD.md
+docs/adr/ADR-001-choix-de-stack.md
+docs/epics/EPIC_00-fondations.md
+docs/stories/US-00.5-adr-stack-constitution.md
+docs/trace/US-00.5/events.jsonl
+reports/US-00.5/conformite_ac.txt
+reports/US-00.5/entry_state/art4_vs_gates_reels.txt
+reports/US-00.5/entry_state/registre_et_sast.txt
+tests/features/US-00.5-adr-stack-constitution.feature
+
+  CONSTITUTION.md present ? -> 0
+  -> 0 = AC-4 REELLEMENT TENU sur le contenu complet de la PR no 1
+
+  factory.config.json present (doit etre 0, fichier protege) ? -> 0
+  fichiers Dart presents (doit etre 0) ? -> 0

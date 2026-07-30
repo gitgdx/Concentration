@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -428,7 +428,7 @@
   - **`selftest` en CI** exerçant les 12 chemins sur les fixtures versionnées — la seule parade
     réellement à portée d'agent contre une régression silencieuse de la frontière.
   - **1 fausse affirmation résiduelle non déclarée** : `tests/features/US-00.1-secrets-scan-depot.feature:54`
-    — même famille que **S11** (US **certifiée**) → **à joindre à la transmission US-00.5**. L'auditeur
+    — même famille que **S11** (US **certifiée**) → **PÉRIMÉ-2026-07-28 : à joindre à la transmission US-00.5** *(destinataire réel : **US-00.8**, par arbitrage @PO du 2026-07-28 — `reports/US-00.7/po_arbitrage_s11.md`. US-00.5 a été créée le 2026-07-30 avec un périmètre **socle seul** qui **exclut** S11 : y éditer une US **certifiée** exigerait une ré-ouverture de cycle)*. L'auditeur
     la classe non bloquante car « **elle ne falsifie plus aucune affirmation**, puisque plus aucune n'est
     faite ». *(4ᵉ échec d'exhaustivité du balayage : l'extension `.feature` n'avait été couverte par
     aucune des trois passes précédentes.)*
@@ -542,9 +542,15 @@
   - **Dettes ouvertes transmises** : **NB-1** (correctif 1 ligne : `MAPPED_TOP_KEYS & set(expected)`) ·
     **`selftest` en CI** (recommandation forte du re-audit — seule parade à portée d'agent contre une
     régression silencieuse de la frontière) · **émetteurs de trace déclarés mais non enforced**
-    (`trace_append.py` ne lit jamais `emitter`) · **US-00.5** : `CLAUDE.md:20`,
-    `docs/governance/CONSTITUTION.md:49`, et `US-00.1` (S11 : Story File l. 198/215 **et** `.feature`
-    l. 54).
+    (`trace_append.py` ne lit jamais `emitter`) · **PÉRIMÉ-2026-07-28 — « US-00.5 : `CLAUDE.md:20`,
+    `docs/governance/CONSTITUTION.md:49`, et `US-00.1` (S11) »** : cette transmission est **périmée sur
+    ses trois items**. `CLAUDE.md` **règle 2** et la phrase de l'**Art. 4** sont **devenues VRAIES** le
+    2026-07-28 *(les « corriger » vaudrait **régression documentaire**)* ; **S11 est versé à US-00.8**
+    *(arbitrage @PO du 2026-07-28)*. ⚠️ **Ce qui RESTE dû à US-00.5**, et qui n'était **pas** dans cette
+    transmission : l'**Art. 4 est FAUX sur trois autres points** — SAST annoncé bloquant mais
+    **inexistant**, `deps_audit` annoncé bloquant alors qu'il porte **`blocking: false`**, et
+    `coverage_ratchet` cité mais **absent de `factory.config.json`** *(établi par exécution le
+    2026-07-30)*.
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
 
@@ -594,7 +600,46 @@
   suprême du projet est éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des
   scripts. ⛔ **Non corrigé ici** : `protect_files.sh` est **lui-même protégé** *(action humaine)*, et
   l'humain a arbitré « socle seul ».
-- **Prochaine étape** : `EVT_ARCHI_VALIDATED` *(Integration Lock)*, puis T1 → T8 sur la **PR nº 1**.
+- **🔒 Integration Lock** (2026-07-30, `EVT_ARCHI_VALIDATED`) : conception verrouillée — **2 livrables**,
+  **T1 → T12** répartis entre les **deux PR**, **18 critères de test dont chacun est une COMMANDE** avec
+  sa sortie attendue, **5 risques** nommés *(dont **R-1** : « ADR-001 devient le fourre-tout des dettes »,
+  qui est ce qui a fait grossir US-00.7 jusqu'à cinq `FAIL`)*.
+- **Design `N/A` justifié ×2** (`EVT_DESIGN_COMPLETED`) : **Data** — aucun schéma, aucune migration, le
+  choix de persistance restant reporté à **US-01.2 + ADR** *(cadrage d'US-00.3)* · **UX** — aucune surface
+  applicative, aucun écran, aucun token. ⛔ **La phase n'est pas SAUTÉE, elle est traversée à vide et le
+  dit** — le track `STANDARD` l'autorise quand ni schéma ni UI ne sont touchés, là où **FULL** l'aurait
+  interdit *(une des raisons de son exclusion)*.
+- **✅ PR nº 1 LIVRÉE — `docs/adr/ADR-001-choix-de-stack.md`** (`EVT_CODE_READY`) : statut **`Accepté`**,
+  **numéro rétroactif ASSUMÉ et écrit dans l'ADR lui-même** *(décision en vigueur depuis le bootstrap du
+  **2026-07-24**, tracée le **2026-07-30** — « cet ADR ne fait pas semblant d'avoir précédé la
+  décision »)*, et l'ADR écrit que le registre **n'est NI chronologique NI complet** *(002-004 réservés à
+  US-01.1, non écrits)*. **6 alternatives écartées avec leur raison** — dont `fastapi-react` **et** le
+  split back/front, tous deux écartés parce que l'**offline-first rend le backend inutile par
+  construction** : le composant aurait été **vide**.
+  - **Les 4 honnêtetés dures sont écrites, non adoucies** : **iOS non scaffoldé** alors que le PRD RNF-08
+    cible iOS **et** Android · **build Android réel NON validé**, `flutter build web` n'étant qu'un
+    **repli** — un gate `build` vert signifie « *compile pour le web* », **pas** « *constructible pour sa
+    cible* » · **`deps_audit` non bloquant** et mesurant l'**obsolescence**, pas la **vulnérabilité** →
+    ⛔ **aucun scan de CVE n'existe, donc aucun verdict de sécurité ne peut s'y adosser** · ⛔ **aucun
+    SAST** pour le code Dart *(`actionlint` ne couvre que les workflows)*.
+  - ⚠️ **T1 — l'état d'entrée est archivé AVEC une annotation qui EMPÊCHE de le sur-lire.** La
+    confrontation brute montre que **`lint` et `typecheck` ne correspondent à aucun gate** ; on pourrait en
+    conclure « l'Art. 4 est faux 3 fois sur 5 ». **Ce serait faux** : ce sont des **catégories génériques**
+    d'un texte voulu **agnostique de la stack**, réalisées par `analyze` — `STACK_PROFILE.md` l'écrit
+    explicitement, *« Dart n'a pas d'étape typecheck séparée »*. **Elles ne seront PAS touchées** :
+    corriger ce qui est exact vaudrait **régression documentaire**. **Les faussetés restent TROIS**, plus
+    **une omission** (`app.build`).
+  - ⛔ **FAUX VERT COMMIS PAR MOI EN T7, ET CORRIGÉ EN PLACE** : mon premier contrôle d'AC-4 comparait
+    `origin/main...HEAD`, donc **le dernier commit seulement**, et rendait un vert qui **ne portait pas sur
+    ADR-001**, non encore commité. Refait sur l'**index complet** : `CONSTITUTION.md` **absent**,
+    `factory.config.json` **absent**, **0 fichier Dart**. Preuve : `reports/US-00.5/conformite_ac.txt`,
+    où la correction est **écrite à la suite du contrôle fautif**, pas à sa place.
+  - ⚠️ **ÉCART DE NOMENCLATURE INSCRIT** : `EVT_CODE_READY` déclare `emitter: developer`, or **aucun
+    @Developer n'intervient** *(0 fichier de code)*. L'émettre en `developer` aurait été **factuellement
+    faux** → émis en **`architect`**, écart **écrit dans le `rationale`**. Rappel de la dette de fond : le
+    champ `emitter` **n'est lu par aucun script** — c'est la **détection** qui manque, pas la prévention.
+- **Prochaine étape** : `/audit-us` *(Rev + Sec, contextes frais)* sur la **PR nº 1**, puis QA. Ensuite
+  **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement de l'Art. 4 *(T10 → T12)*.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 
