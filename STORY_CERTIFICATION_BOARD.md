@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | parallel_audit | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -855,8 +855,12 @@
   - **N-3 (MED)** : sur PR de **fork**, les workflows viennent du **commit de fusion** — l'attaquant
     fournit la CI qui produit ses propres checks requis. Atténué par
     `approval_policy: "first_time_contributors"`.
-  - **N-4 / N-5 (LOW)** : épinglage qui rancira · ⚠️ **le `ci.yml` corrigé N'A JAMAIS TOURNÉ EN CI**
-    (branche non poussée) — **inférence outillée, pas observation**.
+  - **N-4 / N-5 (LOW)** : épinglage qui rancira · **PÉRIMÉ-2026-07-29** — ⚠️ « le `ci.yml` corrigé
+    **N'A JAMAIS TOURNÉ EN CI** (branche non poussée) — inférence outillée, pas observation ».
+    ✅ **N-5 EST CLOS EN FAIT depuis le 2026-07-29** : le `ci.yml` corrigé était porté par
+    `feat/US-00.7-certif`, **fusionnée via la PR #13**, et `gh pr checks 13` rend **4 contextes `pass`**
+    en CI réelle — les workflows corrigés **ont tourné**. Constat établi par le **5ᵉ passage QA**
+    *(`qa_reaudit4.md` §2)*, qui l'avait relevé **à décharge** ; il était **exact à sa date**.
   - **Bornes que l'auditeur refuse d'escamoter** : **aucun scanner de CVE n'existe** dans cette factory,
     donc son PASS **ne s'appuie sur aucun scan de vulnérabilité**.
 - **✅ DOUBLE AUDIT OBTENU** : Rev ✅ 🔍 · Sec ✅ 🛡️. **Phase maintenue à `parallel_audit`** : le hook
@@ -1077,6 +1081,45 @@
     NUMÉRO DE LIGNE.** `SCB:642` couvrait « *les lignes ~493 et ~520* » — **déjà glissées** : la
     couverture existait mais **ne pointait plus** sur ce qu'elle couvrait, et **aucun `grep`** ne pouvait
     relier l'une à l'autre. Défaut **silencieux par construction**.
+- **✅ QA Status 🧪 PASS — 6ᵉ PASSAGE (2026-07-30, `EVT_QA_PASSED`, `qa_reaudit5.md`). CASE 29 LEVÉE.**
+  Après **cinq** `FAIL` aux motifs réels et tous différents. Le verdict tombe parce que le 5ᵉ passage
+  avait publié un **critère de sortie borné, falsifiable et rejouable** — et que la QA l'a **exécuté
+  elle-même** sur `813fad0` : sa commande rend **`SCB:268` seule**, l'unique exception admise. Elle
+  honore son engagement écrit : « *si elle est vide, ce motif meurt et je n'en cherche pas un autre* ».
+  - 🔎 **Contrôles à charge, tous exécutés, aucun ne rend de faute** : **`md5` sur les 8 corrections
+    déclarées → 8/8 réellement modifiées** *(le bloc de sortie passe de `167ed8fd`, hachage du 5ᵉ FAIL, à
+    `59bc907c`)* · **contrôle négatif** sur `SCB:268`, qu'il était **interdit** de toucher →
+    **`cb5f93a7` des deux côtés, byte-identique** · artefacts datés/certifiés → **0 ligne** · `ci.yml`
+    **YAML valide**, **4 libellés identiques point de code par point de code** *(aucun `U+FE0F`
+    parasite)*, diff **100 % commentaires** · case 29 **non auto-cochée** · gates **5/5 exit 0** ·
+    **balayage étendu de sa propre initiative** : 20 documents × 9 familles de motifs → **41 lignes
+    triées une par une, 0 faute**.
+  - ⛔ **FAUTE DE LA QA, RECONNUE PAR ELLE ET NON EFFACÉE** : sa commande **publiée** au §3.2 de
+    `qa_reaudit4.md` **omettait un filtre `grep -v "T16→T19"`** présent dans son script de travail — d'où
+    **9 lignes réelles contre 7 annoncées**. Ce filtre **dissimulait `SCB:497`**, la survivance la plus
+    grave du corpus. *« C'est la classe de défaut que je sanctionnais, commise dans le rapport qui la
+    dénonçait. »* → **leçon versée à US-00.8** : **un critère de sortie se publie comme un script
+    exécutable, jamais recopié à la main**.
+  - ✅ **Jugement porté sur la QUALITÉ des correctifs, pas leur présence** : `SCB:529` « exigeait un
+    **jugement**, et il est juste — 3 périmées, **1 conservée vraie** ; un balayage mécanique en aurait
+    périmé 4 » · `GIT_PROTECTION.md` va **au-delà** de la demande en distinguant la condition 2 désormais
+    **constatée** des conditions 3-4-5 restées **déduites** — « plus honnête **dans les deux sens** ».
+  - ⚠️ **BORNES DU `PASS`, écrites par la QA et non négociées** : exhaustivité **non revendiquée** ·
+    couverture **89,5 % sur le squelette Flutter**, **0 fichier Dart** touché → **non-régression, pas
+    validation du livrable** · **24 scénarios Gherkin non exécutés** *(ni step definition ni runner)* ·
+    refus prouvé sur contextes **`expected`, pas `failing`** ; **`--admin` non testé** · conditions de
+    fusion **3, 4 et 5 restent déduites** · **tout est conditionnel à la visibilité PUBLIQUE** du dépôt ·
+    **aucune détection de dérive** *(`protected: true` vérifié ce jour seulement)* · **critères 20, 21, 27
+    demeurent NON LEVÉS** — recevables, **jamais requalifiés**.
+- **✅ CASE 31 — SCB mis à jour (2026-07-30, @Architect).** Colonnes : **Phase Workflow**
+  `parallel_audit` → **`quality_assurance`** *(autorisé dès que `QA Status` n'est plus `⏳`, cf. le hook
+  `check_scb_compliance.py`)* · **QA Status** `🧪 FAIL` → **`🧪 PASS`**. ⏳ **Déploiement** et
+  **Certifié Prod** demeurent en attente : ils appartiennent à @DevOps puis au rituel `/certify`.
+  - ✅ **Réserve documentaire de la QA traitée ici, et non reportée** : `SCB:858` affirmait que « le
+    `ci.yml` corrigé **n'a jamais tourné en CI** » — **faux depuis la PR #13**, comme la QA l'avait
+    elle-même établi **à décharge** au 5ᵉ passage. Elle l'avait **consciemment écarté** de son critère
+    publié pour ne pas ouvrir un 6ᵉ motif, et l'a **routé vers la case 31**. **Fait** : marqueur posé et
+    **N-5 déclaré CLOS EN FAIT**.
 - **PÉRIMÉ-2026-07-29 — ✅ le CHEMIN DE SORTIE est ATTEINT ; ce bloc est corrigé EN FAIT, non
   historisé** *(motif : un « chemin de sortie » décrit ce qui **RESTE**, il n'a donc pas de date — même
   raison que pour un index. La version antérieure envoyait un lecteur futur refaire **trois choses déjà
