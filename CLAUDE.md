@@ -49,19 +49,24 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
-renforcements). **PR #12, #13 et #14 fusionnées** — `main` = **`cad24e8`**. ✅ **DoD 34/34 — AUCUNE case
-décochée.** Audits **✅ 🔍** et **✅ 🛡️** · ✅ **QA 🧪 PASS le 2026-07-30** *(6ᵉ passage,
-`reports/US-00.7/qa_reaudit5.md`)*, **après 5 `FAIL`** aux motifs réels et **tous différents** ·
-**25 critères levés / 3 non levés** (20, 21, 27), **recevables et jamais requalifiés**. Phase
-**`quality_assurance`**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du
-REFUS de fusion EST OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
-⛔ **Reste dû** : **@DevOps** *(colonne Déploiement)* puis le rituel **`/certify`** — la branche est
-**à pousser** et sa **PR de clôture à ouvrir**. ⚠️ **Bornes du `PASS`, écrites par la QA** :
-exhaustivité **non revendiquée** · **0 fichier Dart** touché *(la couverture de 89,5 % atteste une
+**Chantier actif** : **US-00.5** *(ADR-001 stack + Constitution — périmètre **RÉDUIT** mais NON VIDE,
+détail en Actions humaines)*, ou **US-00.6** (couverture + ratchet). Aucune US en cours de cycle.
+
+✅ **US-00.7 CERTIFIÉE Prod 🚀 le 2026-07-30** — application de la protection de branche (track STANDARD
++ 3 renforcements). **PR #12, #13, #14 et #15 fusionnées** — `main` = **`e2bd626`** *(PR #15 fusionnée
+**par l'humain** à 12:12:35Z, **sans `--admin`** : renforcement **R-c** respecté)*. **DoD 34/34** ·
+Audits **✅ 🔍 ✅ 🛡️** · **QA 🧪 PASS au 6ᵉ passage, après 5 `FAIL`** aux motifs réels et **tous
+différents** · **25 critères levés / 3 non levés** (20, 21, 27) · **6 gates `/certify` verts** ·
+phase **`epic_closure`**. **Health-check réel** : `protected: true` **après** la fusion et
+`--check-remote` **exit 0**, 0 dérive — *et la fusion elle-même prouve le mécanisme, n'ayant pu aboutir
+que sur 4 checks requis verts*.
+⚠️ **CE QUE CETTE CERTIFICATION N'ATTESTE PAS, à ne pas sur-lire** : les critères **20, 21, 27
+DEMEURENT NON LEVÉS** *(arbitrés pour cause de **PLATEFORME**, **jamais requalifiés**)* · refus prouvé sur
+contextes **`expected`, pas `failing`** · conditions de fusion **3, 4 et 5** restent **déduites** ·
+**`--admin` non testé** · **0 fichier Dart** touché *(la couverture de 89,5 % atteste une
 **non-régression**, pas le livrable)* · **24 scénarios Gherkin non exécutés** *(ni step definition ni
-runner)* · refus prouvé sur contextes **`expected`, pas `failing`** · conditions de fusion **3, 4 et 5
-restent déduites** · **tout est conditionnel à la visibilité PUBLIQUE** du dépôt.
+runner)* · **aucune preuve machine de provenance** · **aucune détection automatique de dérive** ·
+⚠️ **tout est conditionnel à la visibilité PUBLIQUE** du dépôt.
 📌 **Ce qui a débloqué 5 cycles d'échec, à réutiliser** : le 5ᵉ `FAIL` a publié un **critère de sortie
 borné, falsifiable et rejouable** *(une commande de balayage dont la sortie doit être vide)*, et la QA l'a
 **exécuté elle-même** au 6ᵉ passage plutôt que de juger sur relecture. **Trois leçons de méthode** en sont
@@ -81,8 +86,12 @@ GitHub interdit à l'auteur d'approuver sa propre PR)*. Il **DEMEURE NON LEVÉ**
 jamais un critère »* — **assumé pour cause de PLATEFORME, non de travail**. Levée réelle → **US-00.8**. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
-protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
-(ADR-001 stack + Constitution — **périmètre RÉDUIT**, cf. dettes) ou **US-00.6** (couverture + ratchet).
+protection de `main` — c'est **US-00.7 qui l'applique, en prouve l'effet, et qui est certifiée**.
+**Reste pour clore EPIC_00** : **US-00.5** (ADR-001 stack + Constitution — périmètre **RÉDUIT**) puis
+**US-00.6** (couverture + ratchet). ⚠️ **`strict: true` SÉRIALISE les merges** → les enchaîner **une par
+une**, jamais en parallèle : toute fusion périme les autres branches ouvertes. **US-00.8** (dette) n'est
+**PAS** requise pour clore EPIC_00 — son report est un **choix assumé** dont le coût est que la fusion par
+un agent reste **interdite** sans être **impossible**.
 US-01.1 (EPIC_01, FULL) reste en pause en `business_alignment`, **à rebaser sur `main`**, et son Lock
 exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 
@@ -145,9 +154,11 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > **25** événements du catalogue ne permet d'éteindre une dérogation → **dette du système de traçabilité**
 > (ci-dessous). **Conditionnel** : un retour du dépôt en privé **rouvrirait la question**.
 
-**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; **US-00.7**
-en cours (hors décompte initial) ; restent US-00.5 (ADR-001 stack + Constitution), US-00.6 (couverture +
-ratchet). ✅ **Le critère de clôture « protection de branche vérifiée » est désormais COCHABLE et COCHÉ**,
+**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; **US-00.7
+CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 = US-00.1→US-00.6)* ; **restent
+US-00.5** (ADR-001 stack + Constitution) et **US-00.6** (couverture + ratchet) — **ce sont les deux
+seules US requises pour clore EPIC_00**. ✅ **Le critère de clôture « protection de branche vérifiée » est
+désormais COCHABLE et COCHÉ**,
 les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_state/`) →
 **EPIC_00 redevient complétable après US-00.5 et US-00.6**. ⚠️ La mention « SPRINT 0 COMPLET » du
 PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
@@ -243,12 +254,20 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
+- 🎯 **PROCHAIN PAS RECOMMANDÉ — `/us-new` pour US-00.5**, branchée sur le **nouveau `main`**
+  (**`e2bd626`**), puis **US-00.6**. Ce sont les **deux seules** US requises pour clore EPIC_00.
+  ⚠️ **Une par une** : `strict: true` sérialise les merges.
 - 🆕 **Créer `US-00.8` (US de dette) via `/us-new`** — décidé par l'**arbitrage @PO du 2026-07-28**
-  (`reports/US-00.7/po_arbitrage_s11.md`). Porte la **requalification tracée d'US-00.1** (S11), en
-  **additif daté**, ⛔ **jamais depuis la branche d'US-00.7** : y éditer `docs/stories/US-00.1-*` ferait
-  **tomber son critère 23**. Y joindre les dettes déjà identifiées : **NB-1bis**, **`selftest` en CI**,
-  et les **findings non bloquants** des audits (N-1 traité, **N-2** `pip install` nu, **N-3** forks,
-  actions à tag mutable, `emitter` non enforced).
+  (`reports/US-00.7/po_arbitrage_s11.md`). ✅ **Le verrou est LEVÉ** : US-00.7 est **certifiée et
+  fusionnée**, donc l'interdiction d'éditer `docs/stories/US-00.1-*` « depuis la branche d'US-00.7 »
+  *(qui aurait fait tomber son critère 23)* **n'a plus d'objet**. Porte la **requalification tracée
+  d'US-00.1** (S11) en **additif daté**, et les dettes déjà identifiées : **NB-1bis** · **`selftest` en
+  CI** · **identité distincte pour les agents + `restrictions`** *(seule voie pour rendre la fusion par un
+  agent **impossible** et non seulement interdite — fusionnée avec la dette `TRACKS.md`)* · **lacune de la
+  grille de test** *(aucun critère de **cohérence temporelle** du corpus vivant — établi deux fois par la
+  QA)* · **« un critère de sortie se publie comme un script exécutable »** · et les **findings non
+  bloquants** des audits (N-1 traité, **N-2** `pip install` nu, **N-3** forks, actions à tag mutable,
+  `emitter` non enforced). ⚠️ **NON requise pour clore EPIC_00** — son report est un choix assumé.
 - 📌 **US-00.5 — périmètre RÉDUIT mais NON VIDE** : S1 (règle 2) et S2 (Art. 4) sont **devenus vrais**,
   donc leur correction est **sans objet**. ⚠️ Mais US-00.5 **gagne un item**, relevé par le @PO :
   l'**Art. 4 de la Constitution nomme `ci.yml`** alors que le **4ᵉ contexte requis provient de
@@ -269,6 +288,10 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   hunk) et **exercée sans réseau** : `main` → `exit 1`, `feat/` → `exit 0`. Preuves :
   [`reports/US-00.7/t20_pre_push.md`](reports/US-00.7/t20_pre_push.md). **C'était la dernière action
   humaine Art. 6 d'US-00.7.**
+- ✅ **FAIT (2026-07-30)** : **fusion de la PR #15** — la **dernière** action humaine d'US-00.7.
+  `main` = **`e2bd626`**, `mergedAt` 12:12:35Z, `mergedBy` **`gitgdx`**, **sans `--admin`** →
+  renforcement **R-c respecté**, aucun agent n'a fusionné. ⚠️ **Garantie DÉCLARATIVE** et assumée comme
+  telle : `mergedBy.is_bot` rend `false` **même pour un agent**, qui opère avec le jeton de l'humain.
 - **Planifier les dettes techniques restantes** : **NB-1bis** (complétude de la cible dans
   `_guard_mapping`) et **`selftest` en CI** — de préférence dans la **même** US de dette.
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).

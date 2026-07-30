@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -1120,6 +1120,57 @@
     elle-même établi **à décharge** au 5ᵉ passage. Elle l'avait **consciemment écarté** de son critère
     publié pour ne pas ouvrir un 6ᵉ motif, et l'a **routé vers la case 31**. **Fait** : marqueur posé et
     **N-5 déclaré CLOS EN FAIT**.
+- **🚀 Déploiement — `🚀 DEPLOYED` (2026-07-30, @DevOps_Engineer, `EVT_STAGING_DEPLOYED` +
+  `EVT_DEPLOYMENT_SUCCESS`).** **Déploiement = fusion sur `main`** — **PR #15**, merge commit
+  **`e2bd626`** *(2 parents `cad24e8` + `d2203ea`)*, `mergedAt` **2026-07-30T12:12:35Z**, `mergedBy`
+  **`gitgdx`**. ✅ **Fusionnée PAR L'HUMAIN** : le renforcement **R-c** est respecté, **aucun agent n'a
+  fusionné** — contrairement à la violation actée du 2026-07-29 sur la PR #13.
+  - **Health-check RÉEL exécuté APRÈS la fusion** — et pour cette US, **l'état de santé EST la protection
+    de `main`** : `GET …/branches/main` → **`"protected": true`** · `factory_sync.py --check-remote` →
+    **exit 0**, **aucune dérive**, **12 champs alignés**, **0 champ actif non couvert**, **sans** préfixe
+    `[SIMULATION]` · **4 contextes requis `pass`** sur le sha fusionné.
+  - 📌 **La fusion est elle-même une preuve de fonctionnement** : elle n'a pu aboutir **que** parce que les
+    4 checks requis étaient verts. Le mécanisme installé par cette US a été **exercé sur sa propre
+    livraison**, sans `--admin`.
+  - **Staging `N/A` justifié, et la justification est bornée** : **0 fichier Dart** modifié, aucun service,
+    aucune migration, aucun environnement à provisionner — il n'existe **aucun** staging où déployer quoi
+    que ce soit. Validation pré-prod = **CI de la PR #15**. ⚠️ **Non prétendu** : **aucun health-check
+    applicatif** n'a tourné, car **il n'y a pas d'application déployée**.
+  - ⚠️ **BORNES QUE LA RÉUSSITE DU DÉPLOIEMENT N'EFFACE PAS** : tout demeure **conditionnel à la
+    visibilité PUBLIQUE** du dépôt · **aucune détection automatique de dérive** *(`--check-remote` exige
+    des droits **admin** absents du `GITHUB_TOKEN` → contrôle **manuel et hors CI**)* · le
+    `"protected": true` est vérifié **ce jour seulement**. Plan de retour arrière **antérieur au `PUT`** :
+    `reports/US-00.7/rollback_main.md`.
+  - 🔧 **Écart de trace d'US-00.4 CORRIGÉ ici** : `EVT_READY_FOR_DEPLOY` est émis avec **`--agent
+    architect`**, conformément au champ `emitter` du catalogue — US-00.4 l'avait émis en `devops`, écart
+    alors relevé et assumé.
+- **🚀 CERTIFIÉ PROD — `🚀 OUI` (2026-07-30, @Architect, `EVT_CERTIFIED_PROD`, rituel `/certify`).**
+  **6 gates sur 6, chacun EXÉCUTÉ et non déclaré** : `check_scb_compliance` **exit 0** ·
+  `validate_trace` **exit 0** · les **3 rapports** exigés existent et portent des sorties d'outils
+  *(30 709 o · 26 287 o · 43 674 o)* · **DoD 34/34**, `0` décochée, numéros **1..34 sans trou** ·
+  `run_gates --all` **exit 0** *(5 gates)* · colonne **Déploiement = `🚀 DEPLOYED`**.
+  - ⚠️ **FAUX VERT RENCONTRÉ ET REFUSÉ AU GATE 4, consigné parce qu'il est instructif** : mon **premier**
+    contrôle de la DoD redirigeait vers `/tmp` et comptait donc un fichier **inexistant** →
+    `cochees=0, decochees=0`, qu'un lecteur pressé aurait lu « **aucune case décochée** ». Refait par
+    comptage direct. **Accepter un vert non fondé aurait été le défaut même que cette US combat**, au
+    dernier gate de son propre rituel de certification.
+  - ✅ **CE QUE CETTE CERTIFICATION ATTESTE** : la protection de `main` est **APPLIQUÉE**, son effet est
+    **PROUVÉ PAR LE SERVEUR dans les deux sens** — **refus** à 1/4 contexte vert *(HTTP 405)* et
+    **acceptation** à 4/4 *(`merged: true`)* — et le **corpus vivant a été remis en cohérence**.
+    C'est la différence exacte avec US-00.4, qui certifiait l'**outillage et le constat**, **pas**
+    la protection.
+  - ⛔ **CE QU'ELLE N'ATTESTE PAS, et qui doit rester lisible après la certification** : les critères
+    **20, 21 et 27 DEMEURENT NON LEVÉS** *(arbitrés pour cause de **PLATEFORME**, **jamais
+    requalifiés**)* · le refus porte sur des contextes **`expected`**, **pas `failing`** · les conditions
+    de fusion **3, 4 et 5** restent **déduites**, non éprouvées par l'effet · **`--admin` non testé** ·
+    **0 fichier Dart** touché → la couverture de **89,5 %** atteste une **non-régression**, **pas** le
+    livrable · les **24 scénarios Gherkin ne sont PAS exécutés** · **aucune preuve machine de provenance**
+    n'existe sur ce dépôt · **aucune détection automatique de dérive** · ⚠️ **tout l'édifice est
+    conditionnel à la visibilité PUBLIQUE du dépôt** — un retour en privé **rouvrirait** la question.
+  - 🎓 **Leçon la plus réutilisable du projet, payée par 5 `FAIL`** : un audit sort d'une boucle d'échecs
+    en publiant un **critère de sortie borné, falsifiable et rejouable**, puis en l'**exécutant lui-même**
+    — jamais en jugeant sur relecture, ni en rapportant un décompte de ce qu'il a **fait** pour un
+    décompte de ce qui **reste**.
 - **PÉRIMÉ-2026-07-29 — ✅ le CHEMIN DE SORTIE est ATTEINT ; ce bloc est corrigé EN FAIT, non
   historisé** *(motif : un « chemin de sortie » décrit ce qui **RESTE**, il n'a donc pas de date — même
   raison que pour un index. La version antérieure envoyait un lecteur futur refaire **trois choses déjà
