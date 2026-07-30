@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.7 | Protection `main` : application effective + preuve par l'effet | quality_assurance | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
+| US-00.7 | Protection `main` : application effective + preuve par l'effet | deployment_prod | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | ⏳ |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
@@ -1120,6 +1120,30 @@
     elle-même établi **à décharge** au 5ᵉ passage. Elle l'avait **consciemment écarté** de son critère
     publié pour ne pas ouvrir un 6ᵉ motif, et l'a **routé vers la case 31**. **Fait** : marqueur posé et
     **N-5 déclaré CLOS EN FAIT**.
+- **🚀 Déploiement — `🚀 DEPLOYED` (2026-07-30, @DevOps_Engineer, `EVT_STAGING_DEPLOYED` +
+  `EVT_DEPLOYMENT_SUCCESS`).** **Déploiement = fusion sur `main`** — **PR #15**, merge commit
+  **`e2bd626`** *(2 parents `cad24e8` + `d2203ea`)*, `mergedAt` **2026-07-30T12:12:35Z**, `mergedBy`
+  **`gitgdx`**. ✅ **Fusionnée PAR L'HUMAIN** : le renforcement **R-c** est respecté, **aucun agent n'a
+  fusionné** — contrairement à la violation actée du 2026-07-29 sur la PR #13.
+  - **Health-check RÉEL exécuté APRÈS la fusion** — et pour cette US, **l'état de santé EST la protection
+    de `main`** : `GET …/branches/main` → **`"protected": true`** · `factory_sync.py --check-remote` →
+    **exit 0**, **aucune dérive**, **12 champs alignés**, **0 champ actif non couvert**, **sans** préfixe
+    `[SIMULATION]` · **4 contextes requis `pass`** sur le sha fusionné.
+  - 📌 **La fusion est elle-même une preuve de fonctionnement** : elle n'a pu aboutir **que** parce que les
+    4 checks requis étaient verts. Le mécanisme installé par cette US a été **exercé sur sa propre
+    livraison**, sans `--admin`.
+  - **Staging `N/A` justifié, et la justification est bornée** : **0 fichier Dart** modifié, aucun service,
+    aucune migration, aucun environnement à provisionner — il n'existe **aucun** staging où déployer quoi
+    que ce soit. Validation pré-prod = **CI de la PR #15**. ⚠️ **Non prétendu** : **aucun health-check
+    applicatif** n'a tourné, car **il n'y a pas d'application déployée**.
+  - ⚠️ **BORNES QUE LA RÉUSSITE DU DÉPLOIEMENT N'EFFACE PAS** : tout demeure **conditionnel à la
+    visibilité PUBLIQUE** du dépôt · **aucune détection automatique de dérive** *(`--check-remote` exige
+    des droits **admin** absents du `GITHUB_TOKEN` → contrôle **manuel et hors CI**)* · le
+    `"protected": true` est vérifié **ce jour seulement**. Plan de retour arrière **antérieur au `PUT`** :
+    `reports/US-00.7/rollback_main.md`.
+  - 🔧 **Écart de trace d'US-00.4 CORRIGÉ ici** : `EVT_READY_FOR_DEPLOY` est émis avec **`--agent
+    architect`**, conformément au champ `emitter` du catalogue — US-00.4 l'avait émis en `devops`, écart
+    alors relevé et assumé.
 - **PÉRIMÉ-2026-07-29 — ✅ le CHEMIN DE SORTIE est ATTEINT ; ce bloc est corrigé EN FAIT, non
   historisé** *(motif : un « chemin de sortie » décrit ce qui **RESTE**, il n'a donc pas de date — même
   raison que pour un index. La version antérieure envoyait un lecteur futur refaire **trois choses déjà
