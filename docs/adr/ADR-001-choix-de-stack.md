@@ -70,6 +70,11 @@ fonctionnalité**.
 ⛔ **Pas de séparation backend/frontend**, et ce n'est pas une commodité : l'application est
 **offline-first** (RNF-07), **aucune donnée ne quitte l'appareil**, donc **il n'y a pas de backend à
 séparer**. Un découpage back/front aurait matérialisé un composant vide.
+⚠️ **Portée de « aucune donnée ne quitte l'appareil »** *(renvoi ajouté le 2026-07-30, dernière fenêtre
+avant l'immuabilité)* : cet énoncé vaut pour la **cible mobile**. La plateforme **Web est matérialisée**,
+et un build web s'exécute dans un **navigateur**, avec son propre modèle de stockage et d'origine —
+voir la borne détaillée en §*Conséquences → Positives*, et l'honnêteté nº 2 *(le Web est une **preuve de
+constructibilité de repli**, pas la cible)*.
 
 **3. Les gates qualité et leurs commandes sont définis en un seul endroit** —
 `factory.config.json` → `adapter.components.app.gates` — et exécutés par `python scripts/run_gates.py`.

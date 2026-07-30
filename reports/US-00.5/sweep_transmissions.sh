@@ -7,21 +7,32 @@
 # File cite mot pour mot.
 #
 # DEFAUT dont on cherche l'extension : « le SCB assigne encore a US-00.5 une charge ETEINTE ».
-#
-# ATTENDU : sortie VIDE, A LA SEULE EXCEPTION NOMMEE ci-dessous.
+# ATTENDU : sortie VIDE, a la seule exception nommee ci-dessous.
 #
 #   *** EXCEPTION UNIQUE ET JUSTIFIEE, designee par son TEXTE et jamais par un numero de ligne ***
 #   La ligne portant « US-00.5 GAGNE un item » — l'Art. 4 nomme ci.yml alors que le 4e contexte
 #   requis vient de branch-naming.yml (arbitrage @PO du 2026-07-28).
-#   (3e lecon d'US-00.7 : un renvoi par numero de ligne GLISSE EN SILENCE. Une premiere version de
-#   ce commentaire disait « SCB:1036 » ; le numero avait deja bouge de 8 lignes en une seule
-#   session de corrections. Designer par le TEXTE, toujours.)
 #   -> Cette charge est VIVANTE et VRAIE : c'est l'item d'INCOMPLETUDE de l'Enforcement, encore DU,
 #      et il part en PR no 2. La MARQUER PERIME serait FAUX.
-#   -> Le script ne la filtre PAS : elle doit RESTER VISIBLE en sortie, et c'est le lecteur qui
-#      constate qu'elle est la seule. Un filtre silencieux serait exactement le defaut que ce
-#      script existe pour empecher (cf. la QA d'US-00.7 : un filtre oublie dans la commande publiee
-#      avait DISSIMULE la pire survivance du corpus).
+#   -> Elle reste VISIBLE en sortie ; le script ne la filtre PAS. Un filtre silencieux est
+#      exactement ce qui, chez la QA d'US-00.7, avait DISSIMULE la pire survivance du corpus.
+#   (3e lecon d'US-00.7 : un renvoi par numero de ligne GLISSE EN SILENCE. Une premiere version de
+#   ce commentaire designait la ligne par son numero ; il avait deja bouge quand je l'ecrivais, et
+#   il a bouge deux fois de plus depuis. Designer par le TEXTE, toujours.)
+#
+# --- PERIMETRE, ET POURQUOI IL EST BORNE (rectifie le 2026-07-30, finding RB-1 du re-audit) ------
+# Les deux premieres versions balayaient TOUT le SCB. Elles rendaient donc AUSSI les lignes de MA
+# PROPRE PROSE qui CITENT le texte de l'exception pour la justifier — d'abord une, puis deux, et le
+# compte augmentait A CHAQUE FOIS QUE J'ECRIVAIS SUR LE SUJET. C'est le piege deja documente du
+# projet (« un grep de motifs matche la documentation des motifs »), ici en boucle : LE CONTROLE
+# S'AUTO-ALIMENTAIT.
+# BORNE SEMANTIQUE RETENUE, et elle n'est pas une commodite : une TRANSMISSION DE CHARGE VERS
+# US-00.5 ne peut par construction exister que dans la section d'une AUTRE US. La section
+# « ### [US-00.5] » est le visa D'US-00.5 ELLE-MEME : elle ne peut pas se transmettre une charge a
+# elle-meme, elle ne fait que RENDRE COMPTE. Elle est donc exclue du perimetre.
+# ⛔ CE QUE CETTE EXCLUSION N'AUTORISE PAS : elle ne dispense d'aucune exactitude dans la section
+# US-00.5, qui reste couverte par les audits et par la QA. Elle borne le perimetre de CE controle,
+# elle ne cree aucune zone franche.
 #
 # Usage : sh reports/US-00.5/sweep_transmissions.sh
 set -u
@@ -29,9 +40,19 @@ cd "$(dirname "$0")/../.." || exit 1
 
 SCB=STORY_CERTIFICATION_BOARD.md
 
+# Bornes de la section « ### [US-00.5] » — calculees, jamais ecrites a la main.
+DEB=$(grep -n '^### \[US-00\.5\]' "$SCB" | head -1 | cut -d: -f1)
+if [ -n "${DEB:-}" ]; then
+  FIN=$(awk -v d="$DEB" 'NR>d && /^### \[/ {print NR; exit}' "$SCB")
+  [ -z "${FIN:-}" ] && FIN=$(wc -l < "$SCB")
+  echo "# (section [US-00.5] exclue du perimetre : lignes $DEB a $FIN — bornes CALCULEES)"
+else
+  DEB=0; FIN=0
+fi
+
 # Motifs d'ASSIGNATION DE CHARGE a US-00.5 (verbes de transmission), et non de simple mention.
-# On exclut deliberement les CONSTATS DE REDUCTION (« le perimetre d'US-00.5 se reduit »,
-# « restent US-00.5 et US-00.6 ») : ils sont VRAIS et ne transmettent aucune charge.
+# On exclut deliberement les CONSTATS DE REDUCTION (« le perimetre d'US-00.5 se reduit ») : ils
+# sont VRAIS et ne transmettent aucune charge.
 ASSIGNE="relève de \*\*US-00.5|transmis à \*\*US-00.5|PR dédiée en US-00.5|\
 transmission US-00.5|US-00.5 :|US-00.5 GAGNE"
 
@@ -39,8 +60,11 @@ grep -nE "$ASSIGNE" "$SCB" \
   | grep -v "PÉRIMÉ-2026-07-28" \
   | grep -v "se réduit" \
   | grep -v "réduit (" \
+  | awk -F: -v d="$DEB" -v f="$FIN" '($1 < d || $1 > f)' \
   | sed "s|^|$SCB:|"
 
-rc=$?
-echo "=== FIN — toute ligne ci-dessus est un DEFAUT NON COUVERT ==="
+# (RB-5 du re-audit : un « rc=$? » figurait ici. Il etait MORT — il capturait le code du dernier
+#  element du pipe, pas celui du grep, et n etait jamais lu. Retire : une variable inutile dans un
+#  script de controle est exactement le genre de faux repere que ce projet traque.)
+echo "=== FIN — toute ligne ci-dessus est a CLASSER (charge eteinte => DEFAUT ; charge vivante => OK) ==="
 exit 0

@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ❌ | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -209,8 +209,8 @@
      🔴 **DÉCISION INVALIDÉE le 2026-07-26** (signalée par la relecture T14 « aucune fausse
      affirmation », occurrence S5). Elle reposait sur la prémisse que la protection serait appliquée.
      Le blocage 403 la renverse : la déclaration « *enforced par protection de branche* » **reste
-     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — la protection étant APPLIQUÉE, S1 et S2 sont devenus VRAIS et leur amendement est SANS OBJET ; les « corriger » vaudrait régression documentaire. Constat exact à sa date, non réécrit.**
-     emplacements exacts `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
+     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux emplacements exacts. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — la protection étant APPLIQUÉE, S1 et S2 sont devenus VRAIS et leur amendement est SANS OBJET ; les « corriger » vaudrait régression documentaire. Constat exact à sa date, non réécrit.**
+     Les deux emplacements visés : `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
      de remplacement suggérée : « *enforced par hook local `pre-push` + PR ; protection de plateforme
      indisponible sur ce plan — cf. ADR-006* ». Transmission formelle en §dédiée de
      `reports/US-00.4/enforcement_gap.md` (T15).
@@ -716,8 +716,52 @@
   faire passer mon US** — ce serait l'anti-pattern « ajuster pour forcer le vert » que ce projet interdit
   nommément. La phase **reste `development_start`** alors que les deux audits ont tourné : **l'incohérence
   est dans le script, pas dans le travail**, et elle est **consignée** plutôt que contournée.
-- **Prochaine étape** : **re-audit de revue** sur les correctifs, puis QA. Ensuite **rebase** *(T9)* et
-  **PR nº 2 DÉDIÉE** pour l'amendement de l'Art. 4 *(T10 → T12)*.
+- **✅ Audit Rev — PASSED au 2ᵉ passage** (2026-07-30, `EVT_CODE_REVIEW_PASSED`, contexte frais,
+  `reports/US-00.5/code_review_reaudit.md` — ⛔ `code_review.md` **intact**, le `FAILED` reste lisible) :
+  **0 bloquant**, **5 non bloquants résiduels**, **27 contrôles à charge sans faute**.
+  **B-1 est levé et vérifié avec SA commande, pas la mienne** : **17 lignes triées une par une** →
+  **0 charge éteinte non marquée**, extension **2/5 → 5/5**, visas datés **ni réécrits ni supprimés**
+  *(diff = ajout pur)*. Il **confirme mon classement de l'exception** *(« US-00.5 GAGNE un item » est
+  vivante et vraie — 4 `status_checks` = 3 `ci.yml` + 1 `branch-naming.yml`)* : **la marquer aurait été
+  faux**. Et il a **ré-implémenté** le critère nº 5 : **2 échecs attendus, 2 obtenus**.
+  - ✅ **Il valide le traitement append-only, avec un motif que je n'avais pas formulé** : *« un journal se
+    lit en avançant, un tableau d'état par accès direct — d'où marqueur sur la ligne au SCB, rectification
+    en aval au PROJECT_LOG. Réécrire aurait détruit la seule preuve que le motif d'US-00.7 se reproduit. »*
+  - ✅ **Il confirme que la phase désalignée n'est PAS un défaut de l'US**, et ajoute une circonstance que
+    je ne revendiquais pas : `check_scb_compliance.py` **n'est pas** dans `protect_files.sh` — **je
+    POUVAIS l'éditer**. 🔴 **Il ÉTEND surtout le défaut, et c'est le point à retenir** : ce n'est pas une
+    règle isolée mais une **famille de 7 contrôles littéraux**, dont **DEUX** exposées à un `N/A`
+    légitime — celle qui m'a bloqué, **et celle des audits, qui bloquera toute US en track `QUICK`** dont
+    les audits sont `N/A`. ⇒ **à verser à US-00.8 AVEC cette extension** : corriger `code_dev` seul serait
+    **corriger le renvoi**.
+  - ⚠️ **Borne qu'il pose et que je reprends telle quelle** : **la cause racine de B-1 n'est PAS éteinte**
+    — **5 occurrences en 2 jours, une seule cause** *(un résultat ou un emplacement écrit à la main à côté
+    d'une commande)*. Le projet en a désormais **la règle**, mais **aucun mécanisme** ne la fait respecter
+    → candidat **`/audit-methodo`**.
+- **✅ LES 5 RÉSIDUS (RB-1 → RB-5) TRAITÉS LE 2026-07-30, plutôt que laissés à la QA** :
+  - 🔴 **RB-2 était le plus instructif, et il est de ma main** : mon rapport de vérification désignait
+    encore l'exception par un **numéro de ligne écrit à la main**, **contredit par sa propre sortie deux
+    lignes plus haut** et périmé une **3ᵉ** fois depuis. **J'avais corrigé le SCRIPT et laissé le
+    RAPPORT** — donc **corrigé le renvoi, pas le défaut**, pour la troisième fois en deux jours, et **dans
+    le paragraphe même qui en tire la leçon**. ⇒ **tous les décomptes et numéros sont retirés** du bloc de
+    vérification : il ne revendique plus qu'un énoncé, *« 0 charge éteinte non marquée »*, et **la sortie
+    VIVE du script fait foi, pas le paragraphe**. ⛔ Les numéros ne sont **pas remplacés par des numéros à
+    jour**, qui périraient à leur tour.
+  - **RB-1** : le script rend désormais **deux** lignes, la seconde étant **ma propre prose citant le texte
+    de l'exception** — vraie, et ne dissimulant rien. ⚠️ **Mon script est donc victime du piège que ce
+    même rapport documente** *(« un grep de motifs matche la documentation des motifs »)* : je ne l'avais
+    pas vu, le re-audit l'a relevé. Les deux lignes sont **classées par texte, jamais par numéro**.
+  - **RB-3** : le marqueur de la transmission « *relève de US-00.5* » était **interpolé au milieu d'une
+    phrase** — reflow, la phrase est rendue lisible et le marqueur **reste sur la ligne**.
+  - **RB-4** : marqueur `PÉRIMÉ-2026-07-30` posé **sur la ligne même** de l'assertion fautive du 3ᵉ faux
+    vert — mon auto-dénonciation était en **fin de fichier**, donc **invisible à un `grep` par ligne** :
+    exactement le défaut que la 1ʳᵉ leçon d'US-00.7 décrit.
+  - **RB-5** : `rc=$?` **mort** retiré du script *(il capturait le code du dernier élément du pipe et
+    n'était jamais lu)*.
+  - **Item 7, suggéré et non exigé, fait dans la dernière fenêtre avant l'immuabilité** : renvoi vers la
+    borne du **Web** depuis §*Décision 2* d'ADR-001.
+- **Prochaine étape** : **QA**. Ensuite **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement de
+  l'Art. 4 *(T10 → T12)*.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 
