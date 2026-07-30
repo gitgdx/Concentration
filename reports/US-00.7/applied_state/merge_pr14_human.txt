@@ -1,0 +1,11 @@
+# ATTESTATION - fusion de la PR #14
+# Horodatage UTC de la commande : 2026-07-29T14:19:59Z
+# Executee par : L HUMAIN (gitgdx), depuis son propre terminal, sans agent.
+# PORTEE DE CE FICHIER, ecrite sans complaisance :
+#   il enregistre la SORTIE de la commande, PAS la PROVENANCE de l acte.
+#   Sur ce depot a un seul compte, aucune preuve machine de provenance n existe
+#   (mergedBy.is_bot rend false meme pour un agent). Cette attestation est
+#   DECLARATIVE et assumee comme telle - c est le NIVEAU 1 de la case 34.
+# ---
+! Pull request gitgdx/Concentration#14 was already merged
+exit=0

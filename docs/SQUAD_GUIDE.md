@@ -38,10 +38,15 @@ règle de gouvernance a donc **3 étages d'enforcement** :
 >
 > ⚠️ **Quatre bornes, à ne pas franchir dans la lecture.** (0) **Ce qui est PROUVÉ est que les 4 contextes
 > sont REQUIS** — état de l'API, et lecture directe du serveur (« *4 of 4 required status checks are
-> expected* »). Qu'**une tentative de fusion** avec un contexte non vert soit **refusée** en découle
-> logiquement, mais **n'a pas encore été observée** sur ce dépôt : c'est la tâche **T11** d'US-00.7,
-> **non exécutée** à ce jour. Écrire « aucune fusion possible avec la CI rouge » est donc une **inférence
-> raisonnée**, pas une preuve — et doit être lue comme telle. (1) Ce qui est acquis se limite à : **4 gates
+> expected* »). ✅ **PÉRIMÉ-2026-07-29** — ~~*qu'une tentative de fusion avec un contexte non vert soit
+> PÉRIMÉ-2026-07-29 · refusée n'a pas encore été observée : tâche T11 d'US-00.7, non exécutée*~~ : **elle A ÉTÉ
+> OBSERVÉE**, et **le refus vient du SERVEUR**. PR **#14**, `2026-07-29T08:49:14Z`, **1/4** contexte vert,
+> `gh api -X PUT …/pulls/14/merge` → **HTTP 405** *« 3 of 4 required status checks are expected »*
+> *(`gh api` n'est qu'un transport HTTP)*. **Administrateur inclus**, **aucun `--admin`**. L'autre moitié
+> — **acceptation seulement après passage au vert** — est prouvée par `{"merged": true}` à **4/4**.
+> ⚠️ **PÉRIMÉ-2026-07-29 · borne qui SUBSISTE** : le refus porte sur des contextes **`expected`**, **pas
+> `failing`** — écrire « aucune fusion possible avec la CI **rouge** » **reste** une **inférence
+> raisonnée**, pas une preuve, ⛔ et on ne casse pas un gate pour l'obtenir. (1) Ce qui est acquis se limite à : **4 gates
 > requis + PR obligatoire + `enforce_admins`, à la date de la mesure, pour les contextes effectivement
 > rapportés et pour l'acteur employé** — rien n'est prouvé pour un jeton d'application, l'interface web,
 > une PR de fork ou réouverte. (2) La règle est **révocable** par un administrateur **sans aucune
@@ -313,9 +318,11 @@ Jobs **requis** par la protection de branche (source des status checks = `factor
 
 > ✅ **Depuis le 2026-07-28, ces 4 jobs SONT des status checks REQUIS** — état de l'API, et lecture directe
 > du serveur, qui les énumère lui-même : « *4 of 4 required status checks are expected* ». La fusion en est
-> **conditionnée**, **administrateur inclus** (`enforce_admins`). ⚠️ **Borne** : le refus d'une **tentative
-> de fusion** n'a **pas encore été observé** sur ce dépôt (tâche **T11** d'US-00.7, non exécutée) — il
-> **découle** de l'état constaté, il n'en est pas la preuve. Vérification de l'état :
+> **conditionnée**, **administrateur inclus** (`enforce_admins`). ✅ **PÉRIMÉ-2026-07-29** :
+> ~~*PÉRIMÉ-2026-07-29 · le refus d'une tentative de fusion n'a pas encore été observé (T11, non exécutée)*~~ — **il l'a été,
+> et par le SERVEUR** : PR **#14**, **HTTP 405**, *« 3 of 4 required status checks are expected »*, avec
+> **1/4** contexte vert. **Ce n'est plus une inférence.** ⚠️ Borne subsistante : contextes **`expected`**,
+> **pas `failing`**. Vérification de l'état :
 > `python scripts/factory_sync.py --check-remote` (**exit 0** attendu).
 > *(Constat inverse du 2026-07-26 — « aucun de ces jobs n'est requis », trouvé alors par un balayage par
 > **motif** après qu'une relecture par liste de fichiers l'avait manqué — **exact à sa date**, levé le

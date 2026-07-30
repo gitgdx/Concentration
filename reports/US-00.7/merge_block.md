@@ -1,4 +1,4 @@
-# T11 — PR #12 : ce que la fusion a prouvé, et **ce qu'elle n'a PAS prouvé**
+# T11 — PR #12 : ce que la fusion a prouvé, et **ce qu'elle n'a PAS prouvé** · PÉRIMÉ-2026-07-29 *(la preuve manquante A ÉTÉ obtenue depuis, sur la PR #14)*
 
 > ## ⛑️ RECTIFICATION DU 2026-07-29 — **deux énoncés de ce rapport sont FAUX**. Rien n'est supprimé.
 >
@@ -11,7 +11,7 @@
 > réelle** (`merge_proof_and_violation.md`). Ce n'est **pas** un fait daté qui s'historise, c'est une
 > **assertion de méthode qui n'a jamais été vraie**. Elle était exacte **par hasard** sur la PR #12
 > — l'humain avait réellement fusionné — et serait sortie **identique** si un agent l'avait fait.
-> ⇒ **La case 34 est DÉCOCHÉE**, sa méthode de preuve **refondue** *(attestation humaine datée, assumée
+> ⇒ **La case 34 est DÉCOCHÉE** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*, sa méthode de preuve **refondue** *(attestation humaine datée, assumée
 > **déclarative**)*, et la dette de provenance est **fusionnée** avec celle de `TRACKS.md` → **US-00.8**.
 >
 > **② §« Ce qui n'est PAS prouvé », point 1 — « le refus d'une tentative de fusion » : PÉRIMÉ.**
@@ -51,7 +51,7 @@ durée **locale** du gate `📱 App` (build Flutter web, > 3 min sur le poste). 
 1 min 23 s.** La fenêtre réelle a été de **~1 min 20 s**, non de « quelques minutes ». L'humain a reçu
 la consigne **après** sa fermeture.
 
-~~**Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
+~~**PÉRIMÉ-2026-07-29 · Conséquence directe** : **l'AC-4 nominal n'est pas satisfait** et la **case 13 de la DoD reste
 décochée**. Aucune formulation de ce rapport ne doit laisser croire l'inverse.~~
 ✅ **PÉRIMÉ-2026-07-29** : **l'AC-4 nominal EST satisfait** et la **case 13 est COCHÉE** *(PR #14,
 HTTP 405 serveur + acceptation à 4/4)*. ⚠️ La consigne « *aucune formulation ne doit laisser croire
@@ -129,7 +129,7 @@ C'est le même dépôt, le même compte, la même commande. **Seule la protectio
 ~~Renforcement de track **R-c** / **case 34 de la DoD** — « l'approbation/fusion ne vient pas d'un
 agent » : **satisfait**, et vérifiable par `mergedBy.is_bot = false`.~~
 ⛑️ **BARRÉ le 2026-07-29 — voir la rectification ① en tête de ce rapport.** `is_bot` **ne prouve rien**
-(jeton partagé entre l'humain et les agents) ⇒ **case 34 DÉCOCHÉE**, méthode de preuve **refondue**.
+(jeton partagé entre l'humain et les agents) ⇒ **case 34 DÉCOCHÉE** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*, méthode de preuve **refondue**.
 
 > ⚠️ **Borne** : `reviewDecision` est **vide** et `latestReviews` est un **tableau vide**. Il n'existe
 > donc **aucune approbation GitHub formelle** — c'est **attendu** (la cible est à

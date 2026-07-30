@@ -134,7 +134,7 @@ essentielle — les présenter comme équivalents serait un défaut.
 | Élément | Nature | Ce qu'il fait | **Ses limites — à ne jamais taire** |
 |---|---|---|---|
 | **Protection de branche GitHub** (`…/branches/main/protection`) | 🔒 **contrainte de PLATEFORME** | Refuse toute mise à jour de `refs/heads/main` hors PR, **pour tout acteur**, y compris l'administrateur (`enforce_admins` → `enforcement_level: "everyone"`). **4 status checks REQUIS.** Refus **prouvés** : `GH006`, « *Changes must be made through a pull request* », « *4 of 4 required status checks are expected* » | **Révocable** par un administrateur à tout moment, **sans aucune détection automatique** (dette **#2**) · vaut **à la date de la mesure** · **conditionnée à la visibilité publique** du dépôt · rien n'est prouvé pour un jeton d'application ni pour l'interface web |
-| CI (`ci.yml`, `branch-naming.yml`) | 🔒 **contrainte de plateforme** *(via les contextes requis)* | Les **4** contextes **SONT REQUIS** — état de l'API, et le serveur les énumère lui-même (« *4 of 4 required status checks are expected* ») : la fusion y est **conditionnée** | ⚠️ Le refus d'une **tentative de fusion** n'a **pas encore été observé** (T11 non exécutée) : il **découle** de l'état, il n'en est pas la preuve. Et ne démontre le caractère bloquant que des contextes **effectivement rapportés** : un contexte requis **jamais rapporté** produit un blocage **définitif** (§Plan de retour arrière) |
+| CI (`ci.yml`, `branch-naming.yml`) | 🔒 **contrainte de plateforme** *(via les contextes requis)* | Les **4** contextes **SONT REQUIS** — état de l'API, et le serveur les énumère lui-même (« *4 of 4 required status checks are expected* ») : la fusion y est **conditionnée** | ✅ **PÉRIMÉ-2026-07-29** : ~~*le refus d'une tentative de fusion n'a pas encore été observé (T11 non exécutée) : il découle de l'état, il n'en est pas la preuve*~~ — **il A été observé, et il vient du SERVEUR** : PR **#14**, **HTTP 405**, *« 3 of 4 required status checks are expected »*, **1/4** contexte vert, **administrateur inclus**, **aucun `--admin`**. **Ce n'est plus une inférence.** ⚠️ **Bornes qui SUBSISTENT** : le refus porte sur des contextes **`expected`**, **pas `failing`** ; et il ne démontre le caractère bloquant que des contextes **effectivement rapportés** — un contexte requis **jamais rapporté** produit un blocage **définitif** (§Plan de retour arrière) |
 | Hook **local** `pre-push` (`core.hooksPath = scripts/githooks`, posé par `scripts/install_hooks.sh`) | 🕸️ **filet de discipline** *(résiduel, et toujours utile)* | Refuse `refs/heads/main` **avant l'aller-retour réseau** (retour immédiat) ; vaudrait encore si la protection serveur était un jour désactivée | **Absent d'un clone frais** — c'est précisément la condition du test négatif d'US-00.7 · l'interdiction des options de contournement de hook (Constitution Art. 1) reste portée par la **même** discipline locale |
 | Discipline de process | 🕸️ **filet de discipline** | PR systématiques : **10 fusions** (#1, #3 → #11) et **2** commits directs, tous deux de bootstrap | Repose sur la volonté des intervenants — mais elle n'est **plus le seul** rempart : `0a2e5ab` et `6483022` (bootstrap) sont les seuls commits jamais arrivés sur `main` hors PR, et un tel commit est désormais **refusé par le serveur** |
 
@@ -273,9 +273,15 @@ est régénéré par `python scripts/factory_sync.py --write`. Toute édition ma
 > de fusion**. Aucune n'est un défaut ; chacune est un **coût assumé** de l'enforcement.
 >
 > ⚠️ **Statut de ce tableau** : il décrit la **configuration appliquée** (état de l'API, prouvé) et le
-> comportement qui en découle **selon la plateforme**. Le **refus effectif d'une tentative de fusion** n'a
-> **pas encore été observé** sur ce dépôt (tâche **T11** d'US-00.7) — à lire comme une inférence
-> documentée, pas comme une preuve.
+> comportement qui en découle. ✅ **PÉRIMÉ-2026-07-29 — cet encadré affirmait que le refus de fusion
+> restait inobservé : c'est FAUX depuis le 2026-07-29.** Le **refus effectif d'une tentative de fusion
+> EST PROUVÉ, PAR LE SERVEUR** *(PR #14 : **HTTP 405**, « 3 of 4 required status checks are expected »,
+> sans `--admin`, administrateur inclus)* — cohérent avec la l. 22 de ce document. Preuve :
+> [`applied_state/merge_refusal_server_405.txt`](../reports/US-00.7/applied_state/merge_refusal_server_405.txt).
+> La **condition 2** ci-dessous n'est donc **plus** une déduction : elle est **constatée**.
+> ⚠️ **Bornes maintenues** : le refus observé porte sur des contextes **`expected`**, **pas `failing`** ;
+> et les conditions **3, 4 et 5** demeurent, elles, **déduites** de l'état de l'API et du comportement
+> documenté de la plateforme — **aucune n'a été éprouvée par l'effet**.
 
 | # | Condition | Ce qui bloque, concrètement | Comment s'y conformer |
 |---|---|---|---|

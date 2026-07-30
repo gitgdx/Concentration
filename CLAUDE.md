@@ -50,10 +50,35 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 ## État courant du projet *(maintenu par @Architect)*
 
 **Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
-renforcements). **PR #12 FUSIONNÉE le 2026-07-28** (`main` = `9fdb7fd`) — première fusion du dépôt
-réellement conditionnée par les gates. **DoD 28/34.** Suite sur la branche post-fusion
-**`feat/US-00.7-certif`** : `/audit-us` → QA → `/certify`. ⛔ **Reste dû : la preuve du REFUS de fusion
-(T11(d), case 13)** — à capturer sur la PR de certification, **immédiatement après son ouverture**. **`main` EST PROTÉGÉE depuis le
+renforcements). **PR #12, #13 et #14 fusionnées** — `main` = **`cad24e8`**. ✅ **DoD 34/34 — AUCUNE case
+décochée.** Audits **✅ 🔍** et **✅ 🛡️** · ✅ **QA 🧪 PASS le 2026-07-30** *(6ᵉ passage,
+`reports/US-00.7/qa_reaudit5.md`)*, **après 5 `FAIL`** aux motifs réels et **tous différents** ·
+**25 critères levés / 3 non levés** (20, 21, 27), **recevables et jamais requalifiés**. Phase
+**`quality_assurance`**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du
+REFUS de fusion EST OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
+⛔ **Reste dû** : **@DevOps** *(colonne Déploiement)* puis le rituel **`/certify`** — la branche est
+**à pousser** et sa **PR de clôture à ouvrir**. ⚠️ **Bornes du `PASS`, écrites par la QA** :
+exhaustivité **non revendiquée** · **0 fichier Dart** touché *(la couverture de 89,5 % atteste une
+**non-régression**, pas le livrable)* · **24 scénarios Gherkin non exécutés** *(ni step definition ni
+runner)* · refus prouvé sur contextes **`expected`, pas `failing`** · conditions de fusion **3, 4 et 5
+restent déduites** · **tout est conditionnel à la visibilité PUBLIQUE** du dépôt.
+📌 **Ce qui a débloqué 5 cycles d'échec, à réutiliser** : le 5ᵉ `FAIL` a publié un **critère de sortie
+borné, falsifiable et rejouable** *(une commande de balayage dont la sortie doit être vide)*, et la QA l'a
+**exécuté elle-même** au 6ᵉ passage plutôt que de juger sur relecture. **Trois leçons de méthode** en sont
+issues, inscrites à [`corpus_sweep.md`](reports/US-00.7/corpus_sweep.md) : ⛔ `~~texte~~` est **invisible à
+`grep`** → marqueur **littéral** `PÉRIMÉ-<date>` **sur la ligne même** · ⛔ corriger le **DÉFAUT**, pas le
+**RENVOI** *(« un renvoi cite un exemple ; le défaut a une extension »)* · ⛔ **ne jamais désigner une
+assertion par son NUMÉRO DE LIGNE** — il glisse en silence et la couverture cesse de couvrir sans qu'aucun
+outil ne le signale. 🔍 **L'extension du motif a fermé 4 survivances que les 5 passages QA et les 4 passes
+du balayage avaient TOUTES manquées** — dont la plus grave du corpus : une puce du SCB *(visa @DevOps
+d'US-00.4)* **niant la protection de `main` et la déclarant impossible**, soit **cinq assertions fausses**
+au cœur même de ce que cette US prouve ; elle était **dissimulée par un filtre** que la QA avait oublié de
+reporter dans sa commande publiée — **faute qu'elle a reconnue elle-même**, d'où la leçon versée à
+US-00.8 : **un critère de sortie se publie comme un script exécutable, jamais recopié à la main**.
+⚖️ **Le critère 27 est ARBITRÉ (2026-07-29, voie a)** : son 3ᵉ
+volet est **structurellement inatteignable** sur un dépôt à **un seul compte** *(`reviewDecision` vide —
+GitHub interdit à l'auteur d'approuver sa propre PR)*. Il **DEMEURE NON LEVÉ** — *« un arbitrage ne lève
+jamais un critère »* — **assumé pour cause de PLATEFORME, non de travail**. Levée réelle → **US-00.8**. **`main` EST PROTÉGÉE depuis le
 2026-07-28** — voir l'encadré ci-dessous. **US-00.4 CERTIFIÉE Prod 🚀 le 2026-07-27** (PR #10/#11) :
 elle a certifié la **valeur, l'honnêteté et la sûreté de l'outillage et du constat**, **pas** la
 protection de `main` — c'est US-00.7 qui l'applique et en prouve l'effet. **Après US-00.7** : **US-00.5**
@@ -92,7 +117,10 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > * ⛔ **VIOLATION DE WORKFLOW du 2026-07-29, actée et NON effacée** : à `07:08:59Z`, **un agent a fusionné
 >   la PR #13** — enfreint la **case 34** / renforcement **R-c**. **Pas un contournement** (4 gates verts,
 >   fusion licite) mais une **violation de PROVENANCE**. `EVT_WORKFLOW_VIOLATION` tracé, **case 34
->   décochée**. A révélé que **`mergedBy.is_bot` ne prouve rien** — voir la dette « provenance » ci-dessous.
+>   **décochée à l'époque** — ⚠️ **PÉRIMÉ-2026-07-29 : la case 34 est depuis RECOCHÉE**, au titre d'une
+>   **attestation humaine datée** *(niveau 1, assumée **déclarative**)* après la fusion de la PR #14 par
+>   l'humain. **Elle ne lève pas pour autant le 3ᵉ volet du critère 27** *(`reviewDecision` vide)*.
+>   A révélé que **`mergedBy.is_bot` ne prouve rien** — voir la dette « provenance » ci-dessous.
 > * `allow_force_pushes: false` et `allow_deletions: false` **ne sont pas isolés** par le test négatif — le
 >   **même** `GH006` sort pour le force-push (la règle « PR obligatoire » se déclenche avant), et GitHub
 >   refuse la suppression de la **branche par défaut** indépendamment du réglage ; ces deux réglages sont

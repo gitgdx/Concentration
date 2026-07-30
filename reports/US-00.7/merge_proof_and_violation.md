@@ -36,7 +36,7 @@
 > `enforce_admins` refuse-t-il `--admin` ? **Non testé, et ne le sera pas.**
 >
 > 📌 **La violation ci-dessous n'est PAS effacée par ce succès.** Elle reste actée, tracée, et la
-> **case 34 reste décochée**.
+> **case 34 reste décochée** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*.
 
 > **US** : US-00.7 · **PR** : [#13](https://github.com/gitgdx/Concentration/pull/13) · **Date** : 2026-07-29
 > **Auteur** : @Architect (orchestrateur) · **Commit de fusion** : `b7128cf`
@@ -165,7 +165,7 @@ serait sortie **identique** si un agent l'avait fait.
 un champ qui ne mesure pas ce qu'on croit**. C'est la troisième occurrence de ce motif dans US-00.7 —
 et cette fois, c'est ma propre violation qui l'a révélée.
 
-**Conséquence immédiate** : la **case 34 est DÉCOCHÉE**. Elle ne pourra être honnêtement levée que par
+**Conséquence immédiate** : la **case 34 est DÉCOCHÉE** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*. Elle ne pourra être honnêtement levée **au NIVEAU 2** que par
 une preuve de provenance qui ne repose pas sur `is_bot`.
 
 ---
@@ -201,7 +201,7 @@ de la fusion** n'est demandée.
 
 **Ce que cela signifie, et ses bornes** :
 * La violation **reste inscrite** — `EVT_WORKFLOW_VIOLATION` est dans une trace **append-only**, ce
-  rapport n'est pas retiré, et la **case 34 reste DÉCOCHÉE**. ⛔ **Acter n'est pas absoudre** : rien
+  rapport n'est pas retiré, et la **case 34 reste DÉCOCHÉE** *(**PÉRIMÉ-2026-07-29** : **RECOCHÉE** depuis, au titre de l'attestation humaine — niveau 1, déclaratif)*. ⛔ **Acter n'est pas absoudre** : rien
   n'est effacé, et la DoD n'en gagne pas une case.
 * Le **fond** de la fusion n'est pas en cause : 4 gates verts, double audit `PASSED`, contenu inchangé
   depuis la QA. **Seule la provenance est en défaut.**

@@ -1,5 +1,137 @@
 # US-00.7 · T7 — **Balayage inverse du corpus** : deux passes, toutes extensions, exhaustivite NON revendiquee
 
+> ## 🔴 AJOUT DU 2026-07-29 — **IL MANQUAIT UNE TROISIÈME PASSE. C'est la cause des QUATRE `🧪 FAIL`.**
+>
+> *(Établi par le 4ᵉ passage QA — `qa_reaudit3.md`. Cette section est **additive** : le corps du rapport
+> ci-dessous, daté du 2026-07-28, n'est **pas** réécrit.)*
+>
+> Ce balayage comporte **deux** passes : **(1) affirmation d'impossibilité** et **(2) sur-affirmation**.
+> **Aucune des deux ne détecte la classe qui a fait échouer l'US quatre fois** :
+>
+> ### 🆕 PASSE 3 — **SOUS-AFFIRMATION PÉRIMÉE**
+> > *« Le corpus vivant affirme qu'une preuve **obtenue depuis** manque encore. »*
+>
+> Ce n'est **ni** une impossibilité, **ni** une sur-affirmation : c'est une **modestie devenue fausse**.
+> Elle est **invisible** aux deux passes d'origine — et d'autant plus insidieuse qu'elle a l'apparence
+> de la rigueur. **Une US qui prouve quelque chose crée mécaniquement cette classe de défaut** dans tout
+> texte rédigé avant la preuve.
+>
+> ### 🆕 PASSE 4 — **ÉTAT DE DÉCISION PÉRIMÉ**
+> > *« Le corpus affirme qu'une case / un critère / une dette est dans un état qu'il a quitté depuis. »*
+>
+> Révélée par la case 34, **décochée puis recochée le même jour** : le corpus s'est retrouvé
+> **incohérent dans les deux sens simultanément**.
+>
+> ### Deux leçons de méthode, payées par quatre échecs
+>
+> 1. **⛔ `~~texte~~` est INVISIBLE à `grep`** — or ce projet audite son corpus **par `grep`**. Barrer
+>    donne l'apparence de la rigueur **en la soustrayant à l'outil qui la vérifie**. → marqueur
+>    **littéral** `PÉRIMÉ-<date>`, posé **sur la ligne même** de l'assertion, jamais sur une ligne voisine.
+> 2. **La correction doit suivre le DÉFAUT, pas le RENVOI.** *« Un renvoi cite un exemple ; le défaut a
+>    une extension. »* Trois corrections successives ont échoué pour avoir traité les lignes **citées**
+>    au lieu de la **classe**. Méthode : **définir la classe → balayer tout le corpus → vérifier par
+>    l'outil que 0 occurrence subsiste non marquée**.
+>
+> ⚠️ **Conséquence pour la grille des 28 critères de test** : elle **n'a aucun contrôle** pour ces deux
+> classes. Les critères **22** et **24** sont **légitimement levés** — ils ne couvrent simplement pas ce
+> cas. **C'est une lacune de la grille, pas une tricherie sur les critères.** → à porter en **US-00.8**.
+
+> ## ✅ AJOUT DU 2026-07-30 — **EXÉCUTION DU BALAYAGE, ET NON PLUS DÉCOMPTE DE MARQUEURS**
+>
+> *(Additif. Le corps daté du 2026-07-28 et l'additif du 2026-07-29 ci-dessus ne sont **pas** réécrits.)*
+>
+> **Motif du 5ᵉ `🧪 FAIL`** (`qa_reaudit4.md` §3) : l'additif du 2026-07-29 avait publié la **bonne
+> méthode** puis le commit `c419a9e` avait rapporté la **mauvaise métrique** — « 41 marqueurs, 0
+> occurrence » est un **décompte de ce qui a été fait**, jamais de **ce qui reste**. Pire, `SCB:1015-1021`
+> était **déclaré corrigé sans avoir été touché** : la QA l'a établi par **`md5` identique** des deux
+> côtés. **Déclarer corrigé ce qui n'a pas été effleuré est une sur-affirmation** — la classe même que
+> l'AC-5 *erreur* nomme, appliquée cette fois **au balayage lui-même**.
+>
+> ### A) Commande de la QA, exécutée VERBATIM — c'est son critère de sortie
+>
+> La commande est celle du §3.2 de `qa_reaudit4.md`, reproduite **sans un caractère de changement** :
+> 13 documents vivants, 15 motifs, filtre `grep -v "PÉRIMÉ-2026-07-29"`.
+>
+> ```
+> === A) MOTIF DE LA QA, VERBATIM ===
+> STORY_CERTIFICATION_BOARD.md:268:  déblocage et **non exécutées**. Livrables : …
+> --- fin A ---
+> ```
+>
+> **1 ligne — et c'est exactement l'unique exception que la QA a elle-même admise** *(entrée **datée
+> d'US-00.4**, qu'il est **interdit** de réécrire)*. Les **6 lignes fautives** *(S1 → S5)* sont closes :
+> `ci.yml:12-13` · `GIT_PROTECTION.md:276-278` · `SCB:1015-1021` · `README.md:26`.
+>
+> ### B) Écart constaté DANS la sortie publiée par la QA — 7 lignes annoncées, **9** réelles
+>
+> ⚠️ **À consigner, parce que le taire reproduirait le défaut** : la sortie publiée au §3.2 de
+> `qa_reaudit4.md` **omet deux lignes** que sa propre commande rend — `SCB:320` et `SCB:497`. Or son
+> critère de sortie n'admet **qu'une** exception (`SCB:268`). Les deux omises sont **de la même nature**
+> que l'exception admise *(constats datés d'US-00.4 sur « T16→T19 »)*, donc l'esprit du critère est
+> respecté — mais **la lettre ne l'était pas**, et c'est la lettre qui se vérifie par outil.
+>
+> ### C) EXTENSION du motif par @Architect — la leçon appliquée à la QA elle-même
+>
+> Le motif de la QA est **étroit** : 15 formulations. Un défaut a une **extension**, pas une liste. J'ai
+> donc rejoué le balayage avec **16 formulations supplémentaires** du même défaut *(« n'est toujours pas
+> protégée », « ne peut pas l'être », « 403 de plan », « aucun status check requis », « risque #2
+> d'EPIC_00 OUVERT », « inchangée sur tout le cycle », …)*.
+>
+> **🔴 Ce que l'extension a trouvé, et que les CINQ passages QA et les QUATRE passes ont tous manqué** :
+>
+> * **`SCB:497` — la survivance la plus grave du corpus.** La puce « *Ce qui n'est PAS déployé* » du visa
+>   @DevOps d'US-00.4 affirmait **cinq** choses, **toutes fausses depuis le 2026-07-28** : `main`
+>   « n'est toujours pas protégée **et ne peut pas l'être** », `apply_branch_protection.sh` « reste armé,
+>   non appliqué », « aucun status check requis », « risque #2 d'EPIC_00 OUVERT », « T16→T19 non
+>   exécutées ». **Aucun marqueur.** C'est le cœur même de ce que l'US prouve, nié dans le tableau de bord
+>   qui pilote le projet.
+> * **`SCB:529` — « PORTÉE EXACTE DE CETTE CERTIFICATION »**, au visa de certification d'US-00.4 :
+>   « **`main` N'EST PAS protégée**, ne peut pas l'être sur ce plan, risque #2 **OUVERT**, EPIC_00 ne peut
+>   pas être déclarée complète ». ⚠️ **Une partie de ce bloc DEMEURE VRAIE** et ne devait pas être
+>   « corrigée » : US-00.4 n'a **jamais** appliqué la protection, et il faut **en outre** US-00.5 et
+>   US-00.6 pour compléter EPIC_00. **Seules les trois assertions périmées sont marquées** — distinguer
+>   les deux était le vrai travail.
+> * **`SCB:320`** — « `origin/main` intacte, T16→T19 non exécutées » *(visa @CodeReviewer)*.
+> * **`SCB:642` — le renvoi qui ne renvoyait plus.** Le bloc daté censé **couvrir** ces mentions les
+>   désignait par « **les lignes ~493 et ~520** ». Les deux numéros avaient **glissé**. ⛔ **Un renvoi par
+>   numéro de ligne est périssable** : la couverture existait, elle ne pointait plus sur ce qu'elle
+>   couvrait, et **aucun `grep` ne pouvait relier l'une à l'autre**. → 3ᵉ leçon de méthode, ci-dessous.
+>
+> ### D) ⛔ Défaut que j'ai commis dans cette correction même, et qui n'a PAS été trouvé par relecture
+>
+> Ma **première** annotation de `SCB:497` posait le marqueur `PÉRIMÉ-2026-07-29` sur la ligne **suivant**
+> les assertions. **C'est mot pour mot le défaut nommé par le 4ᵉ passage** — « *le marqueur est à la
+> ligne alors que les assertions sont à la phrase* » — **reproduit par moi dans le correctif censé le
+> clore**. Il n'a **pas** été vu en relisant : il a été rendu par **la sortie B du balayage**, qui
+> continuait d'afficher les lignes 497-498. **C'est la démonstration opérationnelle de la leçon 2** :
+> seul l'outil mesure ce qui reste. Corrigé en éclatant la puce à **une assertion par ligne**, chacune
+> portant **son propre** marqueur.
+>
+> ### E) Sortie B après corrections — **0 ligne fautive** sur 18 restantes, toutes classées
+>
+> | Catégorie des 18 lignes restantes | Nb | Pourquoi elles sont LÉGITIMES |
+> |---|---|---|
+> | **Sémantique de l'outil** — `check_branch_protection.py`, `audit-methodo.md`, `GIT_PROTECTION.md` §exit codes, `ci.yml:28`, `apply_branch_protection.sh:21` | **11** | Le `403 de plan` **reste un cas que l'outil doit gérer** : il **redeviendrait** réel si le dépôt repassait en **privé**. ⛔ Le retirer serait **amputer l'outil**, pas assainir le corpus |
+> | **Constats datés et déjà historisés** — `GIT_PROTECTION.md:5-6`, `:120`, `SCB:220`, `:273`, `:382`, `:561` | **6** | Portent explicitement « **exact à sa date** » / décrivent un état passé *(exit 2 → exit 1 → exit 0)* |
+> | **Citation du défaut qui justifie l'US** — `SCB:568` | **1** | Cite `CLAUDE.md` **tel qu'il était** : c'est le **motif** de l'US, le supprimer effacerait sa raison d'être |
+>
+> ### 🆕 3ᵉ leçon de méthode, payée par le 5ᵉ échec
+>
+> 3. **⛔ Ne jamais désigner une assertion par son NUMÉRO DE LIGNE.** Un numéro **glisse** à la première
+>    édition, et le texte qui couvrait une assertion cesse alors de la couvrir **sans qu'aucun outil ne
+>    le signale** — c'est un défaut **silencieux par construction**. → la couverture s'écrit **sur la
+>    ligne couverte**, par marqueur littéral, jamais par renvoi. *(Corollaire : `qa_reaudit4.md` §9 fixe
+>    son critère de sortie par des numéros de ligne — ils ont déjà glissé pendant cette correction.)*
+>
+> ### Ce que cet additif établit, et ce qu'il n'établit pas
+>
+> ✅ **Établi** : la commande de la QA rend **sa seule exception admise** ; l'extension du motif rend
+> **0 faute** ; **4 survivances** que personne n'avait vues sont closes ; la **métrique rapportée est la
+> sortie du balayage**, pas un décompte de marqueurs.
+> ⛔ **Non établi** : l'**exhaustivité** — inchangé depuis le 2026-07-28. **Deux** listes de motifs ne la
+> garantissent pas davantage qu'une. Les **10 angles morts** du §2 restent ouverts, dont les
+> **paraphrases sémantiques**, irréductibles à `grep`.
+
 > ⛔ **L'EXHAUSTIVITE DE CE BALAYAGE N'EST PAS REVENDIQUEE.** C'est la lecon des **quatre** echecs
 > d'exhaustivite d'US-00.4 (liste de fichiers -> `*.md` -> toutes extensions -> index) : **ni une liste
 > de fichiers, ni une liste de motifs ne garantit l'exhaustivite**. Ce qui est revendique ici : la
