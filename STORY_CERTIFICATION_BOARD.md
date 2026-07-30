@@ -14,6 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | business_alignment | ✅ @PO | N/A | N/A | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -546,6 +547,54 @@
     l. 54).
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
+
+### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
+
+- **PO Visa** (2026-07-30, `EVT_STORY_CREATED` + `EVT_STORY_READY`) : Story File
+  `docs/stories/US-00.5-adr-stack-constitution.md` créé via `/us-new` par le subagent **@ProductOwner**
+  (contexte frais) — **6 AC** en Nominal/Erreur/Limite, **21 scénarios** Gherkin, DoD **23 cases**.
+  **Valeur** : la décision **la plus structurante du projet — le choix de la stack — est la SEULE qui ne
+  soit pas tracée**. `docs/adr/` porte 005, 006 et 007 ; **ADR-001 est un trou de numérotation réel**, et
+  le numéro est **réservé nommément** depuis le 2026-07-26 par ADR-005 et ADR-006.
+- **Track `STANDARD`** (`EVT_TRACK_SELECTED`) : **0 fichier de code Dart**, ≤ 15 fichiers, **pas** de
+  migration de schéma, **pas** de nouvelle API ni de page. **QUICK est exclu** — pas de Story File ni
+  d'audits pour une US qui amende la **Constitution**. **FULL est exclu** — il exigerait Design Data **et**
+  UX **obligatoires** *(sans objet : aucune UI, aucun schéma)*, plus la « revue humaine explicite » qu'
+  **aucune barrière machine ne soutient** sur ce dépôt *(cible à `0` approbation — dette `TRACKS.md`)*.
+  Précédent : US-00.3, US-00.4 et US-00.7, toutes STANDARD.
+- **Périmètre `SOCLE SEUL`, arbitré par l'HUMAIN le 2026-07-30** — **2 livrables, rien d'autre** :
+  **(1)** `docs/adr/ADR-001-choix-de-stack.md` · **(2)** amendement de l'**Art. 4**. ⛔ **Hors périmètre**,
+  versé à **US-00.8** : protéger `CONSTITUTION.md`/`TRACKS.md` dans `protect_files.sh` · l'arbitrage
+  `TRACKS.md` sur la revue humaine du track FULL · NB-1bis · `selftest` en CI · la lacune de la grille de
+  test · la requalification d'US-00.1 (S11).
+- **⛔ PIÈGE CENTRAL, inscrit au Story File** : le périmètre initial (2026-07-26) portait des corrections
+  **devenues SANS OBJET** — la **règle 2** de `CLAUDE.md` et la phrase « *requis par la protection de
+  branche* » de l'Art. 4 sont **devenues VRAIES** le 2026-07-28. **Les « corriger » rendrait faux un énoncé
+  exact** et vaudrait **régression documentaire**.
+- **✅ Gate `clarify` PASSÉE le 2026-07-30 — les 8 ambiguïtés du @PO sont TRANCHÉES**, dont **2 par
+  arbitrage humain**, et dans les **deux** cas **contre la préconisation @PO** *(les positions datées du
+  @PO sont **conservées**, non réécrites)* :
+  - 🔴 **A-1 — l'Art. 4 n'est pas seulement incomplet, il est FAUX sur trois points**, établi **par
+    exécution** et non par lecture : `run_gates.py --gate sast` rend **« aucun gate ne correspond »** alors
+    que l'article annonce un **SAST bloquant** · `app.deps_audit` porte **`"blocking": false`** alors que
+    l'article l'annonce **bloquant** · **`coverage_ratchet` est ABSENT** de `factory.config.json` alors que
+    l'article le cite comme seuil. S'y ajoute l'**omission** du gate réel `app.build`. Le @PO préconisait
+    **(b) consigner et verser à US-00.8** ; **écarté** : AC-2 oblige ADR-001 à écrire qu'aucun SAST
+    n'existe, donc **cette US aurait produit elle-même la contradiction** qui a coûté **5 `🧪 FAIL`** à
+    US-00.7. **Corriger le DÉFAUT, pas le RENVOI.** ⛔ L'US n'**implémente** aucun SAST pour autant, et ne
+    touche **pas** `factory.config.json` *(protégé)*.
+  - 🔴 **C-1 — la clause *Révision* exige une « PR DÉDIÉE, jamais en side-effect d'une US »** → **DEUX PR
+    successives** *(ADR-001 seul, puis l'amendement, dédié)*, avec **rebase obligatoire entre les deux**
+    car `strict: true` **sérialise** les merges. Le @PO préconisait **une** PR en lisant « dédiée » comme
+    « objet déclaré » ; **écarté** : on n'ouvre pas un écart lettre/esprit **sur le texte qui régit les
+    amendements**. **AC-3 et AC-4 passent de `Should` à `Must`** *(C-2)*.
+- **🔴 CONSTAT NOUVEAU, versé à US-00.8 — `CONSTITUTION.md` n'est PAS protégé** : vérifié le 2026-07-30,
+  `protect_files.sh` couvre `scripts/githooks/*`, `.claude/hooks/*`, `.gitleaks.toml`,
+  `factory.config.json`, `factory_sync.py`, `run_gates.py` — **mais pas `docs/governance/**`**. **Le texte
+  suprême du projet est éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des
+  scripts. ⛔ **Non corrigé ici** : `protect_files.sh` est **lui-même protégé** *(action humaine)*, et
+  l'humain a arbitré « socle seul ».
+- **Prochaine étape** : `EVT_ARCHI_VALIDATED` *(Integration Lock)*, puis T1 → T8 sur la **PR nº 1**.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 
