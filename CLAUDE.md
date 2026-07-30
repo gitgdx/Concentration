@@ -51,10 +51,23 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 **Chantier actif** : **US-00.7** — application de la protection de branche (track STANDARD + 3
 renforcements). **PR #12, #13 et #14 fusionnées** — `main` = **`cad24e8`**. **DoD 32/34** *(restent **29**
-QA et **31** fin de cycle)*. Audits **✅ 🔍** et **✅ 🛡️** · QA **🧪 FAIL ×4**, motifs réels et **tous
-différents**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du REFUS de fusion EST
-OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
-⛔ **Reste dû** : la **QA** (case 29). ⚖️ **Le critère 27 est ARBITRÉ (2026-07-29, voie a)** : son 3ᵉ
+QA et **31** fin de cycle)*. Audits **✅ 🔍** et **✅ 🛡️** · QA **🧪 FAIL ×5** *(dernier : 2026-07-30,
+`reports/US-00.7/qa_reaudit4.md`)*, motifs réels et **tous différents** · **25 critères levés / 3 non
+levés** (20, 21, 27), **aucune régression**. Branche courante **`feat/US-00.7-cloture`**. ✅ **La preuve du
+REFUS de fusion EST OBTENUE** *(PR #14, HTTP 405 du serveur — voir l'encadré ci-dessous)*.
+⛔ **Reste dû** : la **QA** (case 29) — **6ᵉ passage à demander**, sur un **critère de sortie que la QA a
+elle-même publié et borné** *(§9 de son rapport : sa commande de balayage doit rendre une sortie vide ;
+« si elle est vide, ce motif meurt et je n'en cherche pas un autre »)*. ✅ **Correctifs du 5ᵉ FAIL faits
+le 2026-07-30** : les **6 lignes fautives** closes *(`ci.yml:12-13`, `GIT_PROTECTION.md:276-278`,
+`SCB` bloc de sortie, `README.md:26`)*, **sa commande rend désormais sa seule exception admise
+(`SCB:268`)**, et l'**extension du motif** a fermé **4 survivances que les 5 passages QA et les 4 passes
+du balayage avaient toutes manquées** — dont la plus grave du corpus : une puce du SCB *(visa @DevOps
+d'US-00.4)* qui **niait la protection de `main` et la déclarait impossible**, soit **cinq assertions
+fausses** au cœur même de ce que cette US prouve. ⚠️ **3ᵉ leçon de méthode inscrite** :
+⛔ **ne jamais désigner une assertion par son numéro de ligne** — il glisse en silence, et le texte qui
+la couvrait cesse de la couvrir sans qu'aucun outil ne le signale. Détail :
+[`corpus_sweep.md`](reports/US-00.7/corpus_sweep.md) *(additif du 2026-07-30, portant **les deux
+sorties** de balayage)*. ⚖️ **Le critère 27 est ARBITRÉ (2026-07-29, voie a)** : son 3ᵉ
 volet est **structurellement inatteignable** sur un dépôt à **un seul compte** *(`reviewDecision` vide —
 GitHub interdit à l'auteur d'approuver sa propre PR)*. Il **DEMEURE NON LEVÉ** — *« un arbitrage ne lève
 jamais un critère »* — **assumé pour cause de PLATEFORME, non de travail**. Levée réelle → **US-00.8**. **`main` EST PROTÉGÉE depuis le

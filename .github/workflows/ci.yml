@@ -9,8 +9,14 @@ name: ✅ CI
 #    ADMINISTRATEUR INCLUS (enforce_admins en vigueur → enforcement_level "everyone").
 #    Le serveur énumère lui-même les contextes requis : "4 of 4 required status checks are expected"
 #    (reports/US-00.7/applied_state/negative_test_server.txt).
-#    ⚠️ BORNE : le refus PROUVÉ porte sur le PUSH DIRECT. Le refus d'une tentative de FUSION n'a pas
-#    encore été observé (tâche T11 d'US-00.7) : il découle de l'état constaté, il n'en est pas la preuve.
+#    ✅ REFUS DE FUSION PROUVÉ PAR LE SERVEUR le 2026-07-29 (PR #14, T11 EXÉCUTÉE) : un PUT sur
+#    .../pulls/14/merge avec 1/4 contexte vert rend HTTP 405, "3 of 4 required status checks are
+#    expected" — c'est l'API REST qui refuse, administrateur inclus, sans --admin. Le refus d'écriture
+#    directe (GH006) est prouvé de son côté depuis le 2026-07-28. Preuves :
+#    reports/US-00.7/applied_state/merge_refusal_server_405.txt et negative_test_server.txt.
+#    ⚠️ BORNE MAINTENUE : le refus observé porte sur des contextes `expected`, PAS `failing` — la
+#    conjonction littérale d'US-00.1 ("secrets-scan ROUGE -> merge empêché") reste non observée, et
+#    on ne cassera pas un gate pour l'obtenir.
 #    Source unique des libellés : factory.config.json → status_checks.
 #
 # ⛔ NE JAMAIS MODIFIER un `name:` de job de ce fichier sans mettre à jour factory.config.json

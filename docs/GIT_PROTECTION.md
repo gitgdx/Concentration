@@ -273,9 +273,15 @@ est régénéré par `python scripts/factory_sync.py --write`. Toute édition ma
 > de fusion**. Aucune n'est un défaut ; chacune est un **coût assumé** de l'enforcement.
 >
 > ⚠️ **Statut de ce tableau** : il décrit la **configuration appliquée** (état de l'API, prouvé) et le
-> comportement qui en découle **selon la plateforme**. Le **refus effectif d'une tentative de fusion** n'a
-> **pas encore été observé** sur ce dépôt (tâche **T11** d'US-00.7) — à lire comme une inférence
-> documentée, pas comme une preuve.
+> comportement qui en découle. ✅ **PÉRIMÉ-2026-07-29 — cet encadré affirmait que le refus de fusion
+> restait inobservé : c'est FAUX depuis le 2026-07-29.** Le **refus effectif d'une tentative de fusion
+> EST PROUVÉ, PAR LE SERVEUR** *(PR #14 : **HTTP 405**, « 3 of 4 required status checks are expected »,
+> sans `--admin`, administrateur inclus)* — cohérent avec la l. 22 de ce document. Preuve :
+> [`applied_state/merge_refusal_server_405.txt`](../reports/US-00.7/applied_state/merge_refusal_server_405.txt).
+> La **condition 2** ci-dessous n'est donc **plus** une déduction : elle est **constatée**.
+> ⚠️ **Bornes maintenues** : le refus observé porte sur des contextes **`expected`**, **pas `failing`** ;
+> et les conditions **3, 4 et 5** demeurent, elles, **déduites** de l'état de l'API et du comportement
+> documenté de la plateforme — **aucune n'a été éprouvée par l'effet**.
 
 | # | Condition | Ce qui bloque, concrètement | Comment s'y conformer |
 |---|---|---|---|

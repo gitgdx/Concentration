@@ -317,7 +317,9 @@
     **structurellement intègre** · 8 chemins rejoués · **l'inférence de l'AC-1 fait (b) est écrite
     explicitement comme telle en 4 endroits — aucune fraude** · garantie d'import paresseux vérifiée par
     simulation d'un module cassé · bloc `FACTORY_SYNC` byte-identique · Art. 6 respecté · `origin/main`
-    intacte, T16→T19 non exécutées. **Toutes les réserves de @Developer sont honnêtes ; aucune ne
+    intacte, T16→T19 non exécutées *(**PÉRIMÉ-2026-07-29** : constat de l'audit d'US-00.4, **exact à sa
+    date** ; **T16→T19 ont depuis été exécutées** par US-00.7 et `origin/main` a changé — `f4400ca` →
+    `cad24e8`. **Non réécrit, daté**.)*. **Toutes les réserves de @Developer sont honnêtes ; aucune ne
     masquait un défaut** — les 2 bloquants n'y figuraient pas.
 - **✅ Audit Sec 🛡️ — PASS** (2026-07-26, `EVT_SECURITY_AUDIT_PASSED`, contexte frais) : **0 bloquant**,
   rapport `reports/US-00.4/security.md`. **`gitleaks` 8.30.1 retrouvé et réellement exécuté** (hors
@@ -492,9 +494,18 @@
   « PUSH BLOQUÉ » + `exit 1`. Le constat d'US-00.4 était exact **à sa date**)* — interdiction explicite, et le push
     aurait réussi côté serveur. Le refus n'est établi que par **lecture de code**. C'est précisément le
     sujet de l'US.
-  - **Ce qui n'est PAS déployé** : `main` **n'est toujours pas protégée** et ne peut pas l'être (403 de
-    plan) · `apply_branch_protection.sh` reste **armé, non appliqué** · **aucun status check requis** ·
-    **risque #2 d'EPIC_00 OUVERT** · T16→T19 non exécutées.
+  - **Ce qui n'est PAS déployé** *(constat de @DevOps sur US-00.4 — **exact à sa date**, **non réécrit** ;
+    chaque assertion porte son marqueur **sur sa propre ligne**, l'assertion étant à la phrase)* :
+    - **PÉRIMÉ-2026-07-29** — « `main` **n'est toujours pas protégée** et ne peut pas l'être (403 de plan) »
+    - **PÉRIMÉ-2026-07-29** — « `apply_branch_protection.sh` reste **armé, non appliqué** »
+    - **PÉRIMÉ-2026-07-29** — « **aucun status check requis** »
+    - **PÉRIMÉ-2026-07-29** — « **risque #2 d'EPIC_00 OUVERT** »
+    - **PÉRIMÉ-2026-07-29** — « T16→T19 non exécutées »
+    ⚠️ **Les CINQ assertions ci-dessus sont FAUSSES depuis le 2026-07-28**, et c'était la survivance la
+    plus grave du corpus — **manquée par les CINQ passages QA et par les quatre passes du balayage** :
+    dépôt **PUBLIC** depuis le 2026-07-27 *(plus de 403)* · `main` **protégée** *(`"protected": true`)* ·
+    **4 status checks REQUIS** · **risque #2 d'EPIC_00 CLOS** · **T16→T19 exécutées**. Preuves :
+    `reports/US-00.7/applied_state/`.
 - **🔧 Écart de trace relevé par @DevOps, assumé** : `EVT_READY_FOR_DEPLOY` a été émis avec
   `--agent devops` alors que `scripts/events_catalog.json` déclare `"emitter": "architect"` (et que
   US-00.1/00.2/00.3 l'ont toutes émis en `architect`). **Erreur du brief de @Architect**, pas de
@@ -519,9 +530,14 @@
     autoritatif.
   - **⚠️ PORTÉE EXACTE DE CETTE CERTIFICATION — à lire avant toute réutilisation** : elle atteste la
     **valeur, l'honnêteté et la sûreté de l'OUTILLAGE et du CONSTAT**. Elle **n'atteste PAS** que `main`
-    est protégée. **`main` N'EST PAS protégée**, ne peut pas l'être sur ce plan, et le **risque #2
-    d'EPIC_00 reste OUVERT**. **EPIC_00 ne peut pas être déclarée complète** sur cette base — il reste
-    en outre US-00.5 et US-00.6.
+    est protégée. ⚠️ **Ce point DEMEURE VRAI et ne doit pas être « corrigé »** : US-00.4 n'a jamais
+    appliqué la protection — **c'est US-00.7 qui l'applique et en prouve l'effet**.
+    - **PÉRIMÉ-2026-07-29** — « **`main` N'EST PAS protégée**, ne peut pas l'être sur ce plan »
+    - **PÉRIMÉ-2026-07-29** — « le **risque #2 d'EPIC_00 reste OUVERT** »
+    - **PÉRIMÉ-2026-07-29** — « **EPIC_00 ne peut pas être déclarée complète** sur cette base »
+    ⚠️ **Ces trois assertions étaient exactes au 2026-07-27 et sont périmées depuis le 2026-07-28**
+    *(`main` **protégée**, risque #2 **CLOS**, **EPIC_00 redevient complétable**)* — **non réécrites**,
+    **datées**. **Reste vrai** : il faut **en outre** US-00.5 et US-00.6 pour compléter EPIC_00.
   - **Dettes ouvertes transmises** : **NB-1** (correctif 1 ligne : `MAPPED_TOP_KEYS & set(expected)`) ·
     **`selftest` en CI** (recommandation forte du re-audit — seule parade à portée d'agent contre une
     régression silencieuse de la frontière) · **émetteurs de trace déclarés mais non enforced**
@@ -631,10 +647,17 @@
   **pas isolés** par le test négatif (même `GH006` pour le force-push, la règle « PR obligatoire » se
   déclenchant d'abord ; GitHub refuse la suppression de la **branche par défaut** indépendamment du
   réglage) → prouvés par l'**état de l'API**, pas par l'effet.
-- **🔕 MISE À JOUR DATÉE DU 2026-07-28 — portée des visas d'US-00.4 ci-dessus** : les mentions
-  « `main` n'est toujours pas protégée **et ne peut pas l'être** » figurant dans les visas **datés**
-  d'US-00.4 (notamment aux lignes ~493 et ~520) étaient **exactes à leur date** et **ne sont pas
-  réécrites** (ce sont des preuves de cycle). **Elles sont périmées depuis le 2026-07-28.** De même, la
+- **🔕 MISE À JOUR DATÉE DU 2026-07-28, COMPLÉTÉE LE 2026-07-30 — portée des visas d'US-00.4 ci-dessus** :
+  **PÉRIMÉ-2026-07-29** — les mentions « `main` n'est toujours pas protégée **et ne peut pas l'être** »
+  figurant dans les visas **datés** d'US-00.4 étaient **exactes à leur date** et **ne sont pas
+  réécrites** (ce sont des preuves de cycle). **Elles sont périmées depuis le 2026-07-28.**
+  ⚠️ **Correction du 2026-07-30, et c'est une leçon de méthode** : ce bloc désignait sa cible par
+  « les lignes ~493 et ~520 ». **Un renvoi par numéro de ligne est périssable** — les deux numéros
+  avaient déjà glissé, si bien que le bloc censé couvrir ces mentions ne pointait plus sur elles, et
+  **aucun grep ne pouvait relier la couverture à ce qu'elle couvre**. Les trois visas concernés portent
+  désormais **leur propre marqueur, sur leur propre ligne** *(@DevOps « Ce qui n'est PAS déployé » ·
+  « PORTÉE EXACTE DE CETTE CERTIFICATION » · @CodeReviewer « T16→T19 »)* : la couverture est
+  **greppable sans renvoi**. De même, la
   dérogation **`EVT_WAIVER_GRANTED`** (2026-07-26, Art. 5 — « ni Pro, ni public ») est **ÉTEINTE / SANS
   OBJET** : l'humain a choisi la **voie (a)**, dépôt **public**, le 2026-07-27. ⛔ La trace est
   **append-only** : l'événement n'est ni supprimé ni édité — on **éteint** une dérogation, on ne
@@ -1012,13 +1035,60 @@
     `TRACKS.md`**.
   - 📌 **Même classe que le `403` d'US-00.4** : une **impossibilité de plateforme** se règle par un
     **arbitrage humain tracé**, pas par un cycle de correction de plus.
-- **🎯 CHEMIN DE SORTIE — UN SEUL GESTE.** La **PR de certification** depuis `feat/US-00.7-certif`
-  **(a)** exécutera les workflows corrigés **jamais passés en CI** *(referme Q-1 / N-5)* **et**
-  **(b)** rouvrira la **fenêtre de ~80 s** nécessaire au **refus de fusion** *(referme **D-1**)*.
-  ⚠️ **Procédure corrigée, l'erreur à ne pas refaire** : tenter la fusion **IMMÉDIATEMENT après
-  l'ouverture**, **avant toute autre capture**. Le re-passage QA pourra être **ciblé sur le seul
-  critère 26**.
-- **Prochaine étape** : PR de certification → capture du refus (D-1) → **re-QA ciblée** → `/certify`.
+- **🧪 QA — 5ᵉ PASSAGE : `FAIL` (2026-07-30, `EVT_QA_FAILED`, contexte frais, `qa_reaudit4.md`).**
+  **25 critères LEVÉS / 3 NON LEVÉS** (20, 21, 27) — **aucune régression**. Tout ré-exécuté : `run_gates`
+  **5/5 exit 0**, tests **2 passed / 0 skipped / 0 failed**, couverture **89,5 %**, `gitleaks` **0 fuite /
+  64 commits**, gouvernance verte. **Les 24 scénarios Gherkin comptés à part** : **0 exécuté**, ni step
+  definition ni runner — « *un scénario non exécuté n'est ni passed ni skipped* ».
+  - ✅ **Réponse explicite à la question posée** : les critères **20, 21 et 27** non levés par arbitrage
+    sont **RECEVABLES** pour un `PASS` de la case 29 et **ne sont pas** le motif du FAIL. Pour **20/21**,
+    la preuve substituée est **plus forte** que celle qui manque *(`remote:` ×10 et `GH006` ×3 sont
+    impossibles à produire par un hook local)*. Pour **27**, **R-c est un renforcement de PROCESS, pas un
+    AC** ; **AC-4 est COMPLET** par le serveur ; la base factuelle de l'arbitrage est **vraie**, vérifiée
+    à la source par la QA elle-même ; et **décisif : l'arbitrage ne coche RIEN** *(DoD toujours 32/34)* —
+    « *c'est exactement la bonne forme, l'inverse d'une complaisance* ».
+  - 🔴 **Motif du FAIL** : le round du 2026-07-29 s'était **fixé lui-même** son critère de réussite
+    *(« 0 occurrence non marquée sur les 11 artefacts vivants »)* et **ce critère est faux par son propre
+    outil** — il rend **2**, pas 0. **6 lignes / 5 assertions / 4 fichiers vivants.** Aggravant établi par
+    **`md5`** : le bloc de sortie du SCB était **déclaré corrigé** alors qu'il était **byte-identique** —
+    « *déclarer corrigé ce qui n'a pas été effleuré est une sur-affirmation* ».
+  - ✅ **À décharge, et la QA le consigne d'elle-même** : **14 des 15** items du 4ᵉ passage sont
+    **réellement tenus** ; elle **révise** la sévérité du 4ᵉ sur le marquage — **le marqueur littéral
+    fonctionne** — et elle établit **seule** un acquis que personne n'avait consigné : **Q-1 et N-5 sont
+    CLOS**, la « PR de certification à venir » **était la PR #13, déjà fusionnée** *(4 contextes `pass`)*.
+- **✅ CORRECTIFS DU 5ᵉ FAIL — 2026-07-30, @Architect : le balayage est EXÉCUTÉ, plus jamais compté.**
+  Les **6 lignes fautives** sont closes — `ci.yml:12-13` *(fichier **non protégé** par
+  `protect_files.sh`, et la phrase avait été **écrite par T15 de cette US** : l'omission n'avait **aucune
+  excuse**)*, `GIT_PROTECTION.md:276-278` *(qui **contredisait sa propre l. 22** dans la section même que
+  `CLAUDE.md` désigne comme référence)*, le **bloc de sortie** ci-dessous, `README.md:26` et les l. 21-24
+  de la même table. **La commande de la QA, exécutée verbatim, rend désormais `SCB:268` seule** —
+  exactement l'unique exception qu'elle admet.
+  - 🔴 **J'ai fait plus que la liste, parce que c'est la leçon.** L'**extension du motif** *(16
+    formulations supplémentaires)* a fermé **4 survivances que les 5 passages QA et les 4 passes du
+    balayage ont TOUTES manquées** : `SCB:497` *(la plus grave du corpus — **cinq** assertions niant la
+    protection de `main` et la déclarant impossible)*, `SCB:529` *(où il fallait **séparer** ce qui reste
+    **vrai** — US-00.4 n'a jamais appliqué la protection, et US-00.5/US-00.6 restent dues — de ce qui est
+    périmé : **c'était le vrai travail**)*, `SCB:320`, et `SCB:642`.
+  - ⛔ **Défaut que j'ai commis dans le correctif même, et que la relecture n'a pas vu** : ma **première**
+    annotation de `SCB:497` posait le marqueur sur la ligne **suivante** — **mot pour mot le défaut nommé
+    par le 4ᵉ passage**, reproduit dans le correctif censé le clore. C'est **la sortie du balayage** qui
+    l'a rendu, **pas** ma relecture. Corrigé à **une assertion par ligne**.
+  - 🆕 **3ᵉ leçon de méthode, inscrite au balayage** : ⛔ **ne jamais désigner une assertion par son
+    NUMÉRO DE LIGNE.** `SCB:642` couvrait « *les lignes ~493 et ~520* » — **déjà glissées** : la
+    couverture existait mais **ne pointait plus** sur ce qu'elle couvrait, et **aucun `grep`** ne pouvait
+    relier l'une à l'autre. Défaut **silencieux par construction**.
+- **PÉRIMÉ-2026-07-29 — ✅ le CHEMIN DE SORTIE est ATTEINT ; ce bloc est corrigé EN FAIT, non
+  historisé** *(motif : un « chemin de sortie » décrit ce qui **RESTE**, il n'a donc pas de date — même
+  raison que pour un index. La version antérieure envoyait un lecteur futur refaire **trois choses déjà
+  faites** ; défaut relevé par le 5ᵉ passage QA, qui a établi par **md5 identique** que le 4ᵉ round
+  l'avait **déclaré corrigé sans le toucher**)* :
+  - La « **PR de certification** depuis `feat/US-00.7-certif` » **était la PR #13, fusionnée** —
+    `gh pr checks 13` rend **4 contextes pass** en CI réelle, donc les workflows corrigés **ont tourné** :
+    **Q-1 et N-5 sont clos EN FAIT** *(constat porté par `qa_reaudit4.md` §2)*.
+  - Le **refus de fusion est CAPTURÉ** *(PR #14, **HTTP 405** du serveur)* → **D-1 est refermé** et le
+    **critère 26 est LEVÉ** depuis le 3ᵉ passage QA.
+- **Prochaine étape RÉELLE** : `QA Status 🧪 PASS` *(case 29)* → SCB mis à jour *(case 31)* → PR de
+  clôture depuis `feat/US-00.7-cloture` → `/certify`.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

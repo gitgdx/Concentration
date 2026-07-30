@@ -18,12 +18,12 @@
 
 | Champ | Valeur |
 |---|---|
-| Branche | `feat/US-00.7-application-protection-branche` *(basée sur `main` = `f4400ca`)* |
+| Branches | `feat/US-00.7-application-protection-branche` *(phases 0-4, basée sur `main` = `f4400ca`)* → `feat/US-00.7-certif` *(PR #13)* → `feat/US-00.7-violation-fusion-agent` *(PR #14)* → `feat/US-00.7-cloture` *(courante)* |
 | Phases couvertes | **0** (préalables) · **1** (application) · **2 partielle** (test négatif) · **3** (corpus) · **4** (clôture) |
-| Dates | phase 0 : **2026-07-27** · phases 1-2 : **2026-07-28** · phases 3-4 : **2026-07-28** |
-| `origin/main` | **`f4400ca2edd5a53e8879a7568818650eeb32d0d4`** — **inchangée sur tout le cycle** |
-| Opérations à confirmation humaine explicite | **T8** (le `PUT`) et **T10** (test négatif) — **exécutées par l'humain**, jamais par l'agent |
-| ⛔ **Non exécuté** | **T11** (PR · libellés rapportés · refus de fusion · fusion après 4 verts) |
+| Dates | phase 0 : **2026-07-27** · phases 1-2 : **2026-07-28** · phases 3-4 : **2026-07-28**, **prolongées jusqu'au 2026-07-30** par 5 passages QA et 2 arbitrages humains |
+| `origin/main` | **PÉRIMÉ-2026-07-29** *(cette ligne portait « `f4400ca` — inchangée sur tout le cycle » ; corrigée **EN FAIT**, un index décrit ce qui **EST**)* : `f4400ca` **pendant les phases 0-4**, puis **`b7128cf`** *(PR #13)*, puis **`cad24e8`** *(PR #14, état actuel)* |
+| Opérations à confirmation humaine explicite | **T8** (le `PUT`) et **T10** (test négatif) — **exécutées par l'humain**, jamais par l'agent · **fusion de la PR #14** — également humaine *(attestation datée, `applied_state/merge_pr14_human.txt`)* |
+| ✅ **T11 — EXÉCUTÉE** | **PÉRIMÉ-2026-07-29** *(cette ligne portait l'état inverse ; corrigée **EN FAIT**, cf. l. 86 déjà rectifiée)* : **PR #13** → **4 libellés rapportés, 4 pass** · **PR #14** → **refus de fusion HTTP 405** à 1/4 vert, puis **fusion acceptée à 4/4** — `applied_state/merge_refusal_server_405.txt` |
 | ✅ **Exécuté depuis** *(mise à jour du 2026-07-28)* | **T20** — `scripts/githooks/pre-push`, **Art. 6**, **copie humaine** → `t20_pre_push.md` · **T24** — ADR-007 **rédigé et `Accepté`** (`EVT_ARCHI_VALIDATED`) |
 | 🟠 **Preuve PARTIELLE, assumée** *(arbitrage humain du 2026-07-28)* | **Critères 20 et 21** — `negative_test_server.txt` **ne contient pas** : la sortie de `core.hooksPath`, le couple `rev-parse` avant/après, la preuve de suppression du clone, la garde de sûreté avant **chacune** des 3 commandes, ni la phrase de portée. ⛔ **Non retro-archivables** (le clone jetable n'existe plus) et **le fichier n'est PAS retouché** — l'y ajouter serait **fabriquer une preuve**. Détail en regard des critères dans le Story File |
 
