@@ -15,7 +15,9 @@ Il tourne dans le job CI DÉJÀ REQUIS « 📋 Governance » (arbitrage C-3 d'US
    à la différence d'un contrôle qui dort.
 
 Usage : python scripts/selftest_coverage_ratchet.py
-Exit   : 0 si les 4 attentes sont tenues, 1 sinon.
+Exit   : 0 si TOUTES les attentes declarees dans CAS sont tenues, 1 sinon.
+         (PERIME-2026-07-31 : cette ligne disait « les 4 attentes » — chiffre RECOPIE, perime des
+          l ajout de la 5e puis de la 6e. Le nombre est DERIVE de CAS et imprime a l execution.)
 """
 import json
 import subprocess
@@ -36,8 +38,22 @@ CHECKER = Path("scripts/check_flutter_coverage.py")
 
 # Référence utilisée pour l'autotest. ⛔ Ce n'est PAS le seuil du projet : c'est le
 # paramètre du MUTANT. Le seuil du projet vit dans factory.config.json, source unique.
-REF_MUTANT = 89.4
+#
+# ⛔ CORRECTIF B-QA-2 (QA, 2026-07-31) : cette valeur VALAIT LE SEUIL DU PROJET (89.4), si bien
+#    que le mutant « cliquet ecrit EN DUR dans le checker » SURVIVAIT a l autotest — la QA l a
+#    mesure : le jour ou un developpeur figerait le seuil, LA CI RESTERAIT VERTE.
+#    Deux remedes cumules :
+#      1. REF_MUTANT est desormais DISTINCTE du seuil du projet ;
+#      2. un CONTROLE DIFFERENTIEL (voir CAS_DIFFERENTIEL) rejoue LA MEME fixture avec DEUX
+#         references et EXIGE que le verdict CHANGE. Un checker qui figerait sa valeur rendrait
+#         le MEME verdict pour les deux => l autotest rougit. C est la seule facon de prouver
+#         qu une valeur est LUE et non ecrite : la comparer a elle-meme ne prouve rien.
+REF_MUTANT = 86.0
 PLANCHER = 80.0
+
+# Controle DIFFERENTIEL : (fixture, reference BASSE, reference HAUTE, exit attendu bas, haut).
+# La fixture 17/19 = 89,47 % doit PASSER sous une reference basse et ECHOUER sous une haute.
+CAS_DIFFERENTIEL = ("inchange_17_sur_19.info", 86.0, 95.0, 0, 1)
 
 # (fixture, exit attendu, ce que le cas prouve)
 CAS = [
@@ -116,6 +132,28 @@ def main() -> int:
                 echecs += 1
                 for ligne in sortie.strip().splitlines():
                     print(f"         > {ligne}")
+
+    # --- CONTROLE DIFFERENTIEL (B-QA-2) : tue le mutant « cliquet ecrit en dur ».
+    fixture_d, ref_basse, ref_haute, att_bas, att_haut = CAS_DIFFERENTIEL
+    with tempfile.TemporaryDirectory() as tmp2:
+        codes = []
+        for ref in (ref_basse, ref_haute):
+            cfg2 = Path(tmp2) / ("cfg_%s.json" % ref)
+            cfg2.write_text(
+                json.dumps({"adapter": {"components": {"app": {"coverage_ratchet": {
+                    "value": ref, "date": "autotest-differentiel",
+                    "motif": "prouve que la reference est LUE et non ecrite"}}}}}),
+                encoding="utf-8",
+            )
+            code, _ = run(FIXTURES / fixture_d, cfg2)
+            codes.append(code)
+        ok_d = codes == [att_bas, att_haut]
+        print(f"  {'OK    ' if ok_d else 'ECHEC '}| DIFFERENTIEL {fixture_d:<15} "
+              f"ref {ref_basse} -> exit {codes[0]} (attendu {att_bas}) | "
+              f"ref {ref_haute} -> exit {codes[1]} (attendu {att_haut})")
+        print("         | la MEME fixture change de verdict => la reference est LUE, jamais ecrite en dur")
+        if not ok_d:
+            echecs += 1
 
     print("-" * 79)
     if echecs:

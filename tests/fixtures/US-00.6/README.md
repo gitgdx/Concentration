@@ -38,5 +38,5 @@ Elles ne disent **rien** de la qualité des tests — un cliquet **n'améliore p
 **empêche seulement de reculer**. Et la complaisance reste possible, **nommément** : couvrir
 `void main()` / `runApp(...)` ferait **+10,5 pt sans aucune valeur**.
 
-⛔ **Ne pas confondre** ces 4 fixtures, qui **s'exécutent réellement en CI**, avec les **18 scénarios
+⛔ **Ne pas confondre** ces fixtures *(**PÉRIMÉ-2026-07-31** : « ces **4** fixtures » était un chiffre **recopié** ; le nombre exact est **dérivé et imprimé par `python scripts/selftest_coverage_ratchet.py`**)*, qui **s'exécutent réellement en CI**, avec les **18 scénarios
 Gherkin** d'US-00.6, qui sont **documentaires** — le projet n'a ni step definitions ni runner BDD.

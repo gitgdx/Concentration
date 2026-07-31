@@ -589,8 +589,8 @@
     *(Art. 4)*, applique **`max(plancher, cliquet)`** et **dit toujours lequel des deux est violé** —
     jamais un « seuil » anonyme. **Fail-explicit** sur les 4 cas dégradés, dont **`0` ligne mesurable** :
     ⛔ *« ce n'est pas 0 %, ce n'est pas une mesure »*.
-  - 🔬 **`scripts/selftest_coverage_ratchet.py` + 4 fixtures** — **LE MUTANT**, et il rend
-    **2 REFUS sur 4 attentes** : **`16/19` est ROUGE** *(il passait **VERT** avant cette US : le plancher à
+  - 🔬 **`scripts/selftest_coverage_ratchet.py` + ses fixtures** *(**PÉRIMÉ-2026-07-31** : cette ligne écrivait « **4 fixtures** » — chiffre **recopié**, périmé dès l'ajout de la 5ᵉ puis de la 6ᵉ ; le nombre exact est **dérivé et imprimé par `python scripts/selftest_coverage_ratchet.py`**)* — **LE MUTANT**, et il rend
+    **des REFUS** *(**PÉRIMÉ-2026-07-31** : « 2 REFUS sur 4 attentes » était un chiffre **recopié** ; le nombre exact est **dérivé et imprimé par `python scripts/selftest_coverage_ratchet.py`**)* : **`16/19` est ROUGE** *(il passait **VERT** avant cette US : le plancher à
     80 % tolérait **exactement une régression d'une ligne** — c'est là toute la valeur de l'US, et elle
     est **modeste et précise**)*, `17/19` **VERT** *(garde anti-verrouillage)*, `18/19` **VERT + valeur à
     consigner imprimée**, `0` ligne **ROUGE**.
@@ -601,7 +601,7 @@
   - ⛔ **Faute d'instrumentation attrapée en route, et elle est de moi** : mon premier test affichait
     `exit=0` sur un cas **rouge** — mon `$?` lisait le code de `sed`, pas celui de Python. **9ᵉ
     manifestation de la classe versée à `/audit-methodo`.** Corrigé, re-mesuré **hors de tout pipe**.
-- **⏳ DEUX ÉDITIONS HUMAINES, seules actions restantes** *(`reports/US-00.6/transmissions_humaines.md`,
+- **✅ DEUX ÉDITIONS HUMAINES — APPLIQUÉES le 2026-07-31** *(commit `f585e82`)* **PÉRIMÉ-2026-07-31 : cette entrée disait « ⏳ … seules actions restantes »**, ce qui est **faux depuis `f585e82`** — les deux diffs sont **appliqués et vérifiés** *(l'audit sécurité a établi **28/28 lignes exécutables identiques** au diff proposé, et `emit_branch_protection` **octet-identique**)* *(`reports/US-00.6/transmissions_humaines.md`,
   diffs exacts)* : **T7** `factory.config.json` → `app.coverage_ratchet = {value: 89.4, …}` ·
   **T8** `factory_sync.py` → lecture du cliquet **pour `app`** *(aujourd'hui `frontend` seul)*.
   ⛔ **Les deux fichiers sont PROTÉGÉS** — aucun agent ne les écrit. ✅ **La logique est livrée AVANT** et
