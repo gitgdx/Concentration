@@ -14,6 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | development_start | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -553,6 +554,60 @@
     2026-07-30)*.
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
+
+### [US-00.6] Couverture initiale mesurée + cliquet (ratchet) actif
+
+- **PO Visa** (2026-07-31, subagent **@ProductOwner**, contexte frais) : Story File
+  `docs/stories/US-00.6-couverture-ratchet.md` — **6 AC** en Nominal/Erreur/Limite, **18 scénarios**
+  Gherkin **documentaires**, DoD. **Track `STANDARD`** *(et non QUICK malgré un seul fichier de code : le
+  livrable durcit un contexte **REQUIS**, et un cliquet mal réglé rend **toute PR infusionnable,
+  administrateur inclus**)*. **DERNIÈRE US requise pour clore EPIC_00.**
+- **🔴 LE @PO A RÉOUVERT UN ARBITRAGE DE @Architect, ET IL AVAIT RAISON.** @Architect avait arbitré le
+  2026-07-30 « valeur en config + logique dans `check_flutter_coverage.py` » **sans avoir vérifié** que
+  l'**Art. 4** *(amendé la veille)* **et ADR-001 §4** *(immuable)* épinglaient **tous deux** la route
+  `factory_sync.py`. **Le compte s'inverse** : cette route « économe » coûtait **1 édition + un amendement
+  de la Constitution + une attestation humaine + un ADR-008 + une PR dédiée**, contre **2 éditions et rien
+  d'autre**. ⇒ **Arbitrage humain du 2026-07-31 : route du SCHÉMA D'ORIGINE.** ✅ **L'Art. 4 et ADR-001
+  RESTENT VRAIS**, et les ambiguïtés **A-1** et **A-2** deviennent **SANS OBJET**.
+- **✅ Gate `clarify` PASSÉE — les 7 ambiguïtés tranchées** *(2 par arbitrage humain, 5 par @Architect)*.
+  Décisions notables : cliquet en **objet** `{value, date, motif}` *(JSON ne porte aucun commentaire, donc
+  le lien valeur↔justification **doit être une donnée**)* · **aucune clé de tolérance** *(sur **19** lignes,
+  **1 ligne = 5,26 pt** — tout réglage inférieur serait **sans effet observable**)* · **autotest EN CI**
+  *(sinon on recréait à l'identique la dette du `selftest` qui **dort depuis US-00.4**)*.
+- **🔒 Integration Lock** (`EVT_ARCHI_VALIDATED`) : **6 risques nommés**, dont **R-1 le verrouillage du
+  dépôt** *(une référence trop haute rend toute PR infusionnable)* et **R-3/R-4 explicitement NON
+  MITIGÉS** *(le cliquet ne monte jamais seul ; la complaisance reste possible)*. ⛔ **Aucun ADR** : la
+  route retenue **est** celle qu'ADR-001 §4 prescrit, il n'y a **rien à remplacer**.
+- **📏 T1 — MESURE INITIALE, et elle porte trois pièges vérifiés** *(`reports/US-00.6/mesure_initiale.txt`)* :
+  couverture **exacte `89,4737 %` (17/19)**, mais le script **AFFICHE `89.5 %`** ⇒ **consigner l'affiché
+  fabriquerait un rouge immédiat sur un dépôt inchangé** · **1 ligne = 5,26 pt**, donc **aucune valeur
+  n'existe entre 89,47 % et 94,74 %** · les **2** lignes non couvertes sont **nommées** :
+  `lib/main.dart:9-10`, soit `void main()` et `runApp(...)` — **la complaisance possible est donc
+  identifiée nominativement, pas hypothétique**.
+- **✅ CODE LIVRÉ (`EVT_CODE_READY`)** — tout ce qui est à portée d'agent :
+  - `scripts/check_flutter_coverage.py` : lit le cliquet **uniquement** dans `factory.config.json`
+    *(Art. 4)*, applique **`max(plancher, cliquet)`** et **dit toujours lequel des deux est violé** —
+    jamais un « seuil » anonyme. **Fail-explicit** sur les 4 cas dégradés, dont **`0` ligne mesurable** :
+    ⛔ *« ce n'est pas 0 %, ce n'est pas une mesure »*.
+  - 🔬 **`scripts/selftest_coverage_ratchet.py` + 4 fixtures** — **LE MUTANT**, et il rend
+    **2 REFUS sur 4 attentes** : **`16/19` est ROUGE** *(il passait **VERT** avant cette US : le plancher à
+    80 % tolérait **exactement une régression d'une ligne** — c'est là toute la valeur de l'US, et elle
+    est **modeste et précise**)*, `17/19` **VERT** *(garde anti-verrouillage)*, `18/19` **VERT + valeur à
+    consigner imprimée**, `0` ligne **ROUGE**.
+  - **Branché dans le job CI DÉJÀ REQUIS `📋 Governance`** *(step, pas job séparé — un job séparé serait
+    un contexte **non requis**, donc un contrôle qui n'empêche **rien**)*. ⚠️ **Contrepartie assumée** :
+    une fixture cassée **verrouille toute PR** — risque **auto-révélateur**, à la différence d'un contrôle
+    qui dort.
+  - ⛔ **Faute d'instrumentation attrapée en route, et elle est de moi** : mon premier test affichait
+    `exit=0` sur un cas **rouge** — mon `$?` lisait le code de `sed`, pas celui de Python. **9ᵉ
+    manifestation de la classe versée à `/audit-methodo`.** Corrigé, re-mesuré **hors de tout pipe**.
+- **⏳ DEUX ÉDITIONS HUMAINES, seules actions restantes** *(`reports/US-00.6/transmissions_humaines.md`,
+  diffs exacts)* : **T7** `factory.config.json` → `app.coverage_ratchet = {value: 89.4, …}` ·
+  **T8** `factory_sync.py` → lecture du cliquet **pour `app`** *(aujourd'hui `frontend` seul)*.
+  ⛔ **Les deux fichiers sont PROTÉGÉS** — aucun agent ne les écrit. ✅ **La logique est livrée AVANT** et
+  **tolérante à l'absence de la clé** *(vérifié : `run_gates --gate test` **exit 0**)* : **aucun état
+  intermédiaire ne rend une PR infusionnable.**
+- **Prochaine étape** : les 2 copies humaines, puis `/audit-us`, QA, `/certify` — **et EPIC_00 est clos**.
 
 ### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
 

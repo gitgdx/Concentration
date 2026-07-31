@@ -109,6 +109,21 @@ jobs:
         run: python scripts/validate_trace.py --all
       - name: Synchro config (status checks ↔ CI ↔ seuils de l'adapter)
         run: python scripts/factory_sync.py --check
+      # ⛔ AUTOTEST DU CLIQUET DE COUVERTURE — step de CE job, et non un job separe.
+      #    Meme raison qu actionlint ci-dessus : un job separe serait un contexte NON REQUIS,
+      #    donc un controle qui n empeche RIEN. Ici il vit dans « 📋 Governance », qui EST requis.
+      #    Il prouve par 4 fixtures que check_flutter_coverage.py sait REFUSER — dont le cas
+      #    16/19, qui passait VERT avant US-00.6 (le plancher a 80 % toleratit exactement une
+      #    regression d une ligne). « Un controle qui ne peut pas rougir est nul » : lecon
+      #    d US-00.5, ou un controle PORTANT SON MUTANT a ete juste 7 fois sur 7 quand un
+      #    controle purement lexical etait faux 7 fois sur 7.
+      #    ⚠️ Il ne lit PAS factory.config.json : il fabrique sa propre configuration temporaire,
+      #    pour rester executable sans dependre d une edition humaine sur un fichier protege.
+      #    ⚠️ Contrepartie assumee : une fixture cassee verrouille toute PR — risque
+      #    AUTO-REVELATEUR, a la difference du selftest de check_branch_protection.py qui DORT
+      #    depuis US-00.4. C est precisement la dette que ce step existe pour ne pas reproduire.
+      - name: 🔒 Autotest du cliquet de couverture (US-00.6)
+        run: python scripts/selftest_coverage_ratchet.py
 
   app-quality:
     name: 📱 App (gates run_gates.py)
