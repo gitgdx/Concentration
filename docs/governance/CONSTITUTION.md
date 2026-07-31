@@ -2,7 +2,16 @@
 
 > Principes **non-négociables**, référencés à chaque phase du workflow (inspiré du
 > `constitution.md` de GitHub Spec Kit). Chaque article indique son **enforcement** : une règle
-> sans mécanisme d'application est un vœu, pas une règle. Version 1.0 — 2026-07-24.
+> sans mécanisme d'application est un vœu, pas une règle. Version 1.1 — 2026-07-31.
+>
+> **Historique des versions** — *(la clause de Révision exige une PR dédiée, une ligne PROJECT_LOG et
+> un incrément de version ; l'historique est tenu ici pour que l'incrément soit **vérifiable** et non
+> seulement déclaré)* :
+> * **1.0** — 2026-07-24 : version initiale.
+> * **1.1** — 2026-07-31 : **Art. 4 uniquement** (US-00.5). Le corps annonçait des gates
+>   **inexistants ou non bloquants** et un seuil **absent** de la configuration ; le bloc
+>   *Enforcement* ne nommait **qu'un** des **deux** workflows porteurs de contextes requis. Motif
+>   détaillé dans l'article. **Aucun autre article touché.**
 
 ---
 
@@ -40,14 +49,51 @@ et `/certify` (rejettent un rapport sans sortie d'outil).
 
 ## Art. 4 — Seuil qualité unique
 
-Les seuils de couverture et les gates bloquants (lint, typecheck, SAST, audit de dépendances,
-tests) sont définis en **un seul endroit** : `factory.config.json` →
-`adapter.components.*.gates` et `coverage_min` / `coverage_ratchet`. Ils sont vérifiés par
+Les seuils de couverture et les gates de qualité (**mise en forme, lint, typage statique, tests,
+audit de dépendances**) sont définis en **un seul endroit** : `factory.config.json` →
+`adapter.components.*.gates` et `coverage_min`. Ils sont vérifiés par
 `python scripts/factory_sync.py --check` (cohérence config ↔ fichiers de l'adapter) et exécutés
-par `python scripts/run_gates.py`.
+par `python scripts/run_gates.py`. **La liste des gates et leurs valeurs ne sont recopiées
+nulle part** : cet article les **nomme**, la configuration en **fait foi**.
 
-**Enforcement** : CI `ci.yml` jobs qualité, requis par la protection de branche
-(`scripts/apply_branch_protection.sh`) ; job `governance` (synchro).
+**Ce que cet article ne garantit PAS — et le taire serait un vœu, pas une règle** :
+
+- ⛔ **Aucun gate SAST n'existe** pour le code applicatif. `actionlint` (épinglé par SHA256, job
+  requis `governance`) couvre les **workflows GitHub Actions** ; **rien** ne couvre le code Dart.
+  **Dette ouverte** — aucun verdict de sécurité ne peut s'adosser à une analyse statique de code.
+- ⛔ **L'audit de dépendances n'est PAS bloquant** (`deps_audit` porte `"blocking": false`) et il
+  mesure l'**obsolescence**, **pas la vulnérabilité** : **aucun scan de CVE n'existe**. **Dette
+  ouverte.**
+- ⛔ **`coverage_ratchet` n'est PAS en vigueur** : la clé existe au schéma de configuration mais est
+  **absente** de `factory.config.json`, et son activation exige **du code** dans `factory_sync.py`
+  (la clé n'y est lue que pour un composant `frontend`, **absent** de l'adapter courant) — pas une
+  ligne de configuration. **À activer par US-00.6.**
+- ⚠️ Le gate **`build`** est **bloquant** et prouve la **constructibilité**. Sur l'adapter courant,
+  il s'appuie sur une cible de **repli** : un vert signifie « le code compile pour cette cible »,
+  **pas** « l'application est constructible pour sa cible de distribution ».
+
+**Enforcement** : CI **`ci.yml`** (jobs qualité, `secrets-scan`, `governance`) **et
+`branch-naming.yml`** (`check-branch-name`) — ensemble, ils portent les **quatre** contextes
+**requis** par la protection de branche appliquée depuis le 2026-07-28
+(`scripts/apply_branch_protection.sh`). **La liste des contextes requis n'est pas recopiée ici** :
+elle vit dans `factory.config.json` → `status_checks`, **source unique**. Conséquence pratique d'un
+nom de branche non conforme — **PR définitivement infusionnable** : voir
+[`docs/GIT_PROTECTION.md`](../GIT_PROTECTION.md) §*Conditions de fusion*.
+
+> 📜 **Amendement du 2026-07-31 (US-00.5) — motif écrit, comme l'exige la clause de Révision.**
+> Le corps de cet article annonçait des **gates bloquants « SAST »** et un **audit de dépendances
+> bloquant** qui **n'existent pas comme tels**, et citait **`coverage_ratchet`** comme seuil en
+> vigueur alors que la clé est **absente** de la configuration. Établi **par exécution**, non par
+> lecture : `run_gates.py --gate sast` rend « *aucun gate ne correspond* ».
+> ⚠️ **Le plus grave n'est pas l'erreur, c'est sa durée** : l'article était faux **depuis le
+> 2026-07-24, premier jour du projet**, et l'absence de SAST était **déjà consignée dans un rapport
+> de sécurité dès le 2026-07-26**. **Aucun des cinq audits de sécurité qui l'ont constatée n'a
+> jamais ouvert cet article.** La factory a **su** et **affirmé le contraire simultanément**, en
+> certifiant cinq US — dont US-00.7, dont l'objet même était la cohérence du corpus.
+> ⛔ **Cet amendement ne crée aucun gate** : il fait dire à l'article ce qui **est**, et **nomme les
+> dettes** au lieu de les taire. Le bloc *Enforcement* nommait par ailleurs `ci.yml` **seul**, alors
+> que le **4ᵉ** contexte requis — celui qui rend une PR *définitivement* infusionnable — provient de
+> `branch-naming.yml`. Décision de stack associée : [ADR-001](../adr/ADR-001-choix-de-stack.md).
 
 ## Art. 5 — Autorité de certification
 
