@@ -25,9 +25,13 @@ des deux est violé — jamais un « seuil » anonyme.
 FAIL-EXPLICIT, JAMAIS DE FAUX VERT (US-00.6, AC-2/AC-3 « Erreur ») :
   * rapport lcov absent .................. échec explicite
   * 0 ligne instrumentée ................. échec explicite (un vert par vide est
-                                           un mensonge : une troncature du lcov
-                                           AUGMENTE le pourcentage, les lignes non
-                                           couvertes étant en tête du fichier)
+                                           un mensonge : ce n'est pas une mesure)
+  * totaux déclarés (LF:/LH:) qui contredisent les lignes comptées .... échec
+                                           explicite (correctif du finding B-1)
+    PÉRIMÉ-2026-07-31 : ce bloc affirmait qu'une troncature du lcov AUGMENTE le
+    pourcentage. C'est l'INVERSE — mesuré, la suite couvertes(n)/n est croissante,
+    donc une troncature DIMINUE et un lcov tronqué est CONSERVATEUR. Les deux refus
+    ci-dessus restent légitimes par eux-mêmes, sans cet argument.
   * clé `coverage_ratchet` absente ....... plancher seul + message explicite
   * clé mal formée ....................... échec explicite, jamais un plantage
   * référence < plancher ................. échec explicite (config incohérente),
@@ -62,17 +66,46 @@ for _flux in (sys.stdout, sys.stderr):
 RATCHET_PATH = ("adapter", "components", "app", "coverage_ratchet")
 
 
-def line_coverage_percent(lcov_path: Path) -> tuple[float, int, int]:
+def line_coverage_percent(lcov_path: Path) -> tuple[float, int, int, list[str]]:
+    """Compte les lignes DA: ET recoupe le resultat avec les totaux DECLARES (LF:/LH:).
+
+    ⛔ CORRECTIF DU FINDING B-1 (audit de revue, 2026-07-31) : la version precedente
+    ignorait completement LF:/LH:. Un rapport declarant « LF:19 / LH:5 » tout en listant
+    19 lignes couvertes rendait « 100.0% (19/19) », exit 0, ET proposait de consigner
+    100.0 — ce qui aurait VERROUILLE LE DEPOT (le gate est un contexte requis).
+    Le mutant qui l a trouve n avait ete ecrit par personne : c est l auditeur qui l a
+    fabrique. Le controle recoupe donc desormais le COMPTE et le DECLARE, et toute
+    divergence est un ECHEC EXPLICITE — un rapport qui se contredit n est pas une mesure.
+    """
     covered = 0
     total = 0
+    lf_declare = 0
+    lh_declare = 0
     for line in lcov_path.read_text(encoding="utf-8").splitlines():
         if line.startswith("DA:"):
             _, _, hits = line.partition(":")[2].partition(",")
             total += 1
             if int(hits) > 0:
                 covered += 1
+        elif line.startswith("LF:"):
+            try:
+                lf_declare += int(line[3:].strip())
+            except ValueError:
+                pass
+        elif line.startswith("LH:"):
+            try:
+                lh_declare += int(line[3:].strip())
+            except ValueError:
+                pass
+
+    anomalies: list[str] = []
+    if lf_declare != total:
+        anomalies.append(f"LF: declare {lf_declare} ligne(s) instrumentee(s), {total} comptee(s)")
+    if lh_declare != covered:
+        anomalies.append(f"LH: declare {lh_declare} ligne(s) couverte(s), {covered} comptee(s)")
+
     pct = (covered / total * 100) if total else 0.0
-    return pct, covered, total
+    return pct, covered, total, anomalies
 
 
 def read_ratchet(config_path: Path) -> tuple[float | None, str]:
@@ -135,13 +168,25 @@ def main() -> int:
         print(f"[ERREUR] {lcov_path} introuvable — lancer `flutter test --coverage` avant ce script.")
         return 1
 
-    pct, covered, total = line_coverage_percent(lcov_path)
+    pct, covered, total, anomalies = line_coverage_percent(lcov_path)
 
     # ⛔ Un rapport sans ligne instrumentée n'est pas « 0 % » : il n'est PAS UNE MESURE.
     #    Le laisser passer serait un vert par vide — refusé explicitement.
     if total == 0:
-        print(f"[ERREUR] {lcov_path} ne contient AUCUNE ligne instrumentée (0 ligne mesurable).")
-        print("         Ce n'est pas une couverture de 0 % : ce n'est pas une mesure. Refusé.")
+        print(f"[ERREUR] {lcov_path} ne contient AUCUNE ligne instrumentee (0 ligne mesurable).")
+        print("         Ce n'est pas une couverture de 0 % : ce n'est pas une mesure. Refuse.")
+        return 1
+
+    # ⛔ CORRECTIF B-1 : un rapport QUI SE CONTREDIT n'est pas une mesure non plus.
+    #    AC-3 « Erreur » l'exige litteralement, et ce n'etait PAS implemente : un lcov
+    #    declarant « LF:19 / LH:5 » tout en listant 19 lignes couvertes rendait
+    #    « 100.0% », exit 0, et proposait de consigner 100.0 — donc le VERROUILLAGE du
+    #    depot. Le mutant qui l'a trouve n'avait ete ecrit par personne.
+    if anomalies:
+        print(f"[ERREUR] {lcov_path} SE CONTREDIT — totaux declares differents des lignes comptees :")
+        for anomalie in anomalies:
+            print(f"         - {anomalie}")
+        print("         Un rapport incoherent n'est pas une mesure. Refuse.")
         return 1
 
     # Cliquet : lu dans la source unique, jamais écrit en dur ici.

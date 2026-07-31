@@ -45,6 +45,11 @@ CAS = [
     ("inchange_17_sur_19.info", 0, "depot INCHANGE accepte — aucun rouge indu, pas de verrouillage"),
     ("hausse_18_sur_19.info", 0, "HAUSSE acceptee, valeur a consigner imprimee"),
     ("zero_ligne_mesurable.info", 1, "0 ligne mesurable REFUSE — un vert par vide est un mensonge"),
+    # 5e cas AJOUTE le 2026-07-31 apres le finding B-1 de l audit de revue : un rapport dont les
+    # totaux DECLARES contredisent les lignes COMPTEES rendait « 100.0% », exit 0, et proposait
+    # de consigner 100.0 — donc le VERROUILLAGE du depot. Le mutant qui l a trouve n avait ete
+    # ecrit par personne : c est l auditeur qui l a fabrique. Il est desormais DANS le jeu.
+    ("totaux_incoherents.info", 1, "totaux DECLARES contredisant les lignes COMPTEES : REFUSE (B-1)"),
 ]
 
 

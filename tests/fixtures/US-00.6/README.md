@@ -16,9 +16,20 @@ contrôle purement lexical était faux **7 fois sur 7**.
 ## ⚠️ Pourquoi les lignes non couvertes sont EN TÊTE
 
 Elles reproduisent la structure du vrai rapport *(`lib/main.dart:9-10`, soit `void main()` et
-`runApp(...)`)*. **Conséquence contre-intuitive et vérifiée : une troncature du `lcov` AUGMENTE le
-pourcentage.** Un rapport partiel n'est donc **pas conservateur, il est dangereux** — d'où le refus
-explicite du cas « 0 ligne mesurable ».
+`runApp(...)`)*.
+
+> **PÉRIMÉ-2026-07-31 — ce paragraphe affirmait, « comme vérifié », qu'une troncature AUGMENTE le pourcentage et qu'un rapport partiel serait « dangereux, pas conservateur ». C'EST L'INVERSE.**
+> *(Marqueur et citation tiennent sur **une seule ligne** : les avoir séparés était le défaut RB-3/RB-4
+> d'US-00.5 — un marqueur sur la ligne voisine ne couvre rien, et un `grep` par ligne ne le voit pas.)* Mesuré sur le rapport réel : `0 %, 0 %, 33,33 %, 50 %, 60 %, … 89,47 %` — la
+> suite est **strictement croissante**, donc **toute troncature DIMINUE le pourcentage** et un `lcov`
+> tronqué est **CONSERVATEUR**. Le raisonnement était **inversé** : des non-couvertes **en tête**
+> impliquent qu'une troncature en garde proportionnellement **plus**.
+> ⛔ **Ce que cela ne change pas** : le refus du cas « 0 ligne mesurable » est légitime **par
+> lui-même** — ce n'est pas une mesure — et le refus des **totaux incohérents** *(fixture
+> `totaux_incoherents.info`, finding **B-1**)* l'est aussi. **Les deux refus tiennent sans
+> l'argument faux.**
+> **Relevé par les DEUX auditeurs.** Je l'avais écrit à plusieurs endroits **et propagé dans leurs
+> briefs** comme un fait établi : c'est exactement le défaut qu'US-00.5 a payé six fois.
 
 ## ⚠️ Ce que ces fixtures ne prouvent PAS
 

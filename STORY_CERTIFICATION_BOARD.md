@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | development_start | ✅ @PO | N/A | N/A | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | development_start | ✅ @PO | N/A | N/A | ✅ @Dev | ❌ | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -568,7 +568,7 @@
   `factory_sync.py`. **Le compte s'inverse** : cette route « économe » coûtait **1 édition + un amendement
   de la Constitution + une attestation humaine + un ADR-008 + une PR dédiée**, contre **2 éditions et rien
   d'autre**. ⇒ **Arbitrage humain du 2026-07-31 : route du SCHÉMA D'ORIGINE.** ✅ **L'Art. 4 et ADR-001
-  RESTENT VRAIS**, et les ambiguïtés **A-1** et **A-2** deviennent **SANS OBJET**.
+  RESTENT VRAIS**, et les ambiguïtés **A-1** et **A-2** deviennent **SANS OBJET**. ⛔ **PÉRIMÉ-2026-07-31 — « l'Art. 4 et ADR-001 RESTENT VRAIS » est FAUX, et c'est une erreur de raisonnement de @Architect.** *(Finding **B-2** de l'audit de revue, confirmé par vérification.)* L'arbitrage a conclu « sans objet » sur une prémisse vraie **pour une clause sur quatre seulement**. Le changement de route **sauve** la clause « *l'activation exige DU CODE dans `factory_sync.py`* » *(32 lignes y ont été ajoutées)*, **mais rien ne pouvait sauver les trois autres**, puisque c'est le **succès même d'US-00.6** qui les rend fausses : ⛔ « **n'est PAS en vigueur** » *(le gate imprime « (cliquet) »)* · ⛔ « **absente de `factory.config.json`** » *(la clé y est)* · ⛔ « **lue seulement pour un composant `frontend`** » *(elle est lue pour `app`)*. **C'est la classe de défaut qu'US-00.7 a payée CINQ fois** : le corpus affirme qu'une chose manque alors qu'elle est acquise. ✅ **Traitement arbitré le 2026-07-31** : l'**Art. 4 est AMENDÉ** *(PR dédiée, Constitution `1.1` → `1.2`, attestation humaine)* ; **ADR-001 est NOMMÉ et NON corrigé** — il est **immuable**, et son §*Conséquences* décrivait l'état du monde **à sa date**, que ce même jour a changé. **L'immuabilité existe pour qu'on ne repeigne pas l'histoire.**
 - **✅ Gate `clarify` PASSÉE — les 7 ambiguïtés tranchées** *(2 par arbitrage humain, 5 par @Architect)*.
   Décisions notables : cliquet en **objet** `{value, date, motif}` *(JSON ne porte aucun commentaire, donc
   le lien valeur↔justification **doit être une donnée**)* · **aucune clé de tolérance** *(sur **19** lignes,
