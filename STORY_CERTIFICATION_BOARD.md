@@ -816,8 +816,59 @@
 - **➡️ B-9 versé aux dettes de `CLAUDE.md`** : **six manifestations en trois jours**, dont une dans un outil
   de contrôle, et **aucun gate CI ne voit cette classe**. Les **cinq remèdes** établis y sont inscrits.
   **Candidat `/audit-methodo` prioritaire.**
-- **Prochaine étape** : **3ᵉ passage QA**. Ensuite **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement
-  de l'Art. 4 *(T10 → T12)*.
+- **✅ LIVRABLE nº 1 — `ADR-001-choix-de-stack.md` sur `main`** : **PR #17**, fusionnée **par l'humain** le
+  2026-07-31 *(`488b074`)*, **4 contextes requis SUCCESS**.
+- **📜 ✅ LIVRABLE nº 2 — AMENDEMENT DE L'ART. 4, Constitution `1.0` → **`1.1`** sur `main`** : **PR #18**,
+  **DÉDIÉE à la lettre** *(diff = `CONSTITUTION.md` + `PROJECT_LOG.md`, **0 autre fichier** — contrôle de
+  sortie exécuté)*, fusionnée **par l'humain** le 2026-07-31T11:00:05Z *(`c62cdcc`)*. Version **LUE** dans
+  le texte : **`1.1 2026-07-31`**, avec un **historique des versions** ajouté pour que l'incrément soit
+  **vérifiable** et non seulement déclaré. ⚖️ La lecture « dédiée = objet déclaré » avait été **écartée par
+  arbitrage humain** : on n'ouvre pas un écart lettre/esprit **sur le texte qui régit les amendements**.
+  - **Ce que l'amendement corrige, établi PAR EXÉCUTION** : un gate **`SAST` annoncé bloquant et
+    inexistant** · un **audit de dépendances annoncé bloquant** alors que `deps_audit` porte
+    `"blocking": false` **et** mesure l'obsolescence, pas la vulnérabilité · **`coverage_ratchet`** cité
+    comme seuil en vigueur alors que la clé est **absente** *(et son activation exige **du code**, pas une
+    clé — la clé n'est lue que pour un composant `frontend` **inexistant** sur cet adapter)* · le gate
+    **`app.build`**, jusqu'ici **omis**, nommé avec sa **borne** · et le bloc *Enforcement* qui ne nommait
+    **qu'un** des **deux** workflows porteurs de contextes requis.
+  - ⛔ **L'amendement ne crée AUCUN gate** : il fait dire à l'article ce qui **est**, et **nomme les
+    dettes** au lieu de les taire. **Aucune valeur n'est recopiée** — l'article **nomme**, la configuration
+    **fait foi**, Art. 4 étant l'article du « seul endroit ».
+  - ⏱️ **Le plus grave n'est pas l'erreur, c'est sa durée** *(constat de l'audit sécurité)* : `git log` sur
+    `CONSTITUTION.md` rendait **un seul commit, le 2026-07-24** — l'article était faux **depuis le premier
+    jour du projet**, l'absence de SAST était **consignée dans un rapport de sécurité dès le 2026-07-26**,
+    et **aucun des cinq audits de sécurité qui l'ont constatée n'a jamais ouvert cet article**.
+- **🧪 QA — 3ᵉ passage : `FAILED`** (2026-07-31, `qa_final.md`) — **mais DEUX VERROUS SAUTENT** :
+  - ✅ **« Le produit est bon et il est prêt. »** Les **8 affirmations** de l'Art. 4 amendé vérifiées
+    **une par une, à charge, par exécution** : **aucune n'est fausse**. ADR-001 conforme. Clause *Révision*
+    tenue **à la lettre**. **17 critères sur 21 passent**, dont les **5** qui étaient hors périmètre.
+  - ✅ **LA CONTRADICTION ADR-001 ↔ ART. 4 EST ÉTEINTE, ET LA RÉSERVE SUR LE `🚀 OUI` EST LEVÉE.**
+  - 🔴 **F-1 — la SEPTIÈME manifestation, et la 2ᵉ dans un contrôle** : mon contrôle de monotonie
+    **comparait l'ancien motif à lui-même** *(la lecture de la source partait dans `/dev/null`, la valeur
+    substituée étant un littéral recopié)*. **Prouvé par mutation** : régression injectée → attendu ≥ 1 →
+    **obtenu 0** ; et un **chemin inexistant** donnait le même résultat. **Le contrôle était
+    INFALSIFIABLE** — un vert vide se lit comme un vert. ✅ **Réparé** : la source est **lue**, et le
+    contrôle **se prouve lui-même** par un mutant qui l'ampute de deux alternatives.
+  - 🔴 **F-2, et il me prend en flagrant délit sur ce que j'ai affirmé** : l'amendement **A CHANGÉ la
+    liste des catégories** *(« typecheck » **remplacé** par « typage statique » — **0 occurrence** de
+    « typecheck » dans toute la Constitution —, « **mise en forme** » **ajoutée**)*, or j'ai écrit à
+    l'humain **et dans la PR** que « `lint` et `typecheck` ne sont pas touchés » : **c'est INEXACT**. Mes
+    deux copies de contrôle portaient l'ancienne liste, et `verify.sh` affirmait même que « `format` n'est
+    PAS une catégorie de l'Art. 4 » **alors que l'article la nomme en premier**. ✅ **Réparé** : les
+    catégories sont désormais **LUES DANS L'ARTICLE**, jamais recopiées — même remède que pour le motif.
+    **Attendu du critère nº 5 révisé à `0` échec**, l'ancien étant devenu **improducible** *(progrès)*.
+  - 🔴 **F-3** : ce §`[US-00.5]` **ignorait le 2ᵉ livrable** — il s'arrêtait à « *Prochaine étape : PR nº 2*
+    » **pendant que la DoD 20 était cochée**. ✅ **Réparé ci-dessus.**
+  - ⚖️ **Elle RETIRE son propre v2 comme gate** et tranche : `NB-1-faux=2` était **l'artefact de son
+    instrument**, pas un défaut du corpus *(le motif était **intact, déplacé** — précisément parce que
+    j'avais obéi à son B-7)*. Elle confirme que son **exit code était inconditionnellement rouge**, et
+    relève un résidu que **je n'avais pas vu** : `VERIFIEES=0` rendait son `ECART=0` **vrai par vide**.
+  - **Nouveau gate, atteignable et rejouable** : **`sh reports/US-00.5/qa_exit_v3.sh` → exit 0**, où
+    **chaque contrôle bloquant porte son propre mutant**. **4 actions** : **C-1** *(fait)* · **C-2**
+    *(fait)* · **C-3** *(fait)* · **C-4 — attestation humaine de l'amendement, DoD 14 : action HUMAINE**.
+  - **DoD 16/23 → 21/23** par C-2/C-3 seuls. Restent **14** *(humaine)* et **18** *(re-QA)*.
+- **Prochaine étape** : **C-4 (action humaine)**, puis **4ᵉ passage QA** sur `qa_exit_v3.sh`, puis
+  `/certify`.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 

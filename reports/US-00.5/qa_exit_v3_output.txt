@@ -1,0 +1,48 @@
+================================================================================
+ US-00.5 — CRITERE DE SORTIE QA v3.  Chaque controle bloquant porte son mutant.
+================================================================================
+### A. Chiffres presentes comme des RESULTATS dans le corpus de preuves
+  OK      | ECART=0 (verifiees=0, captures datees=0)
+  OK      | SANS_MARQUEUR=0
+  INFO    | ⚠️ BORNE : VERIFIEES=0 -> « ECART=0 » est VRAI PAR VIDE.
+  INFO    |    Il etablit que les rapports ne publient plus de chiffre COURANT ; il n etablit
+  INFO    |    RIEN sur la justesse d un chiffre. A ne jamais lire comme un vert de fond.
+  OK      | mutant A : 8/8 formes de chiffre-resultat detectees
+### B. Classement NB-1 — DESIGNE PAR TEXTE (remplace le §D a numeros figes de v2)
+            exempte (motif dans une COMMANDE publiee) : reports/US-00.5/correctifs_failed_revue.txt ligne 65
+            exempte (motif dans une COMMANDE publiee) : reports/US-00.5/qa.md ligne 208
+  INFO    | exempte (script de controle) : reports/US-00.5/qa_assertions_chiffrees.sh
+  INFO    | exempte (script de controle) : reports/US-00.5/qa_detecteur_v2.sh
+  INFO    | exempte (script de controle) : reports/US-00.5/qa_exit_v3.sh
+  OK      | occurrences NB-1 examinees=4 (exemptees=2), NON qualifiees=0
+  OK      | mutant B detecte : une occurrence NUE serait signalee
+### C. MONOTONIE du motif du sweep — controle HONNETE + son mutant
+  INFO    | motif LU dans reports/US-00.5/sweep_transmissions.sh (568 octets) — aucune copie
+  OK      | monotonie : 0 texte de reference perdu (sur 10)
+  OK      | mutant C detecte : motif ampute -> 2 texte(s) perdu(s) VU(s)
+  ECHEC   | verify.sh §7 : le cote « nouveau motif » est $ANCIEN (lecture redirigee vers /dev/null) -> TAUTOLOGIQUE
+### D. Art. 4 <-> table de correspondance des categories (derive apres la PR no 2)
+  INFO    | categories LUES dans l Art. 4 : mise en forme/lint/typage statique/tests/audit de dépendances
+            categorie « audit de dépendances » nommee par l Art. 4 mais ABSENTE de reports/US-00.5/verify.sh
+  ECHEC   | 1 categorie(s) de l Art. 4 absente(s) de la table de correspondance
+            « typecheck » traite en categorie par reports/US-00.5/verify.sh mais NON nomme comme gate par l Art. 4
+            « SAST » traite en categorie par reports/US-00.5/verify.sh mais NON nomme comme gate par l Art. 4
+  ECHEC   | 2 categorie(s) perimee(s) dans la table
+  OK      | aucune affirmation de reports/US-00.5/verify.sh contredite par le texte de l Art. 4
+  OK      | les 5 gates de factory.config.json existent (run_gates --gate x5)
+### E. LEDGERS — le 2e livrable est-il ENREGISTRE ? (sur main depuis 2026-07-31T11:00:05Z)
+  OK      | SCB §[US-00.5] enregistre l amendement (PR #18 / increment 1.1)
+  ECHEC   | SCB §[US-00.5] annonce encore la PR nº 2 / le 3e passage QA comme A VENIR
+  ECHEC   | DoD 14 porte encore « il n y a pas encore d amendement a approuver »
+  ECHEC   | DoD 5 porte encore « l Art. 4 n est pas amende ici »
+  OK      | une attestation humaine de l amendement est consignee (niveau 1, declaratif)
+  ECHEC   | critere de cloture EPIC_00 encore DECOCHE (DoD 23) alors que les 2 livrables sont sur main
+### F. Non-regression et gouvernance (executees, jamais declarees)
+  OK      | verify.sh exit 0
+  OK      | run_gates --all exit 0
+  OK      | check_scb_compliance exit 0
+  OK      | validate_trace US-00.5 exit 0
+================================================================================
+ CRITERE DE SORTIE : NON ATTEINT — voir les ECHEC ci-dessus (exit 1)
+ ⛔ Aucune exhaustivite revendiquee. Chaque controle bloquant porte son mutant.
+================================================================================
