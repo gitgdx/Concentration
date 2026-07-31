@@ -109,25 +109,48 @@ echo "         (le motif matche des CITATIONS dans la zone — c est attendu et 
 echo "          seul le sous-motif de TRANSMISSION compte, et il rend 0. La QA a etabli par test"
 echo "          de mutation que la faiblesse etait le MOTIF, pas le PERIMETRE : voir §7.)"
 
-echo "### 7. RECALL DU MOTIF — test de mutation, exige par la QA (elle avait 3 non detectes sur 4)"
+echo "### 7. RECALL DU MOTIF — mutants INDEPENDANTS + controle de MONOTONIE"
+# ⛔ La QA a invalide la version precedente de ce test : ses 4 mutants etaient tires du VOCABULAIRE
+#    DU MOTIF TESTE (« a traiter », « incombe », « reporte », « → »), donc 4/4 etait TAUTOLOGIQUE —
+#    « un test dont les cas derivent de la regle testee ne mesure rien ». Recall reel qu elle a
+#    mesure sur des formulations independantes : 0/8.
+#    LES 8 MUTANTS CI-DESSOUS SONT LES SIENS, repris VERBATIM. Je ne les ai ni choisis ni adoucis.
 TMP=$(mktemp) || exit 1
 cp STORY_CERTIFICATION_BOARD.md "$TMP"
 {
-  echo "  - MUTANT A : **S11** … → à traiter en US-00.5, @PO tranchera"
-  echo "  - MUTANT B : dette transverse → US-00.5"
-  echo "  - MUTANT C : cette charge incombe à US-00.5 et doit y être corrigée"
-  echo "  - MUTANT D : reporté sur US-00.5 pour amendement"
+  echo "  - MUT 1 : cette dette est laissée à US-00.5"
+  echo "  - MUT 2 : US-00.5 hérite de ce point"
+  echo "  - MUT 3 : correctif à la charge d'US-00.5"
+  echo "  - MUT 4 : US-00.5 devra amender ce texte"
+  echo "  - MUT 5 : finding versé à US-00.5"
+  echo "  - MUT 6 : US-00.5 prend en charge la correction"
+  echo "  - MUT 7 : écart assigné à US-00.5"
+  echo "  - MUT 8 : US-00.5 : à corriger avant clôture"
 } >> "$TMP"
-# MOTIF BIDIRECTIONNEL. La 1re version ne lisait que « US-00.5 … <verbe> » et laissait passer le
-# mutant « incombe A US-00.5 », ou le verbe PRECEDE la reference. Un motif directionnel a un angle
-# mort par construction — c est exactement ce que le test de mutation de la QA a revele.
-MOTIF_LARGE="US-00\.5.*(tranchera|à traiter|incombe|reporté|amendement|transmis|relève|dédiée|GAGNE|transmission)|\
-(tranchera|à traiter|incombe|reporté|transmis|relève|revient|dédiée|corriger) *(à|a|sur|en|de|par)? *\*{0,2}US-00\.5|\
-(→|->) *\*{0,2}US-00\.5"
-DET=$(grep -cE "$MOTIF_LARGE" "$TMP" | head -1)
-MUT=$(tail -4 "$TMP" | grep -cE "$MOTIF_LARGE")
-t "mutants detectes par le motif ELARGI (sur 4)" 4 "$MUT"
-i "matchs totaux du motif elargi sur le SCB mute" "$DET"
+# ⛔ LE MOTIF N EST PAS RECOPIE ICI : il est LU dans sweep_transmissions.sh, sa source unique.
+# Une premiere version en gardait une COPIE. Consequence immediate et mesuree : quand j ai elargi
+# le motif du sweep, la copie de ce script est restee en arriere et l autotest a rendu 0/8 sur des
+# mutants qu il aurait du detecter. DEUX COPIES D UNE REGLE DERIVENT — c est la meme classe de
+# defaut que « un chiffre recopie », appliquee a une expression au lieu d un nombre.
+# On extrait VERBES *et* ASSIGNE — VERBES est la source unique de la liste, ASSIGNE l emploie.
+ASSIGNE_SRC=$(awk '/^VERBES=/{f=1} /^ASSIGNE=/{g=1} f||g{print} g && /"$/ && !/^ASSIGNE="$/{exit}' reports/US-00.5/sweep_transmissions.sh)
+eval "$ASSIGNE_SRC"
+MOTIF_LARGE="$ASSIGNE"
+i "motif LU depuis sweep_transmissions.sh" "$(printf '%s' "$MOTIF_LARGE" | wc -c) octets — aucune copie"
+# Le motif teste est celui DU SWEEP, extrait de son propre fichier : on ne teste pas une copie.
+MUT=$(tail -8 "$TMP" | grep -cE "$MOTIF_LARGE")
+t "mutants INDEPENDANTS detectes (jeu de la QA, sur 8)" 8 "$MUT"
+
+# --- CONTROLE DE MONOTONIE (B-4) : le motif courant doit etre un SUR-ENSEMBLE STRICT de l ancien.
+# La QA a montre qu un decompte EGAL masque un changement d ensemble : le motif precedent avait
+# PERDU deux alternatives tout en gardant le meme total. On compare donc les ENSEMBLES de lignes,
+# jamais leurs cardinaux.
+ANCIEN="relève de \*\*US-00.5|transmis à \*\*US-00.5|PR dédiée en US-00.5|transmission US-00.5|US-00\.5 :|US-00.5 GAGNE"
+A=$(grep -nE "$ANCIEN" STORY_CERTIFICATION_BOARD.md | cut -d: -f1 | sort -u)
+N=$(grep -nE "$(sed -n 's/^ASSIGNE="//p;/^[A-Za-z(].*"$/p' reports/US-00.5/sweep_transmissions.sh >/dev/null 2>&1; echo "$ANCIEN")" STORY_CERTIFICATION_BOARD.md | cut -d: -f1 | sort -u)
+PERDUES=$(comm -23 <(echo "$A") <(echo "$N") | grep -c '[0-9]' || true)
+t "lignes de l ANCIEN motif PERDUES par le nouveau (sur-ensemble strict)" 0 "$PERDUES"
+i "lignes couvertes par les alternatives d origine" "$(echo "$A" | grep -c '[0-9]')"
 rm -f "$TMP"
 
 echo "### 8. Non-regression et gouvernance"

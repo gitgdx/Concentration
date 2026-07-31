@@ -43,7 +43,7 @@ STORY_CERTIFICATION_BOARD.md:1044:    c'est une charge transmise qui **s'éteint
          La marquer PERIME serait FAUX. C est l exception NOMMEE dans l en-tete du script.
      (b) la ligne de MA PROPRE PROSE du visa US-00.5 qui CITE le texte de cette exception
          pour la justifier. Elle est VRAIE, et elle ne dissimule rien.
-   => 0 charge ETEINTE non marquee. C est le seul enonce que ce bloc revendique, et il est
+   => AUCUNE charge ETEINTE non marquee. C est le seul enonce que ce bloc revendique, et il est
       verifiable en rejouant le script — dont la sortie VIVE fait foi, pas ce paragraphe.
    ⚠️ (b) EST UNE ILLUSTRATION DU PIEGE QUE CE RAPPORT DOCUMENTE PLUS BAS (FAUTE 1) :
       « un grep de motifs matche la documentation des motifs ». Mon propre script en est
@@ -63,7 +63,7 @@ STORY_CERTIFICATION_BOARD.md:1044:    c'est une charge transmise qui **s'éteint
   "@PO tranchera le véhicule" -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
 ## NB-1 — le diagnostic git faux ne subsiste dans AUCUN artefact vivant
 $ grep -rn "dernier commit seulement|ne compare que le" <corpus US-00.5> -> [valeur retiree le 2026-07-31 — source vive : sh reports/US-00.5/verify.sh]
-  -> 0 = corrige aux 3 emplacements (le 3e, PROJECT_LOG:110, est rectifie par une NOUVELLE ligne :
+  -> [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh] — corrige aux 3 emplacements (le 3e, PROJECT_LOG:110, est rectifie par une NOUVELLE ligne :
      append-only, on ne reecrit pas une ligne de journal — usage etabli du projet)
 
 ## NB-2 — le critere de test no 5 REFORMULE est-il satisfait par son propre outil ?
@@ -75,7 +75,8 @@ $ grep -rn "dernier commit seulement|ne compare que le" <corpus US-00.5> -> [val
   SAST -> AUCUN gate ne le realise      => ECHEC ATTENDU (1/2)
   audit_deps blocking -> False
                          => ECHEC ATTENDU (2/2) : realise mais NON BLOQUANT
-  -> 2 echecs attendus, 2 obtenus. Le critere n est PLUS falsifie par son propre outil.
+  -> les DEUX echecs attendus sont obtenus (valeurs vives : verify.sh §4). Le critere n est PLUS
+     falsifie par son propre outil.
 
 ## NB-3 a NB-6, NB-8, NB-9 — presence des renvois et precisions dans ADR-001
   factory_sync.py          -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
@@ -112,11 +113,12 @@ CLASSIFICATION REELLE des 5 occurrences, faite apres verification une par une :
 
   code_review.md:172   -> l AUDITEUR cite ma phrase fautive pour la refuter.  LEGITIME (rapport date)
   code_review.md:173   -> l AUDITEUR prescrit le remplacement.                LEGITIME (rapport date)
-  conformite_ac.txt:45 -> MA correction cite ce que j avais ecrit.            LEGITIME (citation dans sa refutation)
-  correctifs_...:27    -> la commande de grep elle-meme, echo dans ce rapport. LEGITIME (l outil se matche)
+  conformite_ac, bloc « RECTIFICATION DU 2026-07-30 » -> cite ce que j avais ecrit.  LEGITIME (citation dans sa refutation)
+  correctifs, la LIGNE DE COMMANDE de grep elle-meme, echo dans ce rapport.        LEGITIME (l outil se matche)
   SCB:638              -> MA correction cite ce que j avais ecrit.            LEGITIME (citation dans sa refutation)
 
-  => 5 occurrences, 0 ASSERTION VIVANTE. Le correctif NB-1 EST tenu.
+  => AUCUNE ASSERTION VIVANTE ne subsiste ; les occurrences sont des citations dans leur propre
+     refutation. Le correctif NB-1 EST tenu. [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
 
 POURQUOI LE MOTIF ETAIT MAUVAIS, et c est instructif : il ne peut pas distinguer une ASSERTION
 d une CITATION-DANS-SA-REFUTATION. C est le piege deja documente du projet, rencontre TROIS fois

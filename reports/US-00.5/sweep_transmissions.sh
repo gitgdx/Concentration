@@ -65,8 +65,32 @@ fi
 #      verbe PRECEDE la reference. Un motif a sens unique a un angle mort PAR CONSTRUCTION.
 # ⛔ Ce qui n est PAS revendique : l exhaustivite. Un motif ne vaudra jamais mieux que sa liste de
 #    verbes ; le test de mutation de verify.sh §7 en mesure le recall, il ne le garantit pas.
-ASSIGNE="US-00\.5.*(tranchera|à traiter|incombe|reporté|amendement|transmis|relève|dédiée|GAGNE|transmission)|\
-(tranchera|à traiter|incombe|reporté|transmis|relève|revient|dédiée|corriger) *(à|a|sur|en|de|par)? *\*{0,2}US-00\.5|\
+# --- 3e rectification, 2026-07-31 : SUR-ENSEMBLE STRICT + recall elargi -------------------------
+# La QA a etabli DEUX defauts de plus dans la version precedente, tous deux reels :
+#   (a) REGRESSION NON DETECTEE : le nouveau motif n etait PAS UN SUR-ENSEMBLE de l ancien — il
+#       PERDAIT « transmission US-00.5 » et « US-00.5 : ». Le total restait 8 -> 8, ce qui MASQUAIT
+#       le changement d ensemble ; l effet visible etait nul PAR CHANCE (les deux lignes perdues
+#       portaient le marqueur). Un decompte egal n est PAS une preuve d equivalence.
+#       => les alternatives d origine sont REINTEGREES telles quelles, en tete.
+#   (b) RECALL REEL 0/8 sur des formulations qu elle a choisies INDEPENDAMMENT de mon vocabulaire
+#       (« laissee a », « herite », « a la charge d », « devra », « verse a », « prend en charge »,
+#       « assigne a », « US-00.5 : a corriger »). Mon test de mutation etait TAUTOLOGIQUE : ses
+#       4 mutants etaient tires du vocabulaire du motif teste, donc il ne mesurait RIEN.
+#       => verbes ajoutes, et l autotest de verify.sh §7 utilise desormais SES formulations.
+# ⛔ TOUJOURS PAS D EXHAUSTIVITE : un motif ne vaudra jamais mieux que sa liste de verbes. Ce qui
+#    est revendique est un recall MESURE sur un jeu de mutants INDEPENDANT, pas la couverture.
+# --- 4e rectification, 2026-07-31 : UNE SEULE LISTE DE VERBES, utilisee DANS LES DEUX SENS -------
+# Defaut trouve par l autotest sur les mutants INDEPENDANTS de la QA (5/8) : j avais DEUX listes de
+# verbes, une par sens de lecture, et elles avaient DIVERGE — « herite », « devra », « prend en
+# charge » ne figuraient que dans le sens « verbe -> US-00.5 », donc les mutants ou le verbe SUIT la
+# reference echappaient. Meme classe que la copie du motif dans verify.sh : DEUX COPIES D UNE REGLE
+# DERIVENT, qu il s agisse d un nombre, d une expression ou d une liste.
+# => VERBES est desormais la source unique, et ASSIGNE l emploie dans les deux directions.
+VERBES="tranchera|à traiter|à corriger|incombe|reporté|amendement|amender|transmis|relève|revient|dédiée|corriger|laissée?|hérite|à la charge|devra|versée?|prend en charge|assignée?"
+
+ASSIGNE="relève de \*\*US-00.5|transmis à \*\*US-00.5|PR dédiée en US-00.5|transmission US-00.5|US-00\.5 :|US-00.5 GAGNE|\
+US-00\.5.*($VERBES)|\
+($VERBES) *(à|a|sur|en|de|par|d')? *\*{0,2}US-00\.5|\
 (→|->) *\*{0,2}US-00\.5"
 
 grep -nE "$ASSIGNE" "$SCB" \

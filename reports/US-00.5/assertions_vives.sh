@@ -1,70 +1,40 @@
 #!/bin/sh
-# US-00.5 · DETECTEUR GENERALISE de la classe de defaut « assertion chiffree ecrite a la main ».
+# ################################################################################################
+# ⛔⛔  DETECTEUR RETIRE LE 2026-07-31 — IL BLANCHISSAIT.  NE PAS S EN SERVIR COMME GATE.  ⛔⛔
+# ################################################################################################
 #
-# ------------------------------------------------------------------------------------------------
-# POURQUOI CE SCRIPT EXISTE, ET CE QU IL CORRIGE DANS L INSTRUMENT DE LA QA
-# ------------------------------------------------------------------------------------------------
-# La QA a MECANISE la bonne classe de defaut et son critere de sortie est le bon : ECART=0.
-# Son script (qa_assertions_chiffrees.sh) est CONSERVE INTACT, et son verdict reste auditable.
+# CE QUE CE SCRIPT FAISAIT, ET POURQUOI C EST PIRE QU UN ANGLE MORT
+# -----------------------------------------------------------------
+# Ecrit par @Architect le 2026-07-31 pour detecter la classe « assertion chiffree ecrite a la main ».
+# Il rendait « 0 residu / exit 0 » — et c etait FAUX. Son filtre d exclusion etait :
 #
-# MAIS son implementation FIGE LA MOITIE GAUCHE de la comparaison. Son en-tete annonce « aucun
-# chiffre de ce script n est ecrit a la main : la colonne obtenu est LUE » — c est exact pour
-# « obtenu », et FAUX pour « ecrit », qui est un LITTERAL recopie depuis mes rapports au moment de
-# l audit :
-#     chk "conformite_ac « iOS -> 6 »"   6   "$(grep -ci 'iOS' $ADR)"
-#                                        ^ ecrit A LA MAIN dans le script de controle
+#     grep -viE 'CAPTURE DU|PERIME|PÉRIMÉ|valeur retiree'
 #
-# CONSEQUENCE, et elle est structurelle : son ECART=0 devient INATTEIGNABLE des que le corpus
-# evolue LEGITIMEMENT — y compris quand j obeis a sa demande en RETIRANT les chiffres de mes
-# rapports, puisque son littoral « 6 » subsiste dans SON script. L instrument reproduit donc, a un
-# etage au-dessus, exactement le defaut qu il mesure. C est la remarque qu elle fait elle-meme sur
-# son propre travail (« mon script est tombe au premier jet dans le piege ») ; je l etends.
+# Or l assertion fautive qui subsistait etait precisement :
 #
-# CE SCRIPT LIT LES DEUX COTES. Il EXTRAIT du rapport la valeur ecrite, EXECUTE la commande voisine,
-# et compare. Si un rapport ne contient PLUS AUCUNE assertion chiffree, il rend 0 PAR CONSTRUCTION —
-# ce qui est le seul etat verifiable de la classe « plus aucun chiffre ecrit a la main ».
+#     $ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> 2      (la commande rend 5)
 #
-# ⛔ CE QU IL NE FAIT PAS : il ne juge pas la JUSTESSE d une valeur qui n est pas adossee a une
-#    commande dans le meme fichier, et il ne remplace pas verify.sh (qui produit les valeurs vives).
-#    Aucune exhaustivite revendiquee : il ne voit que le motif « <commande> ... -> <nombre> ».
+# Le filtre matchait « PÉRIMÉ » DANS LA COMMANDE ELLE-MEME et masquait donc la ligne. La QA l a
+# qualifie exactement : « ce n est pas un angle mort, c est un BLANCHIMENT » — le piege que ce projet
+# documente depuis trois jours (« un grep de motifs matche la documentation des motifs »), retourne
+# en FAUX NEGATIF et deplace du rapport vers L INSTRUMENT.
+# Recall mesure de ce script : 2 formes sur 8. Il ratait « => N », « : N », « -> N <texte> », les
+# tableaux — ET LE CAS REEL.
 #
-# Usage : sh reports/US-00.5/assertions_vives.sh    ·    Exit : 0 si aucun ecart, 1 sinon.
-# ------------------------------------------------------------------------------------------------
-set -u
-cd "$(dirname "$0")/../.." || exit 1
-
-RAPPORTS="reports/US-00.5/conformite_ac.txt reports/US-00.5/correctifs_failed_revue.txt"
-N=0
-
-echo "==============================================================================="
-echo " DETECTION des assertions chiffrees RESIDUELLES dans les rapports d US-00.5"
-echo " (les deux cotes sont LUS : la valeur ecrite est EXTRAITE, jamais recopiee ici)"
-echo "==============================================================================="
-
-for f in $RAPPORTS; do
-  [ -f "$f" ] || continue
-  echo "--- $f"
-  # Motif : une ligne portant «  -> <nombre> » en fin, precedee ou non d une commande.
-  # On ignore les lignes explicitement DATEES comme captures et les lignes de recit.
-  RES=$(grep -nE '\->[[:space:]]*[0-9]+[[:space:]]*$' "$f" \
-        | grep -viE 'CAPTURE DU|PERIME|PÉRIMÉ|valeur retiree' || true)
-  if [ -z "$RES" ]; then
-    echo "    aucune assertion chiffree residuelle"
-  else
-    echo "$RES" | sed 's/^/    RESIDU  /'
-    N=$(( N + $(echo "$RES" | grep -c '') ))
-  fi
-done
-
-echo "==============================================================================="
-echo " ASSERTIONS CHIFFREES RESIDUELLES : $N"
-if [ "$N" = "0" ]; then
-  echo " => La classe est CLOSE dans les rapports : plus aucune valeur courante n y est ecrite."
-  echo "    Les valeurs vives sont produites par : sh reports/US-00.5/verify.sh"
-else
-  echo " => AU MOINS UNE valeur est encore ecrite a la main. A retirer, pas a mettre a jour :"
-  echo "    une valeur mise a jour perime au cycle suivant."
-fi
-echo "==============================================================================="
-[ "$N" = "0" ] || exit 1
-exit 0
+# C etait la SIXIEME manifestation en trois jours de ma classe de defaut, et la premiere DANS UN
+# OUTIL DE CONTROLE. Un instrument qui se trompe en silence est plus nuisible que pas d instrument.
+#
+# POURQUOI IL EST RETIRE ET NON REPARE
+# ------------------------------------
+# La QA a livre `reports/US-00.5/qa_detecteur_v2.sh`, qui fait le meme travail correctement et porte
+# son AUTOTEST DE MUTATION (8/8) — un vert non falsifiable y est interdit par construction.
+# Maintenir deux detecteurs dont l un blanchit, c est garder un piege pour le prochain lecteur.
+# ⛔ Le fichier n est pas SUPPRIME : sa trace documente la sixieme manifestation. Il est DESARME.
+#
+# GATE AUTORITAIRE  : sh reports/US-00.5/qa_detecteur_v2.sh   (critere de test no 20)
+# VALEURS VIVES     : sh reports/US-00.5/verify.sh            (critere de test no 19)
+# ################################################################################################
+echo "RETIRE — ce detecteur blanchissait (voir l en-tete). Utiliser :"
+echo "  sh reports/US-00.5/qa_detecteur_v2.sh   (gate autoritaire, autotest 8/8)"
+echo "  sh reports/US-00.5/verify.sh            (valeurs vives)"
+exit 2

@@ -42,7 +42,7 @@ $ git diff --stat origin/main...HEAD -- docs/adr/ADR-005* docs/adr/ADR-006* docs
 ## Critere 15 — aucun texte barre (marqueur litteral, jamais ~~)
 $ grep -c '~~' docs/adr/ADR-001-choix-de-stack.md
 [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
--> 0 = conforme
+-> conforme [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
 
 ## Critere 9 — AC-4 : la PR no 1 ne touche PAS la Constitution
 $ git diff --name-only origin/main...HEAD
@@ -54,10 +54,10 @@ docs/trace/US-00.5/events.jsonl
 tests/features/US-00.5-adr-stack-constitution.feature
 
   CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
-  -> 0 = AC-4 TENU
+  -> AC-4 TENU [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
 
 ## Critere 14 — marqueur S11 pose au SCB
-$ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> 2
+$ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
 
 ## ⚠️ CORRECTION DU CRITERE 9 — 2026-07-30, @Architect
 # Le controle ci-dessus etait TROMPEUR, mais PAS pour la raison que j avais ecrite.
@@ -89,7 +89,7 @@ reports/US-00.5/entry_state/registre_et_sast.txt
 tests/features/US-00.5-adr-stack-constitution.feature
 
   CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
-  -> 0 = AC-4 REELLEMENT TENU sur le contenu complet de la PR no 1
+  -> AC-4 REELLEMENT TENU sur le contenu complet de la PR no 1 [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
 
   factory.config.json present (doit etre 0, fichier protege) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
   fichiers Dart presents (doit etre 0) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]

@@ -594,12 +594,18 @@
     car `strict: true` **sérialise** les merges. Le @PO préconisait **une** PR en lisant « dédiée » comme
     « objet déclaré » ; **écarté** : on n'ouvre pas un écart lettre/esprit **sur le texte qui régit les
     amendements**. **AC-3 et AC-4 passent de `Should` à `Must`** *(C-2)*.
-- **🔴 CONSTAT NOUVEAU, versé à US-00.8 — `CONSTITUTION.md` n'est PAS protégé** : vérifié le 2026-07-30,
-  `protect_files.sh` couvre `scripts/githooks/*`, `.claude/hooks/*`, `.gitleaks.toml`,
-  `factory.config.json`, `factory_sync.py`, `run_gates.py` — **mais pas `docs/governance/**`**. **Le texte
+- **🔴 CONSTAT NOUVEAU, versé à US-00.8 — `CONSTITUTION.md` n'est PAS protégé** : vérifié le 2026-07-30.
+  `protect_files.sh` couvre **9 motifs** *(énumération **complétée le 2026-07-31**, finding **B-8** de la
+  QA : cette ligne n'en listait que **6**, comme ADR-001 avant sa correction — **le même défaut, corrigé
+  dans l'ADR et laissé ici**, soit une correction du **renvoi** et non du **défaut**)* :
+  `scripts/githooks/*` · **`.claude/settings.json`** · `.claude/hooks/*` · `.gitleaks.toml` ·
+  **`scripts/install_hooks.sh`** · `factory.config.json` · **`scripts/factory_env.sh`** ·
+  `scripts/factory_sync.py` · `scripts/run_gates.py` — ⛔ **mais pas `docs/governance/**`**. **Le texte
   suprême du projet est éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des
-  scripts. ⛔ **Non corrigé ici** : `protect_files.sh` est **lui-même protégé** *(action humaine)*, et
-  l'humain a arbitré « socle seul ».
+  scripts. ⚠️ **Qualification de l'audit sécurité** : ce n'est **pas** une faille d'autorisation *(même
+  compte, mêmes droits)*, et le hook étant un `PreToolUse(Edit|Write)`, **tout l'édifice est un garde-fou
+  d'ACCIDENT** — ce qui manque est la **détection**. ⛔ **Non corrigé ici** : `protect_files.sh` est
+  **lui-même protégé** *(action humaine)*, et l'humain a arbitré « socle seul ».
 - **🔒 Integration Lock** (2026-07-30, `EVT_ARCHI_VALIDATED`) : conception verrouillée — **2 livrables**,
   **T1 → T12** répartis entre les **deux PR**, **18 critères de test dont chacun est une COMMANDE** avec
   sa sortie attendue, **5 risques** nommés *(dont **R-1** : « ADR-001 devient le fourre-tout des dettes »,
@@ -760,8 +766,58 @@
     n'était jamais lu)*.
   - **Item 7, suggéré et non exigé, fait dans la dernière fenêtre avant l'immuabilité** : renvoi vers la
     borne du **Web** depuis §*Décision 2* d'ADR-001.
-- **Prochaine étape** : **QA**. Ensuite **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement de
-  l'Art. 4 *(T10 → T12)*.
+- **🧪 QA — `FAILED` ×2** (2026-07-30 `qa.md`, 2026-07-31 `qa_reaudit.md`, contexte frais).
+  ⚠️ **Les deux verdicts portent sur les PREUVES et les INSTRUMENTS, jamais sur le produit** — elle
+  l'écrit deux fois. **Acquis confirmés** : **13 critères applicables → 13 levés**, ADR-001 conforme,
+  `CONSTITUTION.md` **absent du diff (0 octet)** donc la **lettre** de la clause *Révision* est tenue,
+  4 honnêtetés présentes, **PR #17 `CLEAN`, 4 contextes requis SUCCESS**. Elle **conteste mon classement**
+  de 2 critères que j'avais dits hors diff *(5 et 6 : elle les exécute, ils rendent **exactement** les
+  2 échecs annoncés)*, et **confirme mon décompte de DoD contre le sien** *(16, pas 17 — la case 19 est
+  **partielle**)*.
+  - 🔴 **Motif du 1ᵉʳ FAILED, et il est MÉCANISÉ** : elle a écrit un script rejouant **34 assertions
+    chiffrées** de mes rapports → **`OK=27 ECART=7`**. Le pire écart était dans `conformite_ac.txt`, **qui
+    EST la preuve exigée par AC-6 et la DoD 11**. **5ᵉ manifestation en 2 jours**, la 4ᵉ étant survenue
+    **dans le paragraphe qui la dénonçait**.
+  - 🔴 **Motif du 2ᵉ FAILED — la 6ᵉ manifestation était DANS MON DÉTECTEUR** : `assertions_vives.sh`
+    rendait « 0 résidu / exit 0 » alors que son exclusion par mots matchait **« PÉRIMÉ » dans la commande
+    elle-même** et masquait le seul écart réel. *« Ce n'est pas un angle mort, c'est un **blanchiment** »* —
+    le piège du projet retourné en **faux négatif** et déplacé du rapport vers l'**instrument**.
+    ⇒ **détecteur RETIRÉ et désarmé**, en-tête expliquant la faute *(non supprimé : sa trace documente la
+    6ᵉ manifestation)*.
+  - 🔴 **Elle a démoli mon test de recall, à raison** : mes 4 mutants étaient **tirés du vocabulaire du
+    motif testé** — *« un test dont les cas dérivent de la règle testée ne mesure rien »* —, recall réel sur
+    ses formulations indépendantes : **0/8**. Et **régression non détectée** : mon nouveau motif **n'était
+    pas un sur-ensemble** de l'ancien *(il **perdait** 2 alternatives, total inchangé 8 → 8, effet visible
+    nul **par chance**)*. ⇒ **8/8** sur **ses** mutants repris verbatim · **contrôle de monotonie** par
+    **ensembles** et non par cardinaux · **motif LU** depuis sa source unique *(une copie avait déjà
+    dérivé)* · **une seule liste de verbes**, employée **dans les deux sens** *(deux listes asymétriques
+    laissaient passer les mutants où le verbe **suit** la référence)*.
+  - ✅ **Ce qu'elle reconnaît** : `verify.sh` est *« le premier instrument bien conçu de cette US »* · le
+    motif du sweep est **réellement** changé *(vérifié au diff, « ce n'est pas un renvoi »)* · DoD **0/23
+    inerte → 16/23 sur preuves** · critères **5 et 11 réparés** · contradiction `app.format` **arbitrée et
+    levée** · rapports datés **non repeints** : *« bonne décision »*.
+  - ⚖️ **ELLE CONCÈDE ET RETIRE SON PROPRE v1**, avec une formulation meilleure que la mienne : sa colonne
+    `écrit` était une **transcription de mesure**, pas une **spécification** — *« une transcription périme,
+    une spécification non »*. **Preuve live** : son v1 a gagné un écart **rien qu'en déposant ses deux
+    fichiers**, sans qu'une ligne de mon corpus ne change. Elle **retire un écart** de son 1ᵉʳ rapport
+    *(`iOS` était juste en lecture sensible à la casse — l'écart venait de **sa** reconstruction d'une
+    commande non publiée)*. **Décompte rectifié : 6 écarts établis, 1 retiré.**
+  - 🟠 **CE QUE JE LUI TRANSMETS SUR SON v2, et qui n'est pas une défense** : son **exit code est
+    inopérant** *(erreur de syntaxe : un `\n` littéral dans la condition finale)*, et son sous-contrôle §D
+    **code 5 emplacements EN DUR** — il rapporte `NB-1-faux=2` **parce que j'ai obéi à son B-7** en
+    remplaçant mes désignations par du **texte**, et parce que mes éditions du SCB ont **décalé les
+    lignes**. **Le sous-contrôle intitulé *« un numéro glisse en silence »* enfreint la leçon qu'il
+    vérifie** — même classe que son v1, un étage plus haut. ⛔ **Je n'ai pas touché à son script** : son
+    verdict reste auditable, et c'est à elle de trancher.
+- **✅ ÉTAT DES GATES au 2026-07-31** : `verify.sh` **exit 0** *(source unique et vive, aucun chiffre écrit
+  à la main)* · son **`qa_detecteur_v2.sh`** → **`ECART=0`, `SANS_MARQUEUR=0`, `MORTES=0`, `autotest 8/8`**
+  *(seul résidu : `NB-1-faux`, artefact de ses emplacements figés)* · `run_gates --all`,
+  `check_scb_compliance`, `validate_trace`, `gitleaks` **exit 0**.
+- **➡️ B-9 versé aux dettes de `CLAUDE.md`** : **six manifestations en trois jours**, dont une dans un outil
+  de contrôle, et **aucun gate CI ne voit cette classe**. Les **cinq remèdes** établis y sont inscrits.
+  **Candidat `/audit-methodo` prioritaire.**
+- **Prochaine étape** : **3ᵉ passage QA**. Ensuite **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement
+  de l'Art. 4 *(T10 → T12)*.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 
