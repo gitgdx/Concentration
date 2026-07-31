@@ -78,6 +78,12 @@
           "dart": "3.12"
         },
         "coverage_min": 80,
+        "coverage_ratchet": {
+          "value": 89.4,
+          "date": "2026-07-31",
+          "motif": "US-00.6 — couverture initiale mesuree 17/19 = 89,4737 %, arrondie VERS LE BAS. Toute baisse sous cette valeur est une REGRESSION."
+        },
+
         "install": {
           "cmd": "flutter pub get"
         },

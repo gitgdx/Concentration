@@ -43,6 +43,19 @@ import json
 import sys
 from pathlib import Path
 
+# ⛔ UN GATE NE DOIT JAMAIS DEPENDRE DE L ENCODAGE DE LA CONSOLE.
+# Bug reel trouve par l autotest le 2026-07-31, et il ne se declenchait QUE sur une
+# HAUSSE de couverture — donc le jour ou elle serait montee, en production :
+# un caractere hors cp1252 dans un message levait UnicodeEncodeError, et le script
+# rendait 1 AU LIEU DE 0. Un gate qui plante sur son propre message de SUCCES est
+# un faux rouge. Les messages sont desormais en ASCII, et cette garde rattrape
+# tout caractere qui y reviendrait par inadvertance.
+for _flux in (sys.stdout, sys.stderr):
+    try:
+        _flux.reconfigure(errors="replace")
+    except (AttributeError, ValueError):  # flux redirige ou non reconfigurable
+        pass
+
 # Une hausse de couverture n'est jamais bloquante, mais elle doit être VISIBLE :
 # la référence vit dans un fichier PROTÉGÉ, donc sa mise à jour est une action
 # humaine — le script imprime la valeur exacte à consigner, il ne la consigne pas.
@@ -171,10 +184,10 @@ def main() -> int:
         a_consigner = int(pct * 10) / 10.0  # arrondi VERS LE BAS
         if a_consigner > ratchet:
             print(
-                f"  ⬆️  HAUSSE : {pct:.2f}% > cliquet {ratchet}%. "
-                f"Valeur à consigner (arrondie VERS LE BAS) : {a_consigner}"
+                f"  [HAUSSE] {pct:.2f}% > cliquet {ratchet}%. "
+                f"Valeur a consigner (arrondie VERS LE BAS) : {a_consigner}"
             )
-            print("      Action HUMAINE : factory.config.json est protégé, aucun agent ne l'édite.")
+            print("      Action HUMAINE : factory.config.json est protege, aucun agent ne l'edite.")
     return 0
 
 

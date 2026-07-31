@@ -23,6 +23,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Meme garde que dans check_flutter_coverage.py : un controle ne doit jamais planter
+# sur son propre message. Voir le bug du 2026-07-31, trouve par CE script.
+for _flux in (sys.stdout, sys.stderr):
+    try:
+        _flux.reconfigure(errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 FIXTURES = Path("tests/fixtures/US-00.6")
 CHECKER = Path("scripts/check_flutter_coverage.py")
 
@@ -105,7 +113,7 @@ def main() -> int:
         print(f" RESULTAT : {echecs} attente(s) NON tenue(s) — le cliquet ne fait pas ce qu il annonce.")
         return 1
     print(f" RESULTAT : les {len(CAS)} attentes sont tenues, dont {sum(1 for c in CAS if c[1] == 1)} REFUS.")
-    print(" ⛔ Ce qu il ne prouve PAS : ni l authenticite du rapport lcov, ni la qualite des tests.")
+    print(" [BORNE] Ce qu il ne prouve PAS : ni l authenticite du rapport lcov, ni la qualite des tests.")
     print("    Un cliquet n ameliore pas les tests — il empeche seulement de reculer.")
     return 0
 
