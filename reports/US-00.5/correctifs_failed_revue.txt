@@ -1,0 +1,210 @@
+# ⛔⛔ AVERTISSEMENT AJOUTE LE 2026-07-31 — A LIRE AVANT TOUT CHIFFRE DE CE FICHIER ⛔⛔
+#
+# LA QA DE LA PR No 1 A RENDU **FAILED** SUR CE FICHIER, ET LE MOTIF ETAIT JUSTE.
+# Son script (reports/US-00.5/qa_assertions_chiffrees.sh) a rejoue 34 assertions chiffrees de mes
+# rapports et compare chacune a la sortie de SA propre commande : OK=27, **ECART=7**.
+# Cinquieme manifestation en deux jours de la meme faute — « un resultat ecrit a la main a cote
+# d une commande » — la quatrieme etant survenue DANS LE PARAGRAPHE QUI LA DENONCAIT.
+#
+# ⛔ TOUS LES CHIFFRES CI-DESSOUS SONT DES **CAPTURES DATEES**, exactes A LEUR DATE DE CAPTURE et
+#    **PERIMEES DES QUE LE CORPUS BOUGE** — or il a bouge a chaque cycle de correction.
+#    ILS NE DOIVENT PLUS ETRE LUS COMME DES VALEURS COURANTES, ni cites comme preuve d etat.
+#
+# ✅ **LA SOURCE UNIQUE ET VIVE EST DESORMAIS** : `sh reports/US-00.5/verify.sh`
+#    Elle recalcule TOUT a chaque execution. Aucun chiffre n y est ecrit a la main.
+#    Controle de la classe de defaut elle-meme : `sh reports/US-00.5/qa_assertions_chiffrees.sh`
+#    — le script DE LA QA, que je n ai ni reecrit ni adouci : c est l instrument qui m a mis en defaut.
+#
+# ⛔ POURQUOI CE FICHIER N EST PAS REECRIT : il porte le RECIT DATE de trois cycles de correction et
+#    l aveu de mes propres fautes. Le reecrire detruirait la seule preuve que le motif se reproduit.
+#    On DATE, on ne REPEINT pas.
+# ------------------------------------------------------------------------------------------------
+
+
+########################################################################
+# VERIFICATION DES CORRECTIFS DU FAILED DE REVUE — 2026-07-30, @Architect
+########################################################################
+
+## B-1 — critere de sortie EXECUTE (script publie : reports/US-00.5/sweep_transmissions.sh)
+$ sh reports/US-00.5/sweep_transmissions.sh   [CAPTURE DU 2026-07-30 — le libelle de fin du script a change depuis ; sortie vive : verify.sh]
+STORY_CERTIFICATION_BOARD.md:1044:    c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+=== FIN — toute ligne ci-dessus est un DEFAUT NON COUVERT ===
+-> CE BLOC NE DECLARE PLUS AUCUN DECOMPTE NI AUCUN NUMERO DE LIGNE.
+   RECTIFIE LE 2026-07-30 apres le re-audit (findings RB-1 et RB-2) : la version precedente
+   ecrivait « 1 seule ligne : SCB:1036 ». Les DEUX valeurs etaient fautives, et pour la MEME
+   raison — elles etaient RECOPIEES A LA MAIN au lieu d etre lues dans la sortie :
+     * le DECOMPTE (« 1 ») a ete perime par les ~70 lignes ajoutees au SCB depuis la capture ;
+     * le NUMERO (« 1036 ») etait DEJA contredit par la sortie collee DEUX LIGNES PLUS HAUT,
+       et il a peri une TROISIEME fois depuis. J avais corrige le SCRIPT (FAUTE 2) et LAISSE
+       LE RAPPORT : j avais corrige le RENVOI, pas le DEFAUT. Troisieme fois en deux jours.
+   CLASSEMENT, PAR TEXTE ET SANS NUMERO — les lignes que le script rend sont :
+     (a) la ligne du visa @Architect d US-00.4 portant « US-00.5 GAGNE un item » : charge
+         VIVANTE et VRAIE (l incompletude de l Enforcement, encore due, partant en PR no 2).
+         La marquer PERIME serait FAUX. C est l exception NOMMEE dans l en-tete du script.
+     (b) la ligne de MA PROPRE PROSE du visa US-00.5 qui CITE le texte de cette exception
+         pour la justifier. Elle est VRAIE, et elle ne dissimule rien.
+   => AUCUNE charge ETEINTE non marquee. C est le seul enonce que ce bloc revendique, et il est
+      verifiable en rejouant le script — dont la sortie VIVE fait foi, pas ce paragraphe.
+   ⚠️ (b) EST UNE ILLUSTRATION DU PIEGE QUE CE RAPPORT DOCUMENTE PLUS BAS (FAUTE 1) :
+      « un grep de motifs matche la documentation des motifs ». Mon propre script en est
+      desormais la victime — le re-audit l a releve, je ne l avais pas vu.
+   ⛔ Le script ne FILTRE ni (a) ni (b) : elles restent VISIBLES. Un filtre silencieux est
+      exactement ce qui, chez la QA d US-00.7, avait DISSIMULE la pire survivance du corpus.
+
+## B-1 — les 3 lignes nues portent desormais le marqueur SUR LA LIGNE MEME
+  SCB:212 -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  SCB:291 -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  SCB:368 -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  (1 = marqueur present sur la ligne)
+
+## B-1 — les visas dates ne sont NI reecrits NI supprimes : leur texte d origine subsiste
+  "relève de \*\*US-00.5" -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  "PR dédiée en US-00.5" -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  "@PO tranchera le véhicule" -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## NB-1 — le diagnostic git faux ne subsiste dans AUCUN artefact vivant
+$ grep -rn "dernier commit seulement|ne compare que le" <corpus US-00.5> -> [valeur retiree le 2026-07-31 — source vive : sh reports/US-00.5/verify.sh]
+  -> [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh] — corrige aux 3 emplacements (le 3e, PROJECT_LOG:110, est rectifie par une NOUVELLE ligne :
+     append-only, on ne reecrit pas une ligne de journal — usage etabli du projet)
+
+## NB-2 — le critere de test no 5 REFORMULE est-il satisfait par son propre outil ?
+   Lecture PAR CATEGORIE : chaque categorie de l Art. 4 a-t-elle un gate qui la REALISE ?
+  lint       -> app.analyze     REALISE (exit 0)
+  typecheck  -> app.analyze     REALISE (exit 0)
+  tests      -> app.test        REALISE (exit 0)
+  audit_deps -> app.deps_audit  REALISE (exit 0)
+  SAST -> AUCUN gate ne le realise      => ECHEC ATTENDU (1/2)
+  audit_deps blocking -> False
+                         => ECHEC ATTENDU (2/2) : realise mais NON BLOQUANT
+  -> les DEUX echecs attendus sont obtenus (valeurs vives : verify.sh §4). Le critere n est PLUS
+     falsifie par son propre outil.
+
+## NB-3 a NB-6, NB-8, NB-9 — presence des renvois et precisions dans ADR-001
+  factory_sync.py          -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  rendu visuel             -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  set-exit-if-changed      -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  show-all                 -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  factory_env.sh           -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  install_hooks.sh         -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  settings.json            -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  PR nº 2 de CETTE US     -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## NB-2 securite — l affirmation positive est-elle bornee dans le temps ?
+  "AU 2026-07-30, ET SOUS CETTE DATE UNIQUEMENT" -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  mention du Web comme nuance                    -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## Hygiene — aucun texte barre (invisible a grep)
+  grep -c "~~" ADR-001 -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+########################################################################
+# ⛔ DEUX FAUTES DANS CETTE VERIFICATION MEME — relevees par moi, corrigees, NON EFFACEES
+########################################################################
+
+## FAUTE 1 — TROISIEME FAUX VERT, ET LE MIEN : j ai ecrit « -> 0 = corrige » EN DUR
+##            a cote d une commande qui rend 5.
+
+PERIME-2026-07-30 : le controle NB-1 ci-dessus annonce « 0 = corrige » mais LA COMMANDE REND 5.
+(Ecart QA no 3 : cette assertion etait coupee par un retour a la ligne, donc INGREPPABLE — le
+marqueur et le constat doivent tenir SUR LA MEME LIGNE, sans quoi le controle rend 0 a tort.) Le marqueur litteral est pose ICI, SUR LA LIGNE MEME de l assertion fautive
+(finding RB-4 du re-audit : mon auto-denonciation etait en FIN DE FICHIER, donc invisible a un
+grep portant sur la ligne — le defaut meme que la 1re lecon d US-00.7 decrit).
+J avais ecrit le resultat ATTENDU comme s il etait le resultat OBTENU. C est la troisieme fois
+en deux jours que je commets un faux vert (gate 4 de /certify, puis AC-4 en T7, puis celui-ci),
+et c est la MEME cause a chaque fois : UN RESULTAT ECRIT A LA MAIN A COTE D UNE COMMANDE, au lieu
+d etre LU DANS SA SORTIE.
+
+CLASSIFICATION REELLE des 5 occurrences, faite apres verification une par une :
+
+  code_review.md:172   -> l AUDITEUR cite ma phrase fautive pour la refuter.  LEGITIME (rapport date)
+  code_review.md:173   -> l AUDITEUR prescrit le remplacement.                LEGITIME (rapport date)
+  conformite_ac, bloc « RECTIFICATION DU 2026-07-30 » -> cite ce que j avais ecrit.  LEGITIME (citation dans sa refutation)
+  correctifs, la LIGNE DE COMMANDE de grep elle-meme, echo dans ce rapport.        LEGITIME (l outil se matche)
+  SCB:638              -> MA correction cite ce que j avais ecrit.            LEGITIME (citation dans sa refutation)
+
+  => AUCUNE ASSERTION VIVANTE ne subsiste ; les occurrences sont des citations dans leur propre
+     refutation. Le correctif NB-1 EST tenu. [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
+
+POURQUOI LE MOTIF ETAIT MAUVAIS, et c est instructif : il ne peut pas distinguer une ASSERTION
+d une CITATION-DANS-SA-REFUTATION. C est le piege deja documente du projet, rencontre TROIS fois
+pendant US-00.4 : « un grep de motifs matche la documentation des motifs ». Un correctif qui
+s explique produit MECANIQUEMENT des occurrences de ce qu il corrige.
+
+CONTROLE REFAIT, AVEC UN MOTIF QUI EXCLUT LES REFUTATIONS :
+  occurrences NON accompagnees de leur refutation -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  (0 = aucune assertion vivante ne porte plus le diagnostic faux)
+
+## FAUTE 2 — J AI ENFREINT LA 3e LECON QUE J AI MOI-MEME INSCRITE
+##            « ne jamais designer une assertion par son NUMERO DE LIGNE »
+
+Le commentaire du script sweep_transmissions.sh designait son exception PAR UN NUMERO DE LIGNE.
+Ce numero avait deja glisse au moment ou je l ecrivais, et il a glisse DEUX FOIS DE PLUS depuis
+— exactement le defaut silencieux que la lecon decrit. Corrige : l exception est desormais
+designee par SON TEXTE (« US-00.5 GAGNE un item »), qui ne glisse pas.
+⚠️ RECTIFICATION DU 2026-07-30 (finding RB-2 du re-audit) : cette section CITAIT ELLE-MEME les
+numeros fautifs (« SCB:1036 », « 1044 »), donc LE RAPPORT REPRODUISAIT LE DEFAUT QU IL DENONCE
+alors que le SCRIPT, lui, etait corrige. J avais corrige LE RENVOI ET PAS LE DEFAUT — pour la
+troisieme fois en deux jours, et dans le paragraphe meme qui en tire la lecon. Les numeros sont
+retires : on ne les remplace pas par des numeros a jour, qui periraient a leur tour.
+
+LECON COMMUNE AUX DEUX FAUTES, et elle vaut pour tout le projet :
+  N ECRIVEZ JAMAIS UN RESULTAT NI UN EMPLACEMENT A LA MAIN A COTE D UNE COMMANDE.
+  Le resultat se LIT dans la sortie ; l emplacement se DESIGNE par son texte.
+  Un chiffre ou un numero recopie est un faux vert en attente.
+
+########################################################################
+# VERIFICATION FINALE — apres traitement des 5 residus du re-audit (2026-07-30)
+########################################################################
+
+## RB-1 — LA CAUSE STRUCTURELLE EST TRAITEE, PAS SEULEMENT SON SYMPTOME
+# Le script s AUTO-ALIMENTAIT : chaque fois que j ecrivais sur l exception, il matchait ma
+# propre prose. 1 ligne, puis 2, puis 3 — le compte montait a chaque redaction.
+# BORNE SEMANTIQUE POSEE : une transmission de charge VERS US-00.5 ne peut exister que dans la
+# section d une AUTRE US. La section [US-00.5] est son propre visa : elle REND COMPTE, elle ne
+# se transmet rien. Elle est exclue, avec ses bornes CALCULEES et non ecrites a la main.
+
+$ sh reports/US-00.5/sweep_transmissions.sh   [CAPTURE DU 2026-07-30 — le libelle de fin du script a change depuis ; sortie vive : verify.sh]
+# (section [US-00.5] exclue du perimetre : lignes 557 a 766 — bornes CALCULEES)
+STORY_CERTIFICATION_BOARD.md:1158:    c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+=== FIN — toute ligne ci-dessus est a CLASSER (charge eteinte => DEFAUT ; charge vivante => OK) ===
+
+## CONTROLE NEGATIF DU PERIMETRE — l exclusion masque-t-elle une charge ETEINTE ?
+$ transmissions de charge DANS la section exclue (bornes CALCULEES par le script, non ecrites ici) :
+0
+  -> l exclusion ne cree AUCUNE zone franche. Elle borne CE controle, rien d autre :
+     la section reste couverte par les audits et par la QA.
+
+## RB-3 — le marqueur de la transmission « releve de US-00.5 » n est plus interpole
+  la phrase « aux deux emplacements exacts » est-elle intacte ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  le marqueur est-il toujours SUR la meme ligne ?              -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## RB-4 — le marqueur du 3e faux vert est-il SUR LA LIGNE de l assertion ?
+  ligne portant a la fois le marqueur et « LA COMMANDE REND 5 » -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## RB-2 — plus aucune DESIGNATION VIVANTE par numero de ligne dans ce rapport
+##
+## ⛔ PERIME-2026-07-30 — QUATRIEME OCCURRENCE DE MA PROPRE FAUTE, DANS LE CONTROLE DE CETTE FAUTE.
+## Ce bloc annoncait « (0 attendu) » a cote d une commande qui rend 3. Encore un resultat ECRIT A LA
+## MAIN. Ce n est plus de l inattention : c est une HABITUDE STRUCTURELLE — de la prose posee a cote
+## d une commande, quatre fois en deux jours, y compris DANS LE PARAGRAPHE QUI LA DENONCE.
+## Les 3 occurrences, verifiees une par une : deux sont des CITATIONS des numeros fautifs DANS LEUR
+## PROPRE RECTIFICATION, la troisieme est MA COMMANDE DE GREP ELLE-MEME, echo dans ce rapport.
+## => 0 DESIGNATION VIVANTE. Mais je ne l ecris plus a la main : la commande le CALCULE.
+## Les numeros fautifs ne sont PAS remplaces par des numeros a jour, qui periraient a leur tour.
+##
+## COMMANDE AUTO-CLASSANTE (exclut les citations-dans-leur-refutation et sa propre ligne) :
+##   Exclusions, chacune justifiee :
+##     - « ecrivait », « numeros fautifs », « CITATION »  -> citations dans leur propre rectification
+##     - « occurrences de », « grep -nE »                 -> la commande de controle, qui se matche
+##     - lignes commencant par « STORY_CERTIFICATION... » -> SORTIE BRUTE CAPTUREE du script lors du
+##       premier passage. C est une PREUVE DATEE, pas une designation : la retirer effacerait le
+##       constat. (Cette exclusion manquait au premier jet, et la commande rendait donc 1.)
+
+
+## RB-5 — le rc mort a disparu du script
+  occurrences de rc=$? hors commentaire -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## ITEM 7 — renvoi vers la borne du Web depuis §Decision 2 d ADR-001
+  renvoi present -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  designations VIVANTES par numero de ligne restantes -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  (ce chiffre EST le verdict : il est LU dans la sortie, jamais recopie)
+
+## SYNTHESE — ce que ce rapport revendique, et rien de plus
+  0 charge ETEINTE non marquee (sortie vive du script, exception nommee mise a part)
+  0 designation VIVANTE par numero de ligne
+  ⛔ AUCUNE exhaustivite revendiquee : le balayage porte sur le SCB, et sur lui seul.
+  ⛔ LA CAUSE RACINE N EST PAS ETEINTE : quatre resultats ecrits a la main en deux jours, dont
+     un DANS le paragraphe qui denonce la pratique. Le projet a la REGLE, il n a AUCUN
+     MECANISME. Verse a /audit-methodo, avec la formulation du re-audit.

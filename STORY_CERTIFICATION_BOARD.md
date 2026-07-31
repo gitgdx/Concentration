@@ -14,6 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | development_start | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
@@ -208,8 +209,8 @@
      🔴 **DÉCISION INVALIDÉE le 2026-07-26** (signalée par la relecture T14 « aucune fausse
      affirmation », occurrence S5). Elle reposait sur la prémisse que la protection serait appliquée.
      Le blocage 403 la renverse : la déclaration « *enforced par protection de branche* » **reste
-     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux
-     emplacements exacts `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
+     FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux emplacements exacts. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — la protection étant APPLIQUÉE, S1 et S2 sont devenus VRAIS et leur amendement est SANS OBJET ; les « corriger » vaudrait régression documentaire. Constat exact à sa date, non réécrit.**
+     Les deux emplacements visés : `CLAUDE.md:20` (règle 2) et `docs/governance/CONSTITUTION.md:49`. Formulation
      de remplacement suggérée : « *enforced par hook local `pre-push` + PR ; protection de plateforme
      indisponible sur ce plan — cf. ADR-006* ». Transmission formelle en §dédiée de
      `reports/US-00.4/enforcement_gap.md` (T15).
@@ -287,7 +288,7 @@
   `.claude/commands/sprint-status.md:9` — **c'est cette ligne qui a effectivement trompé
   l'orchestrateur en ouverture de session**, le rituel de constat d'état portant lui-même la fausse
   affirmation. **S1** (`CLAUDE.md:20`) et **S2** (`CONSTITUTION.md:49`) sont **délibérément maintenues**
-  → textes normatifs, PR dédiée en US-00.5.
+  → textes normatifs, PR dédiée en US-00.5. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — S1 et S2 sont devenus VRAIS le 2026-07-28 ; il n'y a plus rien à y corriger. Constat exact à sa date, non réécrit.**
 - **Réserves honnêtes portées à l'audit** (à ne pas lire comme des PASS) : `gitleaks` **non installé**
   localement → l'absence de secret dans `reports/` est *vraisemblable*, **le gage réel est le job CI**
   `🔐 Secrets scan` ; le **repli `urllib`** n'est **pas exercé** in vivo (aucun jeton en session) ; le
@@ -364,7 +365,7 @@
     (« rapportés, PAS bloquants » ; fusion possible avec CI rouge) — les 4 libellés résolvent toujours,
     `--check` reste exit 0. **S10** `scripts/githooks/pre-push:2-3` → **non édité** (Art. 6), diff exact
     fourni en **T22 [action humaine]**. **S11** `US-00.1:198,215` → **non édité** (**décision humaine** :
-    US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule.
+    US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule. **PÉRIMÉ-2026-07-28 : destinataire RÉEL = US-00.8, par arbitrage @PO du 2026-07-28 (`reports/US-00.7/po_arbitrage_s11.md`). US-00.5 a été créée le 2026-07-30 avec un périmètre SOCLE SEUL qui EXCLUT S11. C'est la ligne que le Story File d'US-00.5 cite mot pour mot, et elle était la seule des 5 à n'avoir rien reçu — relevé par l'audit de revue. Constat exact à sa date, non réécrit.**
   - **S12 — 3ᵉ fausse affirmation du même fichier**, corrigée par @Architect : `docs/SQUAD_GUIDE.md:36`
     (nœud Mermaid « Gates CI **bloquants** sur PR … **insensibles aux bypass locaux** » — **deux**
     affirmations fausses), après S3 (l. 321) et S7 (l. 285). Le principe cardinal du guide (« une règle
@@ -427,7 +428,7 @@
   - **`selftest` en CI** exerçant les 12 chemins sur les fixtures versionnées — la seule parade
     réellement à portée d'agent contre une régression silencieuse de la frontière.
   - **1 fausse affirmation résiduelle non déclarée** : `tests/features/US-00.1-secrets-scan-depot.feature:54`
-    — même famille que **S11** (US **certifiée**) → **à joindre à la transmission US-00.5**. L'auditeur
+    — même famille que **S11** (US **certifiée**) → **PÉRIMÉ-2026-07-28 : à joindre à la transmission US-00.5** *(destinataire réel : **US-00.8**, par arbitrage @PO du 2026-07-28 — `reports/US-00.7/po_arbitrage_s11.md`. US-00.5 a été créée le 2026-07-30 avec un périmètre **socle seul** qui **exclut** S11 : y éditer une US **certifiée** exigerait une ré-ouverture de cycle)*. L'auditeur
     la classe non bloquante car « **elle ne falsifie plus aucune affirmation**, puisque plus aucune n'est
     faite ». *(4ᵉ échec d'exhaustivité du balayage : l'extension `.feature` n'avait été couverte par
     aucune des trois passes précédentes.)*
@@ -541,11 +542,282 @@
   - **Dettes ouvertes transmises** : **NB-1** (correctif 1 ligne : `MAPPED_TOP_KEYS & set(expected)`) ·
     **`selftest` en CI** (recommandation forte du re-audit — seule parade à portée d'agent contre une
     régression silencieuse de la frontière) · **émetteurs de trace déclarés mais non enforced**
-    (`trace_append.py` ne lit jamais `emitter`) · **US-00.5** : `CLAUDE.md:20`,
-    `docs/governance/CONSTITUTION.md:49`, et `US-00.1` (S11 : Story File l. 198/215 **et** `.feature`
-    l. 54).
+    (`trace_append.py` ne lit jamais `emitter`) · **PÉRIMÉ-2026-07-28 — « US-00.5 : `CLAUDE.md:20`,
+    `docs/governance/CONSTITUTION.md:49`, et `US-00.1` (S11) »** : cette transmission est **périmée sur
+    ses trois items**. `CLAUDE.md` **règle 2** et la phrase de l'**Art. 4** sont **devenues VRAIES** le
+    2026-07-28 *(les « corriger » vaudrait **régression documentaire**)* ; **S11 est versé à US-00.8**
+    *(arbitrage @PO du 2026-07-28)*. ⚠️ **Ce qui RESTE dû à US-00.5**, et qui n'était **pas** dans cette
+    transmission : l'**Art. 4 est FAUX sur trois autres points** — SAST annoncé bloquant mais
+    **inexistant**, `deps_audit` annoncé bloquant alors qu'il porte **`blocking: false`**, et
+    `coverage_ratchet` cité mais **absent de `factory.config.json`** *(établi par exécution le
+    2026-07-30)*.
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
+
+### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
+
+- **PO Visa** (2026-07-30, `EVT_STORY_CREATED` + `EVT_STORY_READY`) : Story File
+  `docs/stories/US-00.5-adr-stack-constitution.md` créé via `/us-new` par le subagent **@ProductOwner**
+  (contexte frais) — **6 AC** en Nominal/Erreur/Limite, **21 scénarios** Gherkin, DoD **23 cases**.
+  **Valeur** : la décision **la plus structurante du projet — le choix de la stack — est la SEULE qui ne
+  soit pas tracée**. `docs/adr/` porte 005, 006 et 007 ; **ADR-001 est un trou de numérotation réel**, et
+  le numéro est **réservé nommément** depuis le 2026-07-26 par ADR-005 et ADR-006.
+- **Track `STANDARD`** (`EVT_TRACK_SELECTED`) : **0 fichier de code Dart**, ≤ 15 fichiers, **pas** de
+  migration de schéma, **pas** de nouvelle API ni de page. **QUICK est exclu** — pas de Story File ni
+  d'audits pour une US qui amende la **Constitution**. **FULL est exclu** — il exigerait Design Data **et**
+  UX **obligatoires** *(sans objet : aucune UI, aucun schéma)*, plus la « revue humaine explicite » qu'
+  **aucune barrière machine ne soutient** sur ce dépôt *(cible à `0` approbation — dette `TRACKS.md`)*.
+  Précédent : US-00.3, US-00.4 et US-00.7, toutes STANDARD.
+- **Périmètre `SOCLE SEUL`, arbitré par l'HUMAIN le 2026-07-30** — **2 livrables, rien d'autre** :
+  **(1)** `docs/adr/ADR-001-choix-de-stack.md` · **(2)** amendement de l'**Art. 4**. ⛔ **Hors périmètre**,
+  versé à **US-00.8** : protéger `CONSTITUTION.md`/`TRACKS.md` dans `protect_files.sh` · l'arbitrage
+  `TRACKS.md` sur la revue humaine du track FULL · NB-1bis · `selftest` en CI · la lacune de la grille de
+  test · la requalification d'US-00.1 (S11).
+- **⛔ PIÈGE CENTRAL, inscrit au Story File** : le périmètre initial (2026-07-26) portait des corrections
+  **devenues SANS OBJET** — la **règle 2** de `CLAUDE.md` et la phrase « *requis par la protection de
+  branche* » de l'Art. 4 sont **devenues VRAIES** le 2026-07-28. **Les « corriger » rendrait faux un énoncé
+  exact** et vaudrait **régression documentaire**.
+- **✅ Gate `clarify` PASSÉE le 2026-07-30 — les 8 ambiguïtés du @PO sont TRANCHÉES**, dont **2 par
+  arbitrage humain**, et dans les **deux** cas **contre la préconisation @PO** *(les positions datées du
+  @PO sont **conservées**, non réécrites)* :
+  - 🔴 **A-1 — l'Art. 4 n'est pas seulement incomplet, il est FAUX sur trois points**, établi **par
+    exécution** et non par lecture : `run_gates.py --gate sast` rend **« aucun gate ne correspond »** alors
+    que l'article annonce un **SAST bloquant** · `app.deps_audit` porte **`"blocking": false`** alors que
+    l'article l'annonce **bloquant** · **`coverage_ratchet` est ABSENT** de `factory.config.json` alors que
+    l'article le cite comme seuil. S'y ajoute l'**omission** du gate réel `app.build`. Le @PO préconisait
+    **(b) consigner et verser à US-00.8** ; **écarté** : AC-2 oblige ADR-001 à écrire qu'aucun SAST
+    n'existe, donc **cette US aurait produit elle-même la contradiction** qui a coûté **5 `🧪 FAIL`** à
+    US-00.7. **Corriger le DÉFAUT, pas le RENVOI.** ⛔ L'US n'**implémente** aucun SAST pour autant, et ne
+    touche **pas** `factory.config.json` *(protégé)*.
+  - 🔴 **C-1 — la clause *Révision* exige une « PR DÉDIÉE, jamais en side-effect d'une US »** → **DEUX PR
+    successives** *(ADR-001 seul, puis l'amendement, dédié)*, avec **rebase obligatoire entre les deux**
+    car `strict: true` **sérialise** les merges. Le @PO préconisait **une** PR en lisant « dédiée » comme
+    « objet déclaré » ; **écarté** : on n'ouvre pas un écart lettre/esprit **sur le texte qui régit les
+    amendements**. **AC-3 et AC-4 passent de `Should` à `Must`** *(C-2)*.
+- **🔴 CONSTAT NOUVEAU, versé à US-00.8 — `CONSTITUTION.md` n'est PAS protégé** : vérifié le 2026-07-30.
+  `protect_files.sh` couvre **9 motifs** *(énumération **complétée le 2026-07-31**, finding **B-8** de la
+  QA : cette ligne n'en listait que **6**, comme ADR-001 avant sa correction — **le même défaut, corrigé
+  dans l'ADR et laissé ici**, soit une correction du **renvoi** et non du **défaut**)* :
+  `scripts/githooks/*` · **`.claude/settings.json`** · `.claude/hooks/*` · `.gitleaks.toml` ·
+  **`scripts/install_hooks.sh`** · `factory.config.json` · **`scripts/factory_env.sh`** ·
+  `scripts/factory_sync.py` · `scripts/run_gates.py` — ⛔ **mais pas `docs/governance/**`**. **Le texte
+  suprême du projet est éditable par un agent en autonomie**, alors que l'Art. 6 qu'il énonce protège des
+  scripts. ⚠️ **Qualification de l'audit sécurité** : ce n'est **pas** une faille d'autorisation *(même
+  compte, mêmes droits)*, et le hook étant un `PreToolUse(Edit|Write)`, **tout l'édifice est un garde-fou
+  d'ACCIDENT** — ce qui manque est la **détection**. ⛔ **Non corrigé ici** : `protect_files.sh` est
+  **lui-même protégé** *(action humaine)*, et l'humain a arbitré « socle seul ».
+- **🔒 Integration Lock** (2026-07-30, `EVT_ARCHI_VALIDATED`) : conception verrouillée — **2 livrables**,
+  **T1 → T12** répartis entre les **deux PR**, **18 critères de test dont chacun est une COMMANDE** avec
+  sa sortie attendue, **5 risques** nommés *(dont **R-1** : « ADR-001 devient le fourre-tout des dettes »,
+  qui est ce qui a fait grossir US-00.7 jusqu'à cinq `FAIL`)*.
+- **Design `N/A` justifié ×2** (`EVT_DESIGN_COMPLETED`) : **Data** — aucun schéma, aucune migration, le
+  choix de persistance restant reporté à **US-01.2 + ADR** *(cadrage d'US-00.3)* · **UX** — aucune surface
+  applicative, aucun écran, aucun token. ⛔ **La phase n'est pas SAUTÉE, elle est traversée à vide et le
+  dit** — le track `STANDARD` l'autorise quand ni schéma ni UI ne sont touchés, là où **FULL** l'aurait
+  interdit *(une des raisons de son exclusion)*.
+- **✅ PR nº 1 LIVRÉE — `docs/adr/ADR-001-choix-de-stack.md`** (`EVT_CODE_READY`) : statut **`Accepté`**,
+  **numéro rétroactif ASSUMÉ et écrit dans l'ADR lui-même** *(décision en vigueur depuis le bootstrap du
+  **2026-07-24**, tracée le **2026-07-30** — « cet ADR ne fait pas semblant d'avoir précédé la
+  décision »)*, et l'ADR écrit que le registre **n'est NI chronologique NI complet** *(002-004 réservés à
+  US-01.1, non écrits)*. **6 alternatives écartées avec leur raison** — dont `fastapi-react` **et** le
+  split back/front, tous deux écartés parce que l'**offline-first rend le backend inutile par
+  construction** : le composant aurait été **vide**.
+  - **Les 4 honnêtetés dures sont écrites, non adoucies** : **iOS non scaffoldé** alors que le PRD RNF-08
+    cible iOS **et** Android · **build Android réel NON validé**, `flutter build web` n'étant qu'un
+    **repli** — un gate `build` vert signifie « *compile pour le web* », **pas** « *constructible pour sa
+    cible* » · **`deps_audit` non bloquant** et mesurant l'**obsolescence**, pas la **vulnérabilité** →
+    ⛔ **aucun scan de CVE n'existe, donc aucun verdict de sécurité ne peut s'y adosser** · ⛔ **aucun
+    SAST** pour le code Dart *(`actionlint` ne couvre que les workflows)*.
+  - ⚠️ **T1 — l'état d'entrée est archivé AVEC une annotation qui EMPÊCHE de le sur-lire.** La
+    confrontation brute montre que **`lint` et `typecheck` ne correspondent à aucun gate** ; on pourrait en
+    conclure « l'Art. 4 est faux 3 fois sur 5 ». **Ce serait faux** : ce sont des **catégories génériques**
+    d'un texte voulu **agnostique de la stack**, réalisées par `analyze` — `STACK_PROFILE.md` l'écrit
+    explicitement, *« Dart n'a pas d'étape typecheck séparée »*. **Elles ne seront PAS touchées** :
+    corriger ce qui est exact vaudrait **régression documentaire**. **Les faussetés restent TROIS**, plus
+    **une omission** (`app.build`).
+  - ⛔ **FAUX VERT COMMIS PAR MOI EN T7, ET CORRIGÉ EN PLACE** : mon premier contrôle d'AC-4 rendait un
+    vert qui **ne portait pas sur ADR-001**, alors **non encore commité**. Refait sur l'**index complet** :
+    `CONSTITUTION.md` **absent**, `factory.config.json` **absent**, **0 fichier Dart**. Preuve :
+    `reports/US-00.5/conformite_ac.txt`, où la correction est **écrite à la suite du contrôle fautif**, pas
+    à sa place.
+    - ⚠️ **PÉRIMÉ-2026-07-30 — ma première EXPLICATION de ce faux vert était elle-même FAUSSE** *(finding
+      **NB-1** de l'audit de revue)*. J'avais écrit que `git diff origin/main...HEAD` « *ne compare que le
+      dernier commit* » : **c'est faux**, et l'auditeur l'a **prouvé sur cette branche même** — la forme à
+      **trois points** compare `merge-base(origin/main, HEAD)` à `HEAD`, donc **tous** les commits.
+      **La cause réelle** : un diff compare des **COMMITS**, et ADR-001 **n'était pas commité** — un
+      fichier absent de `HEAD` n'apparaît dans **aucun** diff, quelle que soit la syntaxe. **La leçon que
+      j'en tirais reste juste** *(un contrôle doit porter sur l'objet réel de la livraison)* ; c'est son
+      **motif** qui était faux, et il avait été **propagé dans 3 artefacts vivants**.
+  - ⚠️ **ÉCART DE NOMENCLATURE INSCRIT** : `EVT_CODE_READY` déclare `emitter: developer`, or **aucun
+    @Developer n'intervient** *(0 fichier de code)*. L'émettre en `developer` aurait été **factuellement
+    faux** → émis en **`architect`**, écart **écrit dans le `rationale`**. Rappel de la dette de fond : le
+    champ `emitter` **n'est lu par aucun script** — c'est la **détection** qui manque, pas la prévention.
+- **🛡️ Audit Sec — ✅ PASS** (2026-07-30, `EVT_SECURITY_AUDIT_PASSED`, contexte frais,
+  `reports/US-00.5/security.md`) : **0 bloquant**, **5 non bloquants** *(dont 4 pré-existants et hors
+  diff)*. Les **4 affirmations de sécurité d'ADR-001 sont EXACTES**, vérifiées **dans les deux sens** — il
+  ne sous-estime pas `actionlint` *(crédité avec son épinglage SHA256)* ni ne le sur-vend *(périmètre borné
+  aux workflows)*. `gitleaks` **×4 passes** → `no leaks found`. ⛔ **Bornes écrites en tête de son rapport,
+  pas en note** : **aucun scanner de CVE n'existe** dans la factory, donc ce `PASS` **ne s'appuie sur aucun
+  scan de vulnérabilité** ; **aucune** recherche d'injection / IDOR / XSS n'a été menée — **il n'y a aucune
+  surface applicative**, et il le dit au lieu de le contourner.
+  - 🔴 **Il MESURE la gravité de la fausse assurance de l'Art. 4, et le constat dépasse le nôtre** :
+    `git log -- docs/governance/CONSTITUTION.md` rend **un seul commit, le 2026-07-24** — le texte suprême
+    annonce un **SAST bloquant inexistant depuis le premier jour du projet**. Surtout : l'absence du gate
+    était **déjà consignée dans un rapport de sécurité le 2026-07-26**, et `grep "Art. 4"` sur les
+    rapports d'US-00.4 et d'US-00.7 rend **0**. **Aucun des cinq audits de sécurité qui ont constaté
+    l'absence n'a jamais ouvert l'Art. 4** : la factory a **su** et **affirmé le contraire simultanément**,
+    en certifiant cinq US — dont US-00.7, dont l'objet était la cohérence du corpus.
+  - **Il DURCIT notre constat sur `CONSTITUTION.md`** : `protect_files.sh` étant un `PreToolUse(Edit|Write)`
+    et `block_dangerous_bash.sh` ne couvrant **aucun** fichier d'enforcement, **même `factory.config.json`
+    reste écrivable via Bash** — **tout l'édifice est un garde-fou d'ACCIDENT**. Et `CONSTITUTION.md` est le
+    **seul artefact normatif sans prévention NI détection**, là où `factory.config.json` en a **deux
+    couches**. **L'asymétrie est le finding.** Corollaire qu'il souligne : **la PR nº 2 éditera précisément
+    ce fichier**, la relecture humaine du diff sera le **seul** contrôle, et `required_approving_review_count: 0`
+    ne l'exige même pas.
+  - **NB-4 à rouvrir** : la fausse assurance de l'Art. 4 **demeure sur `main`** — normal, `CONSTITUTION.md`
+    est hors diff. **L'audit de la PR nº 2 devra rouvrir ce finding.**
+- **🔍 Audit Rev — 🔴 FAILED** (2026-07-30, `EVT_CODE_REVIEW_FAILED`, contexte frais,
+  `reports/US-00.5/code_review.md`) : **1 bloquant**, **9 non bloquants**, **19 contrôles sans faute**.
+  - 🔴 **B-1 — et il est juste au point d'être cinglant** : mon marquage a **suivi DEUX RENVOIS au lieu de
+    couvrir l'EXTENSION du défaut**. Les **5** transmissions de charge vers US-00.5 sont **toutes dans la
+    même section** *(le visa @Architect d'US-00.4)* ; j'en avais marqué **2**. Et **la seule mention que le
+    Story File cite MOT POUR MOT était parmi les trois nues**. Aggravant : `PROJECT_LOG` déclarait
+    l'opération complète — « les **DEUX** transmissions périmées » — **falsifiable par un `grep`**.
+    ⛔ **C'est le motif exact des cinq `FAIL` d'US-00.7, reproduit par moi dans l'US qui en documente la
+    leçon.**
+  - **NB-1 — mon EXPLICATION du faux vert était elle-même fausse**, et **propagée dans 3 artefacts** *(voir
+    ci-dessus)*.
+  - **NB-2 — mon critère de test nº 5 était falsifié par son propre outil sur 3 noms**, et l'aurait été
+    **encore après la PR nº 2** : il encodait une lecture **par NOM** là où l'US défend une lecture **par
+    CATÉGORIE**. Reformulé, puis **exécuté** : **2 échecs attendus, 2 obtenus**.
+  - ✅ **Il TRANCHE la question que je lui avais posée à charge** : la distinction « `lint` et `typecheck`
+    ne sont pas faux » **TIENT, ce n'est pas une commodité** — lecture par catégorie imposée par un kit
+    multi-adapters dont le dépôt porte les **résidus** *(`factory_sync.py` code un `backend`/pytest et un
+    `frontend`/vitest, `run_gates.py` prend `--component backend` en exemple)*, et il note que j'ai retenu
+    la lecture **défavorable à moi-même** en refusant « 4 faussetés sur 5 ».
+- **✅ CORRECTIFS DU FAILED — 2026-07-30, les 6 actions du §7 faites, et VÉRIFIÉES PAR L'OUTIL** :
+  `reports/US-00.5/correctifs_failed_revue.txt`. **Critère de sortie publié comme SCRIPT EXÉCUTABLE**
+  *(`reports/US-00.5/sweep_transmissions.sh`)* et **exécuté** : il rend **une seule ligne**, l'**exception
+  nommée et justifiée** *(la charge « US-00.5 GAGNE un item » est **VIVANTE et VRAIE** — l'incomplétude de
+  l'Enforcement, encore due, partant en PR nº 2)*. ⛔ **Le script ne la filtre pas** : elle reste
+  **visible**, un filtre silencieux étant exactement ce qui, chez la QA d'US-00.7, avait **dissimulé la
+  pire survivance du corpus**.
+  - ⛔ **DEUX FAUTES COMMISES DANS CETTE VÉRIFICATION MÊME, relevées par moi et non effacées.**
+    **(1) TROISIÈME faux vert, et le mien** : j'ai écrit « `-> 0 = corrigé` » **en dur** à côté d'une
+    commande qui rend **5**. Les 5 occurrences sont en réalité des **citations de la phrase fautive dans sa
+    propre réfutation** — le piège déjà documenté du projet *(« un grep de motifs matche la documentation
+    des motifs », rencontré 3 fois en US-00.4)* : **un correctif qui s'explique produit mécaniquement des
+    occurrences de ce qu'il corrige**. Contrôle refait avec un motif excluant les réfutations → **0**.
+    **(2) J'ai enfreint la 3ᵉ leçon que j'ai moi-même inscrite** : le script désignait son exception par
+    « `SCB:1036` », or **le numéro avait déjà glissé de 8 lignes en une seule session**. Corrigé — l'exception
+    est désignée par **son TEXTE**.
+    **Leçon commune, et c'est la même cause pour les trois faux verts de ces deux jours** : ⛔ **ne jamais
+    écrire un résultat ni un emplacement à la main à côté d'une commande.** Le résultat se **lit** dans la
+    sortie, l'emplacement se **désigne** par son texte. **Un chiffre recopié est un faux vert en attente.**
+- **🔴 DÉFAUT DE L'ENFORCEMENT DÉCOUVERT ICI, versé à US-00.8 — une US SANS CODE ne peut pas entrer
+  légalement en `parallel_audit`.** Le hook `post_scb_edit.sh` a **refusé** l'édition : la règle
+  `parallel_audit` de `check_scb_compliance.py` exige **littéralement `✅`** dans `Code (Dev)` et
+  **contourne sa propre fonction `is_satisfied()`**, laquelle accepte pourtant explicitement `N/A`
+  *(« validée (✅) **ou explicitement non applicable (N/A)** »)*. ⛔ **Je n'ai PAS modifié le gate pour
+  faire passer mon US** — ce serait l'anti-pattern « ajuster pour forcer le vert » que ce projet interdit
+  nommément. La phase **reste `development_start`** alors que les deux audits ont tourné : **l'incohérence
+  est dans le script, pas dans le travail**, et elle est **consignée** plutôt que contournée.
+- **✅ Audit Rev — PASSED au 2ᵉ passage** (2026-07-30, `EVT_CODE_REVIEW_PASSED`, contexte frais,
+  `reports/US-00.5/code_review_reaudit.md` — ⛔ `code_review.md` **intact**, le `FAILED` reste lisible) :
+  **0 bloquant**, **5 non bloquants résiduels**, **27 contrôles à charge sans faute**.
+  **B-1 est levé et vérifié avec SA commande, pas la mienne** : **17 lignes triées une par une** →
+  **0 charge éteinte non marquée**, extension **2/5 → 5/5**, visas datés **ni réécrits ni supprimés**
+  *(diff = ajout pur)*. Il **confirme mon classement de l'exception** *(« US-00.5 GAGNE un item » est
+  vivante et vraie — 4 `status_checks` = 3 `ci.yml` + 1 `branch-naming.yml`)* : **la marquer aurait été
+  faux**. Et il a **ré-implémenté** le critère nº 5 : **2 échecs attendus, 2 obtenus**.
+  - ✅ **Il valide le traitement append-only, avec un motif que je n'avais pas formulé** : *« un journal se
+    lit en avançant, un tableau d'état par accès direct — d'où marqueur sur la ligne au SCB, rectification
+    en aval au PROJECT_LOG. Réécrire aurait détruit la seule preuve que le motif d'US-00.7 se reproduit. »*
+  - ✅ **Il confirme que la phase désalignée n'est PAS un défaut de l'US**, et ajoute une circonstance que
+    je ne revendiquais pas : `check_scb_compliance.py` **n'est pas** dans `protect_files.sh` — **je
+    POUVAIS l'éditer**. 🔴 **Il ÉTEND surtout le défaut, et c'est le point à retenir** : ce n'est pas une
+    règle isolée mais une **famille de 7 contrôles littéraux**, dont **DEUX** exposées à un `N/A`
+    légitime — celle qui m'a bloqué, **et celle des audits, qui bloquera toute US en track `QUICK`** dont
+    les audits sont `N/A`. ⇒ **à verser à US-00.8 AVEC cette extension** : corriger `code_dev` seul serait
+    **corriger le renvoi**.
+  - ⚠️ **Borne qu'il pose et que je reprends telle quelle** : **la cause racine de B-1 n'est PAS éteinte**
+    — **5 occurrences en 2 jours, une seule cause** *(un résultat ou un emplacement écrit à la main à côté
+    d'une commande)*. Le projet en a désormais **la règle**, mais **aucun mécanisme** ne la fait respecter
+    → candidat **`/audit-methodo`**.
+- **✅ LES 5 RÉSIDUS (RB-1 → RB-5) TRAITÉS LE 2026-07-30, plutôt que laissés à la QA** :
+  - 🔴 **RB-2 était le plus instructif, et il est de ma main** : mon rapport de vérification désignait
+    encore l'exception par un **numéro de ligne écrit à la main**, **contredit par sa propre sortie deux
+    lignes plus haut** et périmé une **3ᵉ** fois depuis. **J'avais corrigé le SCRIPT et laissé le
+    RAPPORT** — donc **corrigé le renvoi, pas le défaut**, pour la troisième fois en deux jours, et **dans
+    le paragraphe même qui en tire la leçon**. ⇒ **tous les décomptes et numéros sont retirés** du bloc de
+    vérification : il ne revendique plus qu'un énoncé, *« 0 charge éteinte non marquée »*, et **la sortie
+    VIVE du script fait foi, pas le paragraphe**. ⛔ Les numéros ne sont **pas remplacés par des numéros à
+    jour**, qui périraient à leur tour.
+  - **RB-1** : le script rend désormais **deux** lignes, la seconde étant **ma propre prose citant le texte
+    de l'exception** — vraie, et ne dissimulant rien. ⚠️ **Mon script est donc victime du piège que ce
+    même rapport documente** *(« un grep de motifs matche la documentation des motifs »)* : je ne l'avais
+    pas vu, le re-audit l'a relevé. Les deux lignes sont **classées par texte, jamais par numéro**.
+  - **RB-3** : le marqueur de la transmission « *relève de US-00.5* » était **interpolé au milieu d'une
+    phrase** — reflow, la phrase est rendue lisible et le marqueur **reste sur la ligne**.
+  - **RB-4** : marqueur `PÉRIMÉ-2026-07-30` posé **sur la ligne même** de l'assertion fautive du 3ᵉ faux
+    vert — mon auto-dénonciation était en **fin de fichier**, donc **invisible à un `grep` par ligne** :
+    exactement le défaut que la 1ʳᵉ leçon d'US-00.7 décrit.
+  - **RB-5** : `rc=$?` **mort** retiré du script *(il capturait le code du dernier élément du pipe et
+    n'était jamais lu)*.
+  - **Item 7, suggéré et non exigé, fait dans la dernière fenêtre avant l'immuabilité** : renvoi vers la
+    borne du **Web** depuis §*Décision 2* d'ADR-001.
+- **🧪 QA — `FAILED` ×2** (2026-07-30 `qa.md`, 2026-07-31 `qa_reaudit.md`, contexte frais).
+  ⚠️ **Les deux verdicts portent sur les PREUVES et les INSTRUMENTS, jamais sur le produit** — elle
+  l'écrit deux fois. **Acquis confirmés** : **13 critères applicables → 13 levés**, ADR-001 conforme,
+  `CONSTITUTION.md` **absent du diff (0 octet)** donc la **lettre** de la clause *Révision* est tenue,
+  4 honnêtetés présentes, **PR #17 `CLEAN`, 4 contextes requis SUCCESS**. Elle **conteste mon classement**
+  de 2 critères que j'avais dits hors diff *(5 et 6 : elle les exécute, ils rendent **exactement** les
+  2 échecs annoncés)*, et **confirme mon décompte de DoD contre le sien** *(16, pas 17 — la case 19 est
+  **partielle**)*.
+  - 🔴 **Motif du 1ᵉʳ FAILED, et il est MÉCANISÉ** : elle a écrit un script rejouant **34 assertions
+    chiffrées** de mes rapports → **`OK=27 ECART=7`**. Le pire écart était dans `conformite_ac.txt`, **qui
+    EST la preuve exigée par AC-6 et la DoD 11**. **5ᵉ manifestation en 2 jours**, la 4ᵉ étant survenue
+    **dans le paragraphe qui la dénonçait**.
+  - 🔴 **Motif du 2ᵉ FAILED — la 6ᵉ manifestation était DANS MON DÉTECTEUR** : `assertions_vives.sh`
+    rendait « 0 résidu / exit 0 » alors que son exclusion par mots matchait **« PÉRIMÉ » dans la commande
+    elle-même** et masquait le seul écart réel. *« Ce n'est pas un angle mort, c'est un **blanchiment** »* —
+    le piège du projet retourné en **faux négatif** et déplacé du rapport vers l'**instrument**.
+    ⇒ **détecteur RETIRÉ et désarmé**, en-tête expliquant la faute *(non supprimé : sa trace documente la
+    6ᵉ manifestation)*.
+  - 🔴 **Elle a démoli mon test de recall, à raison** : mes 4 mutants étaient **tirés du vocabulaire du
+    motif testé** — *« un test dont les cas dérivent de la règle testée ne mesure rien »* —, recall réel sur
+    ses formulations indépendantes : **0/8**. Et **régression non détectée** : mon nouveau motif **n'était
+    pas un sur-ensemble** de l'ancien *(il **perdait** 2 alternatives, total inchangé 8 → 8, effet visible
+    nul **par chance**)*. ⇒ **8/8** sur **ses** mutants repris verbatim · **contrôle de monotonie** par
+    **ensembles** et non par cardinaux · **motif LU** depuis sa source unique *(une copie avait déjà
+    dérivé)* · **une seule liste de verbes**, employée **dans les deux sens** *(deux listes asymétriques
+    laissaient passer les mutants où le verbe **suit** la référence)*.
+  - ✅ **Ce qu'elle reconnaît** : `verify.sh` est *« le premier instrument bien conçu de cette US »* · le
+    motif du sweep est **réellement** changé *(vérifié au diff, « ce n'est pas un renvoi »)* · DoD **0/23
+    inerte → 16/23 sur preuves** · critères **5 et 11 réparés** · contradiction `app.format` **arbitrée et
+    levée** · rapports datés **non repeints** : *« bonne décision »*.
+  - ⚖️ **ELLE CONCÈDE ET RETIRE SON PROPRE v1**, avec une formulation meilleure que la mienne : sa colonne
+    `écrit` était une **transcription de mesure**, pas une **spécification** — *« une transcription périme,
+    une spécification non »*. **Preuve live** : son v1 a gagné un écart **rien qu'en déposant ses deux
+    fichiers**, sans qu'une ligne de mon corpus ne change. Elle **retire un écart** de son 1ᵉʳ rapport
+    *(`iOS` était juste en lecture sensible à la casse — l'écart venait de **sa** reconstruction d'une
+    commande non publiée)*. **Décompte rectifié : 6 écarts établis, 1 retiré.**
+  - 🟠 **CE QUE JE LUI TRANSMETS SUR SON v2, et qui n'est pas une défense** : son **exit code est
+    inopérant** *(erreur de syntaxe : un `\n` littéral dans la condition finale)*, et son sous-contrôle §D
+    **code 5 emplacements EN DUR** — il rapporte `NB-1-faux=2` **parce que j'ai obéi à son B-7** en
+    remplaçant mes désignations par du **texte**, et parce que mes éditions du SCB ont **décalé les
+    lignes**. **Le sous-contrôle intitulé *« un numéro glisse en silence »* enfreint la leçon qu'il
+    vérifie** — même classe que son v1, un étage plus haut. ⛔ **Je n'ai pas touché à son script** : son
+    verdict reste auditable, et c'est à elle de trancher.
+- **✅ ÉTAT DES GATES au 2026-07-31** : `verify.sh` **exit 0** *(source unique et vive, aucun chiffre écrit
+  à la main)* · son **`qa_detecteur_v2.sh`** → **`ECART=0`, `SANS_MARQUEUR=0`, `MORTES=0`, `autotest 8/8`**
+  *(seul résidu : `NB-1-faux`, artefact de ses emplacements figés)* · `run_gates --all`,
+  `check_scb_compliance`, `validate_trace`, `gitleaks` **exit 0**.
+- **➡️ B-9 versé aux dettes de `CLAUDE.md`** : **six manifestations en trois jours**, dont une dans un outil
+  de contrôle, et **aucun gate CI ne voit cette classe**. Les **cinq remèdes** établis y sont inscrits.
+  **Candidat `/audit-methodo` prioritaire.**
+- **Prochaine étape** : **3ᵉ passage QA**. Ensuite **rebase** *(T9)* et **PR nº 2 DÉDIÉE** pour l'amendement
+  de l'Art. 4 *(T10 → T12)*.
 
 ### [US-00.7] Protection `main` : application effective, preuve par l'effet, cohérence du corpus
 

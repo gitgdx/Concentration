@@ -1,0 +1,95 @@
+# ⛔⛔ AVERTISSEMENT AJOUTE LE 2026-07-31 — A LIRE AVANT TOUT CHIFFRE DE CE FICHIER ⛔⛔
+#
+# LA QA DE LA PR No 1 A RENDU **FAILED** SUR CE FICHIER, ET LE MOTIF ETAIT JUSTE.
+# Son script (reports/US-00.5/qa_assertions_chiffrees.sh) a rejoue 34 assertions chiffrees de mes
+# rapports et compare chacune a la sortie de SA propre commande : OK=27, **ECART=7**.
+# Cinquieme manifestation en deux jours de la meme faute — « un resultat ecrit a la main a cote
+# d une commande » — la quatrieme etant survenue DANS LE PARAGRAPHE QUI LA DENONCAIT.
+#
+# ⛔ TOUS LES CHIFFRES CI-DESSOUS SONT DES **CAPTURES DATEES**, exactes A LEUR DATE DE CAPTURE et
+#    **PERIMEES DES QUE LE CORPUS BOUGE** — or il a bouge a chaque cycle de correction.
+#    ILS NE DOIVENT PLUS ETRE LUS COMME DES VALEURS COURANTES, ni cites comme preuve d etat.
+#
+# ✅ **LA SOURCE UNIQUE ET VIVE EST DESORMAIS** : `sh reports/US-00.5/verify.sh`
+#    Elle recalcule TOUT a chaque execution. Aucun chiffre n y est ecrit a la main.
+#    Controle de la classe de defaut elle-meme : `sh reports/US-00.5/qa_assertions_chiffrees.sh`
+#    — le script DE LA QA, que je n ai ni reecrit ni adouci : c est l instrument qui m a mis en defaut.
+#
+# ⛔ POURQUOI CE FICHIER N EST PAS REECRIT : il porte le RECIT DATE de trois cycles de correction et
+#    l aveu de mes propres fautes. Le reecrire detruirait la seule preuve que le motif se reproduit.
+#    On DATE, on ne REPEINT pas.
+# ------------------------------------------------------------------------------------------------
+
+# US-00.5 · T7 — REVUE DE CONFORMITE AC <-> LIVRABLE (PR no 1)
+# @Architect · 2026-07-30 · chaque ligne est une COMMANDE et sa sortie, jamais une relecture
+
+## Critere 1 — ADR-001 existe
+$ ls docs/adr/ADR-001-*.md
+docs/adr/ADR-001-choix-de-stack.md
+
+## Critere 2 — statut Accepte
+$ grep -c "Statut** : **Accepté" -> [valeur retiree le 2026-07-31 — source vive : sh reports/US-00.5/verify.sh]
+
+## Critere 3 — AUCUN ADR accepte edite (immuabilite)
+$ git diff --stat origin/main...HEAD -- docs/adr/ADR-005* docs/adr/ADR-006* docs/adr/ADR-007*
+-> (vide = conforme)
+
+## Critere 4 — les 4 honnetetes dures nommees
+  iOS          -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  Android      -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  deps_audit   -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  SAST         -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+## Critere 15 — aucun texte barre (marqueur litteral, jamais ~~)
+$ grep -c '~~' docs/adr/ADR-001-choix-de-stack.md
+[valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+-> conforme [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
+
+## Critere 9 — AC-4 : la PR no 1 ne touche PAS la Constitution
+$ git diff --name-only origin/main...HEAD
+PROJECT_LOG.md
+STORY_CERTIFICATION_BOARD.md
+docs/epics/EPIC_00-fondations.md
+docs/stories/US-00.5-adr-stack-constitution.md
+docs/trace/US-00.5/events.jsonl
+tests/features/US-00.5-adr-stack-constitution.feature
+
+  CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  -> AC-4 TENU [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
+
+## Critere 14 — marqueur S11 pose au SCB
+$ grep -c "PÉRIMÉ-2026-07-28" STORY_CERTIFICATION_BOARD.md -> [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
+
+## ⚠️ CORRECTION DU CRITERE 9 — 2026-07-30, @Architect
+# Le controle ci-dessus etait TROMPEUR, mais PAS pour la raison que j avais ecrite.
+#
+# ## RECTIFICATION DU 2026-07-30, apres le FAILED de l audit de revue (finding NB-1)
+# J avais ecrit : « `git diff origin/main...HEAD` ne compare que le DERNIER COMMIT ». C EST FAUX,
+# et l auditeur l a prouve sur cette branche meme : la forme a TROIS POINTS compare
+# merge-base(origin/main, HEAD) a HEAD, donc TOUS les commits de la branche — `git diff --stat
+# main...HEAD` rend bien 11 fichiers couvrant les DEUX commits.
+# LA CAUSE REELLE est autre, et plus interessante : un diff compare des COMMITS, or ADR-001
+# n etait PAS ENCORE COMMITE au moment du controle. Un fichier absent de HEAD ne peut apparaitre
+# dans aucun diff, quelle que soit la syntaxe.
+# LA LECON QUE J EN TIRAIS RESTE JUSTE — un controle doit porter sur l OBJET REEL DE LA
+# LIVRAISON — c est son MOTIF qui etait faux. Je ne reecris pas la ligne fautive ci-dessus : je
+# la rectifie ici, comme le veut l usage du projet pour les constats dates.
+# Refait sur l INDEX COMPLET, c est-a-dire l ensemble de ce que la PR no 1 livrera :
+
+$ git diff --cached --name-only origin/main
+BACKLOG.md
+PROJECT_LOG.md
+STORY_CERTIFICATION_BOARD.md
+docs/adr/ADR-001-choix-de-stack.md
+docs/epics/EPIC_00-fondations.md
+docs/stories/US-00.5-adr-stack-constitution.md
+docs/trace/US-00.5/events.jsonl
+reports/US-00.5/conformite_ac.txt
+reports/US-00.5/entry_state/art4_vs_gates_reels.txt
+reports/US-00.5/entry_state/registre_et_sast.txt
+tests/features/US-00.5-adr-stack-constitution.feature
+
+  CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  -> AC-4 REELLEMENT TENU sur le contenu complet de la PR no 1 [CAPTURE DU 2026-07-30 — valeur PERIMEE, source vive : sh reports/US-00.5/verify.sh]
+
+  factory.config.json present (doit etre 0, fichier protege) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  fichiers Dart presents (doit etre 0) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]

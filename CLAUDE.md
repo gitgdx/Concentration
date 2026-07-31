@@ -164,6 +164,24 @@ les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_
 PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
 reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
+- 🔴 **CLASSE DE DÉFAUT RÉCURRENTE, SANS AUCUN MÉCANISME — la dette la plus active du projet.**
+  *« Une assertion chiffrée ou un emplacement écrit à la main à côté d'une commande, jamais relu dans sa
+  sortie. »* **SIX manifestations en trois jours** *(2026-07-29 → 07-31)*, toutes de @Architect, dont
+  **une dans le paragraphe qui la dénonçait** et **une DANS UN OUTIL DE CONTRÔLE** — un détecteur dont
+  l'exclusion par mots matchait « PÉRIMÉ » **dans la commande elle-même** et **blanchissait** le seul écart
+  réel. ⚠️ **Elle atteint aussi les auditeurs** : la QA a **retiré son propre v1** *(sa colonne « écrit »
+  était une **transcription de mesure**, pas une **spécification**, donc son critère devenait inatteignable
+  dès que le corpus évoluait légitimement)*, et son **v2** code encore **5 emplacements en dur** dans le
+  sous-contrôle intitulé *« un numéro glisse en silence »*. **Le projet a la RÈGLE — trois leçons inscrites
+  à [`corpus_sweep.md`](reports/US-00.7/corpus_sweep.md) — et AUCUN gate CI ne voit cette classe.**
+  📌 **Remèdes établis, à généraliser** : ⛔ ne jamais écrire un résultat **ni un emplacement** à la main à
+  côté d'une commande *(le résultat se **lit**, l'emplacement se **désigne par son texte**)* · une valeur
+  fausse se **retire**, jamais ne se « met à jour » *(une valeur mise à jour périme au cycle suivant)* ·
+  **une règle n'existe qu'en un seul exemplaire** *(deux copies d'un motif, d'une liste de verbes ou d'un
+  chiffre **dérivent** — vérifié trois fois)* · **tout script de contrôle porte son autotest de mutation**,
+  avec des mutants **jamais tirés du vocabulaire de la règle testée** *(sinon il ne mesure rien)* · un
+  **décompte égal n'est pas une preuve d'équivalence** : comparer les **ensembles**, pas les cardinaux.
+  ➡️ **Candidat `/audit-methodo` prioritaire** *(B-9 de la QA d'US-00.5)*.
 - 🟠 **Findings NON BLOQUANTS de l'audit sécurité d'US-00.7, ouverts et non traités** *(2026-07-28,
   `reports/US-00.7/security.md`)* : **aucun plancher de sécurité** — `enforce_admins: false` en config
   produirait une **CI verte** et un `--check-remote` « **conforme** », avec `0` approbation requise ·

@@ -1,0 +1,16 @@
+# US-00.5 · T1 — ETAT D ENTREE BRUT ET DATE
+# Genere le 2026-07-30 · main = 856c366 · branche = feat/US-00.5-adr-stack-constitution
+
+$ ls docs/adr/
+ADR-005-convention-migrations-reversibles.md
+ADR-006-protection-branche-principale.md
+ADR-007-application-protection-branche.md
+ADR_TEMPLATE.md
+
+$ ls docs/adr/ADR-001-* 2>&1
+ls: cannot access 'docs/adr/ADR-001-*': No such file or directory
+-> rc=2
+
+$ python scripts/run_gates.py --gate sast
+[ERREUR] aucun gate ne correspond (vérifier factory.config.json / --component / --gate).
+-> rc=1
