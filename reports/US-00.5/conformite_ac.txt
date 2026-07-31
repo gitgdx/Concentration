@@ -1,3 +1,25 @@
+# ⛔⛔ AVERTISSEMENT AJOUTE LE 2026-07-31 — A LIRE AVANT TOUT CHIFFRE DE CE FICHIER ⛔⛔
+#
+# LA QA DE LA PR No 1 A RENDU **FAILED** SUR CE FICHIER, ET LE MOTIF ETAIT JUSTE.
+# Son script (reports/US-00.5/qa_assertions_chiffrees.sh) a rejoue 34 assertions chiffrees de mes
+# rapports et compare chacune a la sortie de SA propre commande : OK=27, **ECART=7**.
+# Cinquieme manifestation en deux jours de la meme faute — « un resultat ecrit a la main a cote
+# d une commande » — la quatrieme etant survenue DANS LE PARAGRAPHE QUI LA DENONCAIT.
+#
+# ⛔ TOUS LES CHIFFRES CI-DESSOUS SONT DES **CAPTURES DATEES**, exactes A LEUR DATE DE CAPTURE et
+#    **PERIMEES DES QUE LE CORPUS BOUGE** — or il a bouge a chaque cycle de correction.
+#    ILS NE DOIVENT PLUS ETRE LUS COMME DES VALEURS COURANTES, ni cites comme preuve d etat.
+#
+# ✅ **LA SOURCE UNIQUE ET VIVE EST DESORMAIS** : `sh reports/US-00.5/verify.sh`
+#    Elle recalcule TOUT a chaque execution. Aucun chiffre n y est ecrit a la main.
+#    Controle de la classe de defaut elle-meme : `sh reports/US-00.5/qa_assertions_chiffrees.sh`
+#    — le script DE LA QA, que je n ai ni reecrit ni adouci : c est l instrument qui m a mis en defaut.
+#
+# ⛔ POURQUOI CE FICHIER N EST PAS REECRIT : il porte le RECIT DATE de trois cycles de correction et
+#    l aveu de mes propres fautes. Le reecrire detruirait la seule preuve que le motif se reproduit.
+#    On DATE, on ne REPEINT pas.
+# ------------------------------------------------------------------------------------------------
+
 # US-00.5 · T7 — REVUE DE CONFORMITE AC <-> LIVRABLE (PR no 1)
 # @Architect · 2026-07-30 · chaque ligne est une COMMANDE et sa sortie, jamais une relecture
 
@@ -6,21 +28,20 @@ $ ls docs/adr/ADR-001-*.md
 docs/adr/ADR-001-choix-de-stack.md
 
 ## Critere 2 — statut Accepte
-$ grep -c "Statut** : **Accepté" -> 1
+$ grep -c "Statut** : **Accepté" -> [valeur retiree le 2026-07-31 — source vive : sh reports/US-00.5/verify.sh]
 
 ## Critere 3 — AUCUN ADR accepte edite (immuabilite)
 $ git diff --stat origin/main...HEAD -- docs/adr/ADR-005* docs/adr/ADR-006* docs/adr/ADR-007*
 -> (vide = conforme)
 
 ## Critere 4 — les 4 honnetetes dures nommees
-  iOS          -> 6
-  Android      -> 7
-  deps_audit   -> 2
-  SAST         -> 2
-
+  iOS          -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  Android      -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  deps_audit   -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  SAST         -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
 ## Critere 15 — aucun texte barre (marqueur litteral, jamais ~~)
 $ grep -c '~~' docs/adr/ADR-001-choix-de-stack.md
-0
+[valeur retiree — source vive : sh reports/US-00.5/verify.sh]
 -> 0 = conforme
 
 ## Critere 9 — AC-4 : la PR no 1 ne touche PAS la Constitution
@@ -32,7 +53,7 @@ docs/stories/US-00.5-adr-stack-constitution.md
 docs/trace/US-00.5/events.jsonl
 tests/features/US-00.5-adr-stack-constitution.feature
 
-  CONSTITUTION.md present ? -> 0
+  CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
   -> 0 = AC-4 TENU
 
 ## Critere 14 — marqueur S11 pose au SCB
@@ -67,8 +88,8 @@ reports/US-00.5/entry_state/art4_vs_gates_reels.txt
 reports/US-00.5/entry_state/registre_et_sast.txt
 tests/features/US-00.5-adr-stack-constitution.feature
 
-  CONSTITUTION.md present ? -> 0
+  CONSTITUTION.md present ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
   -> 0 = AC-4 REELLEMENT TENU sur le contenu complet de la PR no 1
 
-  factory.config.json present (doit etre 0, fichier protege) ? -> 0
-  fichiers Dart presents (doit etre 0) ? -> 0
+  factory.config.json present (doit etre 0, fichier protege) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]
+  fichiers Dart presents (doit etre 0) ? -> [valeur retiree — source vive : sh reports/US-00.5/verify.sh]

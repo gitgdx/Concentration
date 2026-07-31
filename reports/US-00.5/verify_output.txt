@@ -1,0 +1,61 @@
+===============================================================================
+ US-00.5 — VERIFICATION VIVE.  Aucun chiffre de ce rapport n est ecrit a la main.
+===============================================================================
+### 1. ADR-001 — existence, statut, immuabilite des ADR acceptes
+  OK     | ADR-001 existe                                             attendu=1      obtenu=1
+  OK     | statut Accepte                                             attendu=1      obtenu=1
+  OK     | ADR-005/006/007 non edites                                 attendu=0      obtenu=0
+  OK     | aucun texte barre (~~)                                     attendu=0      obtenu=0
+### 2. Les 4 honnetetes dures — presence, sans en fixer le NOMBRE d occurrences
+  OK     | « iOS » nomme                                            occurrences=6
+  OK     | « Android » nomme                                        occurrences=7
+  OK     | « deps_audit » nomme                                     occurrences=2
+  OK     | « SAST » nomme                                           occurrences=3
+### 3. AC-4 — la PR no 1 ne touche PAS la Constitution (clause Revision, a la lettre)
+  OK     | CONSTITUTION.md dans le diff                               attendu=0      obtenu=0
+  OK     | factory.config.json (protege)                              attendu=0      obtenu=0
+  OK     | fichiers .dart dans le diff                                attendu=0      obtenu=0
+### 4. Critere no 5 — lecture PAR CATEGORIE (NB-2 de la revue, ARBITRE le 2026-07-31)
+         Correspondance ARBITREE (source unique = Story File, critere no 5) :
+           lint -> app.format ET app.analyze  (le style ET l analyse statique)
+           typecheck -> app.analyze | tests -> app.test | audit deps -> app.deps_audit
+           SAST -> AUCUN  |  app.build -> couvert par AUCUNE categorie (d ou AC-3)
+  OK     | categorie lint         realisee par app.format      
+  OK     | categorie lint         realisee par app.analyze     
+  OK     | categorie typecheck    realisee par app.analyze     
+  OK     | categorie tests        realisee par app.test        
+  OK     | categorie audit_deps   realisee par app.deps_audit  
+  INFO   | SAST : aucun gate ne le realise                            ECHEC ATTENDU 1/2 (dette, -> US-00.8)
+  INFO   | deps_audit : blocking reel                                 False — ECHEC ATTENDU 2/2
+  INFO   | app.build existe et n est couvert par AUCUNE categorie     => AC-3 prescrit de le NOMMER dans l Art. 4
+### 4bis. Critere no 11 — la version de la Constitution est LUE, jamais supposee
+  INFO   | version LUE dans le texte                                  1.0 2026-07-24
+         (attendu APRES la PR no 2 : une version > 1.0. Sur la PR no 1 elle vaut encore 1.0,
+          la Constitution etant HORS DIFF — c est le critere no 9, et il est TENU.)
+### 5. Marquage des transmissions perimees — sortie VIVE du sweep
+  INFO   | lignes rendues par le sweep                                1  (a CLASSER : charge eteinte => defaut ; vivante => OK)
+  INFO   | marqueurs PERIME-2026-07-28 au SCB                         5  (metrique SECONDAIRE, jamais un critere)
+         Les 3 transmissions relevees par B-1 portent-elles le marqueur SUR LEUR LIGNE ?
+  OK     | « relève de \*\*US-00.5 » marquee/total                 attendu=1      obtenu=1
+  OK     | « PR dédiée en US-00.5 » marquee/total                 attendu=1      obtenu=1
+  OK     | « @PO tranchera le véhicule » marquee/total             attendu=1      obtenu=1
+### 6. CONTROLE NEGATIF DU PERIMETRE — commande PUBLIEE (elle manquait : ecart QA no 4)
+  INFO   | bornes de la section exclue (CALCULEES)                    557..766
+  INFO   | matchs du motif DANS la zone exclue                        2
+  OK     | CHARGES ETEINTES non marquees dans la zone exclue          attendu=0      obtenu=0
+         (le motif matche des CITATIONS dans la zone — c est attendu et non dissimulant :
+          seul le sous-motif de TRANSMISSION compte, et il rend 0. La QA a etabli par test
+          de mutation que la faiblesse etait le MOTIF, pas le PERIMETRE : voir §7.)
+### 7. RECALL DU MOTIF — test de mutation, exige par la QA (elle avait 3 non detectes sur 4)
+  OK     | mutants detectes par le motif ELARGI (sur 4)               attendu=4      obtenu=4
+  INFO   | matchs totaux du motif elargi sur le SCB mute              12
+### 8. Non-regression et gouvernance
+  INFO   | run_gates --all                                            exit 0
+  INFO   | check_scb_compliance                                       exit 0
+  INFO   | validate_trace US-00.5                                     exit 0
+===============================================================================
+ RESULTAT : tous les controles bloquants PASSENT.
+ ⛔ AUCUNE exhaustivite revendiquee. Ce script ne couvre QUE la PR no 1.
+ ⛔ 0 fichier de code : les gates attestent une NON-REGRESSION, jamais le livrable.
+ ⛔ 21 scenarios Gherkin DOCUMENTAIRES : 0 execute, ni step definitions ni runner.
+===============================================================================

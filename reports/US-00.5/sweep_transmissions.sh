@@ -53,8 +53,21 @@ fi
 # Motifs d'ASSIGNATION DE CHARGE a US-00.5 (verbes de transmission), et non de simple mention.
 # On exclut deliberement les CONSTATS DE REDUCTION (« le perimetre d'US-00.5 se reduit ») : ils
 # sont VRAIS et ne transmettent aucune charge.
-ASSIGNE="relève de \*\*US-00.5|transmis à \*\*US-00.5|PR dédiée en US-00.5|\
-transmission US-00.5|US-00.5 :|US-00.5 GAGNE"
+#
+# --- RECALL, rectifie le 2026-07-31 apres le FAILED de la QA ------------------------------------
+# La QA a soumis la version precedente a un TEST DE MUTATION : 4 formulations de transmission
+# injectees dans une copie du SCB, 3 NON DETECTEES, dont DEUX HORS de la zone exclue. Recall
+# mesure : 8 lignes sur 25. Sa conclusion, et elle est juste : « on a debattu de la BORNE pendant
+# que le trou etait dans le GREP » — la faiblesse etait le MOTIF, pas le PERIMETRE.
+# Deux causes, toutes deux corrigees ici :
+#   1. le motif etait une LISTE DE FORMULATIONS OBSERVEES, donc borne a ce qui existait deja ;
+#   2. il etait DIRECTIONNEL (« US-00.5 … <verbe> »), donc aveugle a « incombe A US-00.5 », ou le
+#      verbe PRECEDE la reference. Un motif a sens unique a un angle mort PAR CONSTRUCTION.
+# ⛔ Ce qui n est PAS revendique : l exhaustivite. Un motif ne vaudra jamais mieux que sa liste de
+#    verbes ; le test de mutation de verify.sh §7 en mesure le recall, il ne le garantit pas.
+ASSIGNE="US-00\.5.*(tranchera|à traiter|incombe|reporté|amendement|transmis|relève|dédiée|GAGNE|transmission)|\
+(tranchera|à traiter|incombe|reporté|transmis|relève|revient|dédiée|corriger) *(à|a|sur|en|de|par)? *\*{0,2}US-00\.5|\
+(→|->) *\*{0,2}US-00\.5"
 
 grep -nE "$ASSIGNE" "$SCB" \
   | grep -v "PÉRIMÉ-2026-07-28" \
