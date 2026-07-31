@@ -55,15 +55,25 @@ t "CONSTITUTION.md dans le diff"   0 "$(git diff --name-only origin/main...HEAD 
 t "factory.config.json (protege)"  0 "$(git diff --name-only origin/main...HEAD | grep -c 'factory.config.json')"
 t "fichiers .dart dans le diff"    0 "$(git diff --name-only origin/main...HEAD | grep -c '\.dart$')"
 
-echo "### 4. Critere no 5 — lecture PAR CATEGORIE (NB-2 de la revue, ARBITRE le 2026-07-31)"
-echo "         Correspondance ARBITREE (source unique = Story File, critere no 5) :"
-echo "           lint -> app.format ET app.analyze  (le style ET l analyse statique)"
-echo "           typecheck -> app.analyze | tests -> app.test | audit deps -> app.deps_audit"
-echo "           SAST -> AUCUN  |  app.build -> couvert par AUCUNE categorie (d ou AC-3)"
-# ⛔ « format » n est PAS une categorie de l Art. 4 : une premiere version de ce script en avait
-#    invente une, ce qui CONTREDISAIT entry_state/art4_vs_gates_reels.txt et AC-3 (la QA l a releve
-#    comme contradiction interne a la livraison). Arbitrage : « lint » couvre format ET analyze.
-for pair in "lint:format" "lint:analyze" "typecheck:analyze" "tests:test" "audit_deps:deps_audit"; do
+echo "### 4. Critere no 5 — lecture PAR CATEGORIE, REALIGNEE le 2026-07-31 (finding F-2 de la QA)"
+# ⛔ F-2 : l Art. 4 A CHANGE DE LISTE DE CATEGORIES en PR #18, et les copies de controle portaient
+#    encore l ANCIENNE. Aggravant, et il est de moi : j ai affirme a l humain et dans la PR que
+#    « lint et typecheck ne sont PAS touches » — C EST INEXACT. L amendement a REMPLACE
+#    « typecheck » par « typage statique » (0 occurrence de « typecheck » dans toute la Constitution)
+#    et AJOUTE « mise en forme ». Ce script disait meme « format n est PAS une categorie de
+#    l Art. 4 » alors que l article LA NOMME EN PREMIER.
+# ✅ Les categories sont desormais LUES DANS L ARTICLE, jamais recopiees ici — meme remede que pour
+#    le motif du sweep : une regle n existe qu en un seul exemplaire.
+CATS=$(sed -n '/^## Art\. 4/,/^\*\*Ce que/p' docs/governance/CONSTITUTION.md | grep -A1 'gates de qualité' | tr -d '\n' | sed 's/.*(\*\*//; s/\*\*).*//')
+i "categories LUES dans l Art. 4" "${CATS:-<introuvable>}"
+echo "         Correspondance categorie -> gate (source unique = Story File, critere no 5) :"
+echo "           mise en forme -> app.format | lint + typage statique -> app.analyze"
+echo "           tests -> app.test | audit de dependances -> app.deps_audit"
+echo "           app.build -> couvert par AUCUNE categorie (d ou AC-3, qui prescrit de le NOMMER)"
+echo "         ⚠️ ATTENDU REVISE : l amendement ayant RETIRE le SAST de la liste, il n y a plus"
+echo "            AUCUN echec attendu (l ancien attendu « 1 seul echec : SAST » est devenu"
+echo "            IMPRODUCIBLE — c est un PROGRES, pas une regression du critere)."
+for pair in "mise_en_forme:format" "lint:analyze" "typage_statique:analyze" "tests:test" "audit_deps:deps_audit"; do
   cat=${pair%%:*}; g=${pair##*:}
   if python scripts/run_gates.py --gate "$g" >/dev/null 2>&1; then
     printf '  OK     | categorie %-12s realisee par app.%-12s\n' "$cat" "$g"
@@ -71,8 +81,8 @@ for pair in "lint:format" "lint:analyze" "typecheck:analyze" "tests:test" "audit
     printf '  ECART  | categorie %-12s -> app.%-12s ABSENT\n' "$cat" "$g"; FAIL=1
   fi
 done
-i "SAST : aucun gate ne le realise" "ECHEC ATTENDU 1/2 (dette, -> US-00.8)"
-i "deps_audit : blocking reel" "$(python -c "import json,io;print(json.load(io.open('factory.config.json',encoding='utf-8'))['adapter']['components']['app']['gates']['deps_audit'].get('blocking'))") — ECHEC ATTENDU 2/2"
+i "SAST : ne figure PLUS dans la liste de l Art. 4 (amendement PR #18)" "0 echec attendu — dette NOMMEE dans l article, -> US-00.8"
+i "deps_audit : blocking reel" "$(python -c "import json,io;print(json.load(io.open('factory.config.json',encoding='utf-8'))['adapter']['components']['app']['gates']['deps_audit'].get('blocking'))") — NON bloquant, et l Art. 4 le DIT desormais : 0 echec attendu"
 # app.build : SEUL gate reel qu aucune categorie de l Art. 4 ne couvre -> AC-3 prescrit de le NOMMER.
 python scripts/run_gates.py --gate build >/dev/null 2>&1 \
   && i "app.build existe et n est couvert par AUCUNE categorie" "=> AC-3 prescrit de le NOMMER dans l Art. 4" \
@@ -141,16 +151,36 @@ i "motif LU depuis sweep_transmissions.sh" "$(printf '%s' "$MOTIF_LARGE" | wc -c
 MUT=$(tail -8 "$TMP" | grep -cE "$MOTIF_LARGE")
 t "mutants INDEPENDANTS detectes (jeu de la QA, sur 8)" 8 "$MUT"
 
-# --- CONTROLE DE MONOTONIE (B-4) : le motif courant doit etre un SUR-ENSEMBLE STRICT de l ancien.
-# La QA a montre qu un decompte EGAL masque un changement d ensemble : le motif precedent avait
-# PERDU deux alternatives tout en gardant le meme total. On compare donc les ENSEMBLES de lignes,
-# jamais leurs cardinaux.
+# --- CONTROLE DE MONOTONIE (B-4) — REPARE le 2026-07-31 apres le finding F-1 de la QA ------------
+# ⛔ LA VERSION PRECEDENTE COMPARAIT L ANCIEN MOTIF A LUI-MEME. La lecture de la source partait dans
+#    /dev/null et la valeur substituee etait $ANCIEN, un litteral recopie :
+#        N=$(grep -nE "$(sed ... sweep_transmissions.sh >/dev/null 2>&1; echo "$ANCIEN")" ...)
+#    Donc A == N par construction, PERDUES valait 0 QUOI QU IL ARRIVE, et le controle etait
+#    INFALSIFIABLE. La QA l a prouve par MUTATION : regression injectee -> attendu >=1 -> obtenu 0 ;
+#    et un CHEMIN INEXISTANT donnait le meme resultat. C etait la SEPTIEME manifestation de ma
+#    classe de defaut, et la deuxieme DANS UN CONTROLE — un vert vide se lit comme un vert.
+# ✅ REPARE EN DEUX TEMPS, et le second est le seul qui compte :
+#    (1) le motif courant est LU (variable ASSIGNE, extraite plus haut de sa source unique) ;
+#    (2) LE CONTROLE SE PROUVE LUI-MEME par un mutant : on ampute volontairement le motif courant
+#        de deux alternatives et on EXIGE que le controle les signale. S il ne les voit pas, il est
+#        declare INFALSIFIABLE et le script ECHOUE — un controle qui ne peut pas rougir est nul.
 ANCIEN="relève de \*\*US-00.5|transmis à \*\*US-00.5|PR dédiée en US-00.5|transmission US-00.5|US-00\.5 :|US-00.5 GAGNE"
-A=$(grep -nE "$ANCIEN" STORY_CERTIFICATION_BOARD.md | cut -d: -f1 | sort -u)
-N=$(grep -nE "$(sed -n 's/^ASSIGNE="//p;/^[A-Za-z(].*"$/p' reports/US-00.5/sweep_transmissions.sh >/dev/null 2>&1; echo "$ANCIEN")" STORY_CERTIFICATION_BOARD.md | cut -d: -f1 | sort -u)
-PERDUES=$(comm -23 <(echo "$A") <(echo "$N") | grep -c '[0-9]' || true)
-t "lignes de l ANCIEN motif PERDUES par le nouveau (sur-ensemble strict)" 0 "$PERDUES"
-i "lignes couvertes par les alternatives d origine" "$(echo "$A" | grep -c '[0-9]')"
+lignes() { grep -nE "$1" STORY_CERTIFICATION_BOARD.md | cut -d: -f1 | sort -u; }
+perdues() { comm -23 <(lignes "$1") <(lignes "$2") | grep -c '[0-9]'; }
+
+# (1) mesure reelle : ancien vs COURANT (ASSIGNE lu depuis sweep_transmissions.sh)
+P_REEL=$(perdues "$ANCIEN" "$ASSIGNE")
+t "lignes de l ANCIEN motif PERDUES par le COURANT (sur-ensemble strict)" 0 "$P_REEL"
+
+# (2) AUTOTEST DU CONTROLE : motif ampute des deux alternatives que la QA avait vues disparaitre.
+AMPUTE=$(printf '%s' "$ASSIGNE" | sed 's/transmission US-00\.5|//; s/US-00\\\.5 :|//')
+P_MUT=$(perdues "$ANCIEN" "$AMPUTE")
+if [ "$P_MUT" -ge 1 ]; then
+  printf '  OK     | %-58s le mutant est VU (%s ligne(s)) => controle FALSIFIABLE\n' "autotest de monotonie" "$P_MUT"
+else
+  printf '  ECART  | %-58s mutant INVISIBLE => CONTROLE INFALSIFIABLE, comme avant F-1\n' "autotest de monotonie"; FAIL=1
+fi
+i "lignes couvertes par les alternatives d origine" "$(lignes "$ANCIEN" | grep -c '[0-9]')"
 rm -f "$TMP"
 
 echo "### 8. Non-regression et gouvernance"

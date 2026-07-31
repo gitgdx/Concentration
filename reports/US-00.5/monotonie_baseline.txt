@@ -1,0 +1,10 @@
+(`trace_append.py` ne lit jamais `emitter`) · **PÉRIMÉ-2026-07-28 — « US-00.5 : `CLAUDE.md:20`,
+*(`reports/US-00.5/sweep_transmissions.sh`)* et **exécuté** : il rend **une seule ligne**, l'**exception
+*(diff = ajout pur)*. Il **confirme mon classement de l'exception** *(« US-00.5 GAGNE un item » est
+- **RB-3** : le marqueur de la transmission « *relève de US-00.5* » était **interpolé au milieu d'une
+FAUSSE après cette US**. Son amendement devient **OBLIGATOIRE** et relève de **US-00.5**, aux deux emplacements exacts. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — la protection étant APPLIQUÉE, S1 et S2 sont devenus VRAIS et leur amendement est SANS OBJET ; les « corriger » vaudrait régression documentaire. Constat exact à sa date, non réécrit.**
+US certifiée, pas de ré-ouverture de cycle) → transmis à **US-00.5**, @PO tranchera le véhicule. **PÉRIMÉ-2026-07-28 : destinataire RÉEL = US-00.8, par arbitrage @PO du 2026-07-28 (`reports/US-00.7/po_arbitrage_s11.md`). US-00.5 a été créée le 2026-07-30 avec un périmètre SOCLE SEUL qui EXCLUT S11. C'est la ligne que le Story File d'US-00.5 cite mot pour mot, et elle était la seule des 5 à n'avoir rien reçu — relevé par l'audit de revue. Constat exact à sa date, non réécrit.**
+c'est une charge transmise qui **s'éteint**. Et **US-00.5 GAGNE un item** : l'Art. 4 nomme `ci.yml`
+nommée et justifiée** *(la charge « US-00.5 GAGNE un item » est **VIVANTE et VRAIE** — l'incomplétude de
+— même famille que **S11** (US **certifiée**) → **PÉRIMÉ-2026-07-28 : à joindre à la transmission US-00.5** *(destinataire réel : **US-00.8**, par arbitrage @PO du 2026-07-28 — `reports/US-00.7/po_arbitrage_s11.md`. US-00.5 a été créée le 2026-07-30 avec un périmètre **socle seul** qui **exclut** S11 : y éditer une US **certifiée** exigerait une ré-ouverture de cycle)*. L'auditeur
+→ textes normatifs, PR dédiée en US-00.5. **PÉRIMÉ-2026-07-28 : charge ÉTEINTE — S1 et S2 sont devenus VRAIS le 2026-07-28 ; il n'y a plus rien à y corriger. Constat exact à sa date, non réécrit.**
