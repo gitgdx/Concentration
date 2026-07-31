@@ -1,4 +1,63 @@
 #!/bin/sh
+# ################################################################################################
+# ⛔⛔  GATE RETIRE LE 2026-07-31 PAR SON AUTEUR (@QA_Tester).  NE PAS S EN SERVIR COMME GATE.  ⛔⛔
+# ################################################################################################
+#
+# POURQUOI IL EST RETIRE — ET C EST LE PIRE DEFAUT D INSTRUMENT DE CETTE US
+# ------------------------------------------------------------------------
+# Son controle §E imprimait :
+#       OK | une attestation humaine de l amendement est consignee
+# ALORS QU AUCUNE ATTESTATION N EXISTAIT.  reviews = 0, reviewDecision vide, aucun fichier.
+# La regex matchait un texte PARLANT d attestation :
+#       'attestation.*(amendement|Art\. 4|constitutionnel)|amendement.*attestation'
+#
+# PREUVE, CONSTRUITE PAR MUTATION DE CORPUS (deux corpus identiques a UN FICHIER pres) :
+#   corpus SANS mon rapport                -> ECHEC  (exact : aucune attestation)
+#   LE MEME + reports/US-00.5/qa_final.md  -> OK     (attestation "consignee")
+# Les lignes responsables sont qa_final.md:323, :409, :477 — MON PROPRE RAPPORT, precisement la ou
+# j ecris « aucune attestation ... reviews=0 ... action HUMAINE ».
+# ==> LE VERDICT D UNE APPROBATION HUMAINE BASCULAIT DE ECHEC A OK PAR LE SEUL DEPOT DE MON RAPPORT,
+#     SANS QU AUCUN HUMAIN NE FASSE QUOI QUE CE SOIT.
+#
+# C est exactement le defaut que j avais reproche au v1 de @Architect (« il a gagne un ecart rien
+# qu en deposant ses deux fichiers »), retourne contre moi EN SENS INVERSE : lui gagnait un ROUGE,
+# moi un VERT — et sur le SEUL controle irremplacable du projet, le seul artefact normatif sans
+# prevention NI detection.  Un gate qui valide une approbation humaine absente est PIRE que pas
+# de gate.  8e manifestation de la classe, 3e dans un instrument, et elle est DE MOI.
+#
+# ✅ CE QUI A SAUVE L US : @Architect n a PAS consomme ce faux vert. Il a laisse la case decochee,
+#    DEMANDE l attestation a l humain, et ne l a cochee qu a reception. Le PROCESS a tenu la ou
+#    l INSTRUMENT a menti.
+#
+# POURQUOI RETIRE ET NON REPARE
+# -----------------------------
+# Le reparer aurait voulu dire ajouter UN MOT-CLE DE PLUS. Or ses §D et §E ont rendu 8 griefs et
+# 8 FAUX (accent manquant, libelle recopie, citations-dans-leur-refutation) : la faute n est pas
+# dans le motif, elle est dans le PRINCIPE — un controle lexical ne peut pas distinguer une
+# ASSERTION d une CITATION DANS SA REFUTATION. Voir reports/US-00.5/tension_structurelle.md et
+# reports/US-00.5/qa_final2.md §4.
+#
+# CE QUI SURVIT, ET QUI EST LA SEULE LECON UTILE
+# ----------------------------------------------
+# Ses §A, §B et la LOGIQUE de son §C (monotonie par jeu de TEXTES + mutant embarque) n ont produit
+# AUCUNE faute : ce sont les seules parties qui PORTENT UN MUTANT.
+# Regle mesuree sur les 6 instruments de cette US, dans les DEUX camps :
+#     un controle qui porte un mutant embarque a ete juste 7 fois sur 7 ;
+#     un controle purement lexical a ete faux 7 fois sur 7.
+# Corollaire, contre moi : UN CONTROLE NE DOIT JAMAIS SCANNER LE REPERTOIRE OU SON PROPRE RAPPORT
+# EST DEPOSE (meme boucle que le finding RB-1 du sweep de @Architect : deux camps, meme piege).
+#
+# INSTRUMENT DE REFERENCE SURVIVANT : reports/US-00.5/verify.sh §7 — seul controle du dossier
+# PROUVE FALSIFIABLE (regression reinjectee -> il rougit : attendu=0 obtenu=2).
+#
+# ⛔ Le corps d origine est CONSERVE INTACT ci-dessous, en TRACE DATEE, jamais execute.
+# ################################################################################################
+echo "RETIRE le 2026-07-31 par @QA_Tester — ce gate validait une APPROBATION HUMAINE ABSENTE."
+echo "  Motif complet : en-tete de ce fichier + reports/US-00.5/qa_final2.md §0 et §4."
+echo "  Utiliser :  sh reports/US-00.5/verify.sh   (seul controle PROUVE FALSIFIABLE du dossier)"
+exit 2
+
+# ================================ CORPS D ORIGINE, CONSERVE ======================================
 # ================================================================================================
 # US-00.5 · CRITERE DE SORTIE QA v3 — @QA_Tester, 3e passage (2026-07-31)
 #

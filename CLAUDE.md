@@ -49,8 +49,39 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-00.5** *(ADR-001 stack + Constitution — périmètre **RÉDUIT** mais NON VIDE,
-détail en Actions humaines)*, ou **US-00.6** (couverture + ratchet). Aucune US en cours de cycle.
+**Chantier actif** : **US-00.6** — couverture + ratchet. ⚠️ **Elle exigera du CODE**, pas seulement des
+documents : `coverage_ratchet` **n'est pas une clé à ajouter** — `factory_sync.py` ne la lit que pour un
+composant **`frontend`**, **absent** de l'adapter `flutter` *(composant unique `app`)*, donc l'ajouter
+serait **purement ignoré**. **C'est la DERNIÈRE US requise pour clore EPIC_00.**
+
+✅ **US-00.5 CERTIFIÉE Prod 🚀 le 2026-07-31** — ADR-001 (choix de stack) + exactitude de l'Art. 4.
+**PR #17** *(ADR-001)* et **PR #18** *(amendement, **PR DÉDIÉE** exigée par la clause de Révision)*
+fusionnées **par l'humain** — `main` = **`c62cdcc`**, Constitution **`1.1`**. **DoD 23/23** · **21 critères
+exercés → 21 passés** · **6 gates `/certify` verts** · audits **✅ 🔍 ✅ 🛡️** · **QA `🧪 PASS` au 4ᵉ
+passage**, après **3 `FAILED`** qui portaient **tous** sur « *les preuves et les instruments, jamais le
+produit* ».
+⚠️ **Ce que cette certification n'atteste pas** : l'amendement **NE CRÉE AUCUN GATE** — il fait dire à
+l'Art. 4 ce qui **est** et **nomme les dettes** *(aucun **SAST** applicatif → US-00.8 · aucun scan de CVE ·
+`coverage_ratchet` **non implémenté** → US-00.6)* · l'**attestation humaine de l'amendement est
+DÉCLARATIVE**, et **aucune barrière machine ne pourrait la produire** *(`reviewDecision` vide, `reviews = 0`
+— même constat que le **critère 27 d'US-00.7**, qui **demeure**)* · **0 fichier Dart** touché *(les gates
+attestent une **non-régression**)* · **21 scénarios Gherkin non exécutés**.
+🎓 **L'ACQUIS DE MÉTHODE LE PLUS IMPORTANT DU PROJET, et il est né d'un échec** :
+[`tension_structurelle.md`](reports/US-00.5/tension_structurelle.md). Cette US a produit **SIX
+instruments de contrôle FAUX — trois de chaque côté** *(la QA a retiré son v1, son v2 **et** son v3 ;
+@Architect a retiré un détecteur qui **blanchissait** et réparé un contrôle **infalsifiable**)*. **Cause
+enfin nommée** : la convention du projet *(« marqueur sur la ligne, on DATE, on ne REPEINT pas »)*
+**conserve** le texte fautif et l'explique ⇒ **un correctif qui s'explique produit MÉCANIQUEMENT des
+occurrences de ce qu'il corrige** ; or un gate **par mots-clés** ne peut pas distinguer une **assertion**
+d'une **citation-dans-sa-réfutation** — **exclure** les lignes marquées **BLANCHIT**, **ne pas exclure**
+rend **8 faux positifs sur 8**. **Il n'y a pas de troisième voie lexicale.**
+📊 **Mesure falsifiable établie par la QA** : sur ces 6 instruments, un contrôle **portant son mutant** a
+été juste **7 fois sur 7** ; un contrôle **purement lexical**, faux **7 fois sur 7**.
+⛔ **Le dernier faux vert était celui de la QA, et il portait sur la SIGNATURE HUMAINE** : prouvé par
+**mutation de corpus** *(deux corpus identiques à un fichier près — **son propre rapport** — et le verdict
+basculait de `ECHEC` à `OK`)*. Elle a **retiré** son gate plutôt que de le réparer. **Ce faux `OK`
+autorisait à cocher une signature absente : il n'a PAS été consommé** — l'attestation a été **demandée**
+puis **obtenue**. **Le process a tenu là où l'instrument a menti.**
 
 ✅ **US-00.7 CERTIFIÉE Prod 🚀 le 2026-07-30** — application de la protection de branche (track STANDARD
 + 3 renforcements). **PR #12, #13, #14 et #15 fusionnées** — `main` = **`e2bd626`** *(PR #15 fusionnée
@@ -154,10 +185,9 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > **25** événements du catalogue ne permet d'éteindre une dérogation → **dette du système de traçabilité**
 > (ci-dessous). **Conditionnel** : un retour du dépôt en privé **rouvrirait la question**.
 
-**Sprint 0 (EPIC_00) : 4 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4** 🚀 ; **US-00.7
-CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 = US-00.1→US-00.6)* ; **restent
-US-00.5** (ADR-001 stack + Constitution) et **US-00.6** (couverture + ratchet) — **ce sont les deux
-seules US requises pour clore EPIC_00**. ✅ **Le critère de clôture « protection de branche vérifiée » est
+**Sprint 0 (EPIC_00) : 5 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4**, **US-00.5** 🚀 ; **US-00.7
+CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 = US-00.1→US-00.6)* ; ⛔ **NE RESTE QUE
+US-00.6** (couverture + ratchet) — **la DERNIÈRE US requise pour clore EPIC_00**. ✅ **Le critère de clôture « protection de branche vérifiée » est
 désormais COCHABLE et COCHÉ**,
 les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_state/`) →
 **EPIC_00 redevient complétable après US-00.5 et US-00.6**. ⚠️ La mention « SPRINT 0 COMPLET » du
