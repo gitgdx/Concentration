@@ -81,12 +81,23 @@ def line_coverage_percent(lcov_path: Path) -> tuple[float, int, int, list[str]]:
     total = 0
     lf_declare = 0
     lh_declare = 0
-    for line in lcov_path.read_text(encoding="utf-8").splitlines():
+    malformees: list[str] = []
+    for numero, line in enumerate(lcov_path.read_text(encoding="utf-8").splitlines(), 1):
         if line.startswith("DA:"):
-            _, _, hits = line.partition(":")[2].partition(",")
+            # ⛔ CORRECTIF RA-4 (re-audit, 2026-07-31) : `int(hits)` levait un traceback NON
+            #    RATTRAPE sur trois formes reelles de lcov — « DA:9,0,aBcD1234 » (somme de
+            #    controle, PRODUITE par certains outils), « DA:9,abc » et « DA:9 ».
+            #    Le gate echouait bien EN ROUGE, donc aucune regression ne s y cachait, mais la
+            #    doctrine de ce projet ecrit « JAMAIS un plantage » : un traceback sur un contexte
+            #    REQUIS donne un message inutilisable a qui doit le reparer. Defaut PREEXISTANT
+            #    (identique sur main), corrige ici parce que c est le fichier que l US touche.
+            champs = line.partition(":")[2].split(",")
             total += 1
-            if int(hits) > 0:
-                covered += 1
+            try:
+                if int(champs[1].strip()) > 0:
+                    covered += 1
+            except (IndexError, ValueError):
+                malformees.append(f"ligne {numero} : {line[:40]!r}")
         elif line.startswith("LF:"):
             try:
                 lf_declare += int(line[3:].strip())
@@ -99,6 +110,13 @@ def line_coverage_percent(lcov_path: Path) -> tuple[float, int, int, list[str]]:
                 pass
 
     anomalies: list[str] = []
+    if malformees:
+        # Fail-explicit, jamais un plantage : on NOMME les lignes fautives.
+        anomalies.append(
+            f"{len(malformees)} ligne(s) DA: malformee(s) — "
+            + " ; ".join(malformees[:3])
+            + (" ..." if len(malformees) > 3 else "")
+        )
     if lf_declare != total:
         anomalies.append(f"LF: declare {lf_declare} ligne(s) instrumentee(s), {total} comptee(s)")
     if lh_declare != covered:
@@ -228,8 +246,11 @@ def main() -> int:
     if ratchet is not None and pct > ratchet:
         a_consigner = int(pct * 10) / 10.0  # arrondi VERS LE BAS
         if a_consigner > ratchet:
+            # Le DENOMINATEUR est imprime avec la valeur : recommandation du re-audit. La seule
+            # action humaine sollicitee est de consigner un nombre, et un nombre sans son
+            # denominateur ne dit pas ce qu il vaut (ici 1 ligne = 5,26 pt).
             print(
-                f"  [HAUSSE] {pct:.2f}% > cliquet {ratchet}%. "
+                f"  [HAUSSE] {pct:.2f}% ({covered}/{total}) > cliquet {ratchet}%. "
                 f"Valeur a consigner (arrondie VERS LE BAS) : {a_consigner}"
             )
             print("      Action HUMAINE : factory.config.json est protege, aucun agent ne l'edite.")

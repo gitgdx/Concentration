@@ -50,6 +50,10 @@ CAS = [
     # de consigner 100.0 — donc le VERROUILLAGE du depot. Le mutant qui l a trouve n avait ete
     # ecrit par personne : c est l auditeur qui l a fabrique. Il est desormais DANS le jeu.
     ("totaux_incoherents.info", 1, "totaux DECLARES contredisant les lignes COMPTEES : REFUSE (B-1)"),
+    # 6e cas AJOUTE le 2026-07-31 (finding RA-2 du re-audit) : la fixture de B-1 ne mentait que sur
+    # LH, si bien que la branche LF du recoupement — LE DENOMINATEUR — n avait AUCUN mutant. Le code
+    # refusait bien : c est la FIXTURE qui manquait. Un controle non exerce n est pas un controle prouve.
+    ("lf_menteur.info", 1, "LF menteur (le DENOMINATEUR) : REFUSE — branche LF desormais exercee (RA-2)"),
 ]
 
 
