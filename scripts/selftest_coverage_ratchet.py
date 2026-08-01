@@ -145,8 +145,19 @@ def main() -> int:
                     "motif": "prouve que la reference est LUE et non ecrite"}}}}}),
                 encoding="utf-8",
             )
-            code, _ = run(FIXTURES / fixture_d, cfg2)
+            code, sortie_d = run(FIXTURES / fixture_d, cfg2)
             codes.append(code)
+            # ⛔ CORRECTIF de la famille D-4/D-5/D-7 (re-revue finale). Le differentiel prouvait que
+            #    la reference est LUE, PAS qu elle est APPLIQUEE TELLE QUELLE : toute transformation
+            #    f avec f(86) <= 89,47 < f(95) survivait — plafond, rabot x0,99, contournement cible.
+            #    ⚠️ Et « non silencieux » ne tenait QUE pour un point d injection : un plafond pose
+            #    dans read_ratchet — l endroit NATUREL — rend la sortie AUTO-COHERENTE, donc le trou
+            #    EST silencieux. (La QA avait reporte sur la premisse inverse ; le @CodeReviewer l a
+            #    mesuree et refutee.) On assertionne donc que la sortie PORTE la reference donnee.
+            if f"seuil requis : {ref}%" not in sortie_d:
+                print(f"  ECHEC | DIFFERENTIEL : la sortie ne porte pas « seuil requis : {ref}% » "
+                      f"=> la reference est LUE mais PAS APPLIQUEE TELLE QUELLE")
+                echecs += 1
         ok_d = codes == [att_bas, att_haut]
         print(f"  {'OK    ' if ok_d else 'ECHEC '}| DIFFERENTIEL {fixture_d:<15} "
               f"ref {ref_basse} -> exit {codes[0]} (attendu {att_bas}) | "
@@ -155,11 +166,39 @@ def main() -> int:
         if not ok_d:
             echecs += 1
 
+    # --- RF-2 : LE PLANCHER N AVAIT AUCUN CAS DISCRIMINANT (re-revue finale, 2026-08-01).
+    #     Dans tous les cas ci-dessus le cliquet est AU-DESSUS du plancher, donc le plancher NE
+    #     DECIDE JAMAIS : forcer --min a 0 SURVIVAIT a l autotest. Consequence relevee par le
+    #     @CodeReviewer : AC-4 et le cas « cle absente => plancher seul » n etaient assertionnes
+    #     NULLE PART EN CI. Les deux cas ci-dessous utilisent une config SANS la cle, si bien que
+    #     le plancher est le SEUL a trancher — il devient discriminant.
+    with tempfile.TemporaryDirectory() as tmp3:
+        cfg_vide = Path(tmp3) / "sans_cliquet.json"
+        cfg_vide.write_text(json.dumps({"adapter": {"components": {"app": {}}}}), encoding="utf-8")
+        for fixture_p, att_p, propos_p in (
+            ("regression_16_sur_19.info", 0,
+             "cle ABSENTE + 84,21 % > plancher 80 => VERT : le plancher seul s applique"),
+            ("sous_plancher_15_sur_19.info", 1,
+             "cle ABSENTE + 78,95 % < plancher 80 => ROUGE : LE PLANCHER DECIDE (RF-2)"),
+        ):
+            code_p, _ = run(FIXTURES / fixture_p, cfg_vide)
+            ok_p = code_p == att_p
+            print(f"  {'OK    ' if ok_p else 'ECHEC '}| PLANCHER SEUL {fixture_p:<28} "
+                  f"exit attendu={att_p} obtenu={code_p}")
+            print(f"         | {propos_p}")
+            if not ok_p:
+                echecs += 1
+
     print("-" * 79)
     if echecs:
         print(f" RESULTAT : {echecs} attente(s) NON tenue(s) — le cliquet ne fait pas ce qu il annonce.")
         return 1
-    print(f" RESULTAT : les {len(CAS)} attentes sont tenues, dont {sum(1 for c in CAS if c[1] == 1)} REFUS.")
+    # RF-4 : le message annoncait « len(CAS) attentes » alors que le differentiel et les deux cas
+    # « plancher seul » en ajoutent — un decompte qui ne compte pas tout est un chiffre ecrit a la
+    # main deguise en derive. On compte DESORMAIS ce qui a REELLEMENT tourne.
+    total_assertions = len(CAS) + 1 + 2  # fixtures + differentiel + plancher seul
+    print(f" RESULTAT : les {total_assertions} assertions sont tenues, "
+          f"dont {sum(1 for c in CAS if c[1] == 1) + 1} REFUS.")
     print(" [BORNE] Ce qu il ne prouve PAS : ni l authenticite du rapport lcov, ni la qualite des tests.")
     print("    Un cliquet n ameliore pas les tests — il empeche seulement de reculer.")
     return 0
