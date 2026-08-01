@@ -53,9 +53,18 @@ class _BarreModules extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          // ⛔ Chaque entrée est EXPANDED : sans cela le Row debordait de 63 px a
+          // 390 de large et de 133 px a 320 — trois libelles francais longs
+          // (« Échéances », « Respiration », « Concentration ») ne tiennent pas
+          // sur un telephone. Defaut invisible pour 90 tests, parce qu ils
+          // tournaient TOUS au gabarit par defaut de flutter_test (800x600) ;
+          // trouve en LANCANT l application, puis reproduit par
+          // grille_gabarits_test.dart.
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [for (final m in registre.tous) _EntreeModule(module: m)],
+            children: [
+              for (final m in registre.tous)
+                Expanded(child: _EntreeModule(module: m)),
+            ],
           ),
         ),
       ),
@@ -77,6 +86,9 @@ class _EntreeModule extends StatelessWidget {
 
     final libelle = Text(
       module.libelle,
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
       style: TextStyle(fontFamily: 'Inter', fontSize: 13, color: couleur),
     );
 
