@@ -14,7 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
-| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | deployment | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | ⏳ |
+| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -663,9 +663,59 @@
   la classe de bug de cette US, qu'elle avait vérifiée **deux fois** chez moi. Verdict commun, que je
   reprends : ⛔ **« la dette `/audit-methodo` n'est pas celle de @Architect — c'est une dette de MÉTHODE,
   et elle atteint LES DEUX CÔTÉS DU CONTRÔLE. »**
-- **Prochaine étape** : **fusion de la PR #20**, puis **PR nº 2 DÉDIÉE** *(amendement de l'Art. 4,
-  `1.1` → `1.2`, **attestation humaine**)*, puis **PR nº 3** de certification. ⚠️ **L'ordre est imposé** :
-  l'amendement affirmerait un état **absent de `main`** s'il partait avant.
+- **🚀 Déploiement — `🚀 DEPLOYED` (2026-08-01, @DevOps_Engineer, `EVT_STAGING_DEPLOYED` +
+  `EVT_DEPLOYMENT_SUCCESS`)** : **staging `N/A` justifié ET borné** — US de **gouvernance sans runtime**
+  *(0 fichier Dart livré, aucun service, aucune migration)* ; le livrable **est un mécanisme de gate**, et
+  un mécanisme de gate **n'a pas d'autre pré-production que la CI d'une PR**, où il s'exécute **à
+  l'identique** *(le job **requis** `governance` a lancé le selftest sur **#20 et #21**)*. **Déploiement =
+  fusion sur `main` en DEUX PR**, imposées par la clause de *Révision* : **PR #20** *(code — `main` =
+  `9e46f93`, 07:50:14Z)* puis **PR #21** *(Art. 4 — `main` = `f0a7a2b`, 07:59:16Z)*, **`mergedBy` =
+  `gitgdx`, aucune avec `--admin`**. **Health-check exécuté SUR `main`, pas sur la branche** : `run_gates
+  --all` **exit 0** *(5 gates)*, `protected: true`, Constitution **1.2**. ⚠️ **Borne** : le cliquet n'a
+  **jamais eu à refuser une livraison RÉELLE** — il a refusé **5 fixtures**.
+- **⚖️ DÉROGATION HUMAINE — `EVT_WAIVER_GRANTED` (2026-08-01, Art. 5), et elle est la RAISON pour
+  laquelle cette US est certifiée à DoD 19/20** : le **gate 4 a ÉCHOUÉ** *(il exige **toutes** les cases
+  cochées)* et **@Architect s'est arrêté là**, comme le rituel l'impose — il a **annoncé l'échec AVANT le
+  gate**, dans `EVT_READY_FOR_DEPLOY`, **et non après**. La **case 6** est **insatisfiable** : sa lettre
+  exige un `git diff` **vide** sur `factory_sync.py` là où la tâche **T8 du même Story File prescrit un
+  `+32/−0`**. **Ni la case cochée, ni le gate contourné, ni l'exigence réécrite** — l'humain a **accordé
+  la dérogation**, de **portée stricte** : ce gate, cette case, cette US. ⛔ **Elle ne lève AUCUNE dette.**
+  ⚠️ **Ses deux bornes sont inscrites dans son propre `rationale`** : `emitter` n'est lu par **aucun
+  script** ⇒ la qualité **humaine est DÉCLARATIVE** *(même classe que la provenance des fusions)* ; et
+  **aucun** événement du catalogue ne permet d'**éteindre** une dérogation ⇒ **irrévocable par
+  construction**, d'où son objet **délibérément minuscule**.
+- **🚀 CERTIFIÉ PROD — `🚀 OUI` (2026-08-01, @Architect, `EVT_CERTIFIED_PROD`, rituel `/certify`).**
+  **6 gates, chacun RE-EXÉCUTÉ au moment de la certification et non repris des rapports** :
+  `check_scb_compliance` **exit 0** · `validate_trace --us US-00.6` **exit 0** · les **3 rapports** exigés
+  existent et portent des sorties d'outils *(35 386 o · 40 555 o · 33 844 o)* · **DoD 19/20 — gate 4
+  ÉCHOUÉ, couvert par la dérogation ci-dessus, jamais par un contournement** · `run_gates --all`
+  **exit 0** *(5 gates)* · colonne **Déploiement = `🚀 DEPLOYED`**.
+  - ✅ **CE QUE CETTE CERTIFICATION ATTESTE** : le **cliquet EST en vigueur sur `main`** — le gate imprime
+    **littéralement** `Couverture de lignes : 89.5% (17/19) — seuil requis : 89.4% (cliquet)`, et la
+    référence est **LUE** depuis `factory.config.json`, **prouvé par mutant bidirectionnel** ; le
+    **plancher contractuel** *(80 %)* est désormais **assertionné**, ce que **personne n'avait vu** avant
+    RF-2 ; **9 assertions dont 5 REFUS** tournent dans le job **requis** `governance` ; et l'**Art. 4 dit
+    enfin ce qui EST** *(Constitution `1.2`)*.
+  - ⛔ **CE QU'ELLE N'ATTESTE PAS, et qui doit rester lisible après la certification** : le cliquet
+    **n'a jamais refusé une régression RÉELLE** *(5 fixtures, **0 fichier Dart** livré ⇒ les 89,5 %
+    attestent une **non-régression**, pas le livrable)* · le cliquet **ne monte JAMAIS seul** · **aucune
+    couverture de branches** · l'**angle mort structurel** tranché par expérience *(un fichier non importé
+    par un test **n'entre pas** au dénominateur ⇒ **déplacer du code non couvert FAIT MONTER** la
+    couverture)* · les **18 scénarios Gherkin ne sont PAS exécutés** · **aucun SAST**, **aucun scanner de
+    CVE** ⇒ les **~170 lignes de Python ajoutées** ne sont couvertes par **aucune analyse statique** · la
+    **duplication du seuil est AGGRAVÉE, 2 → 3** · **6 dettes versées à US-00.8** *(RD-1, RD-2, D-1, D-2,
+    D-3, N-1)* · **provenance humaine des fusions DÉCLARATIVE** *(`is_bot` rend `false` même pour un
+    agent)*.
+  - 🎓 **Leçon que cette US ajoute au corpus, et elle porte sur les CONTRÔLEURS** : **les trois
+    instruments d'audit se sont pris à leur propre piège** *(la QA **5 fois** en 3 passages ; la revue en
+    comparant un nombre de colonnes **écrit à la main**, puis en **plantant sur `cp1252`** — la classe de
+    bug **même** de cette US ; la sécurité en produisant **N-1** par copie manuelle)* ⇒ ⛔ **la dette
+    `/audit-methodo` n'est pas celle de @Architect : c'est une dette de MÉTHODE, et elle atteint LES DEUX
+    CÔTÉS DU CONTRÔLE.** *(Le rituel de certification l'a vérifié une fois de plus : mon propre `print` a
+    planté en `cp1252` pendant les gates.)*
+- **Prochaine étape** : **PR nº 3** *(certification, depuis `feat/US-00.6-certification`)* — **4 contextes
+  requis verts** puis **fusion PAR L'HUMAIN sans `--admin`**. Ensuite **clôture d'EPIC_00** : US-00.6 était
+  la **dernière US requise**.
 
 ### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
 
