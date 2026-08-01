@@ -607,7 +607,65 @@
   ⛔ **Les deux fichiers sont PROTÉGÉS** — aucun agent ne les écrit. ✅ **La logique est livrée AVANT** et
   **tolérante à l'absence de la clé** *(vérifié : `run_gates --gate test` **exit 0**)* : **aucun état
   intermédiaire ne rend une PR infusionnable.**
-- **Prochaine étape** : les 2 copies humaines, puis `/audit-us`, QA, `/certify` — **et EPIC_00 est clos**.
+- **✅ AUDITS ET QA — LES TROIS BADGES PORTENT SUR LE MÊME COMMIT `62a4fcc`**, et c'est le résultat d'un
+  **trou que la QA a nommé et m'a renvoyé sous l'Art. 5** : `✅ 🔍` portait sur `3c56218`, `✅ 🛡️` sur
+  `f585e82`, alors que **43 lignes de code — dont le contrôle différentiel, qui tourne dans un gate
+  REQUIS — n'avaient été relues par aucun auditeur**. ⚖️ **Tranché** : re-revue **et** re-audit sécurité
+  lancés **ensemble** sur le commit final — *« il serait absurde de refermer le trou d'un côté en le
+  rouvrant de l'autre »*.
+  - **🧪 QA `PASS`** — DoD **17/20** *(décochées : **6** insatisfiable et datée · **14** fusion humaine ·
+    **17** son propre verdict)* · **6 AC tenus, 0 orphelin** · **29 mutants**. ⚖️ Elle a **refusé un
+    bloquant qui venait de son propre instrument** *(`CS-4` exigeait le marqueur sur la même **ligne
+    physique** alors qu'elle avait déjà arbitré le patron « ligne de continuation » comme non bloquant —
+    « bloquer ici serait me contredire »)*.
+  - **🔍 Revue `PASSED`** — les **5 survivants sont morts, chacun par la bonne barrière**, y compris
+    **Q3a, le cas SILENCIEUX** *(plafond posé dans `read_ratchet`)*. Propriété établie comme
+    **structurelle** : un checker qui **écrit** sa valeur rend le **même verdict pour les deux
+    références**, donc la paire `(0,1)` lui est **inatteignable** — **tout littéral est tué**.
+  - **🛡️ Sécurité `PASSED`** — `gitleaks` sur **121,77 Mo** + le delta, `.gitleaks.toml` **non modifié**
+    *(le vert n'est pas obtenu en desserrant le détecteur)* · **aucun appel réseau**, les 3 `write_text`
+    **toutes** dans un `tempfile`, `subprocess.run` en **forme liste** et **100 % des arguments issus de
+    constantes du module** · `emit_branch_protection` **octet-identique** *(AST)* · **aucun `name:` de job
+    modifié** · `actionlint` **0 erreur** · `main` toujours **protégée**.
+- **🔴 D-4 IMPLÉMENTÉ ALORS QUE PERSONNE NE L'EXIGEAIT** — parce que la revue a **réfuté par mesure** la
+  prémisse du report de la QA : elle l'avait différé au motif que le trou était « non silencieux », or un
+  plafond posé **dans `read_ratchet`, l'endroit NATUREL**, rend la sortie **auto-cohérente** ⇒ **le trou
+  EST silencieux**. Et la famille n'est pas « un plafond à 90 » mais **toute `f` avec
+  `f(86) ≤ 89,47 < f(95)`**. ✅ **Prouvé par mutation** *(sur copie, fichier restauré à l'identique)* :
+  plafond injecté → **les codes de sortie rendent encore `(0,1)` comme attendu**, donc l'ancien
+  différentiel **ne voyait rien** ; c'est **l'assertion de sortie** qui le rattrape.
+- **🔬 RF-2 — le vrai gain, et NI la revue NI la QA NI moi ne l'avions vu** : **le plancher contractuel
+  n'avait AUCUN cas discriminant** *(forcer `--min` à `0` **survivait**)* — dans tous les cas du jeu le
+  cliquet était au-dessus, donc **le plancher ne décidait jamais**, et **AC-4 n'était assertionné nulle
+  part en CI**. Comblé par deux cas « plancher seul », dont une fixture **sous** le plancher. **9
+  assertions, 5 REFUS.**
+- **⚖️ DÉCISION DE CONVERGENCE, ASSUMÉE** : chacun de mes correctifs **invalidait le badge** que le
+  passage précédent venait d'accorder — **régression potentiellement infinie, et j'en étais la cause**.
+  **J'ai gelé** : tout finding **non bloquant** postérieur est **versé en dette à US-00.8 et NON corrigé
+  ici** ; un **bloquant** aurait été corrigé quel qu'en soit le coût. Les deux auditeurs l'ont accepté et
+  s'y sont tenus.
+- **⚖️ N-1 — je NE sollicite PAS de 3ᵉ édition humaine**, sur l'arbitrage de l'audit sécurité :
+  *« le remède serait du même type que la cause »* — demander une copie manuelle de plus sur **le script
+  qui génère la cible de protection de `main`**, pour **quatre espaces sans effet**, réintroduirait le
+  mécanisme exact qui a produit le défaut, avec cette fois un risque **non nul** de divergence réelle.
+  **Un défaut nommé et daté n'est plus un piège** — à corriger **par surcroît** lors d'une future édition.
+- **➡️ DETTES VERSÉES À US-00.8** *(gel appliqué)* : **RD-1** *(l'assertion lie la sortie à la
+  **référence**, pas à la **décision** — une transformation qui est **l'identité sur le domaine testé**
+  est indétectable **par construction** ; correctif **mesuré** par la revue, sans nouvelle fixture)* ·
+  **RD-2** *(le label du seuil violé n'est pas assertionné)* · **D-1** *(un `lcov` **sans `LF:`/`LH:`**
+  rougit désormais — `flutter` les émet, gate réel vert, échec **en fermeture** et auto-révélateur)* ·
+  **D-2/D-3** *(un `+1+2` encore écrit à la main ; le différentiel suppose `PLANCHER < ref_basse`)* ·
+  **N-1** · et la **résorption des 3 occurrences du seuil** *(l'US l'a **aggravée**, 2 → 3)*.
+- **🎓 CE QUE CETTE US ÉTABLIT, ET QUI VAUT POUR TOUT LE PROJET** : **les TROIS instruments d'audit se
+  sont pris à leur propre piège**. La QA : *« mes instruments m'ont trahie **CINQ FOIS** en trois
+  passages, toutes de moi »*. La revue : son contrôle comparait un nombre de colonnes **écrit à la main**
+  et elle a **failli publier un finding faux** ; puis **son harnais a planté sur `cp1252`** — *exactement*
+  la classe de bug de cette US, qu'elle avait vérifiée **deux fois** chez moi. Verdict commun, que je
+  reprends : ⛔ **« la dette `/audit-methodo` n'est pas celle de @Architect — c'est une dette de MÉTHODE,
+  et elle atteint LES DEUX CÔTÉS DU CONTRÔLE. »**
+- **Prochaine étape** : **fusion de la PR #20**, puis **PR nº 2 DÉDIÉE** *(amendement de l'Art. 4,
+  `1.1` → `1.2`, **attestation humaine**)*, puis **PR nº 3** de certification. ⚠️ **L'ordre est imposé** :
+  l'amendement affirmerait un état **absent de `main`** s'il partait avant.
 
 ### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
 
