@@ -180,6 +180,15 @@ près du neutre, où `b` change de signe **avant** `a`.
 | Extrémités du dégradé *(orange 50,4° / bleu 257,6°)* | **0,164** et **0,154** |
 | **Maximum dans le secteur de teinte rouge** | **0,059** |
 
+✅ **LE MILIEU DÉSATURÉ EST ACCEPTÉ — décision humaine du 2026-08-01, prise APRÈS avoir vu le rendu réel.**
+L'application a été lancée et capturée : à `p` intermédiaire la tuile est **franchement mauve**, et elle ne
+lit **pas** comme « entre orange et bleu » mais comme *une autre couleur*. **L'humain l'a regardée et l'a
+validée.** ⇒ ⛔ **Le sujet est CLOS** : le trajet **OKLab cartésien** reste celui d'ADR-003, et toute
+réouverture exigerait un **nouvel ADR** *(trajet polaire préservant la chroma, **avec** une assertion
+« aucun rouge » bloquante)* — ⛔ **jamais un ajustement discret dans le code**.
+📌 **Ce que cette validation vaut, et pas plus** : elle porte sur l'**effet visuel**, non sur les
+contrastes — ceux-là restent tenus par le calcul *(pire cas **4,53:1**, marge **0,03 point**)*.
+
 ⇒ la traversée se fait à **moins de la moitié** de la chroma des extrémités : un **gris chaud désaturé**,
 **jamais un rouge perceptible**. L'arc polaire le plus court, lui, croiserait la **même teinte à pleine
 chroma** — c'est-à-dire un **vrai rouge**. **La décision d'ADR-003 reste donc la bonne ; c'est sa
