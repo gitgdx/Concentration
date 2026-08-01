@@ -173,8 +173,14 @@ protection de `main` — c'est **US-00.7 qui l'applique, en prouve l'effet, et q
 une**, jamais en parallèle : toute fusion périme les autres branches ouvertes. **US-00.8** (dette) n'est
 **PAS** requise pour clore EPIC_00 — son report est un **choix assumé** dont le coût est que la fusion par
 un agent reste **interdite** sans être **impossible**.
-US-01.1 (EPIC_01, FULL) reste en pause en `business_alignment`, **à rebaser sur `main`**, et son Lock
-exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
+US-01.1 (EPIC_01, FULL) est en `business_alignment`. ✅ **Ses trois clauses de track FULL sont ARBITRÉES**
+*(ADR-008, 2026-08-01)*. ⛔ **Mais elle est BLOQUÉE PLUS TÔT que prévu** : `EVT_STORY_READY` est **absent
+de sa trace** *(seuls `EVT_STORY_CREATED` et `EVT_TRACK_SELECTED`, 2026-07-24)* alors que le SCB affiche
+`✅ @PO` ⇒ `EVT_ARCHI_VALIDATED` **exige** `EVT_STORY_READY`, donc **@ProductOwner doit l'émettre avant
+tout** *(`emitter: product-owner`)*. **Design UX reste DÛ** *(track FULL, sans `N/A`)*.
+⛔ **PÉRIMÉ-2026-08-01 : cette ligne portait « à rebaser sur `main` » — c'est FAUX.** Vérifié :
+`feat/US-01.1-affichage-hub-grille` est **ancêtre de `main`** et n'a **0 commit propre** — **rien à
+rebaser, la branche est morte**, à supprimer. L'affirmation traînait depuis le **2026-07-25**.
 
 > ✅ **ÉTAT DE L'ENFORCEMENT DE `main` — 2026-07-28, avec ses bornes.** La **règle 2** ci-dessus est
 > désormais **VRAIE telle qu'elle est écrite** : la protection de branche est **APPLIQUÉE**. Preuves
@@ -360,16 +366,21 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   une **identité distincte pour les agents** (2ᵉ compte ou GitHub App), puis `restrictions` → la fusion
   par un agent devient **impossible**, pas seulement interdite. ⚠️ Réserve **non levée** : `restrictions`
   pourrait être **réservé aux dépôts d'organisation** — à vérifier. **Porté par US-00.8.**
-- ⚠️ **`TRACKS.md` (track FULL) exige une « revue humaine explicite de la PR » qu'aucune barrière
-  machine ne soutient** — ni avant, ni après l'application (cible à **`0`** approbation). **US-01.1 est en
-  FULL** → arbitrage à poser **avant son Integration Lock** : requalifier l'exigence en obligation de
-  process avec preuve tracée, ou engager la voie « 2ᵉ compte relecteur ». **Amendement joint, suggéré par
-  US-00.7** : `TRACKS.md:14` dit « Surface auth / sécurité / **admin** / paiement » là où la pratique
-  constante du projet (4 US certifiées, interprétation inscrite au SCB) lit « surface **applicative** » —
-  le critère littéral **est** satisfait par US-00.7 au sens strict. ⛔ `TRACKS.md` **n'est pas édité** par
-  US-00.7. 🔺 **DEVENU BLOQUANT le 2026-08-01** : EPIC_00 étant clos, **US-01.1 est le chantier actif** —
-  cet arbitrage est donc le **premier pas** de la suite, avant son Integration Lock. C'est une **décision**,
-  pas une US.
+- ✅ **ARBITRÉ le 2026-08-01 — [ADR-008](docs/adr/ADR-008-arbitrages-track-full.md), les TROIS clauses du
+  track FULL** *(et non une seule, comme cette entrée le laissait croire)* : **E2E** *(un test montant
+  l'app entière vaut E2E pour une app offline-first sans backend — la tâche T12 d'US-01.1 était
+  **inexécutable** : `integration_test` absent, aucun appareil en CI)* · **revue humaine** *(clause
+  reformulée en **obligation de process, non enforced** : `TRACKS.md` cesse de laisser croire à une
+  barrière — cible à `0` approbation, `reviewDecision` structurellement vide)* · **Design Data** *(livré
+  **réel mais borné**, aucun `N/A`)*.
+  ⛔ **CE QUE L'ARBITRAGE NE FAIT PAS** : le **critère 27 demeure NON LEVÉ**, la **provenance reste non
+  prouvable**, et la clause reformulée est **plus honnête, pas plus contraignante** — elle **abaisse
+  l'exigence écrite au niveau du réel**. Voie de sortie réelle *(identité distincte pour les agents puis
+  `restrictions`)* : **toujours portée par US-00.8**.
+  ⚠️ **RESTE OUVERT, non traité par ADR-008** : `TRACKS.md` dit « Surface auth / sécurité / **admin** /
+  paiement » là où la pratique constante du projet lit « surface **applicative** » — ⛔ **délibérément non
+  édité** : modifier un **critère de sélection de track** changerait le track de toutes les US futures,
+  ce qui exige son propre arbitrage.
 - **Périmètre Art. 6 déclaré ≠ appliqué** : `.github/workflows/*` et `apply_branch_protection.sh` ne
   sont protégés ni par `protect_files.sh` ni par la Constitution → candidat `/audit-methodo`.
 - **`governance.grandfathering_date` est une clé morte** : lue par aucun script, sémantique décalée
