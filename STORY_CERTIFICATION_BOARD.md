@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | technical_validation | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1694,6 +1694,29 @@
   en tête » ajoutés après la gate *clarify*). Valeur : cœur du MVP — rendre lisible d'un regard le
   temps restant avant chaque échéance (nombre nu sans unité + gradient temporel).
   Voir `docs/stories/US-01.1-affichage-hub-grille.md`. EPIC : `docs/epics/EPIC_01-module-echeances.md`.
+- **✅ `EVT_STORY_READY` ÉMIS le 2026-08-01 — il MANQUAIT depuis le 2026-07-24**, alors que le visa
+  ci-dessus était affiché : **écart SCB ↔ trace**, et il **bloquait tout l'aval** *(`EVT_ARCHI_VALIDATED`
+  l'exige ⇒ ni design, ni code, ni audit n'auraient pu être tracés)*. ⛔ **Rien n'est rétro-daté** :
+  l'événement porte la date de son **émission réelle**. Phase → **`technical_validation`**.
+  - **Vérifié par extraction, pas par relecture** : **9 AC déclarés / 9 couverts / 0 orphelin**, 0 renvoi
+    à un AC inexistant, les **4 résolutions `clarify`** intégrées **aux AC** et pas seulement listées.
+  - 🔬 **Le contrôle en ENSEMBLES a payé là où le décompte mentait** : **13 scénarios contre 13 lignes de
+    résumé**, mais **5 titres divergent en formulation**. **Non bloquant** — le bloc s'intitule *« Résumé
+    des scénarios couverts »*, une paraphrase y est légitime, et le **`.feature` reste NORMATIF**.
+    ➡️ **Conséquence pour T12a/T12b** : le contrôle de correspondance lit les `.feature`, **jamais** ce
+    résumé ; et les titres se reproduisent **verbatim**, guillemets compris *(le `.feature` écrit
+    `état "à zéro"` en guillemets **droits**)*.
+  - ⚠️ **Deux mesures fausses avant la bonne, signalées parce que la cause est la classe de défaut du
+    projet — cette fois dans l'INSTRUMENT** : la regex exigeait le `:` immédiatement après le numéro et
+    ratait donc `- Scénario 10 (cas limite) :`. `grep` disait **13**, la regex **9** ; l'écart a été levé
+    en lisant le **texte brut**, pas en arbitrant entre deux outils.
+  - **Décisions design résiduelles — elles ne bloquaient PAS cet événement** : **AC-5 tranche déjà
+    l'interpolation CONTINUE** *(le PRD l'emporte sur les 4 paliers de la maquette)* ; ne restent que la
+    **valeur exacte des extrémités** du dégradé et la **langue mixte des maquettes**, qui relèvent de la
+    phase **@UXDesigner** — ⛔ **due, et sans `N/A` possible en track FULL**.
+  - ⚠️ **Limite déclarée** : cette relecture PO **n'a pas été faite en contexte frais** *(même session
+    qu'ADR-008 et que la réécriture des tâches techniques)*. La Constitution ne l'exige que pour les
+    **audits** — le lecteur doit néanmoins le savoir.
 - **Track** : FULL — nouvelle EPIC fondatrice + architecture transverse (moteur de dégradé OKLCH,
   moteur d'unité adaptative, registre de modules extensible du hub). ADR-002/003/004 à rédiger
   avant l'Integration Lock (phase `technical_validation`).
