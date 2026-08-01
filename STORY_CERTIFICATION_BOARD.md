@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | development_start | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1778,6 +1778,40 @@
   - ⚠️ **Dette nommée d'avance** *(I-5)* : instants en heure **locale**, **aucun fuseau stocké** — dès
     qu'il y aura persistance il faudra de l'**UTC**, sinon un changement de fuseau **déplacera** les
     échéances. **À rouvrir en US-01.2.**
+- **✅ Code (Dev) — `EVT_CODE_READY` le 2026-08-01, phase → `parallel_audit`.**
+  **PREMIÈRE LIVRAISON APPLICATIVE DU PROJET** : `lib/` passe de **1 fichier / 63 lignes** à **19 fichiers**,
+  `test/` de **1** à **8**, avec **90 tests verts**.
+  - 🎉 **Le cliquet a jugé du code produit pour la première fois, et il PASSE** :
+    **93,8 % (361/385)** contre **89,4 %** requis. ⛔ L'arbitrage **T0-cliquet** est donc tranché **par la
+    mesure** : la voie **(a)** est tenue, le ré-étalonnage **(b)** **n'a pas servi**.
+  - 🔴 **DEUX DÉFAUTS DU PRODUIT trouvés par les scénarios T12a**, pas par relecture : **(1)** le nombre
+    **débordait** de la tuile à 9 tuiles ⇒ `FittedBox(scaleDown)` ; **(2)** ⛔ **la grille DÉFILAIT** — un
+    `GridView` ne construisait que **6 tuiles sur 9**, les 3 dernières exigeant de faire défiler, ce qui
+    **contredit « embrassable d'un regard »** *(AC-3 « Limite »)* ⇒ **bloc carré NON défilant**.
+  - 🔴 **UN BUG DE PRODUCTION trouvé dans le moteur de couleur** : `_versRgbBrut` écrêtait les canaux
+    **avant** le test de gamut ⇒ le test était **toujours vrai** et la réduction de chroma d'ADR-003 §4
+    **ne se déclenchait jamais**. **Vert silencieux** de la classe exacte que ce projet traque.
+  - 🔴 **UNE AFFIRMATION D'ADR-003 ÉTABLIE FAUSSE, par un test écrit pour la vérifier** : le rouge n'est
+    **pas** « inatteignable par construction » au sens de la **teinte** *(le segment cartésien croise la
+    direction rouge sur **15 points de 101**)*. **Ce qui est vrai** : la traversée se fait à **chroma
+    0,059** contre **0,164 aux extrémités** — gris chaud désaturé, **jamais un rouge perceptible**, là où
+    l'arc polaire croiserait la **même teinte à pleine chroma**. **La décision reste bonne, la formulation
+    promettait trop.** ⛔ ADR **non réécrit** *(immuable)* ; correction dans `DESIGN_SYSTEM.md` et
+    assertions alignées. 📌 **Leçon** : *une formulation absolue dans un ADR doit être adossée à une
+    assertion, sinon elle survit à sa propre fausseté.*
+  - ⛔ **L'OUTIL DE CONTRÔLE T12b avait lui-même deux défauts, trouvés par son autotest de mutation** :
+    parseur **mono-ligne** cassé dès que `dart format` reporte un titre à la ligne *(2 faux « scénario sans
+    test »)*, et **apostrophe non échappée** dans son corpus synthétique *(4 assertions sur 6 en échec)*.
+    **Un contrôle sans autotest aurait publié des faux écarts.**
+  - **T12d** : **103 scénarios de gouvernance** ré-étiquetés « **SPÉCIFICATION — NON EXÉCUTÉE** ». Le
+    défaut n'était pas qu'ils ne tournent pas — c'est que **les DoD les comptaient comme des tests**.
+  - ⚠️ **DETTE NOMMÉE, non masquée** : **JetBrains Mono et Inter ne sont PAS embarquées** *(aucune
+    dépendance ajoutée — ni SAST ni scan de CVE)*. Ce qui est **garanti** est l'exigence **fonctionnelle**
+    *(`tabularFigures`, assertionnée)*, **pas la police exacte**.
+  - ⛔ **Ce que cet événement n'atteste PAS** : **aucun audit n'a eu lieu** *(`/audit-us` est la suite)*,
+    l'application **n'a jamais été lancée sur un appareil** *(3 cibles disponibles — Chrome, Edge, Windows
+    — mais **aucun émulateur**, et **aucun JDK** donc **build Android impossible**)*, et les **contrastes
+    sont vérifiés par CALCUL, jamais par l'œil**.
 - **🔒 INTEGRATION LOCK — `EVT_DESIGN_COMPLETED` le 2026-08-01, phase → `development_start`.**
   Les deux conditions du track FULL sont remplies **sans aucun `N/A`**. ✅ **Ce que le Lock débloque
   réellement** : les extrémités du dégradé étant figées, **`temporal_gradient.dart` (T5) et les tokens

@@ -1,3 +1,19 @@
+# ⛔ SPÉCIFICATION — NON EXÉCUTÉE.
+#
+# Ce fichier décrit des exigences de GOUVERNANCE (état de l'API GitHub, gates
+# CI, configuration gitleaks, registre d'ADR, mesure de couverture). ⛔ Aucun
+# runner Flutter ne peut les exécuter : « la branche principale est déclarée
+# protégée par l'API » n'est pas un test de widget.
+#
+# ⚠️ AJOUTÉ LE 2026-08-01 (US-01.1, tâche T12d) parce que le défaut n'était PAS
+# que ces scénarios ne tournent pas — c'est que les DoD les COMPTAIENT comme des
+# tests. Leur vérification EXISTE, sous une autre forme : sorties d'outils
+# archivées dans reports/, selftests, et gates CI de l'US concernée.
+#
+# ✅ Les scénarios EXÉCUTÉS du projet vivent dans test/ et sont adossés à leur
+# .feature par scripts/check_gherkin_mapping.py, qui tourne dans le job REQUIS
+# « 📋 Governance » (voir ADR-008).
+
 # language: fr
 
 Fonctionnalité: Sûreté du dépôt — secrets & scan gitleaks
