@@ -49,10 +49,40 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-00.6** — couverture + ratchet. ⚠️ **Elle exigera du CODE**, pas seulement des
-documents : `coverage_ratchet` **n'est pas une clé à ajouter** — `factory_sync.py` ne la lit que pour un
-composant **`frontend`**, **absent** de l'adapter `flutter` *(composant unique `app`)*, donc l'ajouter
-serait **purement ignoré**. **C'est la DERNIÈRE US requise pour clore EPIC_00.**
+**Chantier actif** : **clôture d'EPIC_00** — ⛔ **plus aucune US requise n'est ouverte.**
+
+✅ **US-00.6 CERTIFIÉE Prod 🚀 le 2026-08-01** — couverture initiale mesurée + **cliquet en vigueur**.
+**PR #20** *(code)* et **PR #21** *(amendement de l'Art. 4, **PR DÉDIÉE**)* fusionnées **par l'humain sans
+`--admin`** — `main` = **`f0a7a2b`**, Constitution **`1.2`**. Le gate imprime **littéralement**
+`Couverture de lignes : 89.5% (17/19) — seuil requis : 89.4% (cliquet)`, plancher **80,0 %** affiché à
+côté ; la référence vit dans `factory.config.json` → `adapter.components.app.coverage_ratchet` et elle est
+**LUE**, prouvé **par mutant bidirectionnel** ; **9 assertions dont 5 REFUS** tournent dans le job
+**requis** `governance`. Audits **✅ 🔍 ✅ 🛡️** *(les deux relancés sur le **même** commit `62a4fcc`)* ·
+**QA 🧪 PASS au 3ᵉ passage**.
+⚖️ **ELLE EST CERTIFIÉE À DoD 19/20, PAR DÉROGATION HUMAINE — pas par un gate tout vert, et cela doit
+rester lisible** : le **gate 4 a ÉCHOUÉ**, @Architect **s'est arrêté** et a annoncé l'échec **avant** le
+gate ; la **case 6** exige un `git diff` **vide** sur `factory_sync.py` là où **T8 du même Story File
+prescrit un `+32/−0`** ⇒ **insatisfiable**. `EVT_WAIVER_GRANTED` accordé le 2026-08-01, **portée stricte**
+*(ce gate, cette case, cette US)* ; la case reste **décochée et datée**. ⚠️ **Deux bornes portées par la
+dérogation elle-même** : `emitter` n'est lu par **aucun script** ⇒ sa qualité **humaine est DÉCLARATIVE**,
+et **aucun** des 25 événements ne permet d'**éteindre** une dérogation ⇒ **irrévocable par construction**.
+⚠️ **Ce que la certification n'atteste pas** : le cliquet **n'a refusé AUCUNE régression réelle** *(5
+fixtures ; **0 fichier Dart** livré ⇒ les 89,5 % attestent une **non-régression**)* · il **ne monte JAMAIS
+seul** · **aucune couverture de branches** · **angle mort structurel** tranché **par expérience** :
+un fichier Dart **non importé par un test n'entre PAS** au dénominateur ⇒ ⛔ **déplacer du code non couvert
+FAIT MONTER la couverture** *(conséquence portée par US-01.1)* · **18 scénarios Gherkin non exécutés** ·
+**aucun SAST ni scan de CVE** sur les **~170 lignes de Python ajoutées** · la **duplication du seuil est
+AGGRAVÉE (2 → 3)**.
+🎓 **L'ACQUIS DE MÉTHODE DE CETTE US PORTE SUR LES CONTRÔLEURS EUX-MÊMES** : **les trois instruments
+d'audit se sont pris à leur propre piège** — la QA **5 fois** en 3 passages ; la revue en comparant un
+nombre de colonnes **écrit à la main**, puis en **plantant sur `cp1252`** *(la classe de bug **même** que
+cette US corrige, qu'elle avait vérifiée **deux fois** chez @Architect)* ; la sécurité en produisant
+**N-1** par copie manuelle. ⛔ **Verdict commun : la dette `/audit-methodo` n'est pas celle de
+@Architect — c'est une dette de MÉTHODE, et elle atteint LES DEUX CÔTÉS DU CONTRÔLE.**
+📌 **Décision de convergence à réutiliser — le GEL** : chaque correctif de @Architect **invalidait le
+badge** que le passage précédent venait d'accorder *(régression potentiellement infinie dont il était la
+cause)* ⇒ tout finding **non bloquant** postérieur est **versé à US-00.8**, un **bloquant** l'aurait été
+quel qu'en soit le coût. **Les deux auditeurs l'ont accepté et s'y sont tenus.**
 
 ✅ **US-00.5 CERTIFIÉE Prod 🚀 le 2026-07-31** — ADR-001 (choix de stack) + exactitude de l'Art. 4.
 **PR #17** *(ADR-001)* et **PR #18** *(amendement, **PR DÉDIÉE** exigée par la clause de Révision)*
@@ -185,32 +215,29 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > **25** événements du catalogue ne permet d'éteindre une dérogation → **dette du système de traçabilité**
 > (ci-dessous). **Conditionnel** : un retour du dépôt en privé **rouvrirait la question**.
 
-**Sprint 0 (EPIC_00) : 5 US sur 6 certifiées** — US-00.1, US-00.2, US-00.3, **US-00.4**, **US-00.5** 🚀 ; **US-00.7
-CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 = US-00.1→US-00.6)* ; ⛔ **NE RESTE QUE
-US-00.6** (couverture + ratchet) — **la DERNIÈRE US requise pour clore EPIC_00**. ✅ **Le critère de clôture « protection de branche vérifiée » est
-désormais COCHABLE et COCHÉ**,
-les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_state/`) →
-**EPIC_00 redevient complétable après US-00.5 et US-00.6**. ⚠️ La mention « SPRINT 0 COMPLET » du
-PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
+**Sprint 0 (EPIC_00) : les 6 US requises sont CERTIFIÉES** — US-00.1, US-00.2, US-00.3, **US-00.4**,
+**US-00.5**, **US-00.6** 🚀 ; **US-00.7 CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 =
+US-00.1→US-00.6)*. ⛔ **Mais EPIC_00 N'EST PAS ENCORE CLOS** : il reste la **PR nº 3** *(certification
+d'US-00.6, branche `feat/US-00.6-certification`)* — **4 contextes requis verts puis fusion PAR L'HUMAIN
+sans `--admin`** — puis la **clôture d'EPIC_00 elle-même**. ⚠️ **Tant que cette PR n'est pas fusionnée, la
+certification n'existe que sur la branche**, pas sur `main`. ✅ Le critère de clôture « protection de
+branche vérifiée » est **coché**, celui des « seuils de couverture mesurés et ratchet actif » l'est
+**depuis US-00.6**, et les **risques #2, #3 et #5 d'EPIC_00 sont CLOS** *(preuves :
+`reports/US-00.7/applied_state/`, `reports/US-00.6/`)*. ⚠️ La mention « SPRINT 0 COMPLET » du
+PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau) — ⛔ **ne pas la reproduire
+aujourd'hui : « les 6 US certifiées » n'est PAS « EPIC_00 clos »**. **US-00.8** (dette) n'est **pas**
+requise pour la clôture — son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL)
 reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
-- 🔴 **L'Art. 4 de la Constitution AFFIRME AUJOURD'HUI TROIS CHOSES FAUSSES sur le cliquet de couverture
-  — dette OUVERTE tant que la PR dédiée d'amendement n'est pas fusionnée.** Depuis US-00.6, la clé
-  `coverage_ratchet` **existe** dans `factory.config.json`, le cliquet **EST en vigueur** *(le gate imprime
-  « `seuil requis : 89.4% (cliquet)` »)*, et `factory_sync.py` **la lit pour le composant `app`**. Or
-  l'article dit encore : ⛔ « **n'est PAS en vigueur** » · ⛔ « **absente** de `factory.config.json` » ·
-  ⛔ « la clé **n'y est lue que pour un composant `frontend`** ». *(La 4ᵉ clause — « son activation exige
-  **du code** » — est, elle, **VRAIE** : 32 lignes ont été ajoutées.)*
-  ⚠️ **C'est une SOUS-AFFIRMATION PÉRIMÉE** : le texte dit que la couverture **n'est pas protégée** alors
-  qu'elle **l'est**. Même classe que celle qu'US-00.7 a payée **cinq fois**.
-  ➡️ **Traitement arbitré le 2026-07-31** : amendement en **PR DÉDIÉE** *(Constitution `1.1` → `1.2`,
-  **attestation humaine** — la clause *Révision* l'exige)*, **après** la fusion d'US-00.6 *(sinon
-  l'amendement affirmerait un état qui n'est pas encore sur `main`)*.
-  ⛔ **ADR-001 §4 porte les mêmes clauses et NE SERA PAS corrigé** : il est **IMMUABLE**, et son
-  §*Conséquences* décrivait l'état du monde **à sa date** — *l'immuabilité existe pour qu'on ne repeigne
-  pas l'histoire*. Il est **nommé**, jamais réécrit. **Aucun ADR-008** : la **décision** d'ADR-001 est
-  inchangée. ⚠️ **Cette entrée est une EXIGENCE DE CLÔTURE posée par l'audit de revue** : sans elle, si la
-  PR dédiée glissait, **rien dans le corpus durable** ne signalerait la fausseté.
+- ✅ **RÉSOLU-2026-08-01 — l'Art. 4 dit désormais ce qui EST.** Cette entrée était une **exigence de
+  clôture** posée par l'audit de revue *(si la PR dédiée glissait, **rien dans le corpus durable** n'aurait
+  signalé la fausseté)* ; elle est **soldée par son propre critère** : l'amendement est **fusionné**
+  *(PR #21, Constitution **`1.2`** sur `main`)*. L'article **nomme** maintenant `coverage_ratchet` parmi
+  les seuils, décrit l'enforcement **réel** et **porte ses bornes**. ⛔ **Ce qui RESTE VRAI et durable** :
+  **ADR-001 §4 porte encore les clauses périmées et NE SERA JAMAIS corrigé** — un ADR est **IMMUABLE**, son
+  §*Conséquences* décrivait l'état du monde **à sa date**, et *l'immuabilité existe précisément pour qu'on
+  ne repeigne pas l'histoire*. Il est **nommé**, jamais réécrit ; **aucun ADR-008**, la **décision** est
+  inchangée — c'est le **constat** qui a vieilli.
 - 🔴 **CLASSE DE DÉFAUT RÉCURRENTE, SANS AUCUN MÉCANISME — la dette la plus active du projet.**
   *« Une assertion chiffrée ou un emplacement écrit à la main à côté d'une commande, jamais relu dans sa
   sortie. »* **SIX manifestations en trois jours** *(2026-07-29 → 07-31)*, toutes de @Architect, dont
@@ -319,8 +346,10 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
-- 🎯 **PROCHAIN PAS RECOMMANDÉ — `/us-new` pour US-00.5**, branchée sur le **nouveau `main`**
-  (**`e2bd626`**), puis **US-00.6**. Ce sont les **deux seules** US requises pour clore EPIC_00.
+- 🎯 **PROCHAIN PAS — fusionner la PR nº 3 d'US-00.6** *(certification, depuis
+  `feat/US-00.6-certification`)* : **4 contextes requis verts**, puis **fusion PAR L'HUMAIN, sans
+  `--admin`** *(renforcement **R-c** — un agent ne fusionne pas)*. C'est la **dernière action** avant la
+  **clôture d'EPIC_00**. ⚠️ La PR n'est **pas encore ouverte** ; la branche est poussée.
   ⚠️ **Une par une** : `strict: true` sérialise les merges.
 - 🆕 **Créer `US-00.8` (US de dette) via `/us-new`** — décidé par l'**arbitrage @PO du 2026-07-28**
   (`reports/US-00.7/po_arbitrage_s11.md`). ✅ **Le verrou est LEVÉ** : US-00.7 est **certifiée et
@@ -333,10 +362,11 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   QA)* · **« un critère de sortie se publie comme un script exécutable »** · et les **findings non
   bloquants** des audits (N-1 traité, **N-2** `pip install` nu, **N-3** forks, actions à tag mutable,
   `emitter` non enforced). ⚠️ **NON requise pour clore EPIC_00** — son report est un choix assumé.
-- 📌 **US-00.5 — périmètre RÉDUIT mais NON VIDE** : S1 (règle 2) et S2 (Art. 4) sont **devenus vrais**,
-  donc leur correction est **sans objet**. ⚠️ Mais US-00.5 **gagne un item**, relevé par le @PO :
-  l'**Art. 4 de la Constitution nomme `ci.yml`** alors que le **4ᵉ contexte requis provient de
-  `branch-naming.yml`**. Et **`BACKLOG.md` n'a jamais porté ces corrections** → **rien à en retrancher**.
+- ✅ **RÉSOLU-2026-08-01 — l'item Art. 4 relevé par le @PO est soldé** *(entrée conservée parce qu'elle
+  était une action en attente, pas effacée)* : le bloc *Enforcement* nommait `ci.yml` **seul** alors que le
+  **4ᵉ** contexte requis provient de `branch-naming.yml`. **Vérifié dans le texte, pas de mémoire** :
+  l'article **nomme désormais les deux** et son encadré d'amendement **conserve la trace du défaut**
+  *(Constitution `1.2`)*.
 - ✅ **FAIT** : `gh` CLI installé (2.96.0) et authentifié `gitgdx` avec `admin: true`. Chemin absolu si
   absent du `PATH` d'une session ouverte avant l'install : `C:\Program Files\GitHub CLI\gh.exe`.
 - ✅ **FAIT** : `factory.config.json` porte `required_approving_review_count: 0` (`enforce_admins: true`).
