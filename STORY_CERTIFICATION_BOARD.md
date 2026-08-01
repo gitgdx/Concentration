@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | technical_validation | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | development_start | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1720,6 +1720,78 @@
 - **Track** : FULL — nouvelle EPIC fondatrice + architecture transverse (moteur de dégradé OKLCH,
   moteur d'unité adaptative, registre de modules extensible du hub). ADR-002/003/004 à rédiger
   avant l'Integration Lock (phase `technical_validation`).
+- **✅ Validation technique — `EVT_ARCHI_VALIDATED` le 2026-08-01, phase → `parallel_design`.**
+  Les **3 ADR** exigés par le track FULL avant l'Integration Lock sont **rédigés et Acceptés**, et chacun
+  tranche une vraie question :
+  - **[ADR-002](docs/adr/ADR-002-moteur-temps-restant.md)** — `p` est défini par les **deux instants**
+    `t_prev`/`t_next` qui encadrent le changement, ⛔ **et non par une fraction de l'unité courante**, qui
+    serait **ambiguë** dès que l'unité n'a pas une durée constante *(un mois ne vaut pas le suivant)*.
+    Deux régimes assumés : **calendaire** pour ans/mois *(RNF-05)*, **durée absolue** en dessous.
+    ⚠️ **DST non neutralisé** pour jours/heures — assumé, **à tester explicitement**.
+  - **[ADR-003](docs/adr/ADR-003-degrade-temporel-espace-colorimetrique.md)** — 🔴 **la décision la plus
+    importante des trois, et elle ferme un piège que personne n'avait vu** : le PRD écrit « OKLCH », or en
+    coordonnées **polaires** l'arc **le plus court** entre l'orange *(~60°)* et le bleu *(~260°)* fait
+    **~160° et PASSE PAR LE ROUGE**, qu'AC-5 **interdit** — et « le plus court » est le **réglage par
+    défaut** de la plupart des bibliothèques. ⇒ interpolation en **OKLab CARTÉSIEN** *(même espace,
+    autres coordonnées)*, qui **n'a aucune notion de sens de rotation** : le rouge devient **inatteignable
+    par construction**, non par vigilance. Écart avec la lettre du PRD **nommé**, jamais laissé à déduire.
+    ⚠️ Prix assumé : **milieu du dégradé désaturé**.
+  - **[ADR-004](docs/adr/ADR-004-registre-modules-hub.md)** — non-interactif par **ABSENCE de
+    gestionnaire**, ⛔ **jamais par `onTap: () {}`** : un callback vide **mentirait à l'accessibilité** et
+    resterait **révocable par accident**, alors que l'absence est **assertionnable**. Registre
+    **agnostique du placement** — c'est ce qui rend tenable la délégation d'AC-2 à @UXDesigner.
+  - ⛔ **Aucune dépendance ajoutée** dans les trois *(ni `go_router`, ni `build_runner`, ni paquet de
+    dates)*, motif constant : **ni SAST ni scanner de CVE** dans ce projet ⇒ toute dépendance est une
+    **surface non scannée**.
+  - 🔴 **FRONTIÈRE POSÉE, et elle conditionne la suite** : ADR-003 **ne décide PAS les extrémités** du
+    dégradé — ce sont des **tokens**, autorité @UXDesigner *(`#3D7DD8` du PRD vs `#005ab3` de la
+    maquette)*. ⇒ `temporal_gradient.dart` **ne peut pas être écrit** avant le Design UX, **bloquant
+    amont** de T1 et T5.
+  - ⛔ **Ce que cet événement n'autorise PAS** : l'Integration Lock reste **fermé**
+    *(`EVT_DESIGN_COMPLETED` exige Design UX **et** Design Data)*, et **aucun code applicatif** n'est
+    écrit. ⚠️ **Limite déclarée** : validation technique **non faite en contexte frais**.
+- **✅ Design UX — `EVT_UX_DESIGN_COMPLETED` le 2026-08-01** *([DESIGN_SYSTEM.md](docs/design/DESIGN_SYSTEM.md), qui était un **gabarit vide**)*.
+  - 🔬 **Le bleu du dégradé est tranché PAR CALCUL, pas par autorité** — contraste WCAG en OKLab sur
+    **101 points** de `p`, **meilleure** des deux couleurs de texte à chaque point, **pire cas** sur la
+    plage : **`#3D7DD8`** *(PRD)* rend **4,53:1** **sans bascule** ✅ · **`#005AB3`** *(maquette)* rend
+    **3,81:1** à `p = 0,73` ⇒ passe **3:1** *(le nombre)* mais ⛔ **échoue 4,5:1** *(la description)*.
+  - 🔴 **Fragilité publiée : la marge est de 0,03 point.** Assombrir le bleu, éclaircir le texte de tuile
+    ou changer l'espace d'interpolation **fera tomber l'AA de la description**.
+  - ⛔ **L'inversion de la maquette n'est plus une hypothèse** : ses propres commentaires disent
+    *« Orange - **Immediate** »* et *« Blue - **Far** »*, soit **l'inverse d'AC-5**. Les tokens sont donc
+    nommés **par leur rôle**, jamais par un palier.
+  - **Langue : FRANÇAIS UNIQUEMENT** *(décision humaine du 2026-08-01)* — les libellés des maquettes sont
+    des **repères de mise en page**, pas des tokens de contenu.
+  - **Placement des modules futurs** *(qu'AC-2 déléguait)* : **barre basse**, ⛔ **pas** de tuiles grisées
+    dans la grille — elles voleraient de la surface aux **9 tuiles** d'AC-3.
+  - **Déclaré SANS OBJET plutôt que coché** : navigation clavier, focus visible, labels ARIA — **aucun
+    élément interactif** dans cette US ; exigences **dues dès US-01.2**.
+- **✅ Design Data — `EVT_DATA_DESIGN_COMPLETED` le 2026-08-01** *([MODELE_ECHEANCE.md](docs/architecture/MODELE_ECHEANCE.md))*.
+  ⛔ **Pas un schéma de base, et délibérément** : aucune table, aucun index, **aucune migration** ⇒
+  `EVT_MIGRATION_SCRIPT_READY` **non émis**.
+  - **7 invariants, dont TROIS sont des INTERDITS d'invariant** : la `description` **peut** être vide
+    *(I-3)*, la `dateEcheance` **peut** être passée *(I-4)*, **aucun** champ de persistance *(I-7)* —
+    poser l'invariant inverse **casserait un AC**.
+  - **Départage des ex æquo AJOUTÉ** *(à date égale, tri par `id`)* : un comparateur **non total** est
+    instable selon l'implémentation, et deux tuiles pourraient **échanger leur place** entre deux
+    rafraîchissements — perçu comme un scintillement. **AC-6 « Erreur » exige un ordre déterministe.**
+  - ⚠️ **Dette nommée d'avance** *(I-5)* : instants en heure **locale**, **aucun fuseau stocké** — dès
+    qu'il y aura persistance il faudra de l'**UTC**, sinon un changement de fuseau **déplacera** les
+    échéances. **À rouvrir en US-01.2.**
+- **🔒 INTEGRATION LOCK — `EVT_DESIGN_COMPLETED` le 2026-08-01, phase → `development_start`.**
+  Les deux conditions du track FULL sont remplies **sans aucun `N/A`**. ✅ **Ce que le Lock débloque
+  réellement** : les extrémités du dégradé étant figées, **`temporal_gradient.dart` (T5) et les tokens
+  (T1) deviennent écrivables** — c'était le bloquant amont posé par ADR-003.
+  - ⚠️ **Porté au Lock à l'attention de @Developer** : la marge de contraste étant de **0,03 point**, le
+    test d'ADR-003 §5 doit être assertionné **sur un échantillonnage de `p`**, ⛔ **pas seulement aux deux
+    extrémités**, et **échouer bruyamment**.
+  - ⛔ **Ce que le Lock n'autorise PAS** : **T0-cliquet reste à trancher AVANT** d'écrire `lib/`. Le
+    cliquet est à **89,4 %** mesuré sur **19 lignes** ; sous ce seuil le gate `test` — **contexte requis**
+    — passe au **rouge** et bloque la PR. Cible tenable *(moteurs purs couvrables à ~100 %, présentation
+    couverte par T12a)*, mais **à décider maintenant, pas devant une PR rouge**.
+  - ⚠️ **Limite déclarée** : ni la relecture PO, ni la validation technique, ni les deux passes de design
+    **n'ont été faites en contexte frais**. La Constitution ne l'exige que pour les **audits**, qui
+    restent à venir via `/audit-us`.
 - **Design Data / UX** : ⏳ requis (track FULL — pas de N/A justifiable). Entrée UX = maquettes
   Stitch rapatriées dans `docs/design/stitch/`. ⚠️ Conflit relevé (gate *analyze*) : le gradient
   des maquettes est **inversé** vs RF-04 (orange = imminent chez Stitch, alors que RF-04 dit
