@@ -56,7 +56,7 @@ développés) ; partage social ; widgets d'écran d'accueil OS ; tri manuel des 
 | US ID | Titre | Story File | Statut |
 |---|---|---|---|
 | US-01.1 | Affichage Hub & grille d'échéances | [`docs/stories/US-01.1-affichage-hub-grille.md`](../stories/US-01.1-affichage-hub-grille.md) | ⏳ business_alignment |
-| US-01.2 | Gestion des événements (CRUD) | _(à créer via `/us-new`)_ | ⏳ à venir |
+| US-01.2 | Gestion des événements (CRUD) | _(à créer via `/us-new`)_ | ⏳ à venir — 📥 **PORTE UN CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00, le 2026-08-01** *(arbitrage humain)* : **la convention de migrations réversibles d'[ADR-005](../adr/ADR-005-convention-migrations-reversibles.md) doit être INSTANCIÉE** — patron de test de migration réversible **exécuté** sur le **premier schéma réel**, interdiction de migration destructive par défaut *(RF-21)* **exercée**. ⚠️ **Origine du transfert** : la 2ᵉ moitié du critère de clôture **nº 112 d'EPIC_00** exigeait cette application, or elle était **structurellement invérifiable là-bas** *(US-01.2 n'existe pas, et EPIC_00 doit être clos AVANT le développement d'EPIC_01 — un deadlock)*. ⛔ **Un transfert n'est pas une levée** : le **risque nº 4 d'EPIC_00 reste OUVERT** jusqu'à cette instanciation, et à ce jour la convention est **documentée et jamais appliquée — aucune migration n'a jamais été exécutée sur ce projet** |
 
 ## ⚠️ Zones d'ombre / Risques identifiés
 

@@ -9,7 +9,7 @@
 | US ID | Titre de la Story | Phase Workflow | PO Visa | Design Data | Design UX | Code (Dev) | Audit Rev 🔍 | Audit Sec 🛡️ | QA Status | Déploiement (DevOps) | Certifié Prod |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EPIC_00** | **Fondations** | | | | | | | | | | |
-| US-INIT | Initialisation de la factory | development_start | ✅ @PO | N/A (init) | N/A (init) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-INIT | Initialisation de la factory | epic_closure | ✅ @PO | N/A (init) | N/A (init) | N/A (absorbée) | N/A (absorbée) | N/A (absorbée) | N/A (absorbée) | N/A (absorbée) | N/A (clôturée sans objet propre) |
 | US-00.1 | Secrets & scan de dépôt | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
@@ -28,8 +28,25 @@
   (voir `BACKLOG.md` → EPIC_00). Pas de valeur métier propre — US technique de bootstrap.
 - **Design Data / UX** : `N/A (init)` — aucun schéma de données ni écran n'est concerné par
   l'initialisation elle-même ; le squelette applicatif de l'adapter n'a pas de design dédié.
-- **Prochaine étape** : dérouler `US-INIT-01` → `US-INIT-06` via `/us-new`, qui feront progresser
-  cette ligne (ou des lignes dédiées) jusqu'à `Certifié Prod`.
+- **✅ CLÔTURÉE SANS OBJET PROPRE le 2026-08-01 — arbitrage humain, et ce n'est PAS une certification.**
+  *(**PÉRIMÉ-2026-08-01** : cette section portait « **Prochaine étape** : dérouler `US-INIT-01` → `US-INIT-06`
+  via `/us-new`, qui feront progresser cette ligne jusqu'à `Certifié Prod` » — **fait, mais sous d'autres
+  IDs** : les 6 chantiers **sont devenus** US-00.1…US-00.6, tous certifiés.)*
+  - **Justification, exigée par la lettre du critère 108 d'EPIC_00** *(« … ou **clôturées/justifiées dans
+    le SCB** »)* : `US-INIT` est un **porteur de bootstrap**, son périmètre a été **entièrement absorbé**
+    par US-00.1→US-00.6. **Aucun périmètre résiduel** ⇒ `N/A (absorbée)` sur les colonnes d'exécution.
+  - **Constat VÉRIFIÉ, non supposé** : **aucun Story File** *(`docs/stories/US-INIT*` — rien ; et un Story
+    File **rétroactif est interdit** par `/us-new`)* · sa trace `docs/trace/US-INIT/events.jsonl`
+    **s'arrête à `EVT_DESIGN_COMPLETED` le 2026-07-24** — **ni `EVT_CODE_READY`, ni audit, ni QA**.
+  - ⛔ **Elle n'est PAS certifiée et ne le sera jamais** : `Certifié Prod` porte `N/A (clôturée sans objet
+    propre)`, **jamais `🚀 OUI`**. La certifier exigerait un Story File rétroactif, une DoD et des audits
+    inexistants — soit une **auto-certification rétroactive**, l'**anti-pattern nº 1** du projet.
+  - 📌 **Aucune dérogation n'a été nécessaire** : contrairement à la case 6 d'US-00.6, ce critère est
+    **satisfait tel qu'il est écrit** — sa seconde branche prévoyait exactement ce cas.
+  - ⚠️ **Reste ouvert, et sans porteur** : la question *« `US-INIT` était-elle une US à part entière ou un
+    simple porteur du Sprint 0 ? »* est **tranchée pour ce SCB** *(porteur)*, mais le **rituel `/us-new`
+    permet toujours de créer des EPIC et des porteurs rétroactivement** — durcissement à décider,
+    candidat `/audit-methodo`.
 
 ### [US-00.1] Secrets & scan de dépôt
 
