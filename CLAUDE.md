@@ -49,7 +49,27 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **clôture d'EPIC_00** — ⛔ **plus aucune US requise n'est ouverte.**
+**Chantier actif** : **US-01.1 — le PRODUIT.** ⛔ **Plus aucune US de fondations n'est ouverte.**
+
+✅ **EPIC_00 CLOS le 2026-08-01** *(⚠️ sur la branche `feat/US-00.6-cloture-epic00` — **la clôture n'est
+sur `main` qu'après fusion de sa PR**)*. **Tous ses critères sont cochés**, dont **le nº 112 sur sa seule
+1ʳᵉ moitié** : sa 2ᵉ exigeait qu'US-01.2 **instancie** la convention d'ADR-005, or **US-01.2 n'existe pas**
+et appartient à EPIC_01, alors qu'EPIC_00 doit être clos **avant** le développement d'EPIC_01 — ⛔ **un
+DEADLOCK, pas une case difficile**. **Transféré** en **critère d'entrée d'US-01.2**, inscrit dans EPIC_01 ;
+⛔ **un transfert n'est pas une levée** : le **risque nº 4 reste OUVERT**, et **aucune migration n'a jamais
+été exécutée sur ce projet**. `US-INIT` est **clôturée sans objet propre** *(porteur de bootstrap, trace
+arrêtée à `EVT_DESIGN_COMPLETED`, aucun Story File)* — ⛔ **jamais `🚀 OUI`**, ce serait une
+auto-certification rétroactive ; le critère 108 **prévoyait ce cas dans sa lettre**, donc **aucune
+dérogation**.
+
+🔬 **CE QUE LA CLÔTURE ÉTABLIT SUR L'ÉTAT RÉEL DU PROJET, et qui doit gouverner la suite** : la factory
+**n'a jamais tourné sur du code produit**. **Mesuré, pas estimé** : `lib/` = **1 fichier, 63 lignes**
+*(19 mesurables)* · `test/` = **1 fichier** · **8 `.feature`** pour **0 step definition et 0 runner** ⇒
+⛔ **aucun scénario Gherkin du projet n'a jamais été exécuté**. Les **7 certifications attestent des
+INSTRUMENTS** — chacune porte « **0 fichier Dart touché** » — et le cliquet n'a **jamais refusé une
+régression réelle**. ➡️ **La preuve que ce socle fonctionne viendra d'US-01.1.** ⚠️ Le premier vrai fichier
+Dart fera **bouger la couverture d'un coup** *(grain minimal **5,26 pt** sur 19 lignes)* : c'est là qu'on
+saura si le cliquet **protège** ou **paralyse**.
 
 ✅ **US-00.6 CERTIFIÉE Prod 🚀 le 2026-08-01** — couverture initiale mesurée + **cliquet en vigueur**.
 **PR #20** *(code)* et **PR #21** *(amendement de l'Art. 4, **PR DÉDIÉE**)* fusionnées **par l'humain sans
@@ -215,19 +235,18 @@ exige d'abord l'arbitrage `TRACKS.md` ci-dessous.
 > **25** événements du catalogue ne permet d'éteindre une dérogation → **dette du système de traçabilité**
 > (ci-dessous). **Conditionnel** : un retour du dépôt en privé **rouvrirait la question**.
 
-**Sprint 0 (EPIC_00) : les 6 US requises sont CERTIFIÉES** — US-00.1, US-00.2, US-00.3, **US-00.4**,
-**US-00.5**, **US-00.6** 🚀 ; **US-00.7 CERTIFIÉE 🚀 le 2026-07-30** *(hors décompte initial : EPIC_00 =
-US-00.1→US-00.6)*. ⛔ **Mais EPIC_00 N'EST PAS ENCORE CLOS** : il reste la **PR nº 3** *(certification
-d'US-00.6, branche `feat/US-00.6-certification`)* — **4 contextes requis verts puis fusion PAR L'HUMAIN
-sans `--admin`** — puis la **clôture d'EPIC_00 elle-même**. ⚠️ **Tant que cette PR n'est pas fusionnée, la
-certification n'existe que sur la branche**, pas sur `main`. ✅ Le critère de clôture « protection de
-branche vérifiée » est **coché**, celui des « seuils de couverture mesurés et ratchet actif » l'est
-**depuis US-00.6**, et les **risques #2, #3 et #5 d'EPIC_00 sont CLOS** *(preuves :
-`reports/US-00.7/applied_state/`, `reports/US-00.6/`)*. ⚠️ La mention « SPRINT 0 COMPLET » du
-PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau) — ⛔ **ne pas la reproduire
-aujourd'hui : « les 6 US certifiées » n'est PAS « EPIC_00 clos »**. **US-00.8** (dette) n'est **pas**
-requise pour la clôture — son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL)
-reste **en pause** en `business_alignment` — à rebaser sur `main`.
+**Sprint 0 (EPIC_00) : CLOS le 2026-08-01** — US-00.1 → **US-00.7 certifiées 🚀** *(US-00.7 le 2026-07-30,
+hors découpage initial : EPIC_00 = US-00.1→US-00.6)*, `US-INIT` **clôturée sans objet propre**, **tous les
+critères de clôture cochés** *(le nº 112 sur sa 1ʳᵉ moitié, transfert daté)*, **risques #1, #2, #3, #5
+CLOS** et **#4 TRANSFÉRÉ donc encore OUVERT** *(preuves : `reports/US-00.7/applied_state/`,
+`reports/US-00.6/`, `python scripts/check_epic00_docs.py` → exit 0)*. ⚠️ **La clôture est sur une BRANCHE
+tant que sa PR n'est pas fusionnée** — sur `main`, EPIC_00 est encore ouvert. ⚠️ **La mention « SPRINT 0
+COMPLET » du PROJECT_LOG au 2026-07-26 était inexacte** *(rectifiée en fin de tableau)* : elle l'était
+parce qu'elle confondait des US livrées avec un EPIC statué. ⛔ **Et « EPIC_00 clos » ne veut pas dire
+« socle prouvé »** : voir le bloc *Chantier actif* — **0 fichier Dart** en 7 US, **0 scénario Gherkin
+exécuté**, **0 migration jamais exécutée**. **US-00.8** (dette) n'était **pas** requise pour la clôture —
+son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient le chantier actif** —
+⚠️ **son Integration Lock exige d'abord l'arbitrage `TRACKS.md`** *(ci-dessous)*.
 **Dettes ouvertes** :
 - ✅ **RÉSOLU-2026-08-01 — l'Art. 4 dit désormais ce qui EST.** Cette entrée était une **exigence de
   clôture** posée par l'audit de revue *(si la PR dédiée glissait, **rien dans le corpus durable** n'aurait
@@ -238,6 +257,20 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   §*Conséquences* décrivait l'état du monde **à sa date**, et *l'immuabilité existe précisément pour qu'on
   ne repeigne pas l'histoire*. Il est **nommé**, jamais réécrit ; **aucun ADR-008**, la **décision** est
   inchangée — c'est le **constat** qui a vieilli.
+- 🔴 **AUCUN ÉVÉNEMENT DE CLÔTURE D'EPIC dans le catalogue** *(constaté le 2026-08-01 en clôturant
+  EPIC_00)* : ses **25** événements n'en comportent **aucun** pour clore un EPIC — **même famille
+  structurelle** que l'absence d'extinction de dérogation. ⇒ **la clôture d'un EPIC est un acte
+  PUREMENT DOCUMENTAIRE**, invisible de `docs/trace/**` : un audit qui ne lirait que la trace ne pourrait
+  **pas savoir** qu'EPIC_00 est clos. ⛔ **`EVT_DOCS_UPDATED` n'a PAS été détourné** *(son `emitter`
+  déclaré est `tech-writer`)* et **aucune dérogation n'a été émise pour un acte documentaire** — précédent
+  suivi : l'amendement de l'Art. 4. En ajouter un modifierait la **machine à états** → exige son propre
+  ADR. **Candidat `/audit-methodo`.**
+- 🟠 **`scripts/check_epic00_docs.py` n'est PAS en CI** *(critère de clôture 114 d'EPIC_00)* : il porte son
+  **autotest de mutation** *(4 assertions, mutants « fichier supprimé » et « marqueur retiré », verdicts
+  comparés en **ensembles**)* et il a été éprouvé sur le **corpus réel** *(Constitution ramenée à `1.1` →
+  refus)*, mais **il se lance à la main** — **même dette** que le `selftest` d'US-00.6. ⚠️ **Borne
+  intrinsèque** : il atteste la **présence** et la **fraîcheur**, ⛔ **jamais la véracité** — l'Art. 4 a
+  prouvé qu'un texte peut être **présent, marqué et faux**.
 - 🔴 **CLASSE DE DÉFAUT RÉCURRENTE, SANS AUCUN MÉCANISME — la dette la plus active du projet.**
   *« Une assertion chiffrée ou un emplacement écrit à la main à côté d'une commande, jamais relu dans sa
   sortie. »* **SIX manifestations en trois jours** *(2026-07-29 → 07-31)*, toutes de @Architect, dont
@@ -334,7 +367,9 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   US-00.7** : `TRACKS.md:14` dit « Surface auth / sécurité / **admin** / paiement » là où la pratique
   constante du projet (4 US certifiées, interprétation inscrite au SCB) lit « surface **applicative** » —
   le critère littéral **est** satisfait par US-00.7 au sens strict. ⛔ `TRACKS.md` **n'est pas édité** par
-  US-00.7.
+  US-00.7. 🔺 **DEVENU BLOQUANT le 2026-08-01** : EPIC_00 étant clos, **US-01.1 est le chantier actif** —
+  cet arbitrage est donc le **premier pas** de la suite, avant son Integration Lock. C'est une **décision**,
+  pas une US.
 - **Périmètre Art. 6 déclaré ≠ appliqué** : `.github/workflows/*` et `apply_branch_protection.sh` ne
   sont protégés ni par `protect_files.sh` ni par la Constitution → candidat `/audit-methodo`.
 - **`governance.grandfathering_date` est une clé morte** : lue par aucun script, sémantique décalée
@@ -346,11 +381,19 @@ reste **en pause** en `business_alignment` — à rebaser sur `main`.
   (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
 **US bloquées** : —
 **Actions humaines en attente** :
-- 🎯 **PROCHAIN PAS — fusionner la PR nº 3 d'US-00.6** *(certification, depuis
-  `feat/US-00.6-certification`)* : **4 contextes requis verts**, puis **fusion PAR L'HUMAIN, sans
-  `--admin`** *(renforcement **R-c** — un agent ne fusionne pas)*. C'est la **dernière action** avant la
-  **clôture d'EPIC_00**. ⚠️ La PR n'est **pas encore ouverte** ; la branche est poussée.
-  ⚠️ **Une par une** : `strict: true` sérialise les merges.
+- ✅ **FAIT (2026-08-01)** : **PR #22 fusionnée** *(certification d'US-00.6)* — `main` = **`0126582`**,
+  `mergedBy` **`gitgdx`**, `12:13:31Z`, **4 contextes `success`** relevés sur le commit fusionné `ee7f6d4`.
+  ⚠️ Provenance **déclarative** *(`is_bot` rend `false` même pour un agent)*.
+- 🎯 **PROCHAIN PAS — fusionner la PR de CLÔTURE d'EPIC_00** *(branche
+  `feat/US-00.6-cloture-epic00`)* : **4 contextes requis verts**, puis **fusion PAR L'HUMAIN, sans
+  `--admin`** *(renforcement **R-c**)*. ⚠️ **Une par une** : `strict: true` sérialise les merges.
+- 🎯 **PUIS — US-01.1, le produit** *(et non US-00.8)*. Ordre recommandé et son motif : la factory
+  **n'a jamais tourné sur du code produit** *(`lib/` = 1 fichier de 63 lignes, 0 scénario Gherkin exécuté,
+  0 migration exécutée)* ⇒ **écrire plus de gouvernance ne testera jamais la gouvernance**. Deux décisions
+  à poser **au démarrage**, pas en route : **(1)** l'**arbitrage `TRACKS.md`** *(ci-dessus, bloque
+  l'Integration Lock)* · **(2)** les **8 `.feature` sans runner** — soit un **runner BDD réel** est
+  financé, soit les DoD cessent d'écrire « N scénarios Gherkin » comme un livrable et disent
+  **« spécification, non exécutée »** ; en l'état chaque DoD porte une ligne qui **ressemble** à un test.
 - 🆕 **Créer `US-00.8` (US de dette) via `/us-new`** — décidé par l'**arbitrage @PO du 2026-07-28**
   (`reports/US-00.7/po_arbitrage_s11.md`). ✅ **Le verrou est LEVÉ** : US-00.7 est **certifiée et
   fusionnée**, donc l'interdiction d'éditer `docs/stories/US-00.1-*` « depuis la branche d'US-00.7 »
