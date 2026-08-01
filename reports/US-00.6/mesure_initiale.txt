@@ -1,0 +1,21 @@
+# US-00.6 · T1 — MESURE INITIALE DE LA COUVERTURE, sortie brute et datee
+# 2026-07-31 · branche feat/US-00.6-couverture-ratchet · main = 309202a
+
+$ python scripts/run_gates.py --gate test
+00:02 +1: incrémente le compteur au tap
+00:03 +2: All tests passed!
+Couverture de lignes : 89.5% (17/19) — seuil requis : 80.0%
+✅ app.test
+————————————————————————————————————————
+Tous les gates bloquants passent (1 exécutés).
+
+## DENOMINATEUR ET LIGNES NON COUVERTES — nommees, jamais resumees en un pourcentage
+  NON COUVERTE : lib\main.dart ligne 9
+  NON COUVERTE : lib\main.dart ligne 10
+
+  denominateur (lignes instrumentees) : 19
+  lignes couvertes                   : 17
+  pourcentage EXACT (non arrondi)     : 89.4737 %
+  ce que le script AFFICHE            : 89.5 %   <-- ARRONDI, ne pas consigner
+  valeur a consigner (arrondi BAS)    : 89.4
+  1 ligne vaut                        : 5.26 pt

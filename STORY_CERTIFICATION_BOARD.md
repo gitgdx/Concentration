@@ -14,6 +14,7 @@
 | US-00.2 | Qualité statique de référence | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.3 | Migrations réversibles | epic_closure | ✅ @PO | ✅ @Data | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.4 | Enforcement `main` : constat + outillage (cible armée) | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
+| US-00.6 | Couverture initiale mesurée + cliquet (ratchet) actif | development_start | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
@@ -553,6 +554,118 @@
     2026-07-30)*.
   - **US-00.4 clôturée** (phase `epic_closure`). **4ᵉ US de fondation certifiée** — Sprint 0 :
     **4 sur 6** (restent US-00.5 et US-00.6).
+
+### [US-00.6] Couverture initiale mesurée + cliquet (ratchet) actif
+
+- **PO Visa** (2026-07-31, subagent **@ProductOwner**, contexte frais) : Story File
+  `docs/stories/US-00.6-couverture-ratchet.md` — **6 AC** en Nominal/Erreur/Limite, **18 scénarios**
+  Gherkin **documentaires**, DoD. **Track `STANDARD`** *(et non QUICK malgré un seul fichier de code : le
+  livrable durcit un contexte **REQUIS**, et un cliquet mal réglé rend **toute PR infusionnable,
+  administrateur inclus**)*. **DERNIÈRE US requise pour clore EPIC_00.**
+- **🔴 LE @PO A RÉOUVERT UN ARBITRAGE DE @Architect, ET IL AVAIT RAISON.** @Architect avait arbitré le
+  2026-07-30 « valeur en config + logique dans `check_flutter_coverage.py` » **sans avoir vérifié** que
+  l'**Art. 4** *(amendé la veille)* **et ADR-001 §4** *(immuable)* épinglaient **tous deux** la route
+  `factory_sync.py`. **Le compte s'inverse** : cette route « économe » coûtait **1 édition + un amendement
+  de la Constitution + une attestation humaine + un ADR-008 + une PR dédiée**, contre **2 éditions et rien
+  d'autre**. ⇒ **Arbitrage humain du 2026-07-31 : route du SCHÉMA D'ORIGINE.** ✅ **L'Art. 4 et ADR-001
+  RESTENT VRAIS**, et les ambiguïtés **A-1** et **A-2** deviennent **SANS OBJET**. ⛔ **PÉRIMÉ-2026-07-31 — « l'Art. 4 et ADR-001 RESTENT VRAIS » est FAUX, et c'est une erreur de raisonnement de @Architect.** *(Finding **B-2** de l'audit de revue, confirmé par vérification.)* L'arbitrage a conclu « sans objet » sur une prémisse vraie **pour une clause sur quatre seulement**. Le changement de route **sauve** la clause « *l'activation exige DU CODE dans `factory_sync.py`* » *(32 lignes y ont été ajoutées)*, **mais rien ne pouvait sauver les trois autres**, puisque c'est le **succès même d'US-00.6** qui les rend fausses : ⛔ « **n'est PAS en vigueur** » *(le gate imprime « (cliquet) »)* · ⛔ « **absente de `factory.config.json`** » *(la clé y est)* · ⛔ « **lue seulement pour un composant `frontend`** » *(elle est lue pour `app`)*. **C'est la classe de défaut qu'US-00.7 a payée CINQ fois** : le corpus affirme qu'une chose manque alors qu'elle est acquise. ✅ **Traitement arbitré le 2026-07-31** : l'**Art. 4 est AMENDÉ** *(PR dédiée, Constitution `1.1` → `1.2`, attestation humaine)* ; **ADR-001 est NOMMÉ et NON corrigé** — il est **immuable**, et son §*Conséquences* décrivait l'état du monde **à sa date**, que ce même jour a changé. **L'immuabilité existe pour qu'on ne repeigne pas l'histoire.**
+- **✅ Gate `clarify` PASSÉE — les 7 ambiguïtés tranchées** *(2 par arbitrage humain, 5 par @Architect)*.
+  Décisions notables : cliquet en **objet** `{value, date, motif}` *(JSON ne porte aucun commentaire, donc
+  le lien valeur↔justification **doit être une donnée**)* · **aucune clé de tolérance** *(sur **19** lignes,
+  **1 ligne = 5,26 pt** — tout réglage inférieur serait **sans effet observable**)* · **autotest EN CI**
+  *(sinon on recréait à l'identique la dette du `selftest` qui **dort depuis US-00.4**)*.
+- **🔒 Integration Lock** (`EVT_ARCHI_VALIDATED`) : **6 risques nommés**, dont **R-1 le verrouillage du
+  dépôt** *(une référence trop haute rend toute PR infusionnable)* et **R-3/R-4 explicitement NON
+  MITIGÉS** *(le cliquet ne monte jamais seul ; la complaisance reste possible)*. ⛔ **Aucun ADR** : la
+  route retenue **est** celle qu'ADR-001 §4 prescrit, il n'y a **rien à remplacer**.
+- **📏 T1 — MESURE INITIALE, et elle porte trois pièges vérifiés** *(`reports/US-00.6/mesure_initiale.txt`)* :
+  couverture **exacte `89,4737 %` (17/19)**, mais le script **AFFICHE `89.5 %`** ⇒ **consigner l'affiché
+  fabriquerait un rouge immédiat sur un dépôt inchangé** · **1 ligne = 5,26 pt**, donc **aucune valeur
+  n'existe entre 89,47 % et 94,74 %** · les **2** lignes non couvertes sont **nommées** :
+  `lib/main.dart:9-10`, soit `void main()` et `runApp(...)` — **la complaisance possible est donc
+  identifiée nominativement, pas hypothétique**.
+- **✅ CODE LIVRÉ (`EVT_CODE_READY`)** — tout ce qui est à portée d'agent :
+  - `scripts/check_flutter_coverage.py` : lit le cliquet **uniquement** dans `factory.config.json`
+    *(Art. 4)*, applique **`max(plancher, cliquet)`** et **dit toujours lequel des deux est violé** —
+    jamais un « seuil » anonyme. **Fail-explicit** sur les 4 cas dégradés, dont **`0` ligne mesurable** :
+    ⛔ *« ce n'est pas 0 %, ce n'est pas une mesure »*.
+  - 🔬 **`scripts/selftest_coverage_ratchet.py` + ses fixtures** *(**PÉRIMÉ-2026-07-31** : cette ligne écrivait « **4 fixtures** » — chiffre **recopié**, périmé dès l'ajout de la 5ᵉ puis de la 6ᵉ ; le nombre exact est **dérivé et imprimé par `python scripts/selftest_coverage_ratchet.py`**)* — **LE MUTANT**, et il rend
+    **des REFUS** *(**PÉRIMÉ-2026-07-31** : « 2 REFUS sur 4 attentes » était un chiffre **recopié** ; le nombre exact est **dérivé et imprimé par `python scripts/selftest_coverage_ratchet.py`**)* : **`16/19` est ROUGE** *(il passait **VERT** avant cette US : le plancher à
+    80 % tolérait **exactement une régression d'une ligne** — c'est là toute la valeur de l'US, et elle
+    est **modeste et précise**)*, `17/19` **VERT** *(garde anti-verrouillage)*, `18/19` **VERT + valeur à
+    consigner imprimée**, `0` ligne **ROUGE**.
+  - **Branché dans le job CI DÉJÀ REQUIS `📋 Governance`** *(step, pas job séparé — un job séparé serait
+    un contexte **non requis**, donc un contrôle qui n'empêche **rien**)*. ⚠️ **Contrepartie assumée** :
+    une fixture cassée **verrouille toute PR** — risque **auto-révélateur**, à la différence d'un contrôle
+    qui dort.
+  - ⛔ **Faute d'instrumentation attrapée en route, et elle est de moi** : mon premier test affichait
+    `exit=0` sur un cas **rouge** — mon `$?` lisait le code de `sed`, pas celui de Python. **9ᵉ
+    manifestation de la classe versée à `/audit-methodo`.** Corrigé, re-mesuré **hors de tout pipe**.
+- **✅ DEUX ÉDITIONS HUMAINES — APPLIQUÉES le 2026-07-31** *(commit `f585e82`)* **PÉRIMÉ-2026-07-31 : cette entrée disait « ⏳ … seules actions restantes »**, ce qui est **faux depuis `f585e82`** — les deux diffs sont **appliqués et vérifiés** *(l'audit sécurité a établi **28/28 lignes exécutables identiques** au diff proposé, et `emit_branch_protection` **octet-identique**)* *(`reports/US-00.6/transmissions_humaines.md`,
+  diffs exacts)* : **T7** `factory.config.json` → `app.coverage_ratchet = {value: 89.4, …}` ·
+  **T8** `factory_sync.py` → lecture du cliquet **pour `app`** *(aujourd'hui `frontend` seul)*.
+  ⛔ **Les deux fichiers sont PROTÉGÉS** — aucun agent ne les écrit. ✅ **La logique est livrée AVANT** et
+  **tolérante à l'absence de la clé** *(vérifié : `run_gates --gate test` **exit 0**)* : **aucun état
+  intermédiaire ne rend une PR infusionnable.**
+- **✅ AUDITS ET QA — LES TROIS BADGES PORTENT SUR LE MÊME COMMIT `62a4fcc`**, et c'est le résultat d'un
+  **trou que la QA a nommé et m'a renvoyé sous l'Art. 5** : `✅ 🔍` portait sur `3c56218`, `✅ 🛡️` sur
+  `f585e82`, alors que **43 lignes de code — dont le contrôle différentiel, qui tourne dans un gate
+  REQUIS — n'avaient été relues par aucun auditeur**. ⚖️ **Tranché** : re-revue **et** re-audit sécurité
+  lancés **ensemble** sur le commit final — *« il serait absurde de refermer le trou d'un côté en le
+  rouvrant de l'autre »*.
+  - **🧪 QA `PASS`** — DoD **17/20** *(décochées : **6** insatisfiable et datée · **14** fusion humaine ·
+    **17** son propre verdict)* · **6 AC tenus, 0 orphelin** · **29 mutants**. ⚖️ Elle a **refusé un
+    bloquant qui venait de son propre instrument** *(`CS-4` exigeait le marqueur sur la même **ligne
+    physique** alors qu'elle avait déjà arbitré le patron « ligne de continuation » comme non bloquant —
+    « bloquer ici serait me contredire »)*.
+  - **🔍 Revue `PASSED`** — les **5 survivants sont morts, chacun par la bonne barrière**, y compris
+    **Q3a, le cas SILENCIEUX** *(plafond posé dans `read_ratchet`)*. Propriété établie comme
+    **structurelle** : un checker qui **écrit** sa valeur rend le **même verdict pour les deux
+    références**, donc la paire `(0,1)` lui est **inatteignable** — **tout littéral est tué**.
+  - **🛡️ Sécurité `PASSED`** — `gitleaks` sur **121,77 Mo** + le delta, `.gitleaks.toml` **non modifié**
+    *(le vert n'est pas obtenu en desserrant le détecteur)* · **aucun appel réseau**, les 3 `write_text`
+    **toutes** dans un `tempfile`, `subprocess.run` en **forme liste** et **100 % des arguments issus de
+    constantes du module** · `emit_branch_protection` **octet-identique** *(AST)* · **aucun `name:` de job
+    modifié** · `actionlint` **0 erreur** · `main` toujours **protégée**.
+- **🔴 D-4 IMPLÉMENTÉ ALORS QUE PERSONNE NE L'EXIGEAIT** — parce que la revue a **réfuté par mesure** la
+  prémisse du report de la QA : elle l'avait différé au motif que le trou était « non silencieux », or un
+  plafond posé **dans `read_ratchet`, l'endroit NATUREL**, rend la sortie **auto-cohérente** ⇒ **le trou
+  EST silencieux**. Et la famille n'est pas « un plafond à 90 » mais **toute `f` avec
+  `f(86) ≤ 89,47 < f(95)`**. ✅ **Prouvé par mutation** *(sur copie, fichier restauré à l'identique)* :
+  plafond injecté → **les codes de sortie rendent encore `(0,1)` comme attendu**, donc l'ancien
+  différentiel **ne voyait rien** ; c'est **l'assertion de sortie** qui le rattrape.
+- **🔬 RF-2 — le vrai gain, et NI la revue NI la QA NI moi ne l'avions vu** : **le plancher contractuel
+  n'avait AUCUN cas discriminant** *(forcer `--min` à `0` **survivait**)* — dans tous les cas du jeu le
+  cliquet était au-dessus, donc **le plancher ne décidait jamais**, et **AC-4 n'était assertionné nulle
+  part en CI**. Comblé par deux cas « plancher seul », dont une fixture **sous** le plancher. **9
+  assertions, 5 REFUS.**
+- **⚖️ DÉCISION DE CONVERGENCE, ASSUMÉE** : chacun de mes correctifs **invalidait le badge** que le
+  passage précédent venait d'accorder — **régression potentiellement infinie, et j'en étais la cause**.
+  **J'ai gelé** : tout finding **non bloquant** postérieur est **versé en dette à US-00.8 et NON corrigé
+  ici** ; un **bloquant** aurait été corrigé quel qu'en soit le coût. Les deux auditeurs l'ont accepté et
+  s'y sont tenus.
+- **⚖️ N-1 — je NE sollicite PAS de 3ᵉ édition humaine**, sur l'arbitrage de l'audit sécurité :
+  *« le remède serait du même type que la cause »* — demander une copie manuelle de plus sur **le script
+  qui génère la cible de protection de `main`**, pour **quatre espaces sans effet**, réintroduirait le
+  mécanisme exact qui a produit le défaut, avec cette fois un risque **non nul** de divergence réelle.
+  **Un défaut nommé et daté n'est plus un piège** — à corriger **par surcroît** lors d'une future édition.
+- **➡️ DETTES VERSÉES À US-00.8** *(gel appliqué)* : **RD-1** *(l'assertion lie la sortie à la
+  **référence**, pas à la **décision** — une transformation qui est **l'identité sur le domaine testé**
+  est indétectable **par construction** ; correctif **mesuré** par la revue, sans nouvelle fixture)* ·
+  **RD-2** *(le label du seuil violé n'est pas assertionné)* · **D-1** *(un `lcov` **sans `LF:`/`LH:`**
+  rougit désormais — `flutter` les émet, gate réel vert, échec **en fermeture** et auto-révélateur)* ·
+  **D-2/D-3** *(un `+1+2` encore écrit à la main ; le différentiel suppose `PLANCHER < ref_basse`)* ·
+  **N-1** · et la **résorption des 3 occurrences du seuil** *(l'US l'a **aggravée**, 2 → 3)*.
+- **🎓 CE QUE CETTE US ÉTABLIT, ET QUI VAUT POUR TOUT LE PROJET** : **les TROIS instruments d'audit se
+  sont pris à leur propre piège**. La QA : *« mes instruments m'ont trahie **CINQ FOIS** en trois
+  passages, toutes de moi »*. La revue : son contrôle comparait un nombre de colonnes **écrit à la main**
+  et elle a **failli publier un finding faux** ; puis **son harnais a planté sur `cp1252`** — *exactement*
+  la classe de bug de cette US, qu'elle avait vérifiée **deux fois** chez moi. Verdict commun, que je
+  reprends : ⛔ **« la dette `/audit-methodo` n'est pas celle de @Architect — c'est une dette de MÉTHODE,
+  et elle atteint LES DEUX CÔTÉS DU CONTRÔLE. »**
+- **Prochaine étape** : **fusion de la PR #20**, puis **PR nº 2 DÉDIÉE** *(amendement de l'Art. 4,
+  `1.1` → `1.2`, **attestation humaine**)*, puis **PR nº 3** de certification. ⚠️ **L'ordre est imposé** :
+  l'amendement affirmerait un état **absent de `main`** s'il partait avant.
 
 ### [US-00.5] ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution
 

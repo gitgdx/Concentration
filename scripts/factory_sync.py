@@ -153,7 +153,39 @@ def check_thresholds(cfg: dict) -> list[str]:
                     errors.append(
                         f"{vitest_cfg.relative_to(ROOT)} : {key}={m.group(1)} < ratchet config ({expected})"
                     )
+                        # US-00.6 — cliquet de couverture du composant `app` (adapter `flutter`).
+    # Le bloc `frontend` ci-dessus ne voit PAS ce composant : la cle y serait IGNOREE.
+    app = components.get("app", {})
+    app_ratchet = app.get("coverage_ratchet")
+    if app_ratchet is not None:
+        if not isinstance(app_ratchet, dict) or "value" not in app_ratchet:
+            errors.append(
+                "factory.config.json : app.coverage_ratchet doit etre un objet {value, date, motif}"
+            )
+        else:
+            try:
+                r_val = float(app_ratchet["value"])
+            except (TypeError, ValueError):
+                errors.append(
+                    f"factory.config.json : app.coverage_ratchet.value n'est pas un nombre "
+                    f"({app_ratchet['value']!r})"
+                )
+            else:
+                app_min = app.get("coverage_min")
+                if app_min is not None and r_val < float(app_min):
+                    errors.append(
+                        f"factory.config.json : app.coverage_ratchet.value={r_val} "
+                        f"< coverage_min ({app_min}) — le plancher borne l'abaissement du cliquet"
+                    )
+                test_cmd = ((app.get("gates") or {}).get("test") or {}).get("cmd", "")
+                if "check_flutter_coverage.py" not in test_cmd:
+                    errors.append(
+                        "factory.config.json : app.coverage_ratchet est defini mais le gate "
+                        "app.test n'appelle pas check_flutter_coverage.py — le cliquet serait IGNORE"
+                    )
     return errors
+
+    
 
 
 def do_check(cfg: dict) -> int:

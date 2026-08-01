@@ -194,6 +194,23 @@ les **risques #2 et #5 d'EPIC_00 sont CLOS** (preuve : `reports/US-00.7/applied_
 PROJECT_LOG au 2026-07-26 était **inexacte** (rectifiée en fin de tableau). US-01.1 (EPIC_01, track FULL)
 reste **en pause** en `business_alignment` — à rebaser sur `main`.
 **Dettes ouvertes** :
+- 🔴 **L'Art. 4 de la Constitution AFFIRME AUJOURD'HUI TROIS CHOSES FAUSSES sur le cliquet de couverture
+  — dette OUVERTE tant que la PR dédiée d'amendement n'est pas fusionnée.** Depuis US-00.6, la clé
+  `coverage_ratchet` **existe** dans `factory.config.json`, le cliquet **EST en vigueur** *(le gate imprime
+  « `seuil requis : 89.4% (cliquet)` »)*, et `factory_sync.py` **la lit pour le composant `app`**. Or
+  l'article dit encore : ⛔ « **n'est PAS en vigueur** » · ⛔ « **absente** de `factory.config.json` » ·
+  ⛔ « la clé **n'y est lue que pour un composant `frontend`** ». *(La 4ᵉ clause — « son activation exige
+  **du code** » — est, elle, **VRAIE** : 32 lignes ont été ajoutées.)*
+  ⚠️ **C'est une SOUS-AFFIRMATION PÉRIMÉE** : le texte dit que la couverture **n'est pas protégée** alors
+  qu'elle **l'est**. Même classe que celle qu'US-00.7 a payée **cinq fois**.
+  ➡️ **Traitement arbitré le 2026-07-31** : amendement en **PR DÉDIÉE** *(Constitution `1.1` → `1.2`,
+  **attestation humaine** — la clause *Révision* l'exige)*, **après** la fusion d'US-00.6 *(sinon
+  l'amendement affirmerait un état qui n'est pas encore sur `main`)*.
+  ⛔ **ADR-001 §4 porte les mêmes clauses et NE SERA PAS corrigé** : il est **IMMUABLE**, et son
+  §*Conséquences* décrivait l'état du monde **à sa date** — *l'immuabilité existe pour qu'on ne repeigne
+  pas l'histoire*. Il est **nommé**, jamais réécrit. **Aucun ADR-008** : la **décision** d'ADR-001 est
+  inchangée. ⚠️ **Cette entrée est une EXIGENCE DE CLÔTURE posée par l'audit de revue** : sans elle, si la
+  PR dédiée glissait, **rien dans le corpus durable** ne signalerait la fausseté.
 - 🔴 **CLASSE DE DÉFAUT RÉCURRENTE, SANS AUCUN MÉCANISME — la dette la plus active du projet.**
   *« Une assertion chiffrée ou un emplacement écrit à la main à côté d'une commande, jamais relu dans sa
   sortie. »* **SIX manifestations en trois jours** *(2026-07-29 → 07-31)*, toutes de @Architect, dont
