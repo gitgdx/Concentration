@@ -2,7 +2,7 @@
 
 > Principes **non-négociables**, référencés à chaque phase du workflow (inspiré du
 > `constitution.md` de GitHub Spec Kit). Chaque article indique son **enforcement** : une règle
-> sans mécanisme d'application est un vœu, pas une règle. Version 1.1 — 2026-07-31.
+> sans mécanisme d'application est un vœu, pas une règle. Version 1.2 — 2026-08-01.
 >
 > **Historique des versions** — *(la clause de Révision exige une PR dédiée, une ligne PROJECT_LOG et
 > un incrément de version ; l'historique est tenu ici pour que l'incrément soit **vérifiable** et non
@@ -12,6 +12,9 @@
 >   **inexistants ou non bloquants** et un seuil **absent** de la configuration ; le bloc
 >   *Enforcement* ne nommait **qu'un** des **deux** workflows porteurs de contextes requis. Motif
 >   détaillé dans l'article. **Aucun autre article touché.**
+> * **1.2** — 2026-08-01 : **Art. 4 uniquement** (US-00.6). Le cliquet de couverture est **entré en
+>   vigueur** ; l'article affirmait encore le contraire. Motif détaillé dans l'article.
+>   **Aucun autre article touché.**
 
 ---
 
@@ -51,7 +54,7 @@ et `/certify` (rejettent un rapport sans sortie d'outil).
 
 Les seuils de couverture et les gates de qualité (**mise en forme, lint, typage statique, tests,
 audit de dépendances**) sont définis en **un seul endroit** : `factory.config.json` →
-`adapter.components.*.gates` et `coverage_min`. Ils sont vérifiés par
+`adapter.components.*.gates`, `coverage_min` **et `coverage_ratchet`**. Ils sont vérifiés par
 `python scripts/factory_sync.py --check` (cohérence config ↔ fichiers de l'adapter) et exécutés
 par `python scripts/run_gates.py`. **La liste des gates et leurs valeurs ne sont recopiées
 nulle part** : cet article les **nomme**, la configuration en **fait foi**.
@@ -64,10 +67,22 @@ nulle part** : cet article les **nomme**, la configuration en **fait foi**.
 - ⛔ **L'audit de dépendances n'est PAS bloquant** (`deps_audit` porte `"blocking": false`) et il
   mesure l'**obsolescence**, **pas la vulnérabilité** : **aucun scan de CVE n'existe**. **Dette
   ouverte.**
-- ⛔ **`coverage_ratchet` n'est PAS en vigueur** : la clé existe au schéma de configuration mais est
-  **absente** de `factory.config.json`, et son activation exige **du code** dans `factory_sync.py`
-  (la clé n'y est lue que pour un composant `frontend`, **absent** de l'adapter courant) — pas une
-  ligne de configuration. **À activer par US-00.6.**
+- ✅ **`coverage_ratchet` EST en vigueur depuis le 2026-08-01** (US-00.6). Le seuil appliqué est
+  `max(coverage_min, coverage_ratchet.value)` — le gate **imprime lequel des deux décide**. La valeur
+  vit **dans `factory.config.json` seul**, sous la forme `{value, date, motif}` ; elle est **lue**,
+  jamais recopiée dans le code. **Enforcement** : `scripts/check_flutter_coverage.py`, appelé par le
+  gate `test` du composant `app`, et **`scripts/selftest_coverage_ratchet.py`**, qui s'exécute dans
+  le job **requis** `governance` et prouve **par ses propres fixtures** que le checker sait
+  **refuser** — dont un contrôle **différentiel** qui rejoue la même fixture sous **deux** références
+  et exige que le verdict **change**, ce qui interdit à un checker d'**écrire** sa valeur au lieu de
+  la **lire**.
+  ⚠️ **Bornes, car les taire serait un vœu** : le cliquet **ne monte jamais seul** — une hausse est
+  **signalée** par le gate, jamais **consignée** sans une édition humaine de la configuration ·
+  la mesure porte sur un dénominateur **très petit** *(grain minimal de plusieurs points)* et
+  **aucune couverture de branches** n'est mesurée · ⛔ **angle mort STRUCTUREL** : un fichier source
+  **non importé par un test** n'entre **pas** au dénominateur, si bien qu'ajouter du code non testé
+  **ne fait pas baisser** la couverture et que **déplacer** du code non couvert vers un fichier non
+  importé la **fait monter** — porté par **US-01.1**.
 - ⚠️ Le gate **`build`** est **bloquant** et prouve la **constructibilité**. Sur l'adapter courant,
   il s'appuie sur une cible de **repli** : un vert signifie « le code compile pour cette cible »,
   **pas** « l'application est constructible pour sa cible de distribution ».
@@ -94,6 +109,24 @@ nom de branche non conforme — **PR définitivement infusionnable** : voir
 > dettes** au lieu de les taire. Le bloc *Enforcement* nommait par ailleurs `ci.yml` **seul**, alors
 > que le **4ᵉ** contexte requis — celui qui rend une PR *définitivement* infusionnable — provient de
 > `branch-naming.yml`. Décision de stack associée : [ADR-001](../adr/ADR-001-choix-de-stack.md).
+
+> 📜 **Amendement du 2026-08-01 (US-00.6) — motif écrit, comme l'exige la clause de Révision.**
+> Le cliquet de couverture est **entré en vigueur** ; la clause qui le décrivait affirmait encore
+> **trois choses devenues fausses** — qu'il *« n'est pas en vigueur »*, que la clé serait *« absente
+> de `factory.config.json` »*, et qu'elle *« n'y est lue que pour un composant `frontend` »*.
+> Établi **par exécution**, non par lecture : la clé porte `{value: 89.4, date, motif}`, le gate
+> imprime « *seuil requis : 89.4% (cliquet)* », et `factory_sync.py` la valide pour le composant
+> `app`. La **quatrième** clause — *« son activation exige du code »* — était **exacte** : 32 lignes
+> ont été ajoutées à `factory_sync.py`, en ajout pur.
+> ⛔ **Cet amendement ne crée aucun gate** : le gate existait **avant** lui. Il fait dire à l'article
+> ce qui **est** — et il corrige une **sous-affirmation**, c'est-à-dire un texte qui déclarait la
+> couverture **non protégée** alors qu'elle l'**est**. C'est la classe de défaut exacte qu'US-00.7 a
+> payée **cinq fois** ; elle est ici traitée **avant** d'être découverte par un audit.
+> ⚠️ **Ce qu'il ne corrige pas, délibérément** : [ADR-001](../adr/ADR-001-choix-de-stack.md) §4 porte
+> les **mêmes** clauses et **ne sera pas réécrit** — un ADR est **immuable**, et son §*Conséquences*
+> décrivait l'état du monde **à sa date**. **L'immuabilité existe précisément pour qu'on ne repeigne
+> pas l'histoire** : il est **nommé ici**, jamais corrigé. **Aucun ADR-008** n'est ouvert, la
+> **décision** d'ADR-001 étant inchangée — c'est son **constat** qui a vieilli, pas son choix.
 
 ## Art. 5 — Autorité de certification
 
