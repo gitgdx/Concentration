@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1778,6 +1778,107 @@
   - ⚠️ **Dette nommée d'avance** *(I-5)* : instants en heure **locale**, **aucun fuseau stocké** — dès
     qu'il y aura persistance il faudra de l'**UTC**, sinon un changement de fuseau **déplacera** les
     échéances. **À rouvrir en US-01.2.**
+- **✅ 🔍 Audit Rev + ✅ 🛡️ Audit Sec — les DEUX sur le MÊME commit `6fe75df` (2026-08-02),
+  phase → `quality_assurance`.**
+  - 🔴 **La revue a d'abord rendu `FAILED`, et elle ne m'a pas relu : elle a MUTÉ mon code.** Sur 5
+    mutations en copie isolée, **2 survivants**.
+    - **B-1 — faux vert sur ADR-003 §4** : la réduction de chroma pouvait être remplacée par
+      l'**écrêtage que l'ADR interdit nommément**, et les **100 tests restaient VERTS**. Le mutant rendait
+      **`#ff0000`, du rouge pur**, dans une US dont **AC-5 interdit le rouge**. Ma tolérance
+      `closeTo(l, 0.06)` absorbait exactement la dérive de **0,0280** que le §4 existe pour empêcher —
+      **60 fois trop lâche**. La dernière branche de `versRgb()` n'était en outre **exécutée par aucun
+      test**.
+    - **B-2** : les commandes `ajout`/`réglages` étaient exigées par **quatre documents** *(AC-2
+      « Limite », ADR-004 §5, T10, une étape Gherkin)* et n'existaient **ni en code ni en assertion**.
+      ⚠️ **T12b ne pouvait pas le voir** : il compare des **titres** de scénario, pas des **étapes** — et
+      le contrôle l'annonce lui-même.
+  - ✅ **Correctifs, prouvés par mutation et non par déclaration** : seuils **serrés sur la mesure**
+    *(`deltaL < 0,005`, teinte `< 2°` — l'implémentation correcte rend 0,0002 et 45,0 → 45,1)*, assertion
+    de **signature** contre le rouge pur, couverture de la branche morte ; commandes **implémentées** et
+    non exigence retirée *(l'inverse serait adapter la spec au livrable)*. **Mutation rejouée : 3 rouges
+    contre 0 au premier passage.**
+  - 🎓 **Ce que la re-revue a ajouté de son propre chef, et qui vaut leçon** : **quatre mutants NON
+    publiés**, *« parce qu'une condition connue à l'avance ne prouve pas grand-chose »*. Le décisif est
+    **M6** — un `GestureDetector(onTap: () {})` : un test qui se contenterait de **taper et de constater
+    que rien ne se passe passerait**, par définition. L'assertion vise l'**ancêtre**, donc elle distingue
+    ⛔ **« ne fait rien » de « NE PEUT RIEN FAIRE »** — exactement ADR-004 §3.
+  - 🔴 **LE TROU QU'US-00.6 AVAIT DÉJÀ PAYÉ A FAILLI SE REPRODUIRE** : le visa 🛡️ portait sur `24fe59a`,
+    donc **73 lignes de `lib/` n'avaient été vues par aucun audit sécurité**. Relevé par la revue,
+    **arbitré par la sécurité elle-même** — *« un visa est une assertion **sur un commit**, pas sur une
+    intention »* — qui a **re-audité plutôt que de juger la description du delta**. Visa rétabli sur
+    `6fe75df`, **aucun finding nouveau**.
+  - **Paramètre `echeances` du widget racine jugé NEUTRE, en 4 points mesurés** : pas une frontière de
+    désérialisation *(aucun `jsonDecode`/`fromJson`/`dart:convert` dans `lib/`)* · atteignable seulement
+    par du Dart compilé, donc **en aval d'un compromis déjà acquis** · **non utilisé en production** ·
+    et il **réduit un écart d'assurance réel, ADR-008 §1 étant enfin tenu à la lettre**.
+  - ⛔ **10 findings non bloquants restent OUVERTS**, et l'auditeur a **refusé de les requalifier** :
+    *« je ne déplace pas mes critères entre deux passages ; requalifier maintenant reviendrait à adapter
+    la règle au résultat — et cette règle vaut aussi pour l'auditeur »*. Priorité **consultative** :
+    **N-3** *(seul finding à preuve active — son mutant M2 survit encore)*, **N-5**, puis **N-1 et N-6 à
+    INSCRIRE dans le Story File d'US-01.2**.
+  - ⚠️ **N-11 — le « < 500 ms » de RNF-02 n'est NI mesuré NI testé.** ⛔ *« La case ne doit pas être
+    cochée sur une impression »* — c'est un point pour la QA.
+  - ✅ **Contrôle d'intégrité de la re-revue** : **aucun `EVT_CODE_REVIEW_PASSED` auto-émis** entre les
+    deux passages. La séparation des pouvoirs a tenu, et elle a été **vérifiée**.
+- **🧪 FAIL — QA le 2026-08-02, sur `6fe75df` (`EVT_QA_FAILED`), phase → `parallel_audit`.**
+  *([qa.md](reports/US-01.1/qa.md) · critère de sortie **exécutable** :
+  [qa_exit_criterion.py](reports/US-01.1/qa_exit_criterion.py))*
+  ⚠️ **Retour en `parallel_audit` et non maintien en `quality_assurance`** : le visa 🛡️ déclare porter sur
+  `6fe75df` **et lui seul**, donc tout correctif touchant `lib/` **le périme** — la phase doit dire que les
+  audits redeviennent dus, pas qu'ils tiennent.
+  - ⛔ **TOUS LES GATES SONT VERTS ET LE VERDICT EST QUAND MÊME `FAILED`** : **102 passed / 0 skipped /
+    0 failed** *(le drapeau `skipped` a été lu dans le flux JSON pour chacun des 102, pas déduit d'un
+    résumé)* · **380/399 = 95,2 %** **recomptés depuis les `DA:` de `lcov.info`**, indépendamment du gate ·
+    **13/13** scénarios montent bien la racine `ConcentrationApp`. 📌 **Ce qui est en défaut n'est pas le
+    produit — tout ce qui a été muté est correctement implémenté dans `lib/` — c'est la CAPACITÉ DE LA
+    SUITE À PROTÉGER ces comportements.**
+  - 🔴 **6 mutants sur 8 SURVIVENT**, chacun supprimant un comportement **exigé par un AC**, la suite
+    restant à **102/102 verts** : `QA-M1` la tuile ignore la progression et reste **toujours orange**
+    *(AC-5)* · `QA-M2b` fond de l'app en **blanc** *(AC-8)* · `QA-M3` **`FittedBox` retiré** *(AC-3 — c'est
+    le mutant M2 de la revue, **N-3**)* · `QA-M4` la **description n'est jamais rendue** *(AC-3)* ·
+    `QA-M5` **plus rien n'est grisé** *(AC-2)* · `QA-M7` rafraîchissement porté à **1 heure** *(AC-4)*.
+  - 🎓 **Le résultat le plus net est une ASYMÉTRIE, et il fallait le mutant inverse pour la voir** : forcer
+    la tuile en **bleu** (`QA-M6`) rougit un test ; la forcer en **orange** (`QA-M1`) n'en rougit **aucun**.
+    Seul `p=0` est vérifié sur le rendu ⇒ **la tuile pourrait ignorer entièrement `temps.progression`**, or
+    « la couleur reflète la proximité » **est** AC-5. `QA-M6` est le **contrôle positif** : sans lui, six
+    survivants pourraient simplement signifier que le harnais est cassé — **leçon des six instruments faux
+    d'US-00.5**.
+  - **Correspondance Gherkin : nominale OUI, sémantique NON.** `check_gherkin_mapping.py` rend **13 ↔ 13,
+    exit 0**, et **imprime lui-même sa borne** *(« contrôle de CORRESPONDANCE DE TITRES — pas de
+    sémantique »)*. **Même angle mort que le bloquant B-2**, mesuré cette fois au lieu d'être supposé.
+  - ⛔ **3 AC orphelins sur 27 clauses** *(+ 8 partielles)*, et **deux sont des faux verts caractérisés** :
+    - **AC-4 « Limite »** *(RF-05)* : le test `pump`e **la valeur du token lui-même** — assertion
+      **auto-référentielle**, la période passe à 1 h et la suite reste verte. ⛔ **C'est la classe de défaut
+      EXACTE de B-1**, que la revue a tenue pour **bloquante la veille**.
+    - **AC-8 « Nominal »** *(mode sombre)* : `expect(scaffold.backgroundColor ?? token, isNotNull)` — le
+      `??` retombe sur une constante **jamais nulle** ⇒ l'assertion est **vraie quoi qu'il arrive**.
+    - **AC-1 « Limite »** *(RNF-02)* : voir ci-dessous.
+  - ⚠️ **RNF-02 « < 500 ms » — RÉPONSE EXPLICITE au point N-11 : AC-1 « Limite » est DÉCLARÉ NON VÉRIFIÉ,
+    la case ne doit pas être cochée.** La QA a néanmoins **mesuré plutôt que de conclure à l'impression**,
+    et **la mesure confirme le refus** : le harnais headless **exclut** démarrage moteur, polices, shaders
+    et rastérisation *(c'est une **borne inférieure**, pas la grandeur de l'AC)*, l'app **n'a jamais tourné
+    sur un appareil**, et cette borne inférieure atteint elle-même **952 ms au premier passage** — il est
+    donc **impossible d'écrire qu'elle est confortablement sous 500 ms**. **Aucun gate ne surveille cette
+    grandeur.**
+  - 🔬 **PREMIÈRE OBSERVATION, SUR DU CODE PRODUIT, DE L'ANGLE MORT TRANCHÉ EN US-00.6** : `lcov` liste
+    **19 fichiers** pour **20 `.dart`** dans `lib/` — **`lib/main.dart` est ABSENT du dénominateur**.
+    ⇒ la conséquence annoncée *(« déplacer du code non couvert FAIT MONTER la couverture »)* **cesse d'être
+    théorique**. ➡️ **portée par US-01.2 / US-00.8**, pas par cette US.
+  - 📌 **Sur N-3, elle ne requalifie rien** : *« mes six mutants sont des findings QA nouveaux, relevant de
+    mon critère de rôle »*. N-3 est **confirmé par sa propre exécution** et **n'est pas à lui seul la cause
+    du `FAILED`** — mais **il cesse d'être isolé en devenant le sixième membre d'une même famille : ce
+    n'est plus un finding ponctuel, c'est un MOTIF.**
+  - ✅ **Critère de sortie publié COMME UN SCRIPT et non comme une prose** *(leçon d'US-00.7 appliquée)* :
+    **`exit 1` aujourd'hui, `exit 0` quand les 6 mutants seront tués** · **autotest vert** · **aucun mutant
+    désigné par un numéro de ligne** · **motif introuvable traité comme un ÉCHEC** et non ignoré.
+  - 🎓 **Elle publie TROIS défauts de ses PROPRES instruments** : plantage **`cp1252`** à l'impression
+    *(**troisième instrument d'audit d'affilée** à tomber sur cette classe de bug)* · un premier mutant
+    « mode sombre » **non discriminant**, **retiré et remplacé** par `QA-M2b` · un `for … else` imprimant
+    `[OK]` **inconditionnellement**.
+  - ⚠️ **Ce que ce `FAIL` n'atteste PAS** : il ne dit **rien de neuf** sur le fait que l'application **n'a
+    jamais tourné sur un appareil**, que **tous les contrastes sont calculés et aucun vu par un œil**, ni
+    qu'il n'existe **toujours aucun SAST ni scan de CVE**. **Écritures confinées à `reports/` et
+    `docs/trace/`** : aucune ligne de `lib/` ou `test/` touchée, **SCB non modifié par la QA**.
 - **✅ Code (Dev) — `EVT_CODE_READY` le 2026-08-01, phase → `parallel_audit`.**
   **PREMIÈRE LIVRAISON APPLICATIVE DU PROJET** : `lib/` passe de **1 fichier / 63 lignes** à **19 fichiers**,
   `test/` de **1** à **8**, avec **90 tests verts**.

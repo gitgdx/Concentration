@@ -263,6 +263,17 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   §*Conséquences* décrivait l'état du monde **à sa date**, et *l'immuabilité existe précisément pour qu'on
   ne repeigne pas l'histoire*. Il est **nommé**, jamais réécrit ; **aucun ADR-008**, la **décision** est
   inchangée — c'est le **constat** qui a vieilli.
+- 🔴 **UN VISA D'AUDIT N'EST RATTACHABLE À AUCUN COMMIT — donc il PÉRIME EN SILENCE.** Découvert le
+  2026-08-02 par l'audit sécurité d'US-01.1 *(NB-6)*, après un incident **réel** : son visa portait sur
+  `24fe59a`, la revue sur `6fe75df`, et **73 lignes de `lib/` n'avaient été vues par aucun audit
+  sécurité**. **Mesuré** : `trace_append.py` n'a **aucune option `--commit`/`--sha`**, et un événement ne
+  porte que `agent, event, evidence, files, model, rationale, session, ts, us`. ⇒ **aucune machine ne peut
+  signaler qu'un visa est périmé** — ici, c'est un **humain** *(l'auditeur de revue)* qui a rattrapé le
+  décalage. Même famille que l'absence d'événement d'extinction de dérogation et qu'`emitter` non
+  enforcé : **le catalogue ne modélise pas ce sur quoi un verdict PORTE**. Mitigation appliquée : SHA
+  inscrit dans le champ libre — ⚠️ **convention NON enforcée**, qui réduit le risque sans le supprimer.
+  Correctif réel *(champ `commit` validé)* : touche le **schéma de la trace** ⇒ **exige son propre ADR**.
+  ➡️ **US-00.8.**
 - 🔴 **AUCUN ÉVÉNEMENT DE CLÔTURE D'EPIC dans le catalogue** *(constaté le 2026-08-01 en clôturant
   EPIC_00)* : ses **25** événements n'en comportent **aucun** pour clore un EPIC — **même famille
   structurelle** que l'absence d'extinction de dérogation. ⇒ **la clôture d'un EPIC est un acte
