@@ -64,8 +64,62 @@ class _BarreModules extends StatelessWidget {
             children: [
               for (final m in registre.tous)
                 Expanded(child: _EntreeModule(module: m)),
+              // ⛔ B-2 de la revue de code (2026-08-02) : ces deux commandes sont
+              // exigées par AC-2 « Limite », ADR-004 §5, la tâche T10 ET une étape
+              // du scénario Gherkin 2 — elles n'existaient NI en code NI en
+              // assertion. Le contrôle T12b ne pouvait pas le voir : il compare
+              // des TITRES de scénario, pas des étapes.
+              // Rendues NON-INTERACTIVES par le même mécanisme que les modules
+              // grisés : ABSENCE de gestionnaire, jamais un onTap vide.
+              for (final c in _CommandeBarre.values)
+                _CommandeNonInteractive(commande: c),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Commandes de la barre basse, **hors périmètre fonctionnel d'US-01.1**.
+///
+/// AC-2 « Limite » : *« Les autres commandes de la barre de navigation basse
+/// (ajout, réglages) sont rendues **non-interactives** dans le périmètre
+/// US-01.1 — leur activation relève d'US ultérieures. »*
+enum _CommandeBarre {
+  ajout('Ajouter une échéance', Icons.add),
+  reglages('Réglages', Icons.settings);
+
+  const _CommandeBarre(this.libelleAccessibilite, this.icone);
+
+  /// Libellé **en français** — lu par le lecteur d'écran uniquement.
+  final String libelleAccessibilite;
+  final IconData icone;
+}
+
+/// Commande **visible mais inerte** (AC-2 « Limite », ADR-004 §5).
+///
+/// ⛔ Aucun `IconButton` : il porte un `onPressed` et une ondulation, donc il
+/// **annoncerait une action**. Une simple `Icon` estompée, marquée
+/// `enabled: false`, dit la vérité — et l'absence de gestionnaire rend
+/// l'interdit **assertionnable** plutôt que révocable.
+class _CommandeNonInteractive extends StatelessWidget {
+  const _CommandeNonInteractive({required this.commande});
+
+  final _CommandeBarre commande;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: commande.libelleAccessibilite,
+      enabled: false,
+      container: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Icon(
+          commande.icone,
+          size: 20,
+          color: ConcentrationTokens.moduleGrise.couleur,
         ),
       ),
     );

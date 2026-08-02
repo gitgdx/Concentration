@@ -192,21 +192,65 @@ void main() {
       }
     });
 
+    test('hors gamut : SEULE la chroma bouge — L et TEINTE sont préservées', () {
+      // ⛔ B-1 de la revue de code (2026-08-02) : la version précédente tolérait
+      // `closeTo(l, 0.06)`. Or l'écrêtage par canal — que le §4 d'ADR-003
+      // INTERDIT nommément — ne dérive que de 0,0280 : le mutant SURVIVAIT, et il
+      // rendait du ROUGE PUR (#ff0000) dans une US dont AC-5 interdit le rouge.
+      // Mesuré sur l'implémentation correcte : deltaL = 0,0002, teinte 45,0 -> 45,1.
+      // Les seuils ci-dessous sont SERRÉS SUR LA MESURE, pas choisis pour passer.
+      const absurde = Oklab(0.6, 0.9, 0.9);
+      expect(absurde.estDansGamut, isFalse);
+      final apres = Oklab.depuisRgb(absurde.versRgb());
+
+      expect(apres.estDansGamut, isTrue);
+      expect(
+        apres.chroma,
+        lessThan(absurde.chroma),
+        reason: 'la chroma DOIT être réduite',
+      );
+      expect(
+        (apres.l - absurde.l).abs(),
+        lessThan(0.005),
+        reason:
+            'L doit rester constante : un écrêtage par canal la déplacerait '
+            'de ~0,028 et casserait la garantie de contraste (ADR-003 §4)',
+      );
+      expect(
+        (apres.teinteDegres - absurde.teinteDegres).abs(),
+        lessThan(2.0),
+        reason:
+            'la TEINTE doit être préservée : un écrêtage la ferait virer '
+            'de 45° à 29°, soit du rouge pur',
+      );
+    });
+
+    test('⛔ un hors-gamut CHAUD ne revient JAMAIS en rouge saturé', () {
+      // Signature exacte du mutant « écrêtage par canal » : #ff0000.
+      for (final cible in [
+        const Oklab(0.6, 0.9, 0.9),
+        const Oklab(0.5, 0.7, 0.4),
+        const Oklab(0.7, 0.5, 0.8),
+      ]) {
+        final rendu = cible.versRgb();
+        final apres = Oklab.depuisRgb(rendu);
+        final rougeSature =
+            (apres.teinteDegres < 25 || apres.teinteDegres > 335) &&
+            apres.chroma > 0.07;
+        expect(rougeSature, isFalse, reason: 'ramené en rouge saturé : $rendu');
+        expect(rendu, isNot(const Rgb(255, 0, 0)));
+      }
+    });
+
     test(
-      'une couleur volontairement hors gamut voit sa CHROMA réduite, à L quasi constante',
+      'dernier recours : une L hors [0;1] sort en gris extrême, sans boucler',
       () {
-        // Chroma absurde : impossible en sRGB.
-        const absurde = Oklab(0.6, 0.9, 0.9);
-        expect(absurde.estDansGamut, isFalse);
-        final ramene = absurde.versRgb();
-        final apres = Oklab.depuisRgb(ramene);
-        expect(apres.estDansGamut, isTrue);
-        expect(apres.chroma, lessThan(absurde.chroma));
-        expect(
-          apres.l,
-          closeTo(absurde.l, 0.06),
-          reason: 'la luminance ne doit pas dériver',
-        );
+        // Couvre la BRANCHE FINALE de versRgb(), qu'aucun test n'exécutait
+        // (relevé par la revue) : la réduction de chroma ne peut pas ramener ces
+        // couleurs dans le gamut, quelle que soit la chroma.
+        expect(const Oklab(1.6, 0.2, 0.2).estDansGamut, isFalse);
+        expect(const Oklab(1.6, 0.2, 0.2).versRgb(), const Rgb(255, 255, 255));
+        expect(const Oklab(-0.4, 0.2, 0.2).versRgb(), const Rgb(0, 0, 0));
       },
     );
   });

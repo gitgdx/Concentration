@@ -1,7 +1,6 @@
 import 'package:concentration/app/app.dart';
 import 'package:concentration/core/color/oklab.dart';
 import 'package:concentration/core/color/temporal_gradient.dart';
-import 'package:concentration/core/theme/concentration_theme.dart';
 import 'package:concentration/core/theme/concentration_tokens.dart';
 import 'package:concentration/core/theme/rgb_extension.dart';
 import 'package:concentration/core/time/clock.dart';
@@ -31,12 +30,15 @@ void main() {
     await tester.pump();
   }
 
+  /// ⛔ Monte la RACINE de l'application, jamais un sous-arbre.
+  ///
+  /// La revue de code du 2026-08-02 a relevé que 11 tests sur 13 montaient
+  /// `MaterialApp(home: HubPage)` — or c'est le fait de monter **l'application
+  /// entière** qui a autorisé ADR-008 §1 à écarter `integration_test/`. Monter
+  /// un sous-arbre, c'était garder l'autorisation sans tenir sa contrepartie.
   Future<void> lancerAvec(WidgetTester tester, List<Echeance> echeances) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ConcentrationTheme.sombre,
-        home: HubPage(echeances: echeances, clock: FakeClock(maintenant)),
-      ),
+      ConcentrationApp(clock: FakeClock(maintenant), echeances: echeances),
     );
     await tester.pump();
   }
@@ -104,6 +106,49 @@ void main() {
       findsOneWidget,
       reason: 'aucune navigation ne doit survenir',
     );
+
+    // ⛔ B-2 (revue de code) : AC-2 « Limite » exige AUSSI que les commandes de
+    // la barre basse (ajout, réglages) soient rendues NON-INTERACTIVES. Elles
+    // n'existaient ni en code ni en assertion.
+    expect(
+      find.byIcon(Icons.add),
+      findsOneWidget,
+      reason: 'commande « ajout » absente',
+    );
+    expect(
+      find.byIcon(Icons.settings),
+      findsOneWidget,
+      reason: 'commande « réglages » absente',
+    );
+    for (final icone in [Icons.add, Icons.settings]) {
+      expect(
+        find.ancestor(
+          of: find.byIcon(icone),
+          matching: find.byType(GestureDetector),
+        ),
+        findsNothing,
+        reason: 'une commande hors périmètre ne doit porter AUCUN gestionnaire',
+      );
+      expect(
+        find.ancestor(
+          of: find.byIcon(icone),
+          matching: find.byType(IconButton),
+        ),
+        findsNothing,
+        reason: 'un IconButton annoncerait une action inexistante',
+      );
+      await tester.tap(find.byIcon(icone), warnIfMissed: false);
+      await tester.longPress(find.byIcon(icone), warnIfMissed: false);
+    }
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(
+      find.byType(HubPage),
+      findsOneWidget,
+      reason: 'aucune commande ne navigue',
+    );
+    expect(find.bySemanticsLabel('Ajouter une échéance'), findsOneWidget);
+    expect(find.bySemanticsLabel('Réglages'), findsOneWidget);
   });
 
   testWidgets("Affichage d'une tuile par échéance active", (tester) async {
