@@ -1922,6 +1922,41 @@
     `--selftest` → exit 0.
   - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
     `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
+- **⚖️ CERTIFICATION ARRÊTÉE À `🧪 PASS` — 2026-08-02. `/certify US-01.1` EXÉCUTÉ, arrêté au gate 6.**
+  ⛔ **`Certifié Prod` reste `⏳`, `Déploiement` reste `⏳`, aucun `EVT_CERTIFIED_PROD`.**
+  - **Le rituel est un CONSTAT D'OUTILS, et il a été lancé plutôt qu'anticipé** — résultats bruts :
+    **gate 1** `check_scb_compliance` ✅ exit 0 · **gate 2** `validate_trace --us US-01.1` ✅ exit 0
+    *(chaîne complète `STORY_READY → DESIGN_COMPLETED → CODE_READY → REVIEW_PASSED + SECURITY_PASSED →
+    QA_PASSED`)* · **gate 3** rapports ✅ 3/3 *(voir la réserve)* · **gate 4** DoD ✅ **10 cochées, 0 non
+    cochée** · **gate 5** `run_gates --all` ✅ exit 0, **5 gates** dont `flutter build web --release`
+    réellement exécuté · **gate 6** ❌ `Déploiement (DevOps)` vaut **`⏳`**.
+  - **Le rituel PRESCRIT cet arrêt** — *« sinon la certification s'arrête à `🧪 PASS` »* — donc **ce n'est
+    ni un échec ni une dérogation** : c'est le comportement écrit. Les **4 événements de déploiement sont
+    absents**, et `EVT_CERTIFIED_PROD` exige `EVT_DEPLOYMENT_SUCCESS` **en précondition**.
+  - ⛔ **POURQUOI LE PRÉCÉDENT DE DÉPLOIEMENT NE SE TRANSFÈRE PAS** *(décision humaine)* : US-00.6 et
+    US-00.7 écrivaient « **DÉPLOIEMENT = FUSION SUR `main`** » avec un « **STAGING N/A JUSTIFIÉ** » dont le
+    motif était **borné** — *« US de GOUVERNANCE sans runtime, **0 fichier Dart livré**, aucun
+    environnement à provisionner »*. **US-01.1 livre 19 fichiers Dart et une application** ⇒ **la prémisse
+    est FAUSSE pour elle**, et la réutiliser serait **adapter le précédent au résultat**. Le déploiement
+    réel est en outre **impossible aujourd'hui** : `STACK_PROFILE` §DevOps déclare `flutter build web
+    --release` **gate de constructibilité** et **« PAS une plateforme cible produit »** *(RNF-08 vise
+    iOS/Android)* — **Android sans JDK**, **iOS non scaffoldé**, aucun keystore, aucun compte store.
+    ➡️ **Ce n'est plus « rien à déployer », c'est « quelque chose à déployer et aucun moyen de le faire ».**
+  - 🔴 **RÉSERVE SUR LE GATE 3, trouvée EN EXÉCUTANT LE RITUEL** : il exige `code_review.md`,
+    `security.md`, `qa.md` — or **`code_review.md` ET `qa.md` portent tous deux un verdict `FAILED`**, les
+    `PASSED` vivant dans `code_review_delta2.md`, `security_delta2.md` et `qa_delta.md`, que **le gate ne
+    regarde JAMAIS**. ⇒ ⛔ **le gate 3 serait VERT sur une US dont tous les audits ont échoué** : il
+    vérifie une **présence de fichier**, pas un **verdict**. Ce qui porte réellement le verdict est la
+    **chaîne d'événements du gate 2**. **Même famille que NB-6.** ➡️ **`/audit-methodo`.**
+  - **Fusions du cycle, toutes par l'humain sans `--admin`** : **PR #27** *(le produit — `main` =
+    `7ba4228`, `mergedBy gitgdx`)* et **PR #28** *(cliquet à 95,2 — `main` = `a9619af`)*. ⚠️ **Provenance
+    DÉCLARATIVE** comme toujours : `mergedBy.is_bot` rend `false` même pour un agent.
+  - ⚠️ **Le cliquet vaut désormais `95.2` sur `main`, et la MARGE EST NULLE** *(couverture mesurée
+    95,2381 %)* ⇒ **toute baisse d'une seule ligne fera rougir un contexte requis**. **US-01.2 devra livrer
+    ses tests EN MÊME TEMPS que son code.** 📌 Sa consignation a d'abord été **incomplète** — seul `value`
+    changé, `date` et `motif` laissés à ceux d'US-00.6 — et le **job requis imprimait une phrase FAUSSE**
+    *(« consigné le 2026-07-31 — US-00.6 — 17/19 = 89,4737 % »)*. **Trouvé en relisant la SORTIE DU GATE,
+    pas le diff.** Les trois champs vont ensemble.
 - **⚖️ ARBITRAGE HUMAIN — 2026-08-02 : US-01.1 sera certifiée avec AC-1 « Limite » (RNF-02) EXPLICITEMENT
   NON COUVERT, borné, daté, et reporté à US-01.2.** Décision prise par l'humain, saisi par @Architect
   après que la QA **et** les trois passages d'audit ont refusé de trancher — *« la décision de reporter un
