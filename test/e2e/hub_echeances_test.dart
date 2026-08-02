@@ -8,9 +8,12 @@ import 'package:concentration/features/echeances/domain/echeance.dart';
 import 'package:concentration/features/echeances/presentation/echeances_grid.dart';
 import 'package:concentration/features/echeances/presentation/widgets/echeance_tile.dart';
 import 'package:concentration/features/echeances/presentation/widgets/empty_echeances_placeholder.dart';
+import 'package:concentration/features/hub/domain/practice_module_registry.dart';
 import 'package:concentration/features/hub/presentation/hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/rendu_couleur.dart';
 
 /// Scénarios de track FULL (T12a) — un test par scénario du `.feature`.
 ///
@@ -62,12 +65,24 @@ void main() {
     expect(find.text('Échéances'), findsOneWidget);
     expect(find.byType(EcheancesGrid), findsOneWidget);
     expect(find.byType(EcheanceTile), findsWidgets);
-    // Dark mode de référence : le fond est celui du token, pas un gris Material.
-    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-    expect(
-      scaffold.backgroundColor ?? ConcentrationTokens.fondApp.couleur,
-      isNotNull,
+
+    // ⛔ « affiché en MODE SOMBRE de référence » est désormais ASSERTIONNÉ.
+    // L'assertion précédente — `scaffold.backgroundColor ?? token, isNotNull` —
+    // retombait sur une constante jamais nulle : elle restait vraie avec un
+    // fond BLANC (mutant QA-M2b, survivant).
+    final theme = Theme.of(tester.element(find.byType(HubPage)));
+    expect(theme.scaffoldBackgroundColor, ConcentrationTokens.fondApp.couleur);
+    expect(theme.brightness, Brightness.dark);
+    // ...et c'est bien cette couleur qui est PEINTE sous la grille.
+    final materiau = tester.widget<Material>(
+      find
+          .ancestor(
+            of: find.byType(EcheancesGrid),
+            matching: find.byType(Material),
+          )
+          .first,
     );
+    expect(materiau.color, ConcentrationTokens.fondApp.couleur);
   });
 
   testWidgets('Les modules futurs sont visibles, grisés et non-interactifs', (
@@ -76,6 +91,28 @@ void main() {
     await lancerApp(tester);
     expect(find.text('Respiration'), findsOneWidget);
     expect(find.text('Concentration'), findsWidgets);
+
+    // ⛔ « GRISÉS » était le seul mot de l'étape que RIEN n'assertionnait :
+    // forcer toutes les entrées à la couleur du module actif laissait les 102
+    // tests verts (mutant QA-M5). Le statut du descripteur ne dit rien du RENDU.
+    // La liste des modules vient du REGISTRE, jamais recopiée ici.
+    const registre = PracticeModuleRegistry();
+    final couleurActif = couleurDuLibelle(tester, registre.actif.libelle);
+    expect(couleurActif, ConcentrationTokens.moduleActif.couleur);
+    expect(registre.grises, isNotEmpty);
+    for (final module in registre.grises) {
+      final couleurGrise = couleurDuLibelle(tester, module.libelle);
+      expect(
+        couleurGrise,
+        ConcentrationTokens.moduleGrise.couleur,
+        reason: '« ${module.libelle} » doit être rendu ESTOMPÉ',
+      );
+      expect(
+        couleurGrise,
+        isNot(couleurActif),
+        reason: 'un module grisé rendu comme l’actif n’est plus grisé',
+      );
+    }
 
     // ⛔ AUCUN gestionnaire de geste sur les entrées grisées : c'est l'ABSENCE
     // qui rend l'interdit vérifiable (ADR-004).
@@ -152,12 +189,35 @@ void main() {
   });
 
   testWidgets("Affichage d'une tuile par échéance active", (tester) async {
+    // ⚠️ L'étape du scénario dit « 4 échéances actives » et « exactement 4
+    // tuiles » ; le test en injectait 3. La donnée suit désormais sa
+    // spécification, et le décompte se LIT dans la table, il ne se réécrit pas.
+    const jeu = <String, (Duration, String)>{
+      'a': (Duration(hours: 3), 'Passeport'),
+      'b': (Duration(days: 4), 'Visite médicale'),
+      'c': (Duration(days: 30), 'Contrôle technique'),
+      'd': (Duration(days: 200), 'Assurance habitation'),
+    };
     await lancerAvec(tester, [
-      e('a', const Duration(hours: 3)),
-      e('b', const Duration(days: 4)),
-      e('c', const Duration(days: 30)),
+      for (final entree in jeu.entries)
+        e(entree.key, entree.value.$1, entree.value.$2),
     ]);
-    expect(find.byType(EcheanceTile), findsNWidgets(3));
+    expect(find.byType(EcheanceTile), findsNWidgets(jeu.length));
+
+    // ⛔ « chaque tuile porte la DESCRIPTION de son échéance » : l'étape était
+    // décorative — la description pouvait n'être JAMAIS rendue sans qu'un seul
+    // test ne rougisse (mutant QA-M4). L'assertion est bornée à CHAQUE tuile,
+    // par sa clé, donc elle vérifie aussi l'appariement description ↔ tuile.
+    jeu.forEach((id, valeur) {
+      expect(
+        find.descendant(
+          of: find.byKey(ValueKey(id)),
+          matching: find.text(valeur.$2),
+        ),
+        findsOneWidget,
+        reason: 'la tuile « $id » doit porter « ${valeur.$2} »',
+      );
+    });
   });
 
   testWidgets('La tuile affiche un nombre nu, sans unité', (tester) async {
@@ -190,44 +250,52 @@ void main() {
   testWidgets('Couleur orange quand le nombre vient de changer', (
     tester,
   ) async {
-    // Cible à exactement 6 h : p = 0, donc l'orange de référence.
+    // Cible à exactement 6 h : le nombre affiché VIENT de passer à 6 (il a pris
+    // sa valeur à l'instant même), donc p = 0 et l'orange de référence.
     await lancerAvec(tester, [e('a', const Duration(hours: 6))]);
-    final boite = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(EcheanceTile),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    final couleur = (boite.decoration as BoxDecoration).color!;
-    expect(couleur, ConcentrationTokens.gradientOrange.couleur);
+    expect(find.text('6'), findsOneWidget);
+    expect(fondDeLaTuile(tester), ConcentrationTokens.gradientOrange.couleur);
   });
 
   testWidgets('Couleur bleue quand le prochain changement est imminent', (
     tester,
   ) async {
-    // p proche de 1 : la couleur doit être plus proche du bleu que de l'orange.
-    await lancerAvec(tester, [e('a', const Duration(hours: 5, minutes: 59))]);
-    final boite = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(EcheanceTile),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
+    // ⛔ DONNÉE CALCULÉE, pas choisie au jugé. Unité « heures », cible dans
+    // 5 h 1 min : le nombre affiché est 6 et il tombera à 5 dans UNE minute —
+    // le prochain changement est donc réellement imminent. Les deux instants
+    // qui l'encadrent (ADR-002 §4) sont `cible − 6 h` et `cible − 5 h`, soit
+    // 60 minutes dont 59 déjà écoulées ⇒ p = (60 − 1) / 60. Dérivé de RF-04,
+    // indépendamment du calculateur.
+    //
+    // ⚠️ La donnée PRÉCÉDENTE (5 h 59) donnait en réalité p = 1/60 — l'ORANGE.
+    // Le test restait vert parce qu'il n'observait JAMAIS la couleur rendue :
+    // il ne lisait que l'alpha, puis comparait une clarté RECALCULÉE À CÔTÉ par
+    // `backgroundFor(0.98)`. D'où le mutant QA-M1 : la tuile pouvait rendre
+    // TOUJOURS l'orange sans qu'un seul test ne rougisse.
+    const pAttendu = (60 - 1) / 60;
+    await lancerAvec(tester, [e('a', const Duration(hours: 5, minutes: 1))]);
+    expect(find.text('6'), findsOneWidget);
+
+    final rendue = fondDeLaTuile(tester);
+    expect(
+      rendue,
+      const TemporalGradient().backgroundFor(pAttendu).couleur,
+      reason: 'la tuile doit rendre le dégradé À SA progression',
     );
-    final rendue = (boite.decoration as BoxDecoration).color!;
+    expect((rendue.a * 255).round(), 255);
+
+    // « Bleue » est une grandeur, mesurée SUR LA COULEUR RENDUE.
+    final l = clarteDe(rendue);
     final versBleu = Oklab.depuisRgb(ConcentrationTokens.gradientBleu);
     final versOrange = Oklab.depuisRgb(ConcentrationTokens.gradientOrange);
-    final l = Oklab.depuisRgb(const TemporalGradient().backgroundFor(0.98)).l;
-    expect((rendue.a * 255).round(), 255);
     expect(
-      (l - versBleu.l).abs() < (l - versOrange.l).abs(),
-      isTrue,
+      (l - versBleu.l).abs(),
+      lessThan((l - versOrange.l).abs()),
       reason:
-          'la couleur doit tirer vers le bleu quand le changement est imminent',
+          'la couleur RENDUE doit tirer vers le bleu quand le changement est '
+          'imminent (clarté mesurée : $l)',
     );
+    expect(rendue, isNot(ConcentrationTokens.gradientOrange.couleur));
   });
 
   testWidgets('Tri des tuiles par échéance croissante', (tester) async {

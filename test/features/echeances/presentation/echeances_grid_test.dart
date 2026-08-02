@@ -176,7 +176,21 @@ void main() {
         expect(find.textContaining(interdit), findsNothing);
       }
     });
+  });
 
+  // ⛔ Le budget est INDÉPENDANT de la source qu'il contrôle. L'assertion
+  // précédente pumpait `ConcentrationTokens.periodeRafraichissement`
+  // ELLE-MÊME : elle restait donc vraie pour 30 s comme pour 1 HEURE (mutant
+  // `QA-M7`, survivant). Une assertion auto-référentielle ne se renforce pas,
+  // elle se REMPLACE — c'est la classe de défaut exacte de B-1.
+  //
+  // La valeur vient de l'AC-4 « Limite » / RF-05 — « au minimum une fois par
+  // minute, indispensable pour l'unité heures ». Elle est écrite UNE fois, et
+  // les deux assertions ci-dessous la partagent : deux copies d'un même seuil
+  // dérivent.
+  const budgetRf05 = Duration(minutes: 1);
+
+  group('RF-05 — le rafraîchissement tient dans UNE MINUTE', () {
     testWidgets('recalcule après avancée de l’horloge (RF-05)', (tester) async {
       final horloge = FakeClock(maintenant);
       await tester.pumpWidget(
@@ -197,9 +211,30 @@ void main() {
       );
       expect(find.text('6'), findsOneWidget);
       horloge.avancerDe(const Duration(hours: 2));
-      await tester.pump(ConcentrationTokens.periodeRafraichissement);
-      expect(find.text('4'), findsOneWidget);
+      // Une minute de temps écoulé — pas « la période », quelle qu'elle soit.
+      await tester.pump(budgetRf05);
+      expect(
+        find.text('4'),
+        findsOneWidget,
+        reason:
+            'le recalcul doit avoir eu lieu au plus tard après $budgetRf05, '
+            'sans quoi une échéance en unité « heures » resterait fausse à '
+            'l’écran pendant plus d’une minute',
+      );
       expect(find.text('6'), findsNothing);
+    });
+
+    test('la période configurée NE DÉPASSE PAS ce budget', () {
+      expect(
+        ConcentrationTokens.periodeRafraichissement,
+        lessThanOrEqualTo(budgetRf05),
+        reason: 'RF-05 exige au minimum un recalcul par minute',
+      );
+      expect(
+        ConcentrationTokens.periodeRafraichissement,
+        greaterThan(Duration.zero),
+        reason: 'une période nulle ferait tourner la reconstruction en boucle',
+      );
     });
   });
 }
