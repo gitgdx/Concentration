@@ -1922,6 +1922,32 @@
     `--selftest` → exit 0.
   - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
     `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
+- **⚖️ ARBITRAGE HUMAIN — 2026-08-02 : US-01.1 sera certifiée avec AC-1 « Limite » (RNF-02) EXPLICITEMENT
+  NON COUVERT, borné, daté, et reporté à US-01.2.** Décision prise par l'humain, saisi par @Architect
+  après que la QA **et** les trois passages d'audit ont refusé de trancher — *« la décision de reporter un
+  AC n'est pas la mienne »*.
+  - ✅ **AUCUNE DÉROGATION N'EST REQUISE, et c'est une CONSTATATION, pas un arrangement** : la DoD de ce
+    Story File est la **liste générique de 10 cases**, et **aucune n'exige la couverture des AC**. La
+    certification n'est donc **pas insatisfiable** — situation **différente d'US-00.6**, dont la case 6
+    était **littéralement** impossible et avait exigé `EVT_WAIVER_GRANTED`. ⛔ **On n'émet pas une
+    dérogation pour se donner l'air rigoureux : il n'y a rien à déroger.**
+  - 🔴 **MAIS CE CONSTAT EST LUI-MÊME UN DÉFAUT DE MÉTHODE, et il faut le dire** : *une DoD qui ne
+    mentionne la couverture d'aucun AC serait **intégralement cochable** avec **la moitié des AC
+    orphelins**, sans qu'aucune case ne le signale.* Ce qui a rattrapé RNF-02 ici, c'est **la QA**, pas la
+    DoD. **Même famille que NB-6** *(le corpus ne modélise pas ce sur quoi un verdict porte)*.
+    ➡️ **Candidat `/audit-methodo`.**
+  - **Motif retenu de l'arbitrage** : précédent **constant** du projet *(US-00.5, US-00.6 et US-00.7 ont
+    toutes été certifiées **avec des bornes déclarées**)* ; l'instrument de levée **existe désormais et
+    est prouvé non blanchissable** ; et les deux alternatives coûtaient plus qu'elles n'apportaient ici —
+    installer JDK + émulateur *(action humaine à durée non bornée, dont **rien ne garantit** qu'elle
+    rendrait un vert)*, ou **réécrire l'AC en plus faible** *(que la QA a d'avance qualifié : « l'écrire
+    serait honnête, continuer à l'appeler RNF-02 ne le serait pas »)*.
+  - ⚠️ **CE QUE CET ARBITRAGE N'EFFACE PAS** : **AC-1 « Limite » n'est pas couvert**, et il ne le devient
+    pas en étant arbitré — *« un arbitrage ne lève jamais un critère »* **(précédent du critère 27
+    d'US-00.7)**. Le trou plus large **demeure entier** : **l'application n'a JAMAIS tourné sur un
+    appareil**, aucun contraste n'a **jamais** été vu par un œil. **Aucun événement n'est émis** — le
+    catalogue **ne couvre aucun arbitrage** *(précédent suivi : l'arbitrage @PO du 2026-07-28)*, et **on ne
+    pollue pas une trace append-only pour satisfaire un format**.
 - **🧪 PASS — QA, 2ᵉ passage, sur `558a475` (2026-08-02, `EVT_QA_PASSED`), phase → `prepare_deployment`.**
   *([qa_delta.md](reports/US-01.1/qa_delta.md) · sonde
   [qa_delta_nb7_probe.py](reports/US-01.1/qa_delta_nb7_probe.py) · critère de levée de RNF-02
