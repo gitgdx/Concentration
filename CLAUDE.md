@@ -51,6 +51,35 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 **Chantier actif** : **US-01.1 — le PRODUIT.** ⛔ **Plus aucune US de fondations n'est ouverte.**
 
+> ⚖️ **US-01.1 EST ARRÊTÉE À `🧪 PASS` — VALIDÉE TECHNIQUEMENT, ⛔ PAS CERTIFIÉE PROD (2026-08-02).**
+> **PR #27 fusionnée** *(`7ba4228`)* puis **PR #28** *(cliquet à 95,2 — `a9619af`)*, les deux **par
+> l'humain sans `--admin`**. SCB : `✅ @PO · ✅ @Data · ✅ @UX · ✅ @Dev · ✅ 🔍 · ✅ 🛡️ · 🧪 PASS`,
+> phase **`prepare_deployment`**, **Déploiement `⏳`**, **Certifié Prod `⏳`**.
+>
+> **`/certify` a été EXÉCUTÉ et s'arrête au gate 6** — c'est un **constat d'outils**, pas un renoncement :
+> **gates 1→5 ✅** *(SCB, trace, rapports, **DoD 10/10**, `run_gates --all` 5 gates dont
+> `flutter build web --release`)*, **gate 6 ❌** car `Déploiement (DevOps)` vaut `⏳`. **Le rituel prescrit
+> littéralement cet arrêt** *(« sinon la certification s'arrête à `🧪 PASS` »)*. **Aucun événement de
+> déploiement n'est émis**, et `EVT_CERTIFIED_PROD` exige `EVT_DEPLOYMENT_SUCCESS` en précondition.
+>
+> ⛔ **POURQUOI LE PRÉCÉDENT DE DÉPLOIEMENT NE SE TRANSFÈRE PAS** *(décision humaine du 2026-08-02)* :
+> US-00.6 et US-00.7 avaient écrit « **DÉPLOIEMENT = FUSION SUR `main`** » avec un « **STAGING N/A** »
+> dont le motif était **borné** — *« US de GOUVERNANCE sans runtime, **0 fichier Dart livré** »*.
+> **US-01.1 livre 19 fichiers Dart et une application** ⇒ **la prémisse du motif est FAUSSE pour elle**, et
+> le réutiliser serait **adapter le précédent au résultat**. Le déploiement réel est par ailleurs
+> **impossible aujourd'hui** : `STACK_PROFILE` §DevOps dit que `flutter build web --release` est un **gate
+> de constructibilité** et **« PAS une plateforme cible produit »** *(RNF-08 vise iOS/Android)* — **Android
+> sans JDK**, **iOS non scaffoldé**, aucun keystore, aucun compte store. ➡️ **Ce n'est plus « rien à
+> déployer » mais « quelque chose à déployer et aucun moyen de le faire ».**
+>
+> ⛔ **CE QUE `🧪 PASS` N'ATTESTE PAS** : **AC-1 « Limite » (RNF-02, « < 500 ms ») N'EST PAS COUVERT**
+> *(arbitrage humain, reporté à US-01.2 ; critère de levée exécutable livré —
+> `reports/US-01.1/rnf02_exit_criterion.py`)* · l'**application n'a JAMAIS tourné sur un appareil** ·
+> **aucun contraste n'a jamais été vu par un œil**, tous sont **calculés** · **aucun SAST, aucun scan de
+> CVE** · **NB-7 est un défaut DÉMONTRÉ non bloquant** *(deux `DecoratedBox` imbriquées et l'assertion lit
+> la mauvaise ⇒ la tuile rend toujours orange et **112 tests restent verts** ; correctif d'**une ligne**,
+> porté à US-01.2)*.
+
 ✅ **EPIC_00 CLOS le 2026-08-01** *(⚠️ sur la branche `feat/US-00.6-cloture-epic00` — **la clôture n'est
 sur `main` qu'après fusion de sa PR**)*. **Tous ses critères sont cochés**, dont **le nº 112 sur sa seule
 1ʳᵉ moitié** : sa 2ᵉ exigeait qu'US-01.2 **instancie** la convention d'ADR-005, or **US-01.2 n'existe pas**
@@ -70,6 +99,22 @@ INSTRUMENTS** — chacune porte « **0 fichier Dart touché** » — et le cliqu
 régression réelle**. ➡️ **La preuve que ce socle fonctionne viendra d'US-01.1.** ⚠️ Le premier vrai fichier
 Dart fera **bouger la couverture d'un coup** *(grain minimal **5,26 pt** sur 19 lignes)* : c'est là qu'on
 saura si le cliquet **protège** ou **paralyse**.
+
+⛔ **PÉRIMÉ-2026-08-02 — le paragraphe ci-dessus décrit l'état AU 1ᵉʳ AOÛT. Il est conservé parce qu'il
+posait la QUESTION ; voici la RÉPONSE, mesurée.** `lib/` = **19 fichiers / 399 lignes mesurables**,
+`test/` = **11 fichiers / 112 tests verts**, couverture **95,2 %** — et **13 scénarios Gherkin d'US-01.1
+sont RÉELLEMENT EXÉCUTÉS**, adossés à des tests Dart par `check_gherkin_mapping.py` *(les 103 scénarios de
+gouvernance restent, eux, ré-étiquetés « **spécification NON EXÉCUTÉE** »)*.
+🔬 **RÉPONSE À LA QUESTION « protège ou paralyse » : NI L'UN NI L'AUTRE — il n'a rien vu.** ⛔ **La
+couverture de lignes est AVEUGLE À LA FORCE DES ASSERTIONS**, et c'est **prouvé sur du code produit réel** :
+**380/399 avant, 380/399 après**, pour **+526 lignes de test** et **6 mutants tués**. Le cliquet **n'a vu
+NI le défaut NI sa correction**. Ce qui a trouvé les six trous, c'est la **mutation** — pas la couverture.
+⛔ **Deuxième acquis, qui inverse une intuition** : **les égalités au token sont TAUTOLOGIQUES** *(les deux
+côtés bougent ensemble)* ⇒ **seules les assertions de GRANDEUR tuent un mutant**, et ce sont justement
+celles qui **ont l'air de faire doublon — ne jamais les retirer à ce titre**.
+⚠️ **Le cliquet vaut désormais `95.2` sur `main`** *(PR #28, `a9619af`)* : la couverture mesurée étant
+**95,2381 %**, la **marge est NULLE**. **Toute baisse d'une seule ligne fera rougir un contexte requis** ⇒
+**US-01.2 devra livrer ses tests EN MÊME TEMPS que son code, pas après.**
 
 ✅ **US-00.6 CERTIFIÉE Prod 🚀 le 2026-08-01** — couverture initiale mesurée + **cliquet en vigueur**.
 **PR #20** *(code)* et **PR #21** *(amendement de l'Art. 4, **PR DÉDIÉE**)* fusionnées **par l'humain sans
@@ -279,6 +324,24 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   §*Conséquences* décrivait l'état du monde **à sa date**, et *l'immuabilité existe précisément pour qu'on
   ne repeigne pas l'histoire*. Il est **nommé**, jamais réécrit ; **aucun ADR-008**, la **décision** est
   inchangée — c'est le **constat** qui a vieilli.
+- 🔴 **LA COUVERTURE DE LIGNES NE MESURE PAS CE QUE LE PROJET CROIT QU'ELLE MESURE — établi par
+  EXPÉRIENCE le 2026-08-02, sur du code produit réel.** **380/399 avant, 380/399 après**, pour **+526
+  lignes de test** et **6 mutants tués** ⇒ ⛔ **le cliquet n'a vu NI le défaut NI sa correction**. Ce qui a
+  trouvé les six trous, c'est la **mutation**. **L'instrument central d'US-00.6 a donc une borne
+  démontrée**, et elle n'est écrite **nulle part dans son propre dossier**. ⚠️ **Ne pas en conclure que le
+  cliquet est inutile** — il **interdit la régression du dénominateur**, ce qui reste vrai ; il ne mesure
+  simplement **pas la qualité des assertions**. **Aucun gate ne mesure la mutation**, et les 3 campagnes de
+  cette US ont toutes été **écrites à la main par des auditeurs**. ➡️ **`/audit-methodo` prioritaire.**
+- 🔴 **`/certify` gate 3 vérifie une PRÉSENCE DE FICHIER, pas un VERDICT** *(trouvé le 2026-08-02 **en
+  exécutant le rituel**)* : il exige `code_review.md`, `security.md`, `qa.md` — or sur US-01.1
+  **`code_review.md` ET `qa.md` portent tous deux un verdict `FAILED`**, les `PASSED` vivant dans
+  `*_delta2.md` et `qa_delta.md` que **le gate ne regarde jamais**. ⇒ **le gate 3 serait VERT sur une US
+  dont tous les audits ont échoué.** Ce qui porte réellement le verdict est la **chaîne d'événements du
+  gate 2**. **Même famille que NB-6** : le corpus **ne modélise pas ce sur quoi un verdict porte**.
+- 🟠 **La DoD générique n'exige la couverture d'AUCUN AC** *(constaté le 2026-08-02 en cherchant si une
+  dérogation était requise — elle ne l'était pas, **et c'est bien le problème**)* : ses **10 cases** sont
+  intégralement cochables **avec la moitié des AC orphelins**, sans qu'aucune ne le signale. Sur US-01.1,
+  ce qui a rattrapé **RNF-02**, c'est **la QA — pas la DoD**. **Candidat `/audit-methodo`.**
 - 🔴 **UN VISA D'AUDIT N'EST RATTACHABLE À AUCUN COMMIT — donc il PÉRIME EN SILENCE.** Découvert le
   2026-08-02 par l'audit sécurité d'US-01.1 *(NB-6)*, après un incident **réel** : son visa portait sur
   `24fe59a`, la revue sur `6fe75df`, et **73 lignes de `lib/` n'avaient été vues par aucun audit
