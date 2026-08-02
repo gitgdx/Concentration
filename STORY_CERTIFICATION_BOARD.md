@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | 🧪 FAIL | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | quality_assurance | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1922,6 +1922,75 @@
     `--selftest` → exit 0.
   - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
     `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
+- **✅ 🔍 + ✅ 🛡️ — 3ᵉ PASSAGE D'AUDIT, les DEUX `PASSED` sur le MÊME commit `173fb62` (2026-08-02),
+  phase → `quality_assurance`.** *([code_review_delta2.md](reports/US-01.1/code_review_delta2.md) ·
+  [security_delta2.md](reports/US-01.1/security_delta2.md) · campagne rejouable
+  [code_review_delta2_mutants.py](reports/US-01.1/code_review_delta2_mutants.py))*
+  ⚠️ **`QA Status` reste à `🧪 FAIL` alors que ce verdict porte sur `6fe75df`** : le SCB **ne sait pas
+  exprimer « QA À REFAIRE »** — il n'a que `⏳`, **interdit en phase bloquante** par
+  `check_scb_compliance.py`, et le dernier verdict rendu. On conserve donc `🧪 FAIL`, qui **SOUS-affirme**
+  *(l'inverse exact d'un `✅` périmé, qui SUR-affirme)*. ➡️ **Même famille que NB-6** : le corpus ne
+  modélise pas **ce sur quoi un verdict porte**. **Candidat `/audit-methodo`.**
+  - **Les 3 affirmations ont été MESURÉES par les deux auditeurs, aucune crue** : `lib/` intact *(revue :
+    `--numstat` à **0 ligne** ; sécurité : **égalité de HACHAGES D'ARBRE Git**, bit-à-bit récursif)* ·
+    `qa_exit_criterion.py` non modifié *(**identité de blob** `e29d75d9…` à l'origine, au commit audité
+    **et sur le disque**)* · **7 mutants tués**, campagne rejouée à `exit 0` là où elle rendait `exit 1`.
+    **112 tests, 95,2 % (380/399)** — **identique à la mesure de @Architect, aucune divergence**.
+  - 🔬 **LA SÉCURITÉ A RÉPONDU À « 100 % `test/` DONC ANODIN » PAR UNE MESURE, PAS PAR UN RAISONNEMENT** :
+    deux révisions construites **à chemin de build constant** ⇒ **bundle identique bit-à-bit**, avec
+    **CONTRÔLE POSITIF** *(un mutant fait bouger le hash — la mesure sait détecter)*. **Borne déclarée :
+    cible web uniquement.** Elle a aussi audité `qa_exit_criterion.py` **comme du code** : n'écrit rien
+    dans le dépôt *(manifeste SHA-256 de 35 fichiers, identique avant/après)*, zéro `eval`/`exec`/réseau,
+    `argv` **littéraux constants**, et le fait décisif — **référencé par aucun workflow ni hook, donc
+    JAMAIS exécuté avec un `GITHUB_TOKEN`**.
+  - 🎓 **L'ACQUIS DE MÉTHODE DU PASSAGE, et il inverse une intuition** : les **9 mutants non publiés** de la
+    revue **dégradent sans supprimer** *(dégradé comprimé, `FittedBox` conservé en `BoxFit.none`, **mode
+    clair à contraste constant** par échange des deux tokens, **61 s** au lieu d'une heure)* — **7/7 tués**,
+    contrôle positif tué, **contrôle négatif SURVIVANT** *(que la QA n'avait pas : sans lui, une suite qui
+    rougirait sur tout passerait pour excellente)*. ⛔ **Résultat exploitable : les égalités au token sont
+    TAUTOLOGIQUES** *(les deux côtés bougent ensemble, elles ne rougissent jamais)* — **seules les
+    assertions de GRANDEUR tuent, et ce sont justement celles qui ont l'air de faire doublon. ⛔ NE JAMAIS
+    LES RETIRER À CE TITRE.**
+  - ✅ **Aucun AFFAIBLISSEMENT** — contrôle en **ensembles** *(8 → 11 fichiers, **13 ajouts, 0 suppression**
+    de nom de test)*, aucun `skip`, aucune tolérance élargie ; les **4** seules assertions supprimées sont
+    examinées une à une, dont la tautologie `backgroundColor ?? token, isNotNull` **qu'on ne pouvait que
+    remplacer**.
+  - ✅ **Les 2 corrections de données de test sont un ALIGNEMENT, pas une triche — confirmé** : le
+    `.feature` est le **même blob** aux deux commits, et le scénario 3 est **littéralement le finding N-5
+    du 1ᵉʳ passage** *(une donnée déplacée **vers** une norme qui la réclamait la veille)*.
+  - **Findings ouverts** : **N-3 RÉSOLU au-delà du critère** *(le mutant « widget conservé, `fit` changé »
+    est tué aussi ⇒ l'assertion porte sur le **comportement**)* · **N-5 PARTIEL** *(2 divergences sur 3 ;
+    « 8 mois 12 jours → 9 » est toujours testé en « 5 h 10 → 6 »)* · **N-1, N-2, N-6, N-7, N-9, N-10,
+    N-12, O-1 inchangés par construction** *(leur lieu est dans `lib/`, dont le diff est vide — re-grepés
+    quand même)* · **NB-1 → NB-6 inchangés**, NB-1 **re-mesuré sur le bundle** : les nouveaux tests
+    **n'exercent ni I-2 ni `depuisDonnee`** ⇒ exposition **ni réduite ni élargie**.
+  - **2 findings sécurité nouveaux, non bloquants** : **NB-7** *(INFO, **méthode et non sécurité**)* — le
+    helper partagé par 3 suites sélectionne **par position sans assertion d'unicité** là où son **voisin
+    immédiat énonce la règle contraire et l'applique** ; ⚠️ **contre-preuve qu'elle s'impose** : la campagne
+    tue QA-M1 et QA-M6 **à travers ce helper** ⇒ **risque de régression future, pas d'inexactitude
+    actuelle**. **NB-8** *(LOW)* — `shell=True` inutile, **exploitabilité nulle** (argv constants).
+  - 🔴 **P-6 — AUCUN OUTIL NE REGARDE LE PYTHON DU DÉPÔT** : les **5 gates sont Dart**, et
+    `ruff|flake8|mypy` → **0 occurrence**. **Démontré, pas supposé** : une variable **liée et jamais lue**
+    trouvée **à l'AST** dans les 314 lignes de `qa_exit_criterion.py`. ⚠️ **Nouvelle facette de la dette
+    « aucun SAST »**, qui jusqu'ici n'était nommée que pour le Dart. ➡️ **US-00.8.**
+  - ⛔ **CE QUE CE DOUBLE `PASSED` N'ATTESTE PAS** : **AC-1 « Limite » (RNF-02) demeure un AC ORPHELIN** —
+    **N-11 ouvert aux TROIS passages**, *« je ne le requalifie pas, et je ne le durcis pas non plus »*, et
+    **aucun vert n'a été fabriqué dessus** *(0 occurrence de mesure de temps, sonde QA absente)*. Bornes
+    inchangées : **aucun SAST, aucun scan de CVE**, l'app **n'a jamais tourné sur un appareil**, tous les
+    contrastes sont **calculés**.
+  - 🎓 **LES DEUX AUDITEURS ONT REPRIS @ARCHITECT SUR SA SAISINE, ET ILS AVAIENT RAISON** : le périmètre
+    annoncé énumérait **3 commits** là où `git rev-list --count 6fe75df..173fb62` rend **4** — l'omis,
+    **`be9cc4a`**, était **le seul de la plage à apporter du code exécutable** *(les 314 lignes de
+    `qa_exit_criterion.py`)*. **Nouvelle occurrence de la classe de défaut nº 1 du projet**, cette fois
+    **dans la saisine**. ⚠️ **Et la revue a relevé la même chose CHEZ ELLE** : son en-tête avait **recopié
+    l'énumération** alors que son §1 avait **déjà mesuré les 4 commits** — *« la mesure était juste, la
+    prose l'a écrasée »*. **Elle s'est aussi imputé** la duplication de son propre harnais *(7 fonctions
+    communes, 4 corps identiques)*. ⚠️ Elle relève enfin que le **2ᵉ passage annonçait « 10 » findings là
+    où son tableau en énumérait 12** — **chiffre écrit à la main**, non re-litigé, **énumération par nom**.
+  - 🎓 **La sécurité publie SON PROPRE FAUX VERDICT** : son harnais a imprimé `bundles DIFFERENTS`, par une
+    **agrégation lisant un fichier jamais écrit**, **à côté de mesures brutes correctes**. Corrigé, verdict
+    **recalculé sur les mesures brutes**, avec **refus explicite de conclure si une mesure manque**.
+    📌 *« Le défaut était dans l'**agrégation**, jamais dans la **mesure**. »*
 - **✅ Code (Dev) — `EVT_CODE_READY` le 2026-08-01, phase → `parallel_audit`.**
   **PREMIÈRE LIVRAISON APPLICATIVE DU PROJET** : `lib/` passe de **1 fichier / 63 lignes** à **19 fichiers**,
   `test/` de **1** à **8**, avec **90 tests verts**.
