@@ -126,6 +126,19 @@ jobs:
       #    depuis US-00.4. C est precisement la dette que ce step existe pour ne pas reproduire.
       - name: 🔒 Autotest du cliquet de couverture (US-00.6)
         run: python scripts/selftest_coverage_ratchet.py
+      # ⛔ T12c (US-01.1) — MEME RAISONNEMENT, MEME JOB : la correspondance
+      #    scenario Gherkin <-> nom de test est la CONTRAINTE ATTACHEE par
+      #    ADR-008 a l autorisation de tenir un test « app entiere » pour un
+      #    scenario E2E de track FULL. Declaree, elle ne vaudrait rien ; verifiee
+      #    ici, elle empeche la fusion. Le controle porte son autotest de
+      #    mutation, lance juste apres — un controle qui ne peut pas rougir est
+      #    nul (lecon d US-00.5).
+      #    ⚠️ Il LIT les .feature : aucun titre n y est recopie, donc un
+      #    renommage produit un ECART et non un silence.
+      - name: 🥒 Correspondance scénarios ↔ tests (US-01.1, T12b)
+        run: python scripts/check_gherkin_mapping.py
+      - name: 🥒 Autotest de mutation du contrôle de correspondance
+        run: python scripts/check_gherkin_mapping.py --selftest
 
   app-quality:
     name: 📱 App (gates run_gates.py)

@@ -173,11 +173,27 @@ protection de `main` — c'est **US-00.7 qui l'applique, en prouve l'effet, et q
 une**, jamais en parallèle : toute fusion périme les autres branches ouvertes. **US-00.8** (dette) n'est
 **PAS** requise pour clore EPIC_00 — son report est un **choix assumé** dont le coût est que la fusion par
 un agent reste **interdite** sans être **impossible**.
-US-01.1 (EPIC_01, FULL) est en `business_alignment`. ✅ **Ses trois clauses de track FULL sont ARBITRÉES**
-*(ADR-008, 2026-08-01)*. ⛔ **Mais elle est BLOQUÉE PLUS TÔT que prévu** : `EVT_STORY_READY` est **absent
-de sa trace** *(seuls `EVT_STORY_CREATED` et `EVT_TRACK_SELECTED`, 2026-07-24)* alors que le SCB affiche
-`✅ @PO` ⇒ `EVT_ARCHI_VALIDATED` **exige** `EVT_STORY_READY`, donc **@ProductOwner doit l'émettre avant
-tout** *(`emitter: product-owner`)*. **Design UX reste DÛ** *(track FULL, sans `N/A`)*.
+⛔ **PÉRIMÉ-2026-08-02 : ce paragraphe annonçait US-01.1 « en `business_alignment` », « BLOQUÉE » faute
+d'`EVT_STORY_READY`, et « Design UX DÛ ». LES TROIS SONT FAUX depuis le 2026-08-01.** *(La ligne traînait
+depuis le 2026-07-24 ; on **date**, on ne **repeint** pas.)* ✅ **État RÉEL au 2026-08-02 : US-01.1 est en
+`prepare_deployment`, avec `✅ @PO · ✅ @Data · ✅ @UX · ✅ @Dev · ✅ 🔍 · ✅ 🛡️ · 🧪 PASS`** — il ne
+reste que **Déploiement** et **Certifié Prod**. `EVT_STORY_READY` a été **émis** le 2026-08-01, les trois
+clauses du track FULL sont **arbitrées** *(ADR-008)*, et **le produit existe** : `lib/` = **19 fichiers**,
+**112 tests verts**, **couverture 95,2 % (380/399)**.
+🔬 **CE QUE CE CYCLE A ÉTABLI ET QUI VAUT AU-DELÀ D'US-01.1** : ⛔ **la couverture de lignes est AVEUGLE À
+LA FORCE DES ASSERTIONS** — **prouvé sur du code produit réel** : **380/399 avant, 380/399 après**, pour
+**+526 lignes de test** et **6 mutants tués** ⇒ **le cliquet d'US-00.6 n'aurait vu NI le défaut NI sa
+correction**. Et ⛔ **les égalités au token sont TAUTOLOGIQUES** *(les deux côtés bougent ensemble)* :
+**seules les assertions de GRANDEUR tuent un mutant, et ce sont justement celles qui ont l'air de faire
+doublon — ne jamais les retirer à ce titre.** ➡️ **Les deux au dossier `/audit-methodo`.**
+⚖️ **ARBITRAGE HUMAIN DU 2026-08-02** : US-01.1 sera certifiée avec **AC-1 « Limite » (RNF-02, « < 500 ms »)
+EXPLICITEMENT NON COUVERT**, borné, daté, reporté à US-01.2. ✅ **Aucune dérogation requise — c'est un
+CONSTAT** : la DoD de ce Story File est la **liste générique de 10 cases** et **aucune n'exige la couverture
+des AC**, donc rien n'est insatisfiable *(différent d'US-00.6, dont la case 6 l'était **littéralement**)*.
+🔴 **Mais ce constat EST un défaut de méthode** : *une DoD qui n'exige la couverture d'aucun AC serait
+intégralement cochable avec la moitié des AC orphelins.* **Ce qui a rattrapé RNF-02, c'est la QA, pas la
+DoD.** ⛔ **Un arbitrage ne lève jamais un critère** *(précédent du critère 27)* : l'AC **reste non
+couvert**, et le trou plus large demeure — **l'application n'a JAMAIS tourné sur un appareil**.
 ⛔ **PÉRIMÉ-2026-08-01 : cette ligne portait « à rebaser sur `main` » — c'est FAUX.** Vérifié :
 `feat/US-01.1-affichage-hub-grille` est **ancêtre de `main`** et n'a **0 commit propre** — **rien à
 rebaser, la branche est morte**, à supprimer. L'affirmation traînait depuis le **2026-07-25**.
@@ -263,6 +279,17 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   §*Conséquences* décrivait l'état du monde **à sa date**, et *l'immuabilité existe précisément pour qu'on
   ne repeigne pas l'histoire*. Il est **nommé**, jamais réécrit ; **aucun ADR-008**, la **décision** est
   inchangée — c'est le **constat** qui a vieilli.
+- 🔴 **UN VISA D'AUDIT N'EST RATTACHABLE À AUCUN COMMIT — donc il PÉRIME EN SILENCE.** Découvert le
+  2026-08-02 par l'audit sécurité d'US-01.1 *(NB-6)*, après un incident **réel** : son visa portait sur
+  `24fe59a`, la revue sur `6fe75df`, et **73 lignes de `lib/` n'avaient été vues par aucun audit
+  sécurité**. **Mesuré** : `trace_append.py` n'a **aucune option `--commit`/`--sha`**, et un événement ne
+  porte que `agent, event, evidence, files, model, rationale, session, ts, us`. ⇒ **aucune machine ne peut
+  signaler qu'un visa est périmé** — ici, c'est un **humain** *(l'auditeur de revue)* qui a rattrapé le
+  décalage. Même famille que l'absence d'événement d'extinction de dérogation et qu'`emitter` non
+  enforcé : **le catalogue ne modélise pas ce sur quoi un verdict PORTE**. Mitigation appliquée : SHA
+  inscrit dans le champ libre — ⚠️ **convention NON enforcée**, qui réduit le risque sans le supprimer.
+  Correctif réel *(champ `commit` validé)* : touche le **schéma de la trace** ⇒ **exige son propre ADR**.
+  ➡️ **US-00.8.**
 - 🔴 **AUCUN ÉVÉNEMENT DE CLÔTURE D'EPIC dans le catalogue** *(constaté le 2026-08-01 en clôturant
   EPIC_00)* : ses **25** événements n'en comportent **aucun** pour clore un EPIC — **même famille
   structurelle** que l'absence d'extinction de dérogation. ⇒ **la clôture d'un EPIC est un acte

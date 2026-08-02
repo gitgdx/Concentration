@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | development_start | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1778,6 +1778,339 @@
   - ⚠️ **Dette nommée d'avance** *(I-5)* : instants en heure **locale**, **aucun fuseau stocké** — dès
     qu'il y aura persistance il faudra de l'**UTC**, sinon un changement de fuseau **déplacera** les
     échéances. **À rouvrir en US-01.2.**
+- **✅ 🔍 Audit Rev + ✅ 🛡️ Audit Sec — les DEUX sur le MÊME commit `6fe75df` (2026-08-02),
+  phase → `quality_assurance`.**
+  - 🔴 **La revue a d'abord rendu `FAILED`, et elle ne m'a pas relu : elle a MUTÉ mon code.** Sur 5
+    mutations en copie isolée, **2 survivants**.
+    - **B-1 — faux vert sur ADR-003 §4** : la réduction de chroma pouvait être remplacée par
+      l'**écrêtage que l'ADR interdit nommément**, et les **100 tests restaient VERTS**. Le mutant rendait
+      **`#ff0000`, du rouge pur**, dans une US dont **AC-5 interdit le rouge**. Ma tolérance
+      `closeTo(l, 0.06)` absorbait exactement la dérive de **0,0280** que le §4 existe pour empêcher —
+      **60 fois trop lâche**. La dernière branche de `versRgb()` n'était en outre **exécutée par aucun
+      test**.
+    - **B-2** : les commandes `ajout`/`réglages` étaient exigées par **quatre documents** *(AC-2
+      « Limite », ADR-004 §5, T10, une étape Gherkin)* et n'existaient **ni en code ni en assertion**.
+      ⚠️ **T12b ne pouvait pas le voir** : il compare des **titres** de scénario, pas des **étapes** — et
+      le contrôle l'annonce lui-même.
+  - ✅ **Correctifs, prouvés par mutation et non par déclaration** : seuils **serrés sur la mesure**
+    *(`deltaL < 0,005`, teinte `< 2°` — l'implémentation correcte rend 0,0002 et 45,0 → 45,1)*, assertion
+    de **signature** contre le rouge pur, couverture de la branche morte ; commandes **implémentées** et
+    non exigence retirée *(l'inverse serait adapter la spec au livrable)*. **Mutation rejouée : 3 rouges
+    contre 0 au premier passage.**
+  - 🎓 **Ce que la re-revue a ajouté de son propre chef, et qui vaut leçon** : **quatre mutants NON
+    publiés**, *« parce qu'une condition connue à l'avance ne prouve pas grand-chose »*. Le décisif est
+    **M6** — un `GestureDetector(onTap: () {})` : un test qui se contenterait de **taper et de constater
+    que rien ne se passe passerait**, par définition. L'assertion vise l'**ancêtre**, donc elle distingue
+    ⛔ **« ne fait rien » de « NE PEUT RIEN FAIRE »** — exactement ADR-004 §3.
+  - 🔴 **LE TROU QU'US-00.6 AVAIT DÉJÀ PAYÉ A FAILLI SE REPRODUIRE** : le visa 🛡️ portait sur `24fe59a`,
+    donc **73 lignes de `lib/` n'avaient été vues par aucun audit sécurité**. Relevé par la revue,
+    **arbitré par la sécurité elle-même** — *« un visa est une assertion **sur un commit**, pas sur une
+    intention »* — qui a **re-audité plutôt que de juger la description du delta**. Visa rétabli sur
+    `6fe75df`, **aucun finding nouveau**.
+  - **Paramètre `echeances` du widget racine jugé NEUTRE, en 4 points mesurés** : pas une frontière de
+    désérialisation *(aucun `jsonDecode`/`fromJson`/`dart:convert` dans `lib/`)* · atteignable seulement
+    par du Dart compilé, donc **en aval d'un compromis déjà acquis** · **non utilisé en production** ·
+    et il **réduit un écart d'assurance réel, ADR-008 §1 étant enfin tenu à la lettre**.
+  - ⛔ **10 findings non bloquants restent OUVERTS**, et l'auditeur a **refusé de les requalifier** :
+    *« je ne déplace pas mes critères entre deux passages ; requalifier maintenant reviendrait à adapter
+    la règle au résultat — et cette règle vaut aussi pour l'auditeur »*. Priorité **consultative** :
+    **N-3** *(seul finding à preuve active — son mutant M2 survit encore)*, **N-5**, puis **N-1 et N-6 à
+    INSCRIRE dans le Story File d'US-01.2**.
+  - ⚠️ **N-11 — le « < 500 ms » de RNF-02 n'est NI mesuré NI testé.** ⛔ *« La case ne doit pas être
+    cochée sur une impression »* — c'est un point pour la QA.
+  - ✅ **Contrôle d'intégrité de la re-revue** : **aucun `EVT_CODE_REVIEW_PASSED` auto-émis** entre les
+    deux passages. La séparation des pouvoirs a tenu, et elle a été **vérifiée**.
+  - ⛔ **CES DEUX VISAS SONT PÉRIMÉS DEPUIS LE 2026-08-02 — colonnes `Audit Rev` et `Audit Sec` remises à
+    ⏳.** Ils portent sur `6fe75df` ; HEAD est **`ddf839e`**. Le visa 🛡️ **le dit lui-même** *(« ce visa
+    porte sur `6fe75df` ET SUR LUI SEUL »)*. ⛔ **Un `✅` maintenu aurait été une assertion FAUSSE sur
+    HEAD** — et c'est précisément le défaut **NB-6** : *aucune machine ne peut signaler qu'un visa est
+    périmé*, c'est un **humain** qui le fait, **une deuxième fois en deux jours**. **Rien n'est repeint** :
+    le bloc ci-dessus reste **intégralement lisible et daté**, seule la **colonne d'état courant** change.
+    ➡️ **Delta à ré-auditer : 100 % `test/`, `lib/` intact, 0 dépendance.**
+- **🧪 FAIL — QA le 2026-08-02, sur `6fe75df` (`EVT_QA_FAILED`), phase → `parallel_audit`.**
+  *([qa.md](reports/US-01.1/qa.md) · critère de sortie **exécutable** :
+  [qa_exit_criterion.py](reports/US-01.1/qa_exit_criterion.py))*
+  ⚠️ **Retour en `parallel_audit` et non maintien en `quality_assurance`** : le visa 🛡️ déclare porter sur
+  `6fe75df` **et lui seul**, donc tout correctif touchant `lib/` **le périme** — la phase doit dire que les
+  audits redeviennent dus, pas qu'ils tiennent.
+  - ⛔ **TOUS LES GATES SONT VERTS ET LE VERDICT EST QUAND MÊME `FAILED`** : **102 passed / 0 skipped /
+    0 failed** *(le drapeau `skipped` a été lu dans le flux JSON pour chacun des 102, pas déduit d'un
+    résumé)* · **380/399 = 95,2 %** **recomptés depuis les `DA:` de `lcov.info`**, indépendamment du gate ·
+    **13/13** scénarios montent bien la racine `ConcentrationApp`. 📌 **Ce qui est en défaut n'est pas le
+    produit — tout ce qui a été muté est correctement implémenté dans `lib/` — c'est la CAPACITÉ DE LA
+    SUITE À PROTÉGER ces comportements.**
+  - 🔴 **6 mutants sur 8 SURVIVENT**, chacun supprimant un comportement **exigé par un AC**, la suite
+    restant à **102/102 verts** : `QA-M1` la tuile ignore la progression et reste **toujours orange**
+    *(AC-5)* · `QA-M2b` fond de l'app en **blanc** *(AC-8)* · `QA-M3` **`FittedBox` retiré** *(AC-3 — c'est
+    le mutant M2 de la revue, **N-3**)* · `QA-M4` la **description n'est jamais rendue** *(AC-3)* ·
+    `QA-M5` **plus rien n'est grisé** *(AC-2)* · `QA-M7` rafraîchissement porté à **1 heure** *(AC-4)*.
+  - 🎓 **Le résultat le plus net est une ASYMÉTRIE, et il fallait le mutant inverse pour la voir** : forcer
+    la tuile en **bleu** (`QA-M6`) rougit un test ; la forcer en **orange** (`QA-M1`) n'en rougit **aucun**.
+    Seul `p=0` est vérifié sur le rendu ⇒ **la tuile pourrait ignorer entièrement `temps.progression`**, or
+    « la couleur reflète la proximité » **est** AC-5. `QA-M6` est le **contrôle positif** : sans lui, six
+    survivants pourraient simplement signifier que le harnais est cassé — **leçon des six instruments faux
+    d'US-00.5**.
+  - **Correspondance Gherkin : nominale OUI, sémantique NON.** `check_gherkin_mapping.py` rend **13 ↔ 13,
+    exit 0**, et **imprime lui-même sa borne** *(« contrôle de CORRESPONDANCE DE TITRES — pas de
+    sémantique »)*. **Même angle mort que le bloquant B-2**, mesuré cette fois au lieu d'être supposé.
+  - ⛔ **3 AC orphelins sur 27 clauses** *(+ 8 partielles)*, et **deux sont des faux verts caractérisés** :
+    - **AC-4 « Limite »** *(RF-05)* : le test `pump`e **la valeur du token lui-même** — assertion
+      **auto-référentielle**, la période passe à 1 h et la suite reste verte. ⛔ **C'est la classe de défaut
+      EXACTE de B-1**, que la revue a tenue pour **bloquante la veille**.
+    - **AC-8 « Nominal »** *(mode sombre)* : `expect(scaffold.backgroundColor ?? token, isNotNull)` — le
+      `??` retombe sur une constante **jamais nulle** ⇒ l'assertion est **vraie quoi qu'il arrive**.
+    - **AC-1 « Limite »** *(RNF-02)* : voir ci-dessous.
+  - ⚠️ **RNF-02 « < 500 ms » — RÉPONSE EXPLICITE au point N-11 : AC-1 « Limite » est DÉCLARÉ NON VÉRIFIÉ,
+    la case ne doit pas être cochée.** La QA a néanmoins **mesuré plutôt que de conclure à l'impression**,
+    et **la mesure confirme le refus** : le harnais headless **exclut** démarrage moteur, polices, shaders
+    et rastérisation *(c'est une **borne inférieure**, pas la grandeur de l'AC)*, l'app **n'a jamais tourné
+    sur un appareil**, et cette borne inférieure atteint elle-même **952 ms au premier passage** — il est
+    donc **impossible d'écrire qu'elle est confortablement sous 500 ms**. **Aucun gate ne surveille cette
+    grandeur.**
+  - 🔬 **PREMIÈRE OBSERVATION, SUR DU CODE PRODUIT, DE L'ANGLE MORT TRANCHÉ EN US-00.6** : `lcov` liste
+    **19 fichiers** pour **20 `.dart`** dans `lib/` — **`lib/main.dart` est ABSENT du dénominateur**.
+    ⇒ la conséquence annoncée *(« déplacer du code non couvert FAIT MONTER la couverture »)* **cesse d'être
+    théorique**. ➡️ **portée par US-01.2 / US-00.8**, pas par cette US.
+  - 📌 **Sur N-3, elle ne requalifie rien** : *« mes six mutants sont des findings QA nouveaux, relevant de
+    mon critère de rôle »*. N-3 est **confirmé par sa propre exécution** et **n'est pas à lui seul la cause
+    du `FAILED`** — mais **il cesse d'être isolé en devenant le sixième membre d'une même famille : ce
+    n'est plus un finding ponctuel, c'est un MOTIF.**
+  - ✅ **Critère de sortie publié COMME UN SCRIPT et non comme une prose** *(leçon d'US-00.7 appliquée)* :
+    **`exit 1` aujourd'hui, `exit 0` quand les 6 mutants seront tués** · **autotest vert** · **aucun mutant
+    désigné par un numéro de ligne** · **motif introuvable traité comme un ÉCHEC** et non ignoré.
+  - 🎓 **Elle publie TROIS défauts de ses PROPRES instruments** : plantage **`cp1252`** à l'impression
+    *(**troisième instrument d'audit d'affilée** à tomber sur cette classe de bug)* · un premier mutant
+    « mode sombre » **non discriminant**, **retiré et remplacé** par `QA-M2b` · un `for … else` imprimant
+    `[OK]` **inconditionnellement**.
+  - ⚠️ **Ce que ce `FAIL` n'atteste PAS** : il ne dit **rien de neuf** sur le fait que l'application **n'a
+    jamais tourné sur un appareil**, que **tous les contrastes sont calculés et aucun vu par un œil**, ni
+    qu'il n'existe **toujours aucun SAST ni scan de CVE**. **Écritures confinées à `reports/` et
+    `docs/trace/`** : aucune ligne de `lib/` ou `test/` touchée, **SCB non modifié par la QA**.
+- **🔧 Correctif post-QA — `EVT_CODE_READY` ré-émis le 2026-08-02 sur `ade583e` (commits `ade583e` +
+  `ddf839e`). Les 6 mutants sont TUÉS, et `lib/` n'a PAS bougé d'une ligne.**
+  - **Vérifié par @Architect, pas pris pour argent comptant** : `git diff be9cc4a..HEAD -- lib/` **vide** ·
+    `git diff` sur `qa_exit_criterion.py` **vide** *(l'instrument de la QA n'a pas été touché — le modifier
+    aurait été **adapter la règle au résultat**)* · `run_gates --gate test` **relancé** → **112 tests**,
+    **95,2 % (380/399)**, exit 0. 📌 **La conclusion de la QA est prise au mot** : le produit n'était pas
+    cassé, c'était la **suite** qui ne le protégeait pas.
+  - ✅ **`qa_exit_criterion.py` passe de `exit 1` à `exit 0`** : les **7** mutants sont `TUE`, `QA-M6` (le
+    contrôle positif) **le reste**. ⛔ **L'ASYMÉTRIE QA-M1/QA-M6 A DISPARU** — orange forcé → **3 rouges**,
+    bleu forcé → **4**.
+  - 🎓 **Deux corrections dépassent la lettre du mandat, et c'est la bonne direction** : `QA-M1` est gardé
+    par une propriété **indépendante de l'implémentation** *(la clarté OKLab de la couleur **rendue**
+    décroît strictement quand `p` augmente)* ⇒ **un fond constant échoue même s'il est la bonne couleur en
+    un point** ; `QA-M3` est tué **par le comportement et non par la présence du widget**, et son test
+    **échoue si le cas cesse d'être un vrai débordement** — sinon il cesserait de contrôler **en silence**.
+  - 🔴 **DEUX DONNÉES DE TEST CONTREDISAIENT LE `.feature`, QUI EST NORMATIF — aucun `.feature` n'a été
+    modifié** *(vérifié : absent du diff)*. **Scénario 3** : le `.feature` exige **4 échéances / exactement
+    4 tuiles**, le test en injectait **3**. **Scénario 7** : le `.feature` dit *« une échéance **proche** de
+    son prochain changement »* → **bleue**, or la donnée `5 h 59` en est **loin** *(donc orange)* — elle
+    **contredisait la prémisse du scénario**, et l'assertion recalculait la couleur attendue **avec la
+    fonction testée**, donc passait quoi qu'il arrive. ⛔ **C'est la divergence SÉMANTIQUE mesurée par la
+    QA : `check_gherkin_mapping.py` compare des TITRES et ne pouvait voir ni l'une ni l'autre.**
+  - ⚠️ **RNF-02 / AC-1 « Limite » reste NON VÉRIFIÉ, délibérément non « fait passer »** — hors mandat, et
+    fabriquer un vert dessus aurait été le contraire du travail demandé. **Restent ouverts hors mandat** :
+    `depuisDonnee` jamais éprouvée à l'écran · `textScaler` **absent du dépôt** *(AC-8 « Limite »)* ·
+    non-interactivité du titre non vérifiée · `main.dart` hors dénominateur `lcov`.
+  - 🎓 **Il publie le défaut de SON PROPRE instrument** *(la classe de défaut la plus active du projet,
+    cette fois dans l'outil)* : sa première mesure de largeur, **recalculée** par un `TextPainter` monté
+    dans le test, rendait **144,75 px** là où le paragraphe rendait **144,0** — **deux mesures de la MÊME
+    grandeur qui divergent**. Corrigé en **lisant** la grandeur *(`getMaxIntrinsicWidth`)* au lieu de la
+    recalculer à côté.
+  - **Aucun `testWidgets` ajouté aux 13 scénarios e2e** *(corps modifiés seulement)* : un test de plus
+    l'aurait rendu **orphelin** et cassé le **13 ↔ 13** de T12b. `check_gherkin_mapping.py` **et** son
+    `--selftest` → exit 0.
+  - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
+    `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
+- **⚖️ ARBITRAGE HUMAIN — 2026-08-02 : US-01.1 sera certifiée avec AC-1 « Limite » (RNF-02) EXPLICITEMENT
+  NON COUVERT, borné, daté, et reporté à US-01.2.** Décision prise par l'humain, saisi par @Architect
+  après que la QA **et** les trois passages d'audit ont refusé de trancher — *« la décision de reporter un
+  AC n'est pas la mienne »*.
+  - ✅ **AUCUNE DÉROGATION N'EST REQUISE, et c'est une CONSTATATION, pas un arrangement** : la DoD de ce
+    Story File est la **liste générique de 10 cases**, et **aucune n'exige la couverture des AC**. La
+    certification n'est donc **pas insatisfiable** — situation **différente d'US-00.6**, dont la case 6
+    était **littéralement** impossible et avait exigé `EVT_WAIVER_GRANTED`. ⛔ **On n'émet pas une
+    dérogation pour se donner l'air rigoureux : il n'y a rien à déroger.**
+  - 🔴 **MAIS CE CONSTAT EST LUI-MÊME UN DÉFAUT DE MÉTHODE, et il faut le dire** : *une DoD qui ne
+    mentionne la couverture d'aucun AC serait **intégralement cochable** avec **la moitié des AC
+    orphelins**, sans qu'aucune case ne le signale.* Ce qui a rattrapé RNF-02 ici, c'est **la QA**, pas la
+    DoD. **Même famille que NB-6** *(le corpus ne modélise pas ce sur quoi un verdict porte)*.
+    ➡️ **Candidat `/audit-methodo`.**
+  - **Motif retenu de l'arbitrage** : précédent **constant** du projet *(US-00.5, US-00.6 et US-00.7 ont
+    toutes été certifiées **avec des bornes déclarées**)* ; l'instrument de levée **existe désormais et
+    est prouvé non blanchissable** ; et les deux alternatives coûtaient plus qu'elles n'apportaient ici —
+    installer JDK + émulateur *(action humaine à durée non bornée, dont **rien ne garantit** qu'elle
+    rendrait un vert)*, ou **réécrire l'AC en plus faible** *(que la QA a d'avance qualifié : « l'écrire
+    serait honnête, continuer à l'appeler RNF-02 ne le serait pas »)*.
+  - ⚠️ **CE QUE CET ARBITRAGE N'EFFACE PAS** : **AC-1 « Limite » n'est pas couvert**, et il ne le devient
+    pas en étant arbitré — *« un arbitrage ne lève jamais un critère »* **(précédent du critère 27
+    d'US-00.7)**. Le trou plus large **demeure entier** : **l'application n'a JAMAIS tourné sur un
+    appareil**, aucun contraste n'a **jamais** été vu par un œil. **Aucun événement n'est émis** — le
+    catalogue **ne couvre aucun arbitrage** *(précédent suivi : l'arbitrage @PO du 2026-07-28)*, et **on ne
+    pollue pas une trace append-only pour satisfaire un format**.
+- **🧪 PASS — QA, 2ᵉ passage, sur `558a475` (2026-08-02, `EVT_QA_PASSED`), phase → `prepare_deployment`.**
+  *([qa_delta.md](reports/US-01.1/qa_delta.md) · sonde
+  [qa_delta_nb7_probe.py](reports/US-01.1/qa_delta_nb7_probe.py) · critère de levée de RNF-02
+  [rnf02_exit_criterion.py](reports/US-01.1/rnf02_exit_criterion.py))*
+  - **112 passed · 0 skipped · 0 failed** *(liste des `skipped` **vide `[]`**, pas absente — lue dans le
+    flux JSON)* · **380/399 = 95,2 %** recomptés depuis `lcov.info` · **son critère de sortie rejoué à
+    `exit 0`** là où il rendait `exit 1` / 6 survivants, **script prouvé non modifié** *(blob
+    `e29d75d9…` identique aux 5 révisions **et** au disque, **un seul commit** dans son historique)*.
+    `lib/` **bit-à-bit identique** *(même hash d'arbre `d95a69c2…` qu'à `6fe75df`)*.
+  - 🔬 **LE RÉSULTAT LE PLUS INSTRUCTIF DU PASSAGE, ET IL VISE LE CLIQUET** : **la couverture n'a pas bougé
+    d'une ligne** — **380/399 avant, 380/399 après**, pour **+526 lignes de test** et **6 mutants tués**.
+    ⇒ **première démonstration du projet, sur du code produit réel, que la couverture de lignes est
+    AVEUGLE À LA FORCE DES ASSERTIONS** : le cliquet **n'aurait vu ni le défaut, ni sa correction**.
+    ➡️ à verser au dossier `/audit-methodo` — c'est une **borne de l'instrument central d'US-00.6**.
+  - ✅ **Les 3 AC orphelins tombent à 1** *(20 couverts · 5 partiels · **1 orphelin** · 1 sans objet, sur
+    27 clauses)*. **AC-8 Nominal** et **AC-4 Limite** sont **réellement** corrigés et non « autrement » :
+    la tautologie a été **supprimée** et remplacée par un couple **égalité-au-token + GRANDEUR**
+    *(`luminance(fond) < luminance(texte)`)*, qui **tue dans les deux directions** — exactement la parade
+    au piège que la revue venait d'établir ; et le budget RF-05 est **écrit une fois, indépendant du token
+    qu'il contrôle**, borné des **deux côtés** ⇒ **une spécification, pas une transcription de mesure**.
+  - ⛔ **SEUL ORPHELIN RESTANT : AC-1 « Limite » — RNF-02.** **Aucun vert n'a été fabriqué dessus**, et
+    c'est le bon comportement. ⚠️ **La QA corrige ici SA PROPRE affirmation antérieure** *(« aucun
+    appareil » est **FAUX** : `flutter devices` en rend **3**)* — **le manque exact est : aucun appareil
+    sur la plateforme CIBLE** *(`android` = 0 émulateur **et pas de JDK** · `ios` = rien · `windows`
+    détecté mais `windows/` **absent du dépôt**, le créer **modifierait le produit** · `web` disponible
+    mais **pas la cible**)*.
+  - 📌 **Critère de levée de RNF-02 publié COMME UN SCRIPT** : instrument
+    `flutter run --profile --trace-startup` → clé **`timeToFirstFrameRasterizedMicros`** *(premier frame
+    **rasterisé**, donc réellement visible — le harnais headless ne donne qu'une **borne inférieure**)* ·
+    **seuil LU dans le Story File, jamais écrit dans le script** *(mutant de corpus : phrase retirée →
+    échec franc ; deux seuils → échec franc ⇒ **il ne peut pas se blanchir**)* · `--device` **obligatoire,
+    le script refuse de deviner** · `--selftest` **exit 0** (7 contrôles) · diagnostic **exit 2 = NON
+    MESURABLE**, ni succès ni échec produit. ⚖️ **Deux voies de levée, et elles ne lui appartiennent
+    pas** : **(1)** JDK + émulateur puis mesure réelle ; **(2)** reformuler en budget `build+layout` —
+    ⛔ **ce serait un AC DIFFÉRENT et PLUS FAIBLE ; l'écrire serait honnête, continuer à l'appeler
+    « RNF-02 » ne le serait pas.** ➡️ **Arbitrage @PO / @Architect DÛ AVANT `/certify`.**
+  - 🔴 **NB-7 CONFIRMÉ et RELEVÉ de INFO à DÉFAUT DÉMONTRÉ — non bloquant, correctif d'UNE LIGNE.**
+    Mesuré par sonde rejouable, pas relu : avec **deux `DecoratedBox` imbriquées** *(extérieure correcte,
+    intérieure figée en orange)*, `.first` lit **l'extérieure et non celle qui est peinte** ⇒ la tuile rend
+    **toujours orange** — **le défaut exact de QA-M1** — et **112 tests restent VERTS**. ⚠️ **Corollaire
+    non attendu** : `couleurDuLibelle` **n'énonce pas tout à fait la règle contraire** — son `hasLength(1)`
+    porte sur un **`.toSet()` de couleurs**, donc deux libellés de **même** couleur **fusionnent et ne le
+    déclenchent pas**. **Garde-fou réel, mais plus étroit que sa justification.** **Non bloquant** parce
+    que la sonde **ajoute un leurre devant le point d'observation** *(elle éprouve le HARNAIS, pas le
+    produit)*, que `lib/` n'a **qu'une** `DecoratedBox` par tuile, et **au titre du précédent du GEL
+    d'US-00.6** *(le développeur a satisfait le critère **publié**)*. ⛔ **Mais le risque est réel et
+    daté** : `Container`, `Card`, `Material`, `InkWell` introduisent **tous** une seconde `DecoratedBox`,
+    et ce jour-là **AC-5 tombe sans un seul rouge**. ➡️ **À traiter en US-01.2.**
+  - **N-5 : confirmé présent, NON bloquant, et la conclusion est plus fine que le finding** — le scénario
+    e2e « 8 mois 12 jours → 9 » est toujours **testé en « 5 h 10 → 6 »**, mais **la règle du PRD EST
+    couverte** par un test unitaire dédié ⇒ ⛔ **AC-4 Nominal n'est PAS orphelin**. Reste une **traçabilité
+    scénario ↔ donnée trompeuse**, invisible à `check_gherkin_mapping.py` — **qui l'annonce lui-même**.
+  - 🎓 **Elle publie l'échec de son propre instrument, DEUXIÈME QA D'AFFILÉE** : son critère RNF-02 a été
+    **refusé par son propre autotest** au premier lancement — le contrôle négatif **inversait les deux
+    arguments** de `verdict(mesure, seuil)`. **Classe de défaut nº 1 du projet, dans l'outil de mesure.**
+    Réécrit en **table comparée en ensembles**, **défaut consigné DANS le script**. *(Aucun plantage
+    `cp1252` ce coup-ci — c'était le 4ᵉ instrument d'affilée à en souffrir.)*
+  - ✅ **Intégrité** : `git diff --stat -- lib/ test/` **vide après 12 mutations** *(toutes en copie
+    temporaire)* · écritures confinées à `reports/` et `docs/trace/` · **SCB non modifié par la QA** ·
+    ⛔ elle ne délivre **pas** `🚀 OUI` *(Art. 5)*.
+- **✅ 🔍 + ✅ 🛡️ — 3ᵉ PASSAGE D'AUDIT, les DEUX `PASSED` sur le MÊME commit `173fb62` (2026-08-02),
+  phase → `quality_assurance`.** *([code_review_delta2.md](reports/US-01.1/code_review_delta2.md) ·
+  [security_delta2.md](reports/US-01.1/security_delta2.md) · campagne rejouable
+  [code_review_delta2_mutants.py](reports/US-01.1/code_review_delta2_mutants.py))*
+  ⚠️ **`QA Status` reste à `🧪 FAIL` alors que ce verdict porte sur `6fe75df`** : le SCB **ne sait pas
+  exprimer « QA À REFAIRE »** — il n'a que `⏳`, **interdit en phase bloquante** par
+  `check_scb_compliance.py`, et le dernier verdict rendu. On conserve donc `🧪 FAIL`, qui **SOUS-affirme**
+  *(l'inverse exact d'un `✅` périmé, qui SUR-affirme)*. ➡️ **Même famille que NB-6** : le corpus ne
+  modélise pas **ce sur quoi un verdict porte**. **Candidat `/audit-methodo`.**
+  - **Les 3 affirmations ont été MESURÉES par les deux auditeurs, aucune crue** : `lib/` intact *(revue :
+    `--numstat` à **0 ligne** ; sécurité : **égalité de HACHAGES D'ARBRE Git**, bit-à-bit récursif)* ·
+    `qa_exit_criterion.py` non modifié *(**identité de blob** `e29d75d9…` à l'origine, au commit audité
+    **et sur le disque**)* · **7 mutants tués**, campagne rejouée à `exit 0` là où elle rendait `exit 1`.
+    **112 tests, 95,2 % (380/399)** — **identique à la mesure de @Architect, aucune divergence**.
+  - 🔬 **LA SÉCURITÉ A RÉPONDU À « 100 % `test/` DONC ANODIN » PAR UNE MESURE, PAS PAR UN RAISONNEMENT** :
+    deux révisions construites **à chemin de build constant** ⇒ **bundle identique bit-à-bit**, avec
+    **CONTRÔLE POSITIF** *(un mutant fait bouger le hash — la mesure sait détecter)*. **Borne déclarée :
+    cible web uniquement.** Elle a aussi audité `qa_exit_criterion.py` **comme du code** : n'écrit rien
+    dans le dépôt *(manifeste SHA-256 de 35 fichiers, identique avant/après)*, zéro `eval`/`exec`/réseau,
+    `argv` **littéraux constants**, et le fait décisif — **référencé par aucun workflow ni hook, donc
+    JAMAIS exécuté avec un `GITHUB_TOKEN`**.
+  - 🎓 **L'ACQUIS DE MÉTHODE DU PASSAGE, et il inverse une intuition** : les **9 mutants non publiés** de la
+    revue **dégradent sans supprimer** *(dégradé comprimé, `FittedBox` conservé en `BoxFit.none`, **mode
+    clair à contraste constant** par échange des deux tokens, **61 s** au lieu d'une heure)* — **7/7 tués**,
+    contrôle positif tué, **contrôle négatif SURVIVANT** *(que la QA n'avait pas : sans lui, une suite qui
+    rougirait sur tout passerait pour excellente)*. ⛔ **Résultat exploitable : les égalités au token sont
+    TAUTOLOGIQUES** *(les deux côtés bougent ensemble, elles ne rougissent jamais)* — **seules les
+    assertions de GRANDEUR tuent, et ce sont justement celles qui ont l'air de faire doublon. ⛔ NE JAMAIS
+    LES RETIRER À CE TITRE.**
+  - ✅ **Aucun AFFAIBLISSEMENT** — contrôle en **ensembles** *(8 → 11 fichiers, **13 ajouts, 0 suppression**
+    de nom de test)*, aucun `skip`, aucune tolérance élargie ; les **4** seules assertions supprimées sont
+    examinées une à une, dont la tautologie `backgroundColor ?? token, isNotNull` **qu'on ne pouvait que
+    remplacer**.
+  - ✅ **Les 2 corrections de données de test sont un ALIGNEMENT, pas une triche — confirmé** : le
+    `.feature` est le **même blob** aux deux commits, et le scénario 3 est **littéralement le finding N-5
+    du 1ᵉʳ passage** *(une donnée déplacée **vers** une norme qui la réclamait la veille)*.
+  - **Findings ouverts** : **N-3 RÉSOLU au-delà du critère** *(le mutant « widget conservé, `fit` changé »
+    est tué aussi ⇒ l'assertion porte sur le **comportement**)* · **N-5 PARTIEL** *(2 divergences sur 3 ;
+    « 8 mois 12 jours → 9 » est toujours testé en « 5 h 10 → 6 »)* · **N-1, N-2, N-6, N-7, N-9, N-10,
+    N-12, O-1 inchangés par construction** *(leur lieu est dans `lib/`, dont le diff est vide — re-grepés
+    quand même)* · **NB-1 → NB-6 inchangés**, NB-1 **re-mesuré sur le bundle** : les nouveaux tests
+    **n'exercent ni I-2 ni `depuisDonnee`** ⇒ exposition **ni réduite ni élargie**.
+  - **2 findings sécurité nouveaux, non bloquants** : **NB-7** *(INFO, **méthode et non sécurité**)* — le
+    helper partagé par 3 suites sélectionne **par position sans assertion d'unicité** là où son **voisin
+    immédiat énonce la règle contraire et l'applique** ; ⚠️ **contre-preuve qu'elle s'impose** : la campagne
+    tue QA-M1 et QA-M6 **à travers ce helper** ⇒ **risque de régression future, pas d'inexactitude
+    actuelle**. **NB-8** *(LOW)* — `shell=True` inutile, **exploitabilité nulle** (argv constants).
+  - 🔴 **P-6 — AUCUN OUTIL NE REGARDE LE PYTHON DU DÉPÔT** : les **5 gates sont Dart**, et
+    `ruff|flake8|mypy` → **0 occurrence**. **Démontré, pas supposé** : une variable **liée et jamais lue**
+    trouvée **à l'AST** dans les 314 lignes de `qa_exit_criterion.py`. ⚠️ **Nouvelle facette de la dette
+    « aucun SAST »**, qui jusqu'ici n'était nommée que pour le Dart. ➡️ **US-00.8.**
+  - ⛔ **CE QUE CE DOUBLE `PASSED` N'ATTESTE PAS** : **AC-1 « Limite » (RNF-02) demeure un AC ORPHELIN** —
+    **N-11 ouvert aux TROIS passages**, *« je ne le requalifie pas, et je ne le durcis pas non plus »*, et
+    **aucun vert n'a été fabriqué dessus** *(0 occurrence de mesure de temps, sonde QA absente)*. Bornes
+    inchangées : **aucun SAST, aucun scan de CVE**, l'app **n'a jamais tourné sur un appareil**, tous les
+    contrastes sont **calculés**.
+  - 🎓 **LES DEUX AUDITEURS ONT REPRIS @ARCHITECT SUR SA SAISINE, ET ILS AVAIENT RAISON** : le périmètre
+    annoncé énumérait **3 commits** là où `git rev-list --count 6fe75df..173fb62` rend **4** — l'omis,
+    **`be9cc4a`**, était **le seul de la plage à apporter du code exécutable** *(les 314 lignes de
+    `qa_exit_criterion.py`)*. **Nouvelle occurrence de la classe de défaut nº 1 du projet**, cette fois
+    **dans la saisine**. ⚠️ **Et la revue a relevé la même chose CHEZ ELLE** : son en-tête avait **recopié
+    l'énumération** alors que son §1 avait **déjà mesuré les 4 commits** — *« la mesure était juste, la
+    prose l'a écrasée »*. **Elle s'est aussi imputé** la duplication de son propre harnais *(7 fonctions
+    communes, 4 corps identiques)*. ⚠️ Elle relève enfin que le **2ᵉ passage annonçait « 10 » findings là
+    où son tableau en énumérait 12** — **chiffre écrit à la main**, non re-litigé, **énumération par nom**.
+  - 🎓 **La sécurité publie SON PROPRE FAUX VERDICT** : son harnais a imprimé `bundles DIFFERENTS`, par une
+    **agrégation lisant un fichier jamais écrit**, **à côté de mesures brutes correctes**. Corrigé, verdict
+    **recalculé sur les mesures brutes**, avec **refus explicite de conclure si une mesure manque**.
+    📌 *« Le défaut était dans l'**agrégation**, jamais dans la **mesure**. »*
+- **✅ Code (Dev) — `EVT_CODE_READY` le 2026-08-01, phase → `parallel_audit`.**
+  **PREMIÈRE LIVRAISON APPLICATIVE DU PROJET** : `lib/` passe de **1 fichier / 63 lignes** à **19 fichiers**,
+  `test/` de **1** à **8**, avec **90 tests verts**.
+  - 🎉 **Le cliquet a jugé du code produit pour la première fois, et il PASSE** :
+    **93,8 % (361/385)** contre **89,4 %** requis. ⛔ L'arbitrage **T0-cliquet** est donc tranché **par la
+    mesure** : la voie **(a)** est tenue, le ré-étalonnage **(b)** **n'a pas servi**.
+  - 🔴 **DEUX DÉFAUTS DU PRODUIT trouvés par les scénarios T12a**, pas par relecture : **(1)** le nombre
+    **débordait** de la tuile à 9 tuiles ⇒ `FittedBox(scaleDown)` ; **(2)** ⛔ **la grille DÉFILAIT** — un
+    `GridView` ne construisait que **6 tuiles sur 9**, les 3 dernières exigeant de faire défiler, ce qui
+    **contredit « embrassable d'un regard »** *(AC-3 « Limite »)* ⇒ **bloc carré NON défilant**.
+  - 🔴 **UN BUG DE PRODUCTION trouvé dans le moteur de couleur** : `_versRgbBrut` écrêtait les canaux
+    **avant** le test de gamut ⇒ le test était **toujours vrai** et la réduction de chroma d'ADR-003 §4
+    **ne se déclenchait jamais**. **Vert silencieux** de la classe exacte que ce projet traque.
+  - 🔴 **UNE AFFIRMATION D'ADR-003 ÉTABLIE FAUSSE, par un test écrit pour la vérifier** : le rouge n'est
+    **pas** « inatteignable par construction » au sens de la **teinte** *(le segment cartésien croise la
+    direction rouge sur **15 points de 101**)*. **Ce qui est vrai** : la traversée se fait à **chroma
+    0,059** contre **0,164 aux extrémités** — gris chaud désaturé, **jamais un rouge perceptible**, là où
+    l'arc polaire croiserait la **même teinte à pleine chroma**. **La décision reste bonne, la formulation
+    promettait trop.** ⛔ ADR **non réécrit** *(immuable)* ; correction dans `DESIGN_SYSTEM.md` et
+    assertions alignées. 📌 **Leçon** : *une formulation absolue dans un ADR doit être adossée à une
+    assertion, sinon elle survit à sa propre fausseté.*
+  - ⛔ **L'OUTIL DE CONTRÔLE T12b avait lui-même deux défauts, trouvés par son autotest de mutation** :
+    parseur **mono-ligne** cassé dès que `dart format` reporte un titre à la ligne *(2 faux « scénario sans
+    test »)*, et **apostrophe non échappée** dans son corpus synthétique *(4 assertions sur 6 en échec)*.
+    **Un contrôle sans autotest aurait publié des faux écarts.**
+  - **T12d** : **103 scénarios de gouvernance** ré-étiquetés « **SPÉCIFICATION — NON EXÉCUTÉE** ». Le
+    défaut n'était pas qu'ils ne tournent pas — c'est que **les DoD les comptaient comme des tests**.
+  - ⚠️ **DETTE NOMMÉE, non masquée** : **JetBrains Mono et Inter ne sont PAS embarquées** *(aucune
+    dépendance ajoutée — ni SAST ni scan de CVE)*. Ce qui est **garanti** est l'exigence **fonctionnelle**
+    *(`tabularFigures`, assertionnée)*, **pas la police exacte**.
+  - ⛔ **Ce que cet événement n'atteste PAS** : **aucun audit n'a eu lieu** *(`/audit-us` est la suite)*,
+    l'application **n'a jamais été lancée sur un appareil** *(3 cibles disponibles — Chrome, Edge, Windows
+    — mais **aucun émulateur**, et **aucun JDK** donc **build Android impossible**)*, et les **contrastes
+    sont vérifiés par CALCUL, jamais par l'œil**.
 - **🔒 INTEGRATION LOCK — `EVT_DESIGN_COMPLETED` le 2026-08-01, phase → `development_start`.**
   Les deux conditions du track FULL sont remplies **sans aucun `N/A`**. ✅ **Ce que le Lock débloque
   réellement** : les extrémités du dégradé étant figées, **`temporal_gradient.dart` (T5) et les tokens

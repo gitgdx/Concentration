@@ -165,3 +165,37 @@ nuance est consignée ici plutôt que dans l'ADR — un ADR Accepté est IMMUABL
 latitude que le PRD délègue**, et l'« écart » porte sur un **exemple**, non sur une prescription.
 ⛔ **Le raisonnement d'ADR-003 reste entièrement valide** *(l'arc polaire le plus court passe par le rouge,
 qu'AC-5 interdit)* — seule sa qualification de « lettre du PRD » est excessive.
+
+### 🔴 SECONDE correction, plus sérieuse, établie par MESURE le 2026-08-01
+
+ADR-003 affirme que le rouge devient **« inatteignable par construction »**. ⛔ **C'est FAUX au sens de la
+TEINTE, et c'est un test écrit pour le vérifier qui l'a établi** : le segment cartésien **croise bel et
+bien** la direction de teinte rouge — **15 points sur 101**, `p` de **0,37 à ~0,51** — parce qu'il passe
+près du neutre, où `b` change de signe **avant** `a`.
+
+**Ce qui est VRAI, et qui est la garantie réelle** :
+
+| | Chroma mesurée |
+|---|---|
+| Extrémités du dégradé *(orange 50,4° / bleu 257,6°)* | **0,164** et **0,154** |
+| **Maximum dans le secteur de teinte rouge** | **0,059** |
+
+✅ **LE MILIEU DÉSATURÉ EST ACCEPTÉ — décision humaine du 2026-08-01, prise APRÈS avoir vu le rendu réel.**
+L'application a été lancée et capturée : à `p` intermédiaire la tuile est **franchement mauve**, et elle ne
+lit **pas** comme « entre orange et bleu » mais comme *une autre couleur*. **L'humain l'a regardée et l'a
+validée.** ⇒ ⛔ **Le sujet est CLOS** : le trajet **OKLab cartésien** reste celui d'ADR-003, et toute
+réouverture exigerait un **nouvel ADR** *(trajet polaire préservant la chroma, **avec** une assertion
+« aucun rouge » bloquante)* — ⛔ **jamais un ajustement discret dans le code**.
+📌 **Ce que cette validation vaut, et pas plus** : elle porte sur l'**effet visuel**, non sur les
+contrastes — ceux-là restent tenus par le calcul *(pire cas **4,53:1**, marge **0,03 point**)*.
+
+⇒ la traversée se fait à **moins de la moitié** de la chroma des extrémités : un **gris chaud désaturé**,
+**jamais un rouge perceptible**. L'arc polaire le plus court, lui, croiserait la **même teinte à pleine
+chroma** — c'est-à-dire un **vrai rouge**. **La décision d'ADR-003 reste donc la bonne ; c'est sa
+formulation qui promettait plus que la géométrie ne donne.**
+
+⛔ **L'ADR n'est PAS réécrit** *(immuable)*. Les **assertions** ont été alignées sur la garantie vraie
+*(`test/core/color/temporal_gradient_test.dart` : « aucun rouge **saturé** », chroma < ½ de celle des
+extrémités)*, et le commentaire de `oklab.dart` porte la même précision.
+📌 **Leçon** : une formulation absolue *(« par construction »)* dans un ADR **doit être adossée à une
+assertion**, sinon elle survit à sa propre fausseté. Ici l'assertion l'a rattrapée en moins d'une heure.
