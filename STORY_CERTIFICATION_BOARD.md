@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | quality_assurance | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1922,6 +1922,66 @@
     `--selftest` → exit 0.
   - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
     `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
+- **🧪 PASS — QA, 2ᵉ passage, sur `558a475` (2026-08-02, `EVT_QA_PASSED`), phase → `prepare_deployment`.**
+  *([qa_delta.md](reports/US-01.1/qa_delta.md) · sonde
+  [qa_delta_nb7_probe.py](reports/US-01.1/qa_delta_nb7_probe.py) · critère de levée de RNF-02
+  [rnf02_exit_criterion.py](reports/US-01.1/rnf02_exit_criterion.py))*
+  - **112 passed · 0 skipped · 0 failed** *(liste des `skipped` **vide `[]`**, pas absente — lue dans le
+    flux JSON)* · **380/399 = 95,2 %** recomptés depuis `lcov.info` · **son critère de sortie rejoué à
+    `exit 0`** là où il rendait `exit 1` / 6 survivants, **script prouvé non modifié** *(blob
+    `e29d75d9…` identique aux 5 révisions **et** au disque, **un seul commit** dans son historique)*.
+    `lib/` **bit-à-bit identique** *(même hash d'arbre `d95a69c2…` qu'à `6fe75df`)*.
+  - 🔬 **LE RÉSULTAT LE PLUS INSTRUCTIF DU PASSAGE, ET IL VISE LE CLIQUET** : **la couverture n'a pas bougé
+    d'une ligne** — **380/399 avant, 380/399 après**, pour **+526 lignes de test** et **6 mutants tués**.
+    ⇒ **première démonstration du projet, sur du code produit réel, que la couverture de lignes est
+    AVEUGLE À LA FORCE DES ASSERTIONS** : le cliquet **n'aurait vu ni le défaut, ni sa correction**.
+    ➡️ à verser au dossier `/audit-methodo` — c'est une **borne de l'instrument central d'US-00.6**.
+  - ✅ **Les 3 AC orphelins tombent à 1** *(20 couverts · 5 partiels · **1 orphelin** · 1 sans objet, sur
+    27 clauses)*. **AC-8 Nominal** et **AC-4 Limite** sont **réellement** corrigés et non « autrement » :
+    la tautologie a été **supprimée** et remplacée par un couple **égalité-au-token + GRANDEUR**
+    *(`luminance(fond) < luminance(texte)`)*, qui **tue dans les deux directions** — exactement la parade
+    au piège que la revue venait d'établir ; et le budget RF-05 est **écrit une fois, indépendant du token
+    qu'il contrôle**, borné des **deux côtés** ⇒ **une spécification, pas une transcription de mesure**.
+  - ⛔ **SEUL ORPHELIN RESTANT : AC-1 « Limite » — RNF-02.** **Aucun vert n'a été fabriqué dessus**, et
+    c'est le bon comportement. ⚠️ **La QA corrige ici SA PROPRE affirmation antérieure** *(« aucun
+    appareil » est **FAUX** : `flutter devices` en rend **3**)* — **le manque exact est : aucun appareil
+    sur la plateforme CIBLE** *(`android` = 0 émulateur **et pas de JDK** · `ios` = rien · `windows`
+    détecté mais `windows/` **absent du dépôt**, le créer **modifierait le produit** · `web` disponible
+    mais **pas la cible**)*.
+  - 📌 **Critère de levée de RNF-02 publié COMME UN SCRIPT** : instrument
+    `flutter run --profile --trace-startup` → clé **`timeToFirstFrameRasterizedMicros`** *(premier frame
+    **rasterisé**, donc réellement visible — le harnais headless ne donne qu'une **borne inférieure**)* ·
+    **seuil LU dans le Story File, jamais écrit dans le script** *(mutant de corpus : phrase retirée →
+    échec franc ; deux seuils → échec franc ⇒ **il ne peut pas se blanchir**)* · `--device` **obligatoire,
+    le script refuse de deviner** · `--selftest` **exit 0** (7 contrôles) · diagnostic **exit 2 = NON
+    MESURABLE**, ni succès ni échec produit. ⚖️ **Deux voies de levée, et elles ne lui appartiennent
+    pas** : **(1)** JDK + émulateur puis mesure réelle ; **(2)** reformuler en budget `build+layout` —
+    ⛔ **ce serait un AC DIFFÉRENT et PLUS FAIBLE ; l'écrire serait honnête, continuer à l'appeler
+    « RNF-02 » ne le serait pas.** ➡️ **Arbitrage @PO / @Architect DÛ AVANT `/certify`.**
+  - 🔴 **NB-7 CONFIRMÉ et RELEVÉ de INFO à DÉFAUT DÉMONTRÉ — non bloquant, correctif d'UNE LIGNE.**
+    Mesuré par sonde rejouable, pas relu : avec **deux `DecoratedBox` imbriquées** *(extérieure correcte,
+    intérieure figée en orange)*, `.first` lit **l'extérieure et non celle qui est peinte** ⇒ la tuile rend
+    **toujours orange** — **le défaut exact de QA-M1** — et **112 tests restent VERTS**. ⚠️ **Corollaire
+    non attendu** : `couleurDuLibelle` **n'énonce pas tout à fait la règle contraire** — son `hasLength(1)`
+    porte sur un **`.toSet()` de couleurs**, donc deux libellés de **même** couleur **fusionnent et ne le
+    déclenchent pas**. **Garde-fou réel, mais plus étroit que sa justification.** **Non bloquant** parce
+    que la sonde **ajoute un leurre devant le point d'observation** *(elle éprouve le HARNAIS, pas le
+    produit)*, que `lib/` n'a **qu'une** `DecoratedBox` par tuile, et **au titre du précédent du GEL
+    d'US-00.6** *(le développeur a satisfait le critère **publié**)*. ⛔ **Mais le risque est réel et
+    daté** : `Container`, `Card`, `Material`, `InkWell` introduisent **tous** une seconde `DecoratedBox`,
+    et ce jour-là **AC-5 tombe sans un seul rouge**. ➡️ **À traiter en US-01.2.**
+  - **N-5 : confirmé présent, NON bloquant, et la conclusion est plus fine que le finding** — le scénario
+    e2e « 8 mois 12 jours → 9 » est toujours **testé en « 5 h 10 → 6 »**, mais **la règle du PRD EST
+    couverte** par un test unitaire dédié ⇒ ⛔ **AC-4 Nominal n'est PAS orphelin**. Reste une **traçabilité
+    scénario ↔ donnée trompeuse**, invisible à `check_gherkin_mapping.py` — **qui l'annonce lui-même**.
+  - 🎓 **Elle publie l'échec de son propre instrument, DEUXIÈME QA D'AFFILÉE** : son critère RNF-02 a été
+    **refusé par son propre autotest** au premier lancement — le contrôle négatif **inversait les deux
+    arguments** de `verdict(mesure, seuil)`. **Classe de défaut nº 1 du projet, dans l'outil de mesure.**
+    Réécrit en **table comparée en ensembles**, **défaut consigné DANS le script**. *(Aucun plantage
+    `cp1252` ce coup-ci — c'était le 4ᵉ instrument d'affilée à en souffrir.)*
+  - ✅ **Intégrité** : `git diff --stat -- lib/ test/` **vide après 12 mutations** *(toutes en copie
+    temporaire)* · écritures confinées à `reports/` et `docs/trace/` · **SCB non modifié par la QA** ·
+    ⛔ elle ne délivre **pas** `🚀 OUI` *(Art. 5)*.
 - **✅ 🔍 + ✅ 🛡️ — 3ᵉ PASSAGE D'AUDIT, les DEUX `PASSED` sur le MÊME commit `173fb62` (2026-08-02),
   phase → `quality_assurance`.** *([code_review_delta2.md](reports/US-01.1/code_review_delta2.md) ·
   [security_delta2.md](reports/US-01.1/security_delta2.md) · campagne rejouable
