@@ -18,7 +18,7 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 FAIL | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | 🧪 FAIL | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1820,6 +1820,13 @@
     cochée sur une impression »* — c'est un point pour la QA.
   - ✅ **Contrôle d'intégrité de la re-revue** : **aucun `EVT_CODE_REVIEW_PASSED` auto-émis** entre les
     deux passages. La séparation des pouvoirs a tenu, et elle a été **vérifiée**.
+  - ⛔ **CES DEUX VISAS SONT PÉRIMÉS DEPUIS LE 2026-08-02 — colonnes `Audit Rev` et `Audit Sec` remises à
+    ⏳.** Ils portent sur `6fe75df` ; HEAD est **`ddf839e`**. Le visa 🛡️ **le dit lui-même** *(« ce visa
+    porte sur `6fe75df` ET SUR LUI SEUL »)*. ⛔ **Un `✅` maintenu aurait été une assertion FAUSSE sur
+    HEAD** — et c'est précisément le défaut **NB-6** : *aucune machine ne peut signaler qu'un visa est
+    périmé*, c'est un **humain** qui le fait, **une deuxième fois en deux jours**. **Rien n'est repeint** :
+    le bloc ci-dessus reste **intégralement lisible et daté**, seule la **colonne d'état courant** change.
+    ➡️ **Delta à ré-auditer : 100 % `test/`, `lib/` intact, 0 dépendance.**
 - **🧪 FAIL — QA le 2026-08-02, sur `6fe75df` (`EVT_QA_FAILED`), phase → `parallel_audit`.**
   *([qa.md](reports/US-01.1/qa.md) · critère de sortie **exécutable** :
   [qa_exit_criterion.py](reports/US-01.1/qa_exit_criterion.py))*
@@ -1879,6 +1886,42 @@
     jamais tourné sur un appareil**, que **tous les contrastes sont calculés et aucun vu par un œil**, ni
     qu'il n'existe **toujours aucun SAST ni scan de CVE**. **Écritures confinées à `reports/` et
     `docs/trace/`** : aucune ligne de `lib/` ou `test/` touchée, **SCB non modifié par la QA**.
+- **🔧 Correctif post-QA — `EVT_CODE_READY` ré-émis le 2026-08-02 sur `ade583e` (commits `ade583e` +
+  `ddf839e`). Les 6 mutants sont TUÉS, et `lib/` n'a PAS bougé d'une ligne.**
+  - **Vérifié par @Architect, pas pris pour argent comptant** : `git diff be9cc4a..HEAD -- lib/` **vide** ·
+    `git diff` sur `qa_exit_criterion.py` **vide** *(l'instrument de la QA n'a pas été touché — le modifier
+    aurait été **adapter la règle au résultat**)* · `run_gates --gate test` **relancé** → **112 tests**,
+    **95,2 % (380/399)**, exit 0. 📌 **La conclusion de la QA est prise au mot** : le produit n'était pas
+    cassé, c'était la **suite** qui ne le protégeait pas.
+  - ✅ **`qa_exit_criterion.py` passe de `exit 1` à `exit 0`** : les **7** mutants sont `TUE`, `QA-M6` (le
+    contrôle positif) **le reste**. ⛔ **L'ASYMÉTRIE QA-M1/QA-M6 A DISPARU** — orange forcé → **3 rouges**,
+    bleu forcé → **4**.
+  - 🎓 **Deux corrections dépassent la lettre du mandat, et c'est la bonne direction** : `QA-M1` est gardé
+    par une propriété **indépendante de l'implémentation** *(la clarté OKLab de la couleur **rendue**
+    décroît strictement quand `p` augmente)* ⇒ **un fond constant échoue même s'il est la bonne couleur en
+    un point** ; `QA-M3` est tué **par le comportement et non par la présence du widget**, et son test
+    **échoue si le cas cesse d'être un vrai débordement** — sinon il cesserait de contrôler **en silence**.
+  - 🔴 **DEUX DONNÉES DE TEST CONTREDISAIENT LE `.feature`, QUI EST NORMATIF — aucun `.feature` n'a été
+    modifié** *(vérifié : absent du diff)*. **Scénario 3** : le `.feature` exige **4 échéances / exactement
+    4 tuiles**, le test en injectait **3**. **Scénario 7** : le `.feature` dit *« une échéance **proche** de
+    son prochain changement »* → **bleue**, or la donnée `5 h 59` en est **loin** *(donc orange)* — elle
+    **contredisait la prémisse du scénario**, et l'assertion recalculait la couleur attendue **avec la
+    fonction testée**, donc passait quoi qu'il arrive. ⛔ **C'est la divergence SÉMANTIQUE mesurée par la
+    QA : `check_gherkin_mapping.py` compare des TITRES et ne pouvait voir ni l'une ni l'autre.**
+  - ⚠️ **RNF-02 / AC-1 « Limite » reste NON VÉRIFIÉ, délibérément non « fait passer »** — hors mandat, et
+    fabriquer un vert dessus aurait été le contraire du travail demandé. **Restent ouverts hors mandat** :
+    `depuisDonnee` jamais éprouvée à l'écran · `textScaler` **absent du dépôt** *(AC-8 « Limite »)* ·
+    non-interactivité du titre non vérifiée · `main.dart` hors dénominateur `lcov`.
+  - 🎓 **Il publie le défaut de SON PROPRE instrument** *(la classe de défaut la plus active du projet,
+    cette fois dans l'outil)* : sa première mesure de largeur, **recalculée** par un `TextPainter` monté
+    dans le test, rendait **144,75 px** là où le paragraphe rendait **144,0** — **deux mesures de la MÊME
+    grandeur qui divergent**. Corrigé en **lisant** la grandeur *(`getMaxIntrinsicWidth`)* au lieu de la
+    recalculer à côté.
+  - **Aucun `testWidgets` ajouté aux 13 scénarios e2e** *(corps modifiés seulement)* : un test de plus
+    l'aurait rendu **orphelin** et cassé le **13 ↔ 13** de T12b. `check_gherkin_mapping.py` **et** son
+    `--selftest` → exit 0.
+  - ⚠️ **Couverture INCHANGÉE à 95,2 %** — normal, seul `test/` a bougé. **Action HUMAINE due avant
+    `/certify`** : consigner `95.2` dans `factory.config.json` *(fichier protégé, aucun agent ne l'édite)*.
 - **✅ Code (Dev) — `EVT_CODE_READY` le 2026-08-01, phase → `parallel_audit`.**
   **PREMIÈRE LIVRAISON APPLICATIVE DU PROJET** : `lib/` passe de **1 fichier / 63 lignes** à **19 fichiers**,
   `test/` de **1** à **8**, avec **90 tests verts**.
