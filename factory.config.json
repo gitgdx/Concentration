@@ -79,9 +79,9 @@
         },
         "coverage_min": 80,
         "coverage_ratchet": {
-          "value": 89.4,
-          "date": "2026-07-31",
-          "motif": "US-00.6 — couverture initiale mesuree 17/19 = 89,4737 %, arrondie VERS LE BAS. Toute baisse sous cette valeur est une REGRESSION."
+          "value": 95.2,
+          "date": "2026-08-02",
+          "motif": "PR27"
         },
 
         "install": {
