@@ -55,8 +55,10 @@ développés) ; partage social ; widgets d'écran d'accueil OS ; tri manuel des 
 
 | US ID | Titre | Story File | Statut |
 |---|---|---|---|
-| US-01.1 | Affichage Hub & grille d'échéances | [`docs/stories/US-01.1-affichage-hub-grille.md`](../stories/US-01.1-affichage-hub-grille.md) | ⏳ business_alignment |
+| US-01.1 | Affichage Hub & grille d'échéances | [`docs/stories/US-01.1-affichage-hub-grille.md`](../stories/US-01.1-affichage-hub-grille.md) | 🧪 **PASS le 2026-08-02 — `prepare_deployment`.** ⛔ **PAS `🚀 OUI`** : `/certify` exécuté, **gates 1→5 verts, gate 6 en échec** *(`Déploiement = ⏳`)*. **Certification DIFFÉRÉE, pas abandonnée** — elle reprend à `prepare_deployment` dès qu'US-01.3 livre la chaîne de déploiement. ⚠️ **Ses visas d'audit devront être RAFRAÎCHIS** à ce moment-là *(ils portent sur `173fb62`)*. ⛔ **PÉRIMÉ-2026-08-02 : cette cellule affichait « ⏳ business_alignment » — faux depuis le 2026-08-01.** |
 | US-01.2 | Gestion des événements (CRUD) | _(à créer via `/us-new`)_ | ⏳ à venir — 📥 **PORTE UN CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00, le 2026-08-01** *(arbitrage humain)* : **la convention de migrations réversibles d'[ADR-005](../adr/ADR-005-convention-migrations-reversibles.md) doit être INSTANCIÉE** — patron de test de migration réversible **exécuté** sur le **premier schéma réel**, interdiction de migration destructive par défaut *(RF-21)* **exercée**. ⚠️ **Origine du transfert** : la 2ᵉ moitié du critère de clôture **nº 112 d'EPIC_00** exigeait cette application, or elle était **structurellement invérifiable là-bas** *(US-01.2 n'existe pas, et EPIC_00 doit être clos AVANT le développement d'EPIC_01 — un deadlock)*. ⛔ **Un transfert n'est pas une levée** : le **risque nº 4 d'EPIC_00 reste OUVERT** jusqu'à cette instanciation, et à ce jour la convention est **documentée et jamais appliquée — aucune migration n'a jamais été exécutée sur ce projet** |
+
+| US-01.3 | Chaîne de déploiement mobile réelle | _(à créer via `/us-new`, **après US-01.2**)_ | ⏳ à venir — 📤 **CRÉÉE PAR ARBITRAGE HUMAIN DU 2026-08-03** *(voir §Critères de clôture)*. **Objet** : rendre `🚀 DEPLOYED` **signifiant** pour ce produit — JDK 17+, licences SDK Android, émulateur ou appareil, keystore, **build signé**, distribution interne *(Play Console internal testing)*, health-check adapté à une app **sans serveur**. ⛔ **Elle est le seul chemin vers `🚀 OUI` pour US-01.1 ET US-01.2**, et elle referme **trois trous ouverts depuis le bootstrap** : « l'application n'a **jamais** tourné sur un appareil » · **RNF-02 non mesuré** *(instrument déjà livré : [`rnf02_exit_criterion.py`](../../reports/US-01.1/rnf02_exit_criterion.py))* · « déployé » **sans définition** pour ce produit |
 
 ## ⚠️ Zones d'ombre / Risques identifiés
 
@@ -95,11 +97,39 @@ bleu = imminent) est verrouillé dans les AC de US-01.1 (AC-5) pour prévenir l'
 
 ## Critères de clôture de l'EPIC
 
-- [ ] Toutes les US listées (US-01.1, US-01.2) sont `Certifié Prod = 🚀 OUI`
+> ⚖️ **ARBITRAGE HUMAIN DU 2026-08-03 — AUCUN CRITÈRE N'EST ABAISSÉ, UNE US EST AJOUTÉE.**
+>
+> **Le défaut trouvé** : deux critères ci-dessous étaient **insatisfiables** au 2026-08-02 — le nº 1 exige
+> `🚀 OUI`, or US-01.1 est arrêtée à `🧪 PASS` *(gate 6 de `/certify` en échec, `Déploiement = ⏳`)* ; et le
+> nº 4 exige un affichage **`< 500 ms` mesuré**, or c'est **RNF-02**, seul AC orphelin d'US-01.1, **non
+> mesurable sans appareil sur la plateforme cible**.
+>
+> 🔬 **La cause est structurelle et dépasse cet EPIC** : `WORKFLOW.yaml` fait dépendre `epic_closure` de
+> `Déploiement == 🚀 DEPLOYED`, et **aucune phase ne modélise « US validée mais NON DÉPLOYABLE »**.
+> US-01.1 stationne donc en `prepare_deployment` avec **toutes ses préconditions satisfaites**.
+> ⛔ **Troisième instance de la même famille de défauts** : le SCB ne sait pas dire « QA à refaire », la
+> trace ne sait pas dire « sur quel commit » *(NB-6)*, le workflow ne sait pas dire « non déployable ».
+> ➡️ **`/audit-methodo`.**
+>
+> ⛔ **CE QUI A ÉTÉ REFUSÉ, et pourquoi** : reformuler les critères sur `🧪 PASS` aurait été **abaisser
+> l'exigence du PREMIER EPIC produit**, et aurait laissé « déployé » **sans définition** pour toutes les US
+> suivantes. C'est la voie qu'a prise EPIC_00 avec son critère 112 *(transfert)* — **elle marche une fois,
+> pas deux**. ✅ **Voie retenue** : **US-01.3 rend `🚀 DEPLOYED` signifiant**, et les critères restent
+> **inchangés dans leur exigence**. Le nº 1 gagne seulement l'US qui manquait à sa liste.
+>
+> ⚠️ **Conséquence assumée** : **EPIC_01 reste ouvert plus longtemps**, et la certification d'US-01.1 est
+> **différée — pas abandonnée**. Elle reprend à `prepare_deployment` après US-01.3, et **ses visas
+> d'audit devront être rafraîchis** *(ils portent sur `173fb62`)* — application directe de **NB-6**.
+
+- [ ] Toutes les US listées (US-01.1, US-01.2, **US-01.3**) sont `Certifié Prod = 🚀 OUI`
 - [ ] Aucune régression détectée sur les EPICs dépendants (EPIC_00)
 - [ ] Décisions de design tranchées et tracées (gradient continu vs paliers, endpoint bleu) dans `docs/design/DESIGN_SYSTEM.md`
 - [ ] Indicateurs de succès mesurés : affichage < 500 ms, taux de crash < 0,5 % (PRD §8)
-- [ ] Documentation à jour (`docs/user-guide/`, `CHANGELOG.md`)
+      — ⚠️ **porté par US-01.3** : non mesurable sans appareil sur la plateforme cible ; l'instrument
+      existe déjà et **refuse de conclure** faute de cible *(`exit 2`)*, il ne peut pas rendre un faux vert
+- [ ] Documentation à jour (`docs/user-guide/`, `CHANGELOG.md`) — ⚠️ **`docs/user-guide/` n'existe pas** et
+      la phase `documentation` de `WORKFLOW.yaml` *(@TechWriter, `EVT_DOCS_UPDATED`)* **n'a jamais tourné**
+      sur ce projet : à ouvrir explicitement, pas à cocher par habitude
 
 ---
 *Document rédigé par @ProductOwner — 2026-07-24*

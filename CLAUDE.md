@@ -80,6 +80,33 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 > la mauvaise ⇒ la tuile rend toujours orange et **112 tests restent verts** ; correctif d'**une ligne**,
 > porté à US-01.2)*.
 
+> 🗺️ **PLAN ARRÊTÉ LE 2026-08-03 (arbitrages humains) — l'ordre est décidé, ne pas le re-litiger.**
+> **① US-01.2** *(CRUD + persistance)* — le produit d'abord, **même raisonnement qu'au 2026-08-02, et il a
+> payé**. Elle porte le **critère d'entrée transféré par EPIC_00** *(instancier ADR-005 : **première
+> migration réellement exécutée du projet** ; **risque nº 4 ouvert jusque-là**)* et rend **NB-1
+> atteignable** *(l'invariant `id` est un `assert`, retiré en release — inoffensif sans persistance, plus
+> du tout avec)*. ⚠️ **Cliquet à 95,2, marge NULLE ⇒ tests livrés AVEC le code, jamais après.**
+> **② US-01.3 — chaîne de déploiement mobile réelle** *(US nouvelle, créée par l'arbitrage)*. ⛔ **Aucun
+> critère de clôture d'EPIC_01 n'a été abaissé** : au lieu de reformuler l'exigence `🚀 OUI` sur
+> `🧪 PASS`, on rend **`🚀 DEPLOYED` SIGNIFIANT** — JDK, licences SDK, appareil, keystore, build signé,
+> distribution interne. **Seul chemin vers `🚀 OUI` pour US-01.1 ET US-01.2**, et elle referme **trois
+> trous ouverts depuis le bootstrap** *(l'app n'a **jamais** tourné sur un appareil · **RNF-02** non
+> mesuré · « déployé » **sans définition**)*.
+> **③ Backport du kit dans ce projet, AVEC `grandfathering_date`** — le champ `commit` des visas *(NB-6)*,
+> le gate 3 de `/certify` qui lit **un verdict** et non un nom de fichier, la case DoD sur la couverture
+> des AC. La clé morte `governance.grandfathering_date` est **enfin réveillée** pour rendre le backport
+> **non cassant** *(la trace existante ne porte aucun `commit`)*.
+> **④ US-00.8** *(dette)*, puis **`/audit-methodo`** — qui n'a **jamais tourné** et dont la matière est
+> désormais considérable, **défauts des instruments de contrôle inclus**.
+> ⛔ **CE QUE CE PLAN NE FAIT PAS** : la certification d'US-01.1 est **DIFFÉRÉE, pas abandonnée** — elle
+> reprend à `prepare_deployment` après US-01.3, et **ses visas devront être RAFRAÎCHIS** *(ils portent sur
+> `173fb62`)*, application directe de **NB-6**. **EPIC_01 reste ouvert plus longtemps : c'est assumé.**
+> 🔬 **Défaut structurel relevé en chemin, à porter à `/audit-methodo`** : `WORKFLOW.yaml` fait dépendre
+> `epic_closure` de `Déploiement == 🚀 DEPLOYED` et **aucune phase ne modélise « US validée mais NON
+> DÉPLOYABLE »** ⇒ US-01.1 stationne en `prepare_deployment` **toutes préconditions satisfaites**.
+> ⛔ **Troisième instance de la même famille** : le SCB ne sait pas dire « QA à refaire », la trace ne sait
+> pas dire « sur quel commit », le workflow ne sait pas dire « non déployable ».
+
 ✅ **EPIC_00 CLOS le 2026-08-01** *(⚠️ sur la branche `feat/US-00.6-cloture-epic00` — **la clôture n'est
 sur `main` qu'après fusion de sa PR**)*. **Tous ses critères sont cochés**, dont **le nº 112 sur sa seule
 1ʳᵉ moitié** : sa 2ᵉ exigeait qu'US-01.2 **instancie** la convention d'ADR-005, or **US-01.2 n'existe pas**
