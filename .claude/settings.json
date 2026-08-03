@@ -5,7 +5,24 @@
       "Bash(python scripts/validate_trace.py *)",
       "Bash(python scripts/trace_append.py *)",
       "Bash(python scripts/run_gates.py *)",
-      "Bash(python scripts/factory_sync.py --check)"
+      "Bash(python scripts/factory_sync.py --check)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" pr view:*)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" pr list:*)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" pr checks:*)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" pr diff:*)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" run list:*)",
+      "Bash(\"C:/Program Files/GitHub CLI/gh.exe\" run view:*)",
+      "Bash(python scripts/check_gherkin_mapping.py:*)",
+      "Bash(python scripts/check_epic00_docs.py:*)",
+      "Bash(python scripts/check_flutter_coverage.py:*)",
+      "Bash(python scripts/selftest_coverage_ratchet.py:*)",
+      "Bash(python scripts/check_branch_protection.py:*)",
+      "Bash(python scripts/factory_sync.py --check-remote)",
+      "Bash(python scripts/validate_trace.py:*)",
+      "Bash(python scripts/check_scb_compliance.py:*)",
+      "mcp__github__pull_request_read",
+      "mcp__github__list_branches",
+      "mcp__stitch__list_projects"
     ]
   },
   "hooks": {
