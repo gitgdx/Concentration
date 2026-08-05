@@ -18,7 +18,8 @@
 | US-00.5 | ADR-001 (choix de stack) + exactitude de l'Art. 4 de la Constitution | epic_closure | ✅ @PO | N/A | N/A | N/A | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
-| US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
+| US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1686,6 +1687,101 @@
     **critère 26 est LEVÉ** depuis le 3ᵉ passage QA.
 - **Prochaine étape RÉELLE** : `QA Status 🧪 PASS` *(case 29)* → SCB mis à jour *(case 31)* → PR de
   clôture depuis `feat/US-00.7-cloture` → `/certify`.
+
+### [US-01.2] Gestion des échéances (CRUD)
+
+- **✅ PO Visa (2026-08-03/04)** — Story File créé via `/us-new`, **track FULL** *(critère décisif mesuré :
+  **> 15 fichiers de code impactés** ; `TRACKS.md` ne donne « illimité » qu'à FULL)*.
+  [`docs/stories/US-01.2-gestion-echeances.md`](docs/stories/US-01.2-gestion-echeances.md) ·
+  [`.feature`](tests/features/US-01.2-gestion-echeances.feature). **14 AC actifs · 42 clauses ·
+  45 scénarios** *(comptés par commande, pas estimés)*.
+  - 🎓 **CE QUE CE STORY FILE FAIT ET QU'US-01.1 N'AVAIT PAS FAIT** : il porte une table
+    **`clause → scénario → RÉFUTATION`** — pour chaque clause, **l'observation qui la contredirait**.
+    ⛔ C'est l'antidote direct aux **2 faux verts** d'US-01.1 *(une assertion **auto-référentielle** et une
+    assertion **vraie quoi qu'il arrive**)*, et à ses **3 AC orphelins**. Et il **déclare 6 bornes de mesure
+    `NM-*`** au lieu de les déguiser en clauses testables. **RNF-02 n'est PAS réimporté** — *« le réécrire
+    ici recréerait l'AC orphelin d'US-01.1 »*.
+  - ⚖️ **10 ambiguïtés levées par ARBITRAGE HUMAIN daté (2026-08-03)**, recommandations du @PO
+    **conservées mot pour mot** à côté du verdict *(on date, on ne repeint pas)*. **Trois structurelles** :
+    **① RF-06 SCINDÉ en US-01.4** *(45 clauses contre 27 pour US-01.1 ⇒ le geste double-tap et l'animation
+    diluaient l'attention sur la partie la plus risquée : la **première migration réelle du projet**)* ·
+    **② DATE CIVILE** *(une échéance est « le 15 mars », pas un instant — voir ci-dessous)* ·
+    **③ limite de 9 = actives + échues non retirées** *(sinon la grille d'US-01.1, **bornée à 9 tuiles,
+    échues en tête**, déborderait ou tronquerait **en silence** — on aurait changé le comportement d'une
+    US déjà livrée)*.
+  - 📌 **Le @PO a rectifié sa propre estimation** : il annonçait « 8 scénarios déplacés, 42 restants », le
+    réel est **6 déplacés, 45 restants**. Estimation d'origine **conservée avec sa rectification datée**.
+- **✅ Validation technique @Architect (2026-08-04) — 3 ADR, et le stockage est tranché PAR MESURE.**
+  - 🔬 **[ADR-009](docs/adr/ADR-009-stockage-local-document-json-versionne.md) — document JSON unique,
+    versionné, écrit atomiquement. `+0` DÉPENDANCE.** Trois critères appliqués **dans l'ordre où ils
+    éliminent**, toutes mesures **refaites sur ce poste** dans un projet jetable hors du dépôt :
+    - **① ADR-005 instanciable — ÉLIMINATOIRE, pas pondéré.** Décompte dans le `lib/` de chaque paquet :
+      `sqflite_common` **25 `onUpgrade` / 24 `onDowngrade`** *(up/down de 1ʳᵉ classe)* · `drift` **15 / 0**
+      — ⛔ **la descente est refusée par son propre code** *(`"runMigrationSteps was asked to downgrade"`)* ·
+      `sembast` **0 / 0** *(une version, mais **pas de couple**)* · **`hive_ce`, `objectbox`, `isar` : 0
+      partout ⇒ DISQUALIFIÉS**. *(À noter : `sqflite` fournit `onDatabaseDowngradeDelete`, soit un `down`
+      **destructif** prêt à l'emploi — **exactement ce qu'ADR-005 §3 interdit**.)*
+    - **② Surface de dépendances** *(comptée dans `package_config.json`)* : JSON **+0** · `sembast` +2 ·
+      `objectbox` +3 · `hive_ce` +6 · `sqflite`+ffi **+23** · `path_provider` **+24** · `drift`+codegen
+      **+49**. ⚠️ **Ce critère compte parce que ce projet n'a NI SAST NI scanner de CVE** : chaque
+      dépendance ne reçoit **qu'une revue humaine**.
+    - **③ LE FAIT QUI A FAIT BASCULER, ET IL EST MESURÉ** : un `import 'dart:io'` **COMPILE** pour le web
+      *(le gate requis `build` est `flutter build web --release` ⇒ **vert**)* et **CASSE À L'EXÉCUTION**
+      — `UnsupportedError: _Namespace`. ⇒ **l'import conditionnel est IMPOSÉ, pas recommandé.**
+    - 📌 **IL A REFUSÉ DE PLAIDER FAUX CONTRE LE FINALISTE SÉRIEUX** : *« à +23 contre +24, le nombre de
+      dépendances ne tranche pas »*. Ce qui tranche pour écarter `sqflite` : en test il passe par **FFI +
+      sqlite3 compilé sur l'hôte**, sur l'appareil par le **greffon natif** ⇒ ⛔ **le code de migration ne
+      serait JAMAIS éprouvé sur le moteur de production** — borne que le JSON n'a pas. Plus un moteur SQL
+      pour **9 enregistrements** dont l'AC-10 « Limite » **interdit** index, pagination et recherche.
+      ✅ **Réexaminable dès qu'une US demandera de REQUÊTER — avec son propre ADR.** *(`isar` est
+      doublement éliminé : il **télécharge un binaire natif** pour tourner sur l'hôte — dans un projet sans
+      scanner de CVE — et il est publié le **2023-04-25**, borne SDK `<3.0.0`.)*
+  - **[ADR-010](docs/adr/ADR-010-clauses-track-full-avec-persistance.md) — remplace la DÉCISION Nº 1
+    d'ADR-008** pour toute US postérieure à US-01.1 *(nº 2 et nº 3 restent en vigueur)*, à la forme
+    d'ADR-007 — et il a **vérifié qu'ADR-006 n'avait pas été édité** avant de reprendre ce précédent.
+    ⛔ **La tension est NOMMÉE, pas masquée** : ADR-008 annonçait fixer ce que « prouvé » veut dire *« pour
+    toute US FULL du projet »* alors que le motif de sa nº 1 était **borné** *(« sans base au périmètre
+    d'US-01.1 »)* ⇒ **la portée annoncée EXCÉDAIT la portée du motif**. **Motif neuf et plus strict** : la
+    persistance s'exécute sur l'hôte **avec le même code que sur l'appareil**, donc ⛔ **un E2E sur faux
+    dépôt ne traverserait toujours qu'un arbre de widgets**. La clause exige désormais **racine montée +
+    magasin RÉEL + assertion sur l'ÉTAT PERSISTÉ**, plus deux contrôles greppables.
+  - **[ADR-011](docs/adr/ADR-011-gestion-etat-injection-dependances.md)** — `ChangeNotifier` du SDK,
+    injection par la racine, **`+0` dépendance** *(mesuré : `provider` +2, `get_it` +1, `flutter_bloc` +4,
+    `flutter_riverpod` **+40**)*. ⚠️ **Et il retire le seam `ConcentrationApp(echeances:)`** : l'audit
+    sécurité du 2026-08-02 l'avait jugé « réduisant un écart d'assurance » — **vrai à sa date, faux dès
+    qu'il y a persistance**, car *« le laisser permettrait d'écrire des E2E verts sans toucher un octet »*.
+  - ⚖️ **La note I-5 de `MODELE_ECHEANCE.md` est STATUÉE** : marquée `DÉPASSÉ-2026-08-04`, **texte
+    conservé**, nouvelle note datée à côté. **I-2 est RENFORCÉ** au titre de **NB-1** : ⛔ **un invariant de
+    sécurité n'est JAMAIS un `assert`** *(un `assert` est retiré en release — prouvé dans les deux sens par
+    sonde `dart` en US-01.1)*. **I-7 CONFIRMÉ** *(`schemaVersion` est porté par le document)*.
+  - 🔢 **LE CHIFFRE QUE @DEVELOPER DOIT AVOIR** : **déplacer `sample_echeances.dart` SEUL** *(27 lignes sur
+    28)* donne **353/371 = 95,1482 % ⇒ ROUGE**. Budget publié : **`U ≤ 0,048·N + 0,152`**, soit **une ligne
+    non couverte pour 21 ajoutées**. ⇒ **la marge nulle du cliquet n'est plus un avertissement, c'est une
+    contrainte chiffrée.** La valeur du seuil est **désignée par sa clé**
+    `adapter.components.app.coverage_ratchet.value`, ⛔ **jamais recopiée** *(une valeur recopiée périme)*.
+  - **24 fichiers impactés · 11 patterns · 15 risques · 18 critères de test · tâches T1→T15.** Vocabulaire
+    tranché : **« échéance »** est le terme unique, « événement » ne désigne qu'un `EVT_*` de trace —
+    équivalence **datée**, titres du BACKLOG/EPIC/SCB **non repeints**.
+- **⚖️ CONFLIT DE SPÉCIFICATION LITTÉRAL, trouvé en lisant le code et arbitré le 2026-08-04.**
+  Le `.feature` **normatif** d'US-01.1 affirmait *« les autres commandes de la barre basse sont
+  non-interactives »* — **plus absolu que l'AC qu'il servait**, l'AC-2 « Limite » d'US-01.1 disant **déjà**
+  *« leur activation relève d'US ultérieures »*. **Étape amendée et BORNÉE** *(« au périmètre d'US-01.1 »)*,
+  ancien libellé conservé en commentaire avec le marqueur **littéral et greppable** `PÉRIMÉ-2026-08-04`
+  *(⛔ pas de `~~texte~~` : invisible à `grep`)*. **1 étape touchée, 0 TITRE** ⇒ `check_gherkin_mapping.py`
+  reste **13 ↔ 13, exit 0**, autotest **6 assertions / 0 échec** *(exécuté par @Architect — le @PO n'a pas
+  d'outil shell et a **REFUSÉ de coller une sortie plausible**, ce qui aurait été le faux vert type de ce
+  projet)*.
+  - 📌 **Le @PO a rectifié ce que @Architect lui avait transmis** : *« deux assertions tomberont »* — **il y
+    en a QUATRE**, désignées **par leur texte et non par leur numéro de ligne**. Et il signale que la boucle
+    `for (final icone in [Icons.add, Icons.settings])` doit être **RESSERRÉE sur `Icons.settings`**, ⛔ **pas
+    supprimée** — sinon on perd la garantie que « Réglages » reste non-interactif.
+  - 🔴 **CONSÉQUENCE INSCRITE ET NON MASQUÉE — le `🧪 PASS` d'US-01.1 est PÉRIMÉ** *(il portait sur
+    `558a475`)* : toucher à son `.feature` et à ses tests périme son **verdict QA**, en plus de ses **visas
+    d'audit** *(qui portaient déjà sur `173fb62` — **NB-6**)*. ⇒ **qui certifiera US-01.1 après US-01.3
+    devra RE-AUDITER *et* RE-QA.** Le coût du report grandit ; il reste inférieur à celui d'un `🚀 OUI`
+    fabriqué. Une **ligne de DoD** exige que cette péremption soit **transmise**.
+- **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**
+  *(track FULL — ⛔ **aucun `N/A` possible**)*, puis l'Integration Lock.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
