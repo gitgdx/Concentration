@@ -2,7 +2,18 @@
 # US-01.1 — Affichage Hub & grille d'échéances (EPIC_01)
 # Périmètre : affichage / lecture, à partir de données d'exemple injectées.
 # US-01.1 embarque le calcul du nombre (unité adaptative : ceil, RF-02/03).
-# Les données réelles et les interactions mutantes (double tap, CRUD) relèvent de US-01.2.
+# ⛔ PÉRIMÉ-2026-08-04 : cette ligne portait « Les données réelles et les interactions mutantes
+#    (double tap, CRUD) relèvent de US-01.2. » — FAUX depuis le découpage arbitré du 2026-08-03.
+#    Exact : les données réelles et le CRUD relèvent d'US-01.2 ; le GESTE DOUBLE TAP relève d'US-01.4.
+#
+# ⚖️ AMENDEMENT DU 2026-08-04, décision humaine — 1 ÉTAPE bornée, 0 TITRE touché.
+#    L'étape « les autres commandes de la barre de navigation basse sont non-interactives » du
+#    scénario « Les modules futurs sont visibles, grisés et non-interactifs » est désormais bornée
+#    « au périmètre d'US-01.1 » : US-01.2 (AC-1) active la commande « Gérer les échéances ».
+#    ⛔ AUCUN titre de scénario n'est modifié : la correspondance 13 ↔ 13 par TITRE de
+#    scripts/check_gherkin_mapping.py (job REQUIS Governance) en dépend.
+#    ⚠️ Cet amendement PÉRIME le verdict QA d'US-01.1 et ses visas d'audit — c'est écrit et assumé
+#    dans docs/stories/US-01.2-gestion-echeances.md, §Effet de bord sur US-01.1.
 
 Fonctionnalité: Affichage du Hub de pratiques et de la grille d'échéances
   En tant que pratiquant régulier d'exercices de recentrage
@@ -20,7 +31,16 @@ Fonctionnalité: Affichage du Hub de pratiques et de la grille d'échéances
     Quand j'observe les entrées de pratique
     Alors les modules "Respiration" et "Concentration" sont visibles mais grisés
     Et toucher un module grisé ne déclenche aucune navigation ni action
-    Et les autres commandes de la barre de navigation basse sont non-interactives
+    # ⛔ PÉRIMÉ-2026-08-04 — l'étape suivante portait, SANS BORNE : « Et les autres commandes de la
+    #    barre de navigation basse sont non-interactives ». AMENDÉE (décision humaine du 2026-08-04),
+    #    non repeinte : elle était PLUS ABSOLUE QUE L'AC QU'ELLE SERT — l'AC-2 « Limite » d'US-01.1
+    #    dit déjà « leur activation relève d'US ultérieures ». US-01.2 (AC-1) active la commande
+    #    « Gérer les échéances », qui ouvre la page de gestion.
+    #    ⛔ On corrige le DÉFAUT (une étape non bornée), pas le renvoi : laissée absolue, elle
+    #    redeviendrait fausse à chaque US qui active une commande. Leçon US-00.7.
+    #    ⚠️ Conséquence assumée : cet amendement PÉRIME le verdict QA d'US-01.1 (voir le Story File
+    #    d'US-01.2, §Effet de bord sur US-01.1).
+    Et les autres commandes de la barre de navigation basse sont non-interactives au périmètre d'US-01.1
 
   Scénario: Affichage d'une tuile par échéance active
     Étant donné que 4 échéances actives sont injectées
