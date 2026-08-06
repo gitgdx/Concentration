@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_design | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1780,8 +1780,31 @@
     d'audit** *(qui portaient déjà sur `173fb62` — **NB-6**)*. ⇒ **qui certifiera US-01.1 après US-01.3
     devra RE-AUDITER *et* RE-QA.** Le coût du report grandit ; il reste inférieur à celui d'un `🚀 OUI`
     fabriqué. Une **ligne de DoD** exige que cette péremption soit **transmise**.
-- **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**
+- ⛔ **PÉRIMÉ-2026-08-06 — sa 1ʳᵉ mention est tombée** *(l'événement a été émis le 2026-08-05 ; voir la
+  puce suivante)*. Ligne **conservée** : on date, on ne repeint pas.
+  **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**
   *(track FULL — ⛔ **aucun `N/A` possible**)*, puis l'Integration Lock.
+- **✅ `EVT_STORY_READY` (11:49:56) et `EVT_ARCHI_VALIDATED` (11:50:30) ÉMIS le 2026-08-05 — commités le
+  2026-08-06.** `python scripts/validate_trace.py --us US-01.2` → **`Traçabilité conforme`**.
+  **Phase → `parallel_design`** — ⛔ **lue dans `WORKFLOW.yaml`, pas écrite de mémoire** :
+  `technical_validation` émet `[EVT_TRACK_SELECTED, EVT_ARCHI_VALIDATED]` et porte
+  `next_on: "SUCCESS -> parallel_design"`.
+  - 🔴 **LA CELLULE DE PHASE AFFICHAIT ENCORE `business_alignment` PENDANT CE TEMPS — c'est l'écart
+    SCB ↔ trace, dans le sens INVERSE de celui qu'US-01.1 a payé.** Là-bas un **visa PO affiché 8 jours
+    sans son événement** bloquait tout l'aval ; ici **deux événements émis** sans que la cellule bouge —
+    et la cellule était **déjà fausse** avant `EVT_ARCHI_VALIDATED`, puisqu'`EVT_STORY_READY` clôt
+    `business_alignment`. ⚠️ **Aucun outil ne l'a vu** : `check_scb_compliance.py` rend
+    *« SCB conforme »* et `validate_trace.py` rend *« conforme »* — **les deux séparément, aucun ne
+    croise la cellule de phase avec le dernier événement tracé**. ➡️ **Candidat `/audit-methodo`**,
+    même famille que NB-6 *(la trace ne sait pas dire « sur quel commit »)*.
+  - 📌 **`EVT_STORY_READY` a été émis APRÈS le travail technique, et sa propre `rationale` le dit** :
+    *« cet événement aurait dû être émis AVANT le travail technique et il est émis en retard, l'ordre réel
+    du travail étant conservé dans le PROJECT_LOG et non repeint »*. ⛔ **Rien n'est rétro-daté.**
+- **⏳ Reste dû au 2026-08-06** : Design **Data** *(@DataEngineer)* et Design **UX** *(@UXDesigner)*, en
+  **parallèle** — ⛔ **aucun `N/A` possible** : track FULL, et **ADR-010 ne remplace que la décision nº 1
+  d'ADR-008**, dont la **nº 3** *(Design Data dû)* reste en vigueur. Puis l'**Integration Lock**
+  @Architect → `EVT_DESIGN_COMPLETED`, **seul déverrouillage de @Developer** *(`development_start` porte
+  `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
