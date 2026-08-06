@@ -505,8 +505,25 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   supprimer du schéma.
 - Fichiers EPIC créés **rétroactivement** (EPIC_00, EPIC_01) — `/us-new` ne vérifie pas l'existence
   du fichier EPIC parent ; durcissement du rituel à décider.
-- Décisions design à arbitrer (@UXDesigner + @PO) : gradient continu OKLCH (PRD) vs 4 paliers
-  (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.
+- ⛔ **PÉRIMÉ-2026-08-06 — LES TROIS SONT TRANCHÉES DEPUIS LE 2026-08-01, cette entrée avait CINQ JOURS de
+  retard sur le corpus du projet.** Relevé par **@UXDesigner** pendant `parallel_design` d'US-01.2, qui est
+  **allé lire le corpus au lieu de reprendre cette liste** ; **vérifié par @Architect avant correction**.
+  ⛔ **Le CLAUDE.md était en retard sur ce qu'il est censé résumer** — et c'est la classe de défaut nº 1
+  sous sa forme la plus coûteuse : *une liste de questions ouvertes dont les réponses existaient déjà*, que
+  tout agent démarrant une session aurait rouverte. **Ligne conservée, non repeinte** :
+  *Décisions design à arbitrer (@UXDesigner + @PO) : gradient continu OKLCH (PRD) vs 4 paliers
+  (maquette) ; endpoint bleu `#3D7DD8` (PRD) vs `#005ab3` (maquette) ; langue mixte fr/en des maquettes.*
+  - ✅ **Gradient : CONTINU.** `DESIGN_SYSTEM.md` §*« Les 4 paliers ne sont PAS retenus »* — `#FFB68D` et
+    `#AAC7FF` **ne sont pas des tokens de dégradé** ; l'interpolation se fait entre les deux **extrémités**
+    et **jamais par un palier**, *« pour rendre l'erreur difficile »*.
+  - ✅ **Endpoint : `#3D7DD8`, ET IL EST TRANCHÉ PAR CALCUL, pas par goût** — **4,53:1** contre **3,81:1**
+    pour `#005AB3` de la maquette, qui *« passe 3:1 (le nombre) et échoue 4,5:1 (la description) »*.
+    **Le code le porte** : `concentration_tokens.dart` → `static final Rgb gradientBleu = Rgb.hex('#3D7DD8')`.
+  - ✅ **Langue : FRANÇAIS UNIQUEMENT.** `DESIGN_SYSTEM.md` §*Langue du produit* — *« cette décision clôt
+    l'arbitrage langue mixte fr/en des maquettes »*.
+  - ⚠️ **Aucune des trois ne bloquait US-01.2** — et aucune n'aurait été rouverte si quiconque avait lu le
+    `DESIGN_SYSTEM.md` plutôt que ce résumé. **Candidat `/audit-methodo`** : rien ne détecte qu'une entrée
+    du CLAUDE.md a été **réfutée par le corpus** qu'elle prétend résumer.
 **US bloquées** : —
 **Actions humaines en attente** :
 - ✅ **FAIT (2026-08-01)** : **PR #22 fusionnée** *(certification d'US-00.6)* — `main` = **`0126582`**,
@@ -562,7 +579,9 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
   `_guard_mapping`) et **`selftest` en CI** — de préférence dans la **même** US de dette.
 - Clarifier le statut de `US-INIT` (US à part entière vs simple porteur du Sprint 0).
 - Décider la création de US-01.2 (Gestion des événements).
-- Arbitrages design ci-dessus.
+- ✅ **SANS OBJET-2026-08-06** : *« Arbitrages design ci-dessus »* — **les trois étaient déjà tranchés
+  depuis le 2026-08-01**, cette action attendait donc une décision **déjà prise**. Voir l'entrée datée
+  correspondante dans les dettes ci-dessus.
 
 ## Anti-patterns (à ne pas reproduire)
 

@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | integration_lock | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | development_start | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1695,6 +1695,12 @@
   [`docs/stories/US-01.2-gestion-echeances.md`](docs/stories/US-01.2-gestion-echeances.md) ·
   [`.feature`](tests/features/US-01.2-gestion-echeances.feature). **14 AC actifs · 42 clauses ·
   45 scénarios** *(comptés par commande, pas estimés)*.
+  ⚖️ **PÉRIMÉ-2026-08-06 pour le décompte SEUL — le visa du 2026-08-03/04, lui, reste ce qu'il était.**
+  Décompte faisant autorité depuis l'ajout d'**AC-16** et **AC-17** : **16 AC actifs** *(⛔ **AC-9 reste
+  vacant et n'est PAS réutilisé** — un identifiant qui glisse casse en silence les références déjà
+  écrites, y compris celles d'US-01.4)* · **48 clauses** · **50 scénarios**. **Mesuré par commande, pas
+  déduit** : **50** occurrences de `^  Scénario: ` dans le `.feature`, **0 titre en double**.
+  *(Contrôle d'arithmétique : `+2 AC ⇒ +6 clauses`, cohérent avec `14 × 3 = 42` et `16 × 3 = 48`.)*
   - 🎓 **CE QUE CE STORY FILE FAIT ET QU'US-01.1 N'AVAIT PAS FAIT** : il porte une table
     **`clause → scénario → RÉFUTATION`** — pour chaque clause, **l'observation qui la contredirait**.
     ⛔ C'est l'antidote direct aux **2 faux verts** d'US-01.1 *(une assertion **auto-référentielle** et une
@@ -1897,6 +1903,20 @@
     *(état vide, aucune écriture, ⛔ **SURTOUT AUCUN `rename`** — déplacer une donnée valide d'une version
     récente est **destructeur en effet**)* · **`id` en double** · **`schemaVersion` absent**. ⛔ **Ne pas
     leur écrire de Gherkin** : `45 ↔ 45` deviendrait rouge au job `Governance`.
+    - 🔴 **PÉRIMÉ-2026-08-06 — LA SECONDE MOITIÉ DE LA PUCE CI-DESSUS EST FAUSSE, ET C'EST @ARCHITECT QUI
+      L'A ÉCRITE, DANS LE COMMIT MÊME OÙ IL SE FÉLICITAIT D'AVOIR EXÉCUTÉ LES INSTRUMENTS.** Je l'ai
+      relayée de @DataEngineer **sans lancer `check_gherkin_mapping.py`** ; je ne l'ai lancé que **plus
+      tard**, quand une décision humaine m'y a obligé. **Ce que la commande rend réellement** :
+      `COUPLES` est une **tuple codée en dur ne contenant qu'US-01.1**, la sortie dit *« 13 scénarios ↔
+      13 tests »*, `exit 0` — ⛔ **US-01.2 n'est PAS sous contrôle**, et **ajouter un scénario n'a AUCUN
+      effet sur le job requis aujourd'hui**. La contrainte ne mord qu'à **T14**, ce que le **risque R-7**
+      du Story File énonçait déjà **correctement** : *« enregistré TROP TÔT rend `Governance` rouge »*.
+      ⇒ **Le Story File était juste, le résumé qui le citait était faux.** ⛔ **Classe de défaut nº 1 du
+      projet, commise par l'@Architect, le jour même où il vérifiait le travail des autres.** *(La 1ʳᵉ
+      moitié — « ne pas leur écrire de Gherkin » — **reste vraie** : c'est l'arbitrage humain, voie (b).)*
+    - ✅ **CONSÉQUENCE UTILE, et elle a changé une décision** : la voie (a) *(créer les AC manquants)*
+      était **gratuite** au regard du gate, alors qu'elle paraissait coûteuse. **AC-16 et AC-17 ont été
+      créés.**
   - 📌 **`EVT_MIGRATION_SCRIPT_READY` VOLONTAIREMENT NON ÉMIS** : le catalogue le définit comme migration
     *« validée »*, or la commande par défaut rend **`exit 1`** ⇒ **la claim serait réfutée par une commande
     que n'importe qui peut lancer**. Vérifié qu'**aucun événement n'en dépend** — rien n'est bloqué.
@@ -1918,11 +1938,113 @@
     (@Developer)**, et ⛔ **aucune phase de `WORKFLOW.yaml` ne rappelle @DataEngineer après
     `development_start`.**
 
-- **⏳ Reste dû** : l'**Integration Lock** @Architect *(cohérence Data ↔ UX)* → `EVT_DESIGN_COMPLETED`,
+- ⛔ **PÉRIMÉ-2026-08-06** *(le lock est posé — voir ci-dessous)*.
+  **⏳ Reste dû** : l'**Integration Lock** @Architect *(cohérence Data ↔ UX)* → `EVT_DESIGN_COMPLETED`,
   **seul déverrouillage de @Developer** *(`development_start` porte
   `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*. ⚠️ **Une question tranchée AVANT T9** : champs textuels
   **vs** sélecteurs natifs — `showDatePicker` **sans `flutter_localizations`** afficherait *« Select date
   / CANCEL / OK »* **en anglais et en thème clair**, or **ADR-009 interdit la dépendance**.
+
+- **⚖️ AC-16 et AC-17 CRÉÉS @PO (2026-08-06) — en `integration_lock`, par décision humaine.**
+  🔴 **Ils manquaient DEPUIS LA CRÉATION du Story File, et aucun contrôle du projet ne l'a signalé** :
+  la table anti-orphelin vérifie que les clauses **écrites** ont un scénario, ⛔ **jamais qu'une clause
+  MANQUE**. ⇒ **Ce sont deux documents de design produits EN PARALLÈLE qui l'ont révélé** — @Data a publié
+  la règle **V-1**, @UX a **nommé la lacune sans inventer d'AC**. **Candidat `/audit-methodo`.**
+  - **AC-16 — refus d'une date ou d'une heure civile qui n'existe pas** *(Must)*. Clause **Limite** :
+    **même refus à l'ÉDITION** *(sinon deux chemins dérivent, R-10)*. ⚠️ Le volet **heure DST** n'a
+    **aucun scénario** — borne **NM-9**, motif **borné** : le fuseau du processus Dart n'est pas pilotable
+    et sous `TZ=UTC` **il n'existe aucune transition**, donc le test y serait **vrai quoi qu'il arrive**
+    — ⛔ **le faux vert d'US-01.1 refait à l'identique.**
+  - **AC-17 — échec d'écriture** *(Must)*, une règle en une phrase : **« ce qui est affiché correspond
+    toujours à ce qui est sur le disque. »** ⛔ Ni réessai automatique, ni file d'attente, ni brouillon
+    persisté *(les trois exigeraient d'écrire, ce qui vient d'échouer)* · ⛔ **la saisie est CONSERVÉE**.
+    Borne **NM-10** *(web exécuté)* — ⚠️ **elle ne se lèvera PAS avec US-01.3**, qui vise iOS/Android.
+  - 📌 **Le @PO a ÉCARTÉ la recommandation U-4 de @UXDesigner** *(ranger l'échec d'écriture en borne
+    `NM-*`)*, motif inscrit : *« une borne dit qu'on ne sait pas mesurer ; ici on sait exactement quoi
+    observer — ranger une lacune de SPÉCIFICATION dans le tiroir des limites de MESURE, c'est ce que le
+    projet a payé avec RNF-02 »*. **@UXDesigner en a convenu** : *« ma recommandation aurait fabriqué un
+    AC orphelin de plus »*.
+  - **Décompte** : `45 → 50` scénarios, `42 → 48` clauses, `14 → 16` AC actifs. **Mesuré par commande** :
+    **50** scénarios, **0 titre en double**. ⛔ **AC-9 reste vacant, jamais réutilisé.**
+
+- **✅ Design UX @UX — COMPLÉMENT (2026-08-06), §14 de sa doc dédiée.** ⚠️ **Il est revenu parce que son
+  visa initial couvrait 14 AC alors que le Story File en porte 16** — ⛔ **NB-6 en train de se reproduire**,
+  arrêté avant le lock.
+  - 📌 **Sa conclusion la plus utile est un REFUS DE TRAVAIL** : **AC-16 n'a besoin d'AUCUNE surface
+    nouvelle** — c'est un refus de validation à la soumission, comme AC-2/3/4, donc **C-4 + C-5
+    existants**. Et la clause « même refus à l'édition » est **tenue par construction** : son design ne
+    prévoit **qu'un seul formulaire** *(même widget, deux titres)*. ⚠️ **Réserve qu'il pose lui-même** :
+    *« R-10 vise la FONCTION de validation, pas la surface — je supprime la divergence de présentation,
+    je ne dis rien de l'unicité du prédicat »*.
+  - 🔬 **TROISIÈME OCCURRENCE DE LA MÊME CLASSE DE DÉFAUT DANS CE DESIGN**, et il la nomme :
+    **4ᵉ interdit du formulaire — aucun formateur de saisie qui corrige, borne ou réécrit** la valeur du
+    champ date. *Réfuté par* : `31/02/2027` **intapable** ⇒ le scénario devient **inobservable**.
+    ➡️ **Corollaire à retenir bien au-delà d'US-01.2** : ⛔ **ce qui doit être refusé doit d'abord pouvoir
+    être SAISI — un contrôle qui empêche de produire l'entrée fautive EFFACE la clause qui protégeait
+    l'utilisateur.** *(Après `maxLength` qui tuait le refus du 81ᵉ caractère, et le bouton désactivé qui
+    tuait le refus de la 10ᵉ échéance.)*
+  - **AC-17 : une règle unique, deux surfaces ÉTENDUES** — ⛔ *« une surface d'écriture ne se ferme jamais
+    sur un échec »* *(fermer, c'est dire « c'est fait »)*. **C-5** gagne un 3ᵉ ancrage *(le pied de
+    l'action)*, **C-7** un 2ᵉ état *(le dialogue de suppression **reste ouvert**)*. Variante « fermer le
+    dialogue » **nommée et refusée** : elle exigerait un ancrage **par carte**, donc le mécanisme nouveau
+    qu'on lui interdisait d'inventer, *« et l'écran obtenu est précisément celui qui a l'air de rien ne
+    s'est passé »*.
+  - 🔬 **Le piège qu'il signale « parce que personne ne le verrait en revue »** : le message d'échec doit
+    être **retiré puis re-posé** à chaque tentative — une `liveRegion` **dont le texte ne change pas n'est
+    pas ré-annoncée** ⇒ une **2ᵉ** tentative échouée serait **silencieuse pour un lecteur d'écran**, et
+    l'utilisateur en conclurait qu'elle a réussi. ⛔ **Exactement le mensonge qu'AC-17 interdit.**
+  - **Contrastes : ZÉRO couple nouveau** — 10 éléments peints énumérés, chacun rattaché à une entrée
+    **déjà** dans le script. ⇒ ⛔ **aucune relance nécessaire**, et il publie le **contrôle négatif** : ce
+    qui *aurait* créé un couple *(bandeau à fond teinté, assombrissement du dialogue, remplissage `erreur`
+    du champ, estompage pendant l'écriture)* est **explicitement refusé, avec motif**.
+  - ⚠️ **Ce qu'il n'atteste pas** : *« je n'ai lu la sortie d'aucun programme dans cette session non plus
+    — l'`exit 0` et le `--selftest` 12/12 me sont RAPPORTÉS par @Architect. Fait rapporté, pas observé. »*
+
+- **🔒 INTEGRATION LOCK @Architect (2026-08-06) — cohérence Data ↔ UX vérifiée, 2 décisions prises.**
+  🔴 **Ce que le lock a réellement trouvé, et c'est sa justification** : **les deux branches ont tourné
+  EN AVEUGLE l'une de l'autre**, et leur jointure portait **quatre trous** dont **aucune des deux ne
+  pouvait être tenue pour responsable** — V-1 sans surface, 3 règles data sans AC, l'échec d'écriture sans
+  rien, et U-2. ⇒ ⛔ **Un `parallel_branch` sans étape de jointure aurait livré les quatre.**
+  - **⚖️ U-5 — où vit le texte de l'échec d'écriture.** **Pattern nº 10 AMENDÉ** : sa règle
+    *(« un seul exemplaire »)* était bonne, **son PORTEUR était trop étroit** — l'échec d'écriture n'est
+    **pas** un refus de validation, donc son texte serait allé **dans le widget** par défaut. Il est
+    désormais porté par le **refus typé rendu par le port** *(couche `domain`)*.
+  - **⚖️ U-6 — rendre l'échec OBSERVABLE, et c'est ÉLIMINATOIRE pour AC-17** *(si l'écriture est tirée et
+    oubliée, **les 3 scénarios sont inobservables** — même classe que le bouton désactivé)*. **Deux
+    moitiés, aucune ne suffit seule** : **①** le port rend un **refus typé**, ⛔ **jamais `void`**, et
+    ⛔ **l'état en mémoire n'est jamais muté avant un succès** *(aucune mise à jour optimiste)* ·
+    **②** **`unawaited_futures` ACTIVÉ** dans `analysis_options.yaml`.
+    🔬 **PORTÉE DE ② MESURÉE PAR MUTANT, ET LA 1ʳᵉ FORMULATION D'@ARCHITECT ÉTAIT FAUSSE** — le premier
+    mutant a **SURVÉCU** : le lint **ne fire QUE dans une fonction `async`** *(gate **ROUGE**, `exit 1`)*
+    et ⛔ **PAS dans un appelant synchrone** *(gate **vert, faussement**)*. Sans ce mutant, le SCB porterait
+    *« le lint attrape les écritures tirées-et-oubliées »*, **faux pour la moitié des cas**. Le résidu est
+    fermé par **① + le test d'AC-17 « Erreur »**. *(Mesuré aussi : `unawaited_futures` **n'est fourni ni
+    par `flutter_lints` 6.0.0 ni par `lints` 6.1.0** ; son activation laisse `analyze` **vert** sur
+    l'existant.)*
+  - **U-2 tranché** *(champs textuels vs sélecteurs natifs)* : ⚠️ **ce n'était pas une question de langue,
+    mais d'INTÉGRITÉ DE DONNÉE.** Un sélecteur natif **ne peut pas produire** `2026-02-31` ; un champ
+    texte, **si** — et `DateTime.parse` l'avale en silence. ⇒ **le champ texte CRÉE le risque que V-1
+    doit rattraper.** ⛔ **Mais V-1 reste nécessaire dans les deux cas** : `showTimePicker` propose `02:30`
+    **même le jour du saut de printemps**. **Mesuré** : `flutter_localizations` = **+2 paquets**
+    *(lui-même, du SDK, et **`intl`** de pub.dev)* — ⛔ **pas le mur que la formulation laissait croire**
+    *(à comparer aux écartés d'ADR-009 : `sqflite`+ffi **+23**, `path_provider` **+24**, `drift` **+49**)*.
+    ⚖️ **Décision : la question reste OUVERTE pour @Developer avant T9** — elle **n'est plus bloquante**
+    parce qu'**AC-16 protège les DEUX options**, et elle **coûte +2 paquets**, pas +24. ⛔ **Un lock ne
+    tranche pas ce qui n'a pas besoin de l'être avant sa tâche.**
+  - **Points reportés, non bloquants** : U-1 *(moment du refus à la limite de 9)* · U-3 *(icône
+    `Icons.add`)* · le **harnais** pour provoquer un échec d'écriture **sans magasin factice**
+    *(ADR-010 §1)*, à décider en T12.
+  - ⚠️ **CE QUE LE LOCK N'ATTESTE PAS** : ⛔ **aucune ligne de `lib/` n'existe encore** · le **risque nº 4
+    d'EPIC_00 reste OUVERT** *(le patron de migration n'a pas été joué sur le module réel)* · **aucun
+    écran n'a été vu** · **NM-6, NM-7, NM-9, NM-10** non levées · et ⛔ **la trace ne sait pas dire
+    « le périmètre a changé »** : les AC ont bougé **après** `EVT_STORY_READY` et **aucun événement du
+    catalogue ne modélise cela** — ⛔ **aucun n'a été détourné** *(précédent : les arbitrages n'émettent
+    rien)*. **4ᵉ instance de la même famille**, versée à `/audit-methodo` : le SCB ne sait pas dire « QA à
+    refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire « non
+    déployable », la trace ne sait pas dire « le périmètre a changé ».
+
+- **⏳ Reste dû** : **@Developer**, tâches **T1 → T15**. ⚠️ **Le cliquet est à marge NULLE** — chaque tâche
+  livre **son code ET ses tests dans le MÊME commit**, budget **`U ≤ 0,048·N + 0,152`**.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

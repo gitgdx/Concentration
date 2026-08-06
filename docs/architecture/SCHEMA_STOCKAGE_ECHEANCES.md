@@ -261,6 +261,21 @@ fois sur ce corpus)*.
    `.feature` en porte **45**, et `check_gherkin_mapping.py` exige **45 ↔ 45** *(un 46ᵉ scénario rend le
    job requis `📋 Governance` **rouge** — R-7)*. ⇒ **tests unitaires de la couche `data`**, et
    **entrée à porter à @ProductOwner / @Architect** s'ils doivent devenir des AC.
+
+   > 🔴 **PÉRIMÉ-2026-08-06 (@Architect) — LE MOTIF CI-DESSUS EST FAUX, LA CONCLUSION EST JUSTE. Les deux
+   > sont conservés parce que l'écart entre eux est instructif.**
+   > **Mesuré en LANÇANT la commande** : `COUPLES` est une tuple **codée en dur ne contenant qu'US-01.1** ;
+   > `python scripts/check_gherkin_mapping.py` imprime *« 13 scénarios ↔ 13 tests »* et rend `exit 0`.
+   > ⇒ ⛔ **US-01.2 n'est sous aucun contrôle de correspondance aujourd'hui**, et un 46ᵉ scénario **ne
+   > rend rien rouge**. La contrainte ne s'active qu'à **T14**, qui enregistre le couple **en dernier** —
+   > ce que **R-7 énonçait déjà correctement**.
+   > **La conclusion « pas de Gherkin pour ces trois règles » DEMEURE**, mais pour son **vrai** motif :
+   > **arbitrage humain du 2026-08-06, voie (b)** — ce sont des règles de **contrat interne invisibles à
+   > l'utilisateur**, couvertes par des **tests unitaires déclarés**. ⛔ **Pas parce qu'un gate l'aurait
+   > interdit.**
+   > 📌 **Le `.feature` porte désormais 50 scénarios** *(AC-16 et AC-17 créés le 2026-08-06 ; compté par
+   > commande : **50**, **0 titre en double**)*. ⛔ **Ce nombre n'est PAS recopié ailleurs dans ce
+   > document** : il se **lit** dans le `.feature`.
 3. ⚠️ **Le comportement de l'IHM face à un document de version future n'est pas défini** : la couche de
    données sait **refuser d'écrire**, l'application n'a **aucun mode « lecture seule »**. ⛔ **Je ne le
    décide pas** *(c'est du produit)*.
