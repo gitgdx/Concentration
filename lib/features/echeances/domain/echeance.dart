@@ -19,11 +19,31 @@ class Echeance implements Comparable<Echeance> {
   final String description;
   final DateTime dateEcheance;
 
+  /// Recopie **modifiée** — l'`id` est **CONSERVÉ** (édition, AC-6 d'US-01.2).
+  ///
+  /// ⛔ **Aucun champ nouveau** (I-7) : l'entité reste exactement celle
+  /// d'US-01.1. Un `null` signifie « inchangé », jamais « effacé » — c'est ce
+  /// qui permet à l'édition de ne toucher qu'un seul champ sans que l'autre
+  /// puisse être perdu par omission.
+  Echeance avec({String? description, DateTime? dateEcheance}) => Echeance(
+    id: id,
+    description: description ?? this.description,
+    dateEcheance: dateEcheance ?? this.dateEcheance,
+  );
+
   /// Construit depuis une donnée potentiellement illisible.
   ///
   /// **I-6** : une donnée invalide rend `null` — elle est **ignorée**, jamais
   /// fatale (AC-1/AC-3 « Erreur »). La validation vit à la frontière, pas dans
   /// le widget.
+  ///
+  /// 🔴 **NB-1 (audit sécurité US-01.1), et c'est le point de T2** : le refus
+  /// d'un `id` vide est porté **par ce code EXÉCUTÉ**, jamais par l'`assert`
+  /// du constructeur — un `assert` est **retiré en release** (ADR-010 §3), donc
+  /// il ne peut pas être la barrière. L'`assert` reste comme **documentation**
+  /// de l'invariant ; ⛔ aucune clause d'AC ne s'appuie sur lui.
+  /// En US-01.1 ce chemin n'avait **aucun appelant** (finding N-6) ; il en a un
+  /// réel depuis que la donnée vient du disque (AC-11).
   static Echeance? depuisDonnee(Object? donnee) {
     if (donnee is! Map) return null;
     final id = donnee['id'];
