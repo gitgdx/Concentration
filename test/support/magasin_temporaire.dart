@@ -52,6 +52,34 @@ class MagasinTemporaire {
       repertoire.listSync().map((e) => e.uri.pathSegments.last).toList()
         ..sort();
 
+  /// 🔴 **REND LE STOCKAGE RÉELLEMENT NON INSCRIPTIBLE** — la réponse à la
+  /// tension qu'AC-17 laissait ouverte.
+  ///
+  /// **Le problème posé** : les 3 scénarios d'AC-17 exigent de provoquer un
+  /// échec d'écriture, or **ADR-010 §1 interdit tout magasin factice dans
+  /// `test/e2e/**`**. ⛔ Un faux magasin qui lèverait est exactement ce qui est
+  /// proscrit.
+  ///
+  /// **Le moyen retenu, et il n'a rien d'un artifice** : l'écriture atomique
+  /// passe **obligatoirement** par `echeances.json.tmp` (`.tmp` + `flush` +
+  /// `rename`). En créant **un RÉPERTOIRE** portant ce nom, le
+  /// `writeAsString` du **code de production** échoue par une
+  /// `FileSystemException` **réelle**, émise par le **système de fichiers**.
+  /// ⇒ ⛔ **aucun magasin factice, aucun mock, aucune injection** : le chemin
+  /// traversé est **exactement** celui de l'appareil, et la cause de l'échec
+  /// est de la même nature qu'un disque plein ou qu'un droit refusé.
+  ///
+  /// ✅ **Et il est RÉVERSIBLE** — ce que le 2ᵉ scénario d'AC-17 exige
+  /// littéralement : *« quand le stockage local redevient inscriptible »*.
+  void bloquerEcriture() {
+    Directory('${fichier.path}.tmp').createSync();
+  }
+
+  void debloquerEcriture() {
+    final obstacle = Directory('${fichier.path}.tmp');
+    if (obstacle.existsSync()) obstacle.deleteSync(recursive: true);
+  }
+
   void nettoyer() {
     if (repertoire.existsSync()) repertoire.deleteSync(recursive: true);
   }
