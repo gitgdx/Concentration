@@ -49,7 +49,57 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-01.1 — le PRODUIT.** ⛔ **Plus aucune US de fondations n'est ouverte.**
+**Chantier actif** : **US-01.2 — Gestion des échéances (CRUD).** Phase **`development_start`**, branche
+`feat/US-01.2-design`. ⛔ **Plus aucune US de fondations n'est ouverte.**
+*(⚖️ **PÉRIMÉ-2026-08-06** : cette ligne portait **« US-01.1 — le PRODUIT »** — vrai jusqu'au 2026-08-03,
+faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint pas.**)*
+
+> 🔒 **US-01.2 : LA PHASE DE DESIGN EST CLOSE (2026-08-06) — `EVT_DESIGN_COMPLETED` émis, @Developer est
+> déverrouillé pour T1 → T15.** SCB : `✅ @PO · ✅ @Data · ✅ @UX`, phase **`development_start`**.
+> **3 commits sur la branche** *(`4f9383f`, `2f9a57f`, `478c45a`)*. **16 AC actifs** *(AC-9 vacant)* ·
+> **48 clauses** · **50 scénarios** — ⛔ **comptés par commande, 0 titre en double.**
+>
+> 🔬 **CE QUE CE CYCLE A ÉTABLI ET QUI VAUT AU-DELÀ D'US-01.2 — deux acquis de méthode, tous deux payés.**
+> **① `parallel_design` A BESOIN DE SON ÉTAPE DE JOINTURE, et c'est MESURÉ, pas supposé** : les deux
+> branches ont tourné **en aveugle l'une de l'autre** et leur jointure portait **QUATRE trous dont aucune
+> des deux n'était responsable** — la règle **V-1** de @Data **sans surface**, **3 règles data sans AC**,
+> l'**échec d'écriture sans AC ni scénario ni surface**, et **U-2**. ⛔ **Sans l'Integration Lock, les
+> quatre partaient en développement.**
+> **② ⛔ CE QUI DOIT ÊTRE REFUSÉ DOIT D'ABORD POUVOIR ÊTRE SAISI** *(@UXDesigner)* — un contrôle qui
+> empêche de produire l'entrée fautive **EFFACE la clause qui protégeait l'utilisateur**. **Trois
+> occurrences dans le même design** : `maxLength` tuait le refus du **81ᵉ** caractère · un bouton
+> **désactivé** à 9 tuait le refus de la **10ᵉ** échéance · un **formateur de saisie** rendrait
+> `31/02/2027` **intapable**, donc le scénario **inobservable**.
+>
+> 📌 **DEUX FAITS MESURÉS QUE @DEVELOPER DOIT AVOIR AVANT T1, et qu'il ne doit PAS re-découvrir** :
+> ⛔ **`DateTime.parse("2026-02-31T23:59")` NE LÈVE PAS** — il rend **`2026-03-03T23:59`** ⇒ **une
+> exception n'est PAS une barrière, la barrière est la FORME CANONIQUE** *(règle V-1, AC-16)*. ⚠️ Et
+> ⛔ **ne jamais asserter « aucune échéance au 3 mars »** : **la date de dérive dépend de l'année
+> bissextile** *(2 mars une bissextile)*.
+> ⛔ **`unawaited_futures` est ACTIVÉ** *(`analysis_options.yaml`)* mais **sa portée est PARTIELLE, prouvée
+> par mutant dans les deux sens** : il rend le gate requis `analyze` **ROUGE** sur un `await` oublié
+> **dans une fonction `async`**, et ⛔ **ne voit RIEN dans un appelant synchrone** *(gate **vert à
+> tort**)*. **Le premier mutant a SURVÉCU** — sans lui, le SCB porterait une affirmation **fausse pour la
+> moitié des cas**. Le résidu est fermé par le **refus typé du port** *(⛔ jamais `void`, ⛔ jamais de
+> mise à jour optimiste)* **et** le test d'AC-17 « Erreur ».
+>
+> ⛔ **CE QUE LA CLÔTURE DU DESIGN N'ATTESTE PAS** : **0 ligne de `lib/`** · **LE RISQUE Nº 4 D'EPIC_00
+> RESTE OUVERT** — le patron de migration **n'a PAS été joué sur le module réel** *(le critère
+> `reports/US-01.2/migration_roundtrip_criterion.py` rend **`exit 1` EN LE DISANT** ; il rendra `exit 0`
+> à T5)* · **aucun écran n'a été vu** · **NM-6, NM-7, NM-9, NM-10** non levées · et la **borne NM-10**
+> *(web exécuté)* ⛔ **ne se lèvera PAS avec US-01.3**, qui vise iOS/Android.
+>
+> 🔴 **UN CONSTAT D'ADR-009 EST CONTREDIT PAR LA MESURE** *(et l'ADR n'est PAS édité — immuable, sa
+> **décision** n'est pas touchée)* : son §*Conséquences* dit l'aller-retour *« exact dans un fuseau
+> donné »*, or `--sonde` montre **dans le seul fuseau Paris** que `ALLER_RETOUR_EXACT=false` pour toute
+> **seconde** ou **milliseconde** non nulle **et** pour la **2ᵉ occurrence de la bascule d'automne**.
+> ⇒ **la garde d'inversibilité est la CONDITION du couple `v1⇄v2`, pas une élégance.**
+>
+> ⛔ **QUATRIÈME INSTANCE DE LA MÊME FAMILLE STRUCTURELLE** : les AC ont bougé **après**
+> `EVT_STORY_READY` et **aucun événement du catalogue ne modélise un changement de périmètre** —
+> ⛔ **aucun n'a été détourné** *(précédent : les arbitrages n'émettent rien)*. Le SCB ne sait pas dire
+> « QA à refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire « non
+> déployable », **la trace ne sait pas dire « le périmètre a changé »**.
 
 > ⚖️ **US-01.1 EST ARRÊTÉE À `🧪 PASS` — VALIDÉE TECHNIQUEMENT, ⛔ PAS CERTIFIÉE PROD (2026-08-02).**
 > **PR #27 fusionnée** *(`7ba4228`)* puis **PR #28** *(cliquet à 95,2 — `a9619af`)*, les deux **par
@@ -342,6 +392,42 @@ exécuté**, **0 migration jamais exécutée**. **US-00.8** (dette) n'était **p
 son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient le chantier actif** —
 ⚠️ **son Integration Lock exige d'abord l'arbitrage `TRACKS.md`** *(ci-dessous)*.
 **Dettes ouvertes** :
+- 🔴 **SIX DÉFAUTS RELEVÉS LE 2026-08-06 PENDANT LE DESIGN D'US-01.2 — tous `/audit-methodo`, et QUATRE
+  visent les INSTRUMENTS DE CONTRÔLE eux-mêmes.**
+  - **① La « Sortie obligatoire » de `@UXDesigner` est IMPOSSIBLE avec sa propre dotation d'outils.**
+    `.claude/agents/ux-designer.md` déclare `tools: Read, Grep, Glob, Edit, Write` et son §2 exige
+    d'**exécuter** `trace_append.py`. **Il a refusé d'écrire la ligne à la main** après avoir vérifié
+    **dans le code** les 4 contrôles qu'une écriture manuelle contournerait ; @Architect a émis pour son
+    compte. ⚠️ **Même situation pour `@ProductOwner`** *(2 fois : 2026-08-05 et 2026-08-06)*.
+    ⛔ **À vérifier sur TOUS les subagents, pas seulement ces deux** — la contradiction est dans la
+    **définition du rôle**, pas dans son exécution. Même famille que la dette `emitter` non enforcé.
+  - **② `EVT_MIGRATION_SCRIPT_READY` ne sera JAMAIS émis si personne ne le réclame** *(relevé par
+    @DataEngineer)* : son `emitter` déclaré est `data-engineer`, sa précondition sera satisfaite par
+    **T5 (@Developer)**, et ⛔ **aucune phase de `WORKFLOW.yaml` ne rappelle @DataEngineer après
+    `development_start`.**
+  - **③ AUCUN OUTIL NE CROISE LA CELLULE DE PHASE DU SCB AVEC LE DERNIER ÉVÉNEMENT TRACÉ.**
+    **Mesuré** : la cellule d'US-01.2 affichait `business_alignment` alors qu'`EVT_STORY_READY` **et**
+    `EVT_ARCHI_VALIDATED` étaient émis — et `check_scb_compliance.py` rendait *« conforme »*,
+    `validate_trace.py` aussi, **chacun de son côté**. ⇒ **l'écart SCB ↔ trace est invisible dans les
+    DEUX sens** *(US-01.1 avait payé l'autre : un visa @PO affiché **8 jours** sans son événement)*.
+  - **④ RIEN NE DÉTECTE QU'UNE ENTRÉE DU `CLAUDE.md` A ÉTÉ RÉFUTÉE PAR LE CORPUS QU'ELLE RÉSUME.**
+    Ses 3 « décisions design à arbitrer » étaient **tranchées depuis le 2026-08-01** — **cinq jours** de
+    retard, et **tout agent démarrant une session les aurait rouvertes**. Trouvé par **@UXDesigner allant
+    lire le corpus** plutôt que ce résumé. ⚠️ **La même journée a produit une 2ᵉ occurrence** : le
+    « Chantier actif » nommait encore US-01.1.
+  - **⑤ UN NOMBRE DÉRIVÉ EST ÉCRIT À LA MAIN 23 FOIS.** Le compte de scénarios d'US-01.2 vivait en
+    **20 exemplaires dans le Story File** + SCB + BACKLOG + EPIC_01, tous à faire bouger ensemble — ⛔ la
+    règle du projet est *« une règle n'existe qu'en un seul exemplaire »*, vérifiée trois fois.
+    📌 **Remède proposé par le @PO, non mis en œuvre** : un `scripts/check_story_counts.py` qui **LIT** le
+    `.feature` et **refuse tout écart**, avec son autotest de mutation ; variante plus sûre — **supprimer**
+    le total du Story File et n'y laisser que **la commande qui le produit**. ⚠️ **Vaut aussi pour
+    `N AC / N clauses`**, qui souffre du même mal **sans même avoir de source machine-lisible**.
+  - **⑥ LA TABLE ANTI-ORPHELIN NE PEUT PAS VOIR UNE CLAUSE MANQUANTE.** Elle vérifie que les clauses
+    **écrites** ont un scénario, ⛔ **jamais qu'une clause MANQUE**. **AC-16 et AC-17 manquaient depuis la
+    création du Story File** et **aucun contrôle ne l'a signalé** — ce sont **deux documents de design
+    produits en parallèle** qui les ont révélés. ⚠️ **C'est le même angle mort que la DoD** *(qui n'exige
+    la couverture d'aucun AC)* : **les instruments vérifient la cohérence de ce qui est là, jamais la
+    complétude de ce qui devrait y être.**
 - ✅ **RÉSOLU-2026-08-01 — l'Art. 4 dit désormais ce qui EST.** Cette entrée était une **exigence de
   clôture** posée par l'audit de revue *(si la PR dédiée glissait, **rien dans le corpus durable** n'aurait
   signalé la fausseté)* ; elle est **soldée par son propre critère** : l'amendement est **fusionné**
@@ -529,6 +615,18 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
 - ✅ **FAIT (2026-08-01)** : **PR #22 fusionnée** *(certification d'US-00.6)* — `main` = **`0126582`**,
   `mergedBy` **`gitgdx`**, `12:13:31Z`, **4 contextes `success`** relevés sur le commit fusionné `ee7f6d4`.
   ⚠️ Provenance **déclarative** *(`is_bot` rend `false` même pour un agent)*.
+- 🎯 **PROCHAIN PAS AU 2026-08-06 — @Developer, tâches T1 → T15 d'US-01.2.** Le design est **verrouillé**
+  *(`EVT_DESIGN_COMPLETED` émis)*, la branche `feat/US-01.2-design` porte **3 commits**.
+  ⚠️ **Chaque tâche = un commit, code ET tests ENSEMBLE** — le cliquet est à **marge NULLE**, budget
+  **`U ≤ 0,048·N + 0,152`** *(~1 ligne non couverte pour 21 ajoutées)*. ⛔ **La valeur du cliquet se LIT**
+  dans `factory.config.json` → `adapter.components.app.coverage_ratchet.value`, **jamais recopiée**.
+  📌 **Une question laissée OUVERTE pour lui, délibérément, à trancher avant T9** : champs textuels **vs**
+  sélecteurs natifs *(`flutter_localizations` = **+2 paquets** mesurés — lui-même et `intl`)*. ⛔ **Non
+  bloquante : AC-16 protège les deux options** — *un lock ne tranche pas ce qui n'a pas besoin de l'être
+  avant sa tâche.*
+- ⛔ **PÉRIMÉ-2026-08-06 : les deux entrées suivantes sont FAITES.** La PR de clôture d'EPIC_00 **et** la
+  PR d'US-01.1 sont fusionnées *(PR #29, #30, #31 ; `main` = `fe85364`)*, et **US-01.2 a démarré**.
+  *(Conservées, non repeintes — elles portaient le motif de l'ordre choisi, qui a payé.)*
 - 🎯 **PROCHAIN PAS — fusionner la PR de CLÔTURE d'EPIC_00** *(branche
   `feat/US-00.6-cloture-epic00`)* : **4 contextes requis verts**, puis **fusion PAR L'HUMAIN, sans
   `--admin`** *(renforcement **R-c**)*. ⚠️ **Une par une** : `strict: true` sérialise les merges.
