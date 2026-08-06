@@ -55,6 +55,50 @@ et `.temporal-gradient-4 { background-color: #005ab3; } /* Blue - **Far** */`.
 reprendra ses classes CSS réintroduira l'inversion. **Les tokens ci-dessus sont nommés par leur RÔLE**
 *(`gradientOrange` / `gradientBleu`)* et **jamais par un palier**, pour rendre l'erreur difficile.
 
+### Surfaces interactives — **4 tokens AJOUTÉS le 2026-08-06** *(US-01.2)*
+
+> ⛔ **Rien de ce bloc ne modifie un token existant.** Le dégradé temporel et ses trois tokens sont
+> **intouchés** *(leur marge est de **0,03 point**)*. Détail, wireframes et calculs :
+> [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md).
+
+| Token | Valeur | Usage | Origine |
+|---|---|---|---|
+| `surfaceElevee` | **`#231914`** | fond des cartes de gestion et des champs de saisie | maquette `surface-container-low` |
+| `contour` | **`#A48C7F`** | bordure 1 dp d'une carte ou d'un champ, liseré du groupe des échues | maquette **`outline`** |
+| `texteSecondaire` | **`#DDC1B3`** | date, heure, temps restant, libellé de champ, texte d'aide | maquette `on-surface-variant` |
+| `erreur` | **`#FFB4AB`** | message de refus de validation *(AC-15 d'US-01.2 l'autorise nommément)* | maquette `error` |
+
+⛔ **`focus` n'est PAS un token** : l'anneau de focus **est** `moduleActif` — une seconde valeur pour
+la même intention dériverait.
+
+**Ratios calculés** *(WCAG 2.1 ; **autorité** = `python docs/design/us_01_2_contrastes.py`, à
+supprimer en T9 quand `test/core/theme/contraste_tokens_test.dart` existera)* :
+`texteSurFond/fondApp` **14,39** · `texteSurFond/surfaceElevee` **13,35** ·
+`texteSecondaire/fondApp` **10,91** · `erreur/fondApp` **10,93** · `fondApp/moduleActif` **10,89** ·
+`contour/fondApp` **5,86** · `contour/surfaceElevee` **5,44**.
+
+🔴 **Trois REFUS, par mesure — ce sont eux qui portent la décision** :
+
+| Écarté | Ratio | Conséquence |
+|---|---|---|
+| `outline-variant` **`#564338`** *(bordure de la maquette)* | **1,99:1** | **Remplacé par `#A48C7F`** — une bordure qui identifie un composant relève de SC 1.4.11 *(≥ 3:1)* |
+| **Toute opacité sur un token de texte** *(la maquette empile `/40`, `/50`, `/60`, `/80`)* | `texteSecondaire` à 40 % = `#69574F` ⇒ **2,72:1** | ⛔ **INTERDITE.** La hiérarchie se fait par un **token mesuré**, la **taille** et la **graisse** — une opacité fabrique une couleur dont personne n'a calculé le contraste |
+| `moduleGrise` **`#3E322C`** pour un élément **devenu interactif** | **1,50:1** | Licite pour un composant **inactif** *(exempté SC 1.4.3)*, ⛔ **interdit** pour un texte porteur d'information et pour la commande activée par US-01.2 |
+
+🔴 **`erreur`, `moduleActif` et `texteSecondaire` sont à `1,00:1` ENTRE EUX** *(luminances 0,5684 ·
+0,5664 · 0,5677)* : ils **ne sont pas séparables par la luminance**. ⇒ **règle permanente** : tout
+état porte **un mot ou une forme**, ⛔ **jamais la couleur seule** *(SC 1.4.1)*.
+
+### Espacement, rayons — **posés le 2026-08-06** *(US-01.2)*
+
+Échelle base 8, demi-pas 4 : `xs 4` · `sm 8` · `md 16` · `lg 24` · `xl 32`.
+Marge de contenu **16** *(⛔ pas les 24 de la maquette : à 320 dp, 48 dp de marges = 15 % de la
+largeur — la maquette est centrée, c'est un réglage **desktop**)*.
+Rayons : `rayonSurface 16` *(cartes — **même valeur que la tuile**)* · `rayonChamp 8`.
+⚠️ **Dette de cohérence NOMMÉE, non corrigée** : `hub_page.dart` porte `vertical: 12` et
+`horizontal: 10`, **hors échelle**. ⛔ **Non retouchés** — ce fichier n'est modifié que pour activer
+une commande, et son `Row` a **déjà débordé** *(63 px à 390, 133 px à 320)*.
+
 ### ⛔ Les 4 paliers ne sont PAS retenus
 
 `#FFB68D` et `#AAC7FF` *(paliers 2 et 3)* **ne sont pas des tokens de dégradé** : AC-5 exige une
@@ -86,6 +130,27 @@ casser** quand l'utilisateur agrandit la police du système *(AC-8)*.
 ⛔ **Aucun état « chargement »** : les données sont **injectées en mémoire** au périmètre d'US-01.1 — un
 spinner serait un mensonge d'interface. ⛔ **Aucun état « erreur » visible** : une donnée illisible est
 **ignorée silencieusement**, le hub reste debout *(AC-1/AC-3 « Erreur »)*.
+
+### Composants **AJOUTÉS le 2026-08-06** *(US-01.2 — anatomie complète dans [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md))*
+
+| Composant | Emplacement prévu | États couverts |
+|---|---|---|
+| **Carte d'échéance** | `presentation/widgets/ligne_echeance.dart` | **active** *(nombre + unité)* · **échue** *(« Échéance atteinte » + liseré)* · **description vide** *(la date monte en ligne de titre)* |
+| **Bouton principal** | gestion + formulaire + dialogue | **disponible** *(plein)* · **indisponible mais ACTIVABLE** *(contour + message)* — ⛔ **jamais « désactivé »** |
+| **Champ de saisie** | `presentation/widgets/formulaire_echeance.dart` | **vide** · **rempli** · **en erreur** · **focus** |
+| **Message de validation** | sous le champ visé, ou en tête de formulaire | **absent** · **présent** *(`liveRegion`)* |
+| **Dialogue de confirmation** | `presentation/widgets/confirmation_suppression.dart` | un seul état — **seul acte destructif du produit** |
+
+📌 **Règle née d'US-01.2, et elle vaut désormais partout : ⛔ AUCUNE BARRIÈRE MUETTE.** Toute règle qui
+refuse est **atteignable par un geste** et **rend un message**. Motif **mesurable** : deux scénarios du
+`.feature` normatif disent *« je **tente** de créer une dixième »* et *« je **tente** de modifier cette
+échéance »* — un bouton **désactivé** rendrait ces deux clauses **inobservables**.
+
+✅ **`⛔ Aucun état « chargement »` est CONFIRMÉ pour US-01.2, mais pour un motif DIFFÉRENT** *(la
+ligne ci-dessus reste vraie à sa date, et n'est pas repeinte)* : les données ne sont plus « en
+mémoire », elles viennent **du disque** — mais la composition se fait **dans `main()` seul, avant
+`runApp`**, donc **le premier rendu a déjà les données**. ⚠️ **Réfutation** : l'apparition d'un
+indicateur de progression signifierait que la composition a quitté `main()`.
 
 ## Wireframes textuels — mobile-first
 
@@ -145,6 +210,28 @@ d'appui**, aucune ondulation.
   de cocher une ligne générique — **il n'existe aucun élément interactif** *(aucun bouton actif, aucun
   champ)*. Cette exigence redeviendra due dès **US-01.2** *(CRUD)*. ⛔ **Aucun label ARIA de formulaire**
   n'est requis ici, pour la même raison.
+  ✅ **ÉCHUE-2026-08-06 : l'exigence est DUE et elle est servie.** *(La ligne ci-dessus reste vraie à sa
+  date — on date, on ne repeint pas.)* US-01.2 introduit **cinq surfaces interactives**, donc
+  **15 exigences chiffrées** *(A-1 → A-15)* dans [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md), §7.
+
+### Exigences chiffrées des surfaces interactives — **2026-08-06** *(US-01.2)*
+
+| Exigence | Valeur | Référence |
+|---|---|---|
+| Contraste texte normal / texte large / **non textuel** | **≥ 4,5:1** · **≥ 3:1** · **≥ 3:1** | SC 1.4.3 · SC 1.4.11 |
+| **Cible tactile** | **≥ 48 × 48 dp**, **sauf** la commande de barre basse : **≥ 40 × 48 dp** *(exception **déclarée** : élargir ce `Row` a déjà coûté un débordement de 63 px ; WCAG 2.2 SC 2.5.8 n'exige que **24 × 24**, donc le seuil normatif reste **largement** tenu)* | Material · SC 2.5.8 |
+| Écart entre deux cibles adjacentes | **≥ 8 dp** | prévention du mé-appui près d'un acte destructif |
+| **Échelle de texte** supportée | **jusqu'à ×2,0**, sans troncature ni chevauchement | SC 1.4.4 |
+| **Focus visible** | anneau **2 dp**, décalage **2 dp**, `moduleActif`, **≥ 3:1** contre les **deux** surfaces adjacentes | SC 2.4.7 |
+| **Clavier** | tout interactif atteignable, ordre haut→bas / gauche→droite, ⛔ aucun piège ; **focus capturé** dans le dialogue, **focus initial sur « Annuler »**, **Échap = Annuler** | SC 2.1.1, 2.1.2, 2.4.3 |
+| **Libellés** | libellé **visible en permanence** ⛔ **jamais un `placeholder`** ; `Semantics` portant le nom **et** « obligatoire »/« optionnel » | SC 1.3.1, 3.3.2 |
+| **Message d'erreur** | `liveRegion`, **ancré sous le champ visé**, **le focus s'y déplace** | SC 3.3.1, 4.1.3 |
+| **Nom d'une action de liste** | contient **la description de l'échéance** *(9 boutons « Modifier » sont 9 boutons indistinguables)* | SC 2.4.6 |
+| **Jamais la couleur seule** | tout état porte **un mot ou une forme** | SC 1.4.1 — **rendu obligatoire ici par la mesure** *(3 tokens à 1,00:1 entre eux)* |
+| **Mouvement** | **0** animation en US-01.2 *(RF-06 est **US-01.4**)* | SC 2.2.2, 2.3.1 |
+
+⚠️ **Bornes non levées, rappelées** : **NM-6** *(l'annonce **réelle** d'un lecteur d'écran)* et **NM-7**
+*(l'**œil**, et le rendu réel à grande police)* — elles ne se lèveront qu'avec **US-01.3**.
 
 ## Dark mode
 
@@ -153,6 +240,14 @@ d'appui**, aucune ondulation.
 définir serait prétendre qu'un mode clair est supporté.
 ⚠️ **Conséquence assumée** : si l'appareil est en mode clair, l'application **reste sombre**. C'est un
 choix produit *(sobriété, RNF-03)*, à réexaminer quand un mode clair sera réellement demandé.
+
+**Complément 2026-08-06 *(US-01.2)*** : ⛔ **aucun équivalent clair n'est défini pour les 4 tokens
+ajoutés** — même motif. 🔴 **Et une conséquence NOUVELLE, qui a un coût réel** : **tout composant natif
+de plateforme rendrait un thème CLAIR par défaut** *(`showDatePicker`, `showTimePicker`)*, en plus
+d'afficher des **chaînes anglaises** faute de `flutter_localizations` *(que l'ADR-009 interdit
+d'ajouter)*. ⇒ **les sélecteurs natifs sont écartés au profit de champs de saisie**
+*(`JJ/MM/AAAA`, `hh:mm`)*. **Arbitrage recommandé, non tranché par @UXDesigner** :
+[`US-01.2-DESIGN-UX.md` §9.2 et §11.5](US-01.2-DESIGN-UX.md).
 
 ---
 

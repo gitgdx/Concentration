@@ -46,6 +46,10 @@ n'est pas modifiée** — tandis que la **valeur persistée** est une **chaîne 
 `AAAA-MM-JJThh:mm`, **sans `Z`, sans décalage**. ⇒ À chaque lecture, la date civile est **ré-ancrée dans
 le fuseau courant** : c'est **exactement** la conséquence assumée d'AC-14 « Limite » *(« 23:59 **là où je
 suis** »)*, et non un effet de bord.
+➡️ **AJOUT DATÉ-2026-08-06 (@DataEngineer, US-01.2)** : le **diagramme ER de la forme PERSISTÉE**, la
+**grammaire exacte** de chaque valeur, le **contrat des migrations** et les **cas de corruption** vivent
+désormais dans [`SCHEMA_STOCKAGE_ECHEANCES.md`](SCHEMA_STOCKAGE_ECHEANCES.md). ⛔ **Le diagramme
+ci-dessus n'est PAS modifié** : il décrit la forme **en mémoire**, qu'US-01.2 **ne change pas**.
 
 ⚠️ **`REMAINING_TIME` n'est PAS une entité persistable** : c'est un **résultat de calcul**, dérivé de
 `(Echeance, Clock)`. Il figure au diagramme parce que **T2 le déclare dans le domaine**, mais ⛔ **il ne
@@ -100,3 +104,10 @@ jeu d'exemple : l'app démarre avec un jeu **lisible**, pas avec un cas limite.
   ⚠️ **TOUJOURS VRAI AU 2026-08-04** : ADR-009 **décide** le mécanisme, il **n'exécute** aucune
   migration. **Le risque nº 4 d'EPIC_00 reste OUVERT** jusqu'à ce que les tests d'US-01.2 exécutent
   réellement le patron aller-retour. ⛔ **Un ADR n'est pas une exécution.**
+  ⚠️ **ENCORE VRAI AU 2026-08-06** *(@DataEngineer)* : le schéma persisté est **spécifié** et le patron
+  est **exécutable** — [`SCHEMA_STOCKAGE_ECHEANCES.md`](SCHEMA_STOCKAGE_ECHEANCES.md) +
+  [`reports/US-01.2/migration_roundtrip_criterion.py`](../../reports/US-01.2/migration_roundtrip_criterion.py)
+  *(8 assertions, **7 mutants comportementaux**, autotest **vert** le 2026-08-06)*. ⛔ **Mais il a été
+  joué contre une source de FIXTURE, pas contre `lib/`, qui n'existe pas encore** ⇒ **le risque nº 4
+  reste OUVERT** jusqu'à l'`exit 0` du critère contre le module réel *(tâche **T5**)*.
+  ⛔ **Un critère de sortie n'est pas davantage une exécution du produit.**

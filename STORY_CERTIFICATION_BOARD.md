@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_design | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | integration_lock | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1800,11 +1800,129 @@
   - 📌 **`EVT_STORY_READY` a été émis APRÈS le travail technique, et sa propre `rationale` le dit** :
     *« cet événement aurait dû être émis AVANT le travail technique et il est émis en retard, l'ordre réel
     du travail étant conservé dans le PROJECT_LOG et non repeint »*. ⛔ **Rien n'est rétro-daté.**
-- **⏳ Reste dû au 2026-08-06** : Design **Data** *(@DataEngineer)* et Design **UX** *(@UXDesigner)*, en
+- ⛔ **PÉRIMÉ-2026-08-06** *(les deux branches sont livrées le jour même — voir les deux visas
+  ci-dessous ; on date, on ne repeint pas)*.
+  **⏳ Reste dû au 2026-08-06** : Design **Data** *(@DataEngineer)* et Design **UX** *(@UXDesigner)*, en
   **parallèle** — ⛔ **aucun `N/A` possible** : track FULL, et **ADR-010 ne remplace que la décision nº 1
   d'ADR-008**, dont la **nº 3** *(Design Data dû)* reste en vigueur. Puis l'**Integration Lock**
   @Architect → `EVT_DESIGN_COMPLETED`, **seul déverrouillage de @Developer** *(`development_start` porte
   `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*.
+
+- **✅ Design UX @UX (2026-08-06)** — [`docs/design/US-01.2-DESIGN-UX.md`](docs/design/US-01.2-DESIGN-UX.md)
+  *(5 wireframes mobile-first, gabarit 360 dp, vérification exigée à 320 et 390 · 8 composants · 4 tokens
+  nouveaux · 15 exigences chiffrées · table **AC → surface → RÉFUTATION**)* ·
+  [`us_01_2_contrastes.py`](docs/design/us_01_2_contrastes.py) · 4 blocs **ajoutés et datés** au
+  [`DESIGN_SYSTEM.md`](docs/design/DESIGN_SYSTEM.md) *(⛔ aucun token existant modifié)* · section
+  « Design UX » du Story File.
+  - 🔬 **LE CONTRASTE EST PUBLIÉ COMME UN SCRIPT EXÉCUTABLE, PAS COMME UNE PHRASE** — 11 couples
+    **exigés**, **3 couples REFUSÉS** *(contrôle négatif)*, 3 constats « couleur seule », autotest de
+    mutation aux mutants pris **hors du vocabulaire de la règle**, verdicts comparés **en ensembles**.
+    ⚠️ **Il porte sa propre date de péremption** : **T9 doit le SUPPRIMER** une fois
+    `test/core/theme/contraste_tokens_test.dart` écrit — *deux copies d'une règle dérivent*.
+  - 🔴 **LE DESIGNER N'A PAS PU L'EXÉCUTER ET L'A DIT** *(aucun shell dans sa dotation)* : ses ratios
+    étaient un **calcul à la main**, soit la **classe de défaut nº 1 du projet**, **nommée au lieu d'être
+    masquée**. ✅ **@Architect l'a exécuté avant de poser ce visa** : `exit 0` *(11 exigés passés, 3 refus
+    qui tiennent)* et `--selftest` **`exit 0`, 12 assertions**, dont **`M1a` : l'ancre noir/blanc
+    **NE TUE PAS** le mutant de gamma** *(contrôle négatif sur son propre mutant)*. ⇒ **toutes les valeurs
+    manuelles sont CONFIRMÉES par le programme, zéro divergence.**
+  - **Trois refus portés par la MESURE, et tous les trois visent la maquette** : bordure
+    `outline-variant` **1,99:1** *(< 3:1, SC 1.4.11)* → remplacée par `contour` **5,86:1** · traitement
+    `opacity-40` sur le groupe des échues **2,72:1**, qui frapperait **précisément** le groupe que le @PO
+    veut rendre évident ⇒ ⛔ **opacité interdite sur tout token de texte** · `moduleGrise` **1,50:1**,
+    licite tant que la commande est **inerte** *(exemptée SC 1.4.3)*, illicite dès qu'elle devient
+    **interactive** *(SC 1.4.11)* → `moduleActif` **10,89:1**.
+  - 🔬 **Une mesure qui inverse une intuition** : `erreur`, `moduleActif` et `texteSecondaire` sont à
+    **1,00:1 ENTRE EUX** *(luminances 0,5684 / 0,5664 / 0,5677)* ⇒ **non séparables par la luminance** :
+    « **jamais la couleur seule** » cesse d'être une recommandation et devient **obligatoire**.
+  - 📌 **Deux réflexes de formulaire REFUSÉS parce qu'ils tueraient un scénario** : un bouton d'ajout
+    **désactivé** à 9 et une icône « modifier » **retirée** sur une échue rendraient **INOBSERVABLES** les
+    deux clauses qui disent « je **tente** » ⇒ règle **aucune barrière muette**. Et ⛔ **ni `maxLength` ni
+    compteur** sur la description : `maxLength` empêcherait de taper le **81ᵉ** caractère, donc le refus
+    d'**AC-2 « Limite » n'aurait JAMAIS LIEU** *(le compteur est par ailleurs nommément interdit par
+    AC-15)*.
+  - ⚠️ **Contradiction SIGNALÉE, non contournée** : `libelleAccessibilite` **embarque `', $description'`**
+    *(mesuré dans `remaining_time_calculator.dart`)* ⇒ l'afficher verbatim rendrait « 3 semaines,
+    Convention annuelle ». **Écart avec la LETTRE du Story File, assumé et écrit.**
+  - ⚠️ **Lacune NOMMÉE sans inventer d'AC** : l'**échec d'écriture** n'a **aucun AC, aucun scénario,
+    aucune surface**.
+  - **Ce que ce design N'ATTESTE PAS** : ⛔ **aucun écran n'a été vu** *(ni maquette rendue, ni appareil)* ·
+    **NM-6** *(annonce réelle d'un lecteur d'écran)* et **NM-7** *(l'œil, le rendu à grande police)*
+    **restent NON LEVÉES** · **aucun test de vision des couleurs** — « jamais la couleur seule » est
+    déduite d'une **arithmétique de luminance**, pas d'une simulation. ⛔ **Un design ne couvre aucune
+    clause : il la rend observable.**
+
+- **✅ Design Data @Data (2026-08-06)** —
+  [`docs/architecture/SCHEMA_STOCKAGE_ECHEANCES.md`](docs/architecture/SCHEMA_STOCKAGE_ECHEANCES.md)
+  *(**premier schéma PERSISTÉ du projet** : diagramme ER de la forme **sur disque**, grammaire de chaque
+  valeur **avec sa réfutation**, contrat d'appel des migrations, matrice de corruption)* ·
+  [`reports/US-01.2/migration_roundtrip_criterion.py`](reports/US-01.2/migration_roundtrip_criterion.py) ·
+  2 ajouts **datés** à `MODELE_ECHEANCE.md` *(texte existant non repeint)*.
+  - **Conventions du rôle NOMMÉES, pas cochées** : `snake_case` **écartée sciemment** *(les clés miroitent
+    les champs de l'entité Dart, figés par un ADR immuable — deux graphies exigeraient une table de
+    correspondance, soit **deux exemplaires d'une même règle**)* · **3NF appliquée et structurante** :
+    ⛔ **aucun fait dérivable persisté** *(`estEchue` et `RemainingTime` restent CALCULÉS)* · index
+    **sans objet et interdits** par AC-10 « Limite » · séparation DDL/données **sans objet** *(un document
+    JSON n'a pas de DDL)*.
+  - **Patron** : `v0` = **absence de fichier** · `v1` = instant UTC canonique · `v2` = **date civile**
+    *(`versionCourante`)*. ⚠️ **Déviation d'ADR-005 §1 NOMMÉE et datée** : il n'existe **aucune étape
+    `v0→v1`** — créer le fichier n'est pas une transformation de données, et son `down` serait **le seul
+    `down` destructif du projet**, pour un chemin que rien n'emprunte.
+  - 🔴 **CE QUI N'A PAS PU ÊTRE JOUÉ, DIT PLATEMENT** : `echeance_schema_migrations.dart` **n'existe pas**
+    *(T2→T7, @Developer)* ⇒ **le patron n'a PAS été joué sur `lib/`**, et le mode par défaut du critère
+    rend **`exit 1` EN LE DISANT**. ⛔ **Le risque nº 4 d'EPIC_00 RESTE OUVERT** et **le critère d'entrée
+    transféré par EPIC_00 N'EST PAS SATISFAIT** — *« un ADR n'est pas une exécution, un critère de sortie
+    non plus »*. Il le sera à l'`exit 0` **contre le module réel**.
+  - ✅ **Ce qui a RÉELLEMENT tourné** *(rejoué par @Architect avant ce visa)* : `--selftest` **`exit 0`**,
+    ensembles attendus **==** obtenus **8/8**, et **les 8 assertions sont tuées par au moins un mutant**
+    *(7 mutants **comportementaux**)*. **Défaut trouvé en route et publié** : un mutant a tué **son propre
+    garde-fou** — la 1ʳᵉ version du contrôle négatif **ne pouvait structurellement jamais rougir** ;
+    corrigée, puis **prouvée vivante** par un mutant que seule elle voit, avec contrôle de faux positif.
+  - 🔴 **LA MESURE CONTREDIT UN CONSTAT D'ADR-009, et c'est la trouvaille de la branche.** Son
+    §*Conséquences* écrit que l'aller-retour est *« exact dans un fuseau donné »* — **c'est FAUX**, et
+    `--sonde` le montre **dans le SEUL fuseau Paris** : `ALLER_RETOUR_EXACT=false` pour toute **seconde**
+    ou **milliseconde** non nulle *(`22:59:30Z` → `23:59` → `22:59:00Z`, **30 s détruites**)* **et** pour
+    la **2ᵉ occurrence de la bascule d'automne** *(`01:30Z` et `00:30Z` rendent la **même** heure civile
+    `02:30`)*. ⛔ **ADR-009 n'est PAS édité** — immuable, et sa **décision** n'est pas touchée : c'est un
+    **constat de son §Conséquences qui a vieilli**.
+    ⇒ **Conséquence non décorative** : un couple `up`/`down` naïf **violerait ADR-005 §2** ⇒ la **garde
+    d'inversibilité** est **la condition** du couple `v1⇄v2`, pas une élégance. Elle vaut **exactement**
+    l'exactitude de l'aller-retour, **7 cas sur 7, dans les deux sens** *(caractérisation exacte, pas
+    approximation prudente)*. Étape **non destructive**, ⛔ **aucune dérogation demandée**.
+  - 🔴 **Second piège MESURÉ, pour T3/T4** : **`DateTime.parse("2026-02-31T23:59")` NE LÈVE PAS** et rend
+    **`2026-03-03T23:59`**. ⇒ **une exception n'est pas une barrière — la barrière est la comparaison à la
+    FORME CANONIQUE.** D'où la règle **V-1** : la saisie doit refuser une **heure civile inexistante
+    localement**, sinon l'app écrit une valeur **qu'elle refusera de relire** et ⛔ **l'échéance disparaît
+    sans message**.
+  - ⚠️ **Trois règles SANS AUCUN AC ni scénario**, déclarées telles et non déguisées : **version FUTURE**
+    *(état vide, aucune écriture, ⛔ **SURTOUT AUCUN `rename`** — déplacer une donnée valide d'une version
+    récente est **destructeur en effet**)* · **`id` en double** · **`schemaVersion` absent**. ⛔ **Ne pas
+    leur écrire de Gherkin** : `45 ↔ 45` deviendrait rouge au job `Governance`.
+  - 📌 **`EVT_MIGRATION_SCRIPT_READY` VOLONTAIREMENT NON ÉMIS** : le catalogue le définit comme migration
+    *« validée »*, or la commande par défaut rend **`exit 1`** ⇒ **la claim serait réfutée par une commande
+    que n'importe qui peut lancer**. Vérifié qu'**aucun événement n'en dépend** — rien n'est bloqué.
+  - **Empreinte sur les gates : NULLE et mesurée** — `analyze` *No issues found*, `format` *32 files
+    (0 changed)*. Le Dart du critère vit dans `.dart_tool/` *(gitignoré, invisible à l'analyseur)* ⇒
+    **0 ligne de `lib/`, 0 effet sur le cliquet à marge nulle**.
+
+- 🔴 **DEUX DÉFAUTS STRUCTURELS RELEVÉS PAR CETTE PHASE — versés à `/audit-methodo`.**
+  - **① La « Sortie obligatoire » de `@UXDesigner` est IMPOSSIBLE avec sa propre dotation d'outils** :
+    `.claude/agents/ux-designer.md` déclare `tools: Read, Grep, Glob, Edit, Write` et son §2 exige
+    d'**exécuter** `trace_append.py`. Il a **refusé d'écrire la ligne de trace à la main** après avoir
+    vérifié **dans le code** les **4 contrôles** qu'une écriture manuelle contournerait *(alias dépréciés,
+    événement inconnu, **préconditions**, existence du `report`)* + le `ts` machine.
+    `EVT_UX_DESIGN_COMPLETED` **émis par @Architect pour son compte**, inscrit comme tel dans le
+    `rationale`. **Précédent identique le 2026-08-05** : le @PO, privé de shell, avait **refusé de coller
+    une sortie plausible**. **Même famille que la dette `emitter` non enforcé.**
+  - **② `EVT_MIGRATION_SCRIPT_READY` ne sera JAMAIS émis si personne ne le réclame** *(relevé par
+    @DataEngineer)* : son `emitter` déclaré est `data-engineer`, sa précondition sera satisfaite par **T5
+    (@Developer)**, et ⛔ **aucune phase de `WORKFLOW.yaml` ne rappelle @DataEngineer après
+    `development_start`.**
+
+- **⏳ Reste dû** : l'**Integration Lock** @Architect *(cohérence Data ↔ UX)* → `EVT_DESIGN_COMPLETED`,
+  **seul déverrouillage de @Developer** *(`development_start` porte
+  `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*. ⚠️ **Une question tranchée AVANT T9** : champs textuels
+  **vs** sélecteurs natifs — `showDatePicker` **sans `flutter_localizations`** afficherait *« Select date
+  / CANCEL / OK »* **en anglais et en thème clair**, or **ADR-009 interdit la dépendance**.
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
