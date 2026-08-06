@@ -17,6 +17,7 @@ import 'dart:io';
 import 'package:concentration/core/time/clock.dart';
 import 'package:concentration/features/echeances/data/document_store.dart';
 import 'package:concentration/features/echeances/data/document_store_io.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// Un magasin fichier neuf, dans un répertoire temporaire **qui lui est
 /// propre** — deux tests ne peuvent pas se marcher dessus.
@@ -81,6 +82,47 @@ class MagasinTemporaire {
   }
 
   void nettoyer() {
-    if (repertoire.existsSync()) repertoire.deleteSync(recursive: true);
+    // ⚠️ Sous Windows, un descripteur peut rester ouvert quelques
+    // millisecondes après la dernière écriture ⇒ `deleteSync` lève
+    // `PathAccessException`. ⛔ Un ÉCHEC DE MÉNAGE ne doit JAMAIS faire rougir
+    // un test : il ferait croire à un défaut du produit là où il n'y a qu'un
+    // répertoire temporaire qui survit une seconde de plus.
+    try {
+      if (repertoire.existsSync()) repertoire.deleteSync(recursive: true);
+    } on FileSystemException {
+      // Le système d'exploitation le récupérera.
+    }
+  }
+}
+
+/// 🔴 **FAIT MESURÉ, et il gouverne TOUS les tests de widgets de cette US** :
+/// une écriture disque **RÉELLE déclenchée par un TAP n'aboutit PAS** sous
+/// `testWidgets`. Le corps d'un `testWidgets` tourne dans une zone
+/// **`FakeAsync`** : les continuations de `Future` y sont des **microtâches
+/// que seul `pump()` draine**, et l'achèvement de l'entrée-sortie ne peut
+/// arriver que si la **vraie** boucle d'événements tourne — ce que seul
+/// `runAsync` autorise.
+///
+/// **Mesuré dans les deux sens le 2026-08-06** *(sonde jetable, supprimée)* :
+/// * `tap` → `pump` → `runAsync(delay 50 ms)` → `pump` ⇒ **`octets() == null`,
+///   l'écriture N'A PAS EU LIEU** ;
+/// * la même chose **répétée** ⇒ le fichier est écrit.
+///
+/// ⛔ **Sans cet utilitaire, un E2E qui tape « Enregistrer » serait VERT en
+/// n'écrivant RIEN** — exactement le faux vert qu'ADR-010 §1 existe pour
+/// interdire. ⚠️ Et il aurait été **indétectable** : l'écran, lui, se met bien
+/// à jour.
+Future<void> reglerEcritures(
+  WidgetTester tester, {
+  bool Function()? jusqua,
+  int tours = 15,
+}) async {
+  for (var i = 0; i < tours; i++) {
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 5)),
+    );
+    await tester.pump(const Duration(milliseconds: 5));
+    if (jusqua != null && jusqua()) return;
   }
 }
