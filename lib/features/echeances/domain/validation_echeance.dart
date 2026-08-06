@@ -5,7 +5,13 @@ import 'echeance.dart';
 /// Le champ visé par un refus — il détermine **où le message s'ancre**
 /// (Design UX §14.2.1 : *« le message est ancré sur CE QUI A ÉCHOUÉ : un champ
 /// si c'est un champ, l'action si c'est l'action »*).
-enum ChampEcheance { description, date, heure, formulaire }
+///
+/// * [description], [date], [heure] — **sous le champ** visé ;
+/// * [formulaire] — **en tête** *(la limite de 9 ne vise aucun champ)* ;
+/// * [action] — **au pied de l'action** *(3ᵉ ancrage, ajouté par AC-17 : un
+///   échec d'écriture **n'est pas un refus de validation**, rien n'est fautif
+///   dans la saisie)*.
+enum ChampEcheance { description, date, heure, formulaire, action }
 
 /// **Refus NOMMÉ** : le champ visé **et** son message, en un seul objet.
 ///
