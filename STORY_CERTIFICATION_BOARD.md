@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ❌ 🛡️ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2094,7 +2094,91 @@
     **titres**, ⛔ **il ne dit rien de ce que les 50 tests vérifient** · et ⛔ **le verdict QA d'US-01.1
     reste PÉRIMÉ** — @Developer l'a **transmis**, il ne l'a **pas rafraîchi**.
 
-- **⏳ Reste dû** : **`/audit-us US-01.2`** *(contextes frais — Constitution Art. 2)*, puis **QA**.
+- **✅ Audit Rev 🔍 (2026-08-07, `EVT_CODE_REVIEW_PASSED`, contexte FRAIS — commit `5272ed1`)** :
+  **PASSED**, **0 finding bloquant**, **8 non bloquants** *(NB-A → NB-H)*. Rapport :
+  [`reports/US-01.2/code_review.md`](reports/US-01.2/code_review.md).
+  **16/16 AC actifs couverts par des assertions qui portent sur l'exigence** — ⛔ **aucun cas « bon titre,
+  assertion absente »**, la classe même du bloquant **B-2 d'US-01.1**. **10 bornes `NM-*` jugées honnêtes**,
+  aucune déguisée en test vert.
+  - 🔬 **CE QUE CET AUDIT A APPORTÉ QUE LES GATES NE POUVAIENT PAS DONNER** : **5 mutants que @Developer
+    n'avait PAS joués**, **5 tués, 0 survivant**, arbre restauré *(`git status --porcelain` vide)* — 81ᵉ
+    caractère *(3 tests rouges)* · 10ᵉ échéance *(9)* · **retrait de la barrière de forme canonique V-1**
+    *(9, dont celui qui prouve que `jourExisteAuCalendrier` **n'est pas un doublon**)* · **mise à jour
+    optimiste** *(3)* · **retrait de l'atomicité `.tmp` + `rename`** *(14)*.
+  - ✅ **LE CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00 EST FERMÉ PAR EXÉCUTION, ET IL NE PEUT PAS AVOIR ÉTÉ
+    PLIÉ POUR PASSER** : `migration_roundtrip_criterion.py` rend **`exit 0`, 8 assertions**, et
+    `git log --follow` montre **un seul commit — `2f9a57f`, phase design, antérieur à la première ligne de
+    `lib/`** ⇒ **le critère a été écrit avant le code qu'il juge et jamais retouché**. *C'est la seule
+    configuration dans laquelle un critère de sortie prouve quelque chose.* ➡️ **risque nº 4 d'EPIC_00
+    fermé**, non plus transféré.
+  - ✅ **NB-7 d'US-01.1 est CORRIGÉ** *(l'assertion d'unicité précède la sélection de la `DecoratedBox`)*.
+  - **Non bloquants les plus actionnables** : **NB-B** *(1 ligne)* — dans `_ecrire`, la branche
+    `document == null` code **en dur** `ActeEcriture.enregistrement` alors que `acte` est disponible ⇒ une
+    **suppression** échouée annoncerait « *L'échéance n'a pas été enregistrée.* » · **NB-A** — la doc de
+    `remplacer` promet « sans correspondance : **échec** », l'implémentation rend **succès** · **NB-C**
+    *(mesuré par sonde)* — `check_e2e_persistance.py` ne voit **ni** un magasin factice nommé hors
+    vocabulaire, **ni** un fichier `test/e2e/**` **sans aucun `pumpWidget`** *(le contrôle « racine » passe
+    **à vide**)* · **NB-H** — `find.textContaining('9')` est **tautologique** dans deux tests.
+
+- **❌ Audit Sec 🛡️ (2026-08-07, `EVT_SECURITY_AUDIT_FAILED`, contexte FRAIS — commit `5272ed1`)** :
+  **FAILED**, **1 finding BLOQUANT**. Rapport : [`reports/US-01.2/security.md`](reports/US-01.2/security.md).
+  - 🔴 **B-1 (HIGH) — UN DOCUMENT LOCAL NON DÉCODABLE EN UTF-8 EMPÊCHE DÉFINITIVEMENT L'APPLICATION DE
+    DÉMARRER.** `document_store_io.dart` → `lire()` rend `cible.readAsString()` **sans garde** ;
+    `echeance_document_repository.dart` → `charger()` fait `await magasin.lire()` **sans garde** ;
+    `main.dart` fait `await notifier.charger()` **avant `runApp`**. `File.readAsString()` décode en **UTF-8
+    strict** et **lève** ⇒ **`runApp` n'est jamais appelé**. Et comme l'échec a lieu **à la LECTURE**,
+    `mettreDeCote()` **n'est jamais atteint** ⇒ **le document fautif reste en place** ⇒ **chaque démarrage
+    échoue à l'identique, sans issue depuis l'application**.
+    ⛔ **CE N'EST PAS UNE OPINION D'AUDITEUR — LA RÉFUTATION EST CELLE QUE LE STORY FILE ÉCRIT LUI-MÊME** :
+    la table anti-orphelin donne pour **AC-11 « Erreur » (Must)** la réfutation littérale
+    « **L'application refuse de s'ouvrir** ». **B-1 la produit.**
+    **Vérifié une seconde fois par @Architect, indépendamment de l'auditeur** *(un JSON valide dont **un
+    SEUL octet** est en cp1252 → `FileSystemException: Failed to decode data using encoding 'utf-8'`, et
+    `grep` de `try`/`catch` sur les trois fichiers du chemin → **aucune garde**)*.
+    **Correctif attendu : ~4 lignes** — une garde `on FileSystemException` rendant une **sentinelle non
+    JSON**, de sorte que le chemin « illisible » **déjà correct** fasse la mise de côté par `rename`.
+    ⛔ **PAS `allowMalformed: true`** : il transformerait un document illisible en document **silencieusement
+    corrigé**, exactement ce qu'AC-11 et AC-16 interdisent.
+  - 🔬 **POURQUOI 344 TESTS ET 97,9 % DE COUVERTURE NE L'ONT PAS VU — MESURÉ, PAS SUPPOSÉ** :
+    `grep -rn "writeAsBytes|utf8.encode|latin1|0xFF" test/` → **aucune occurrence**, et le harnais
+    `magasin_temporaire.dart` pose par `writeAsStringSync` ⇒ **il ne PEUT produire que de l'UTF-8 valide**.
+    Les 3 tests d'AC-11 exercent du **JSON invalide**, ⛔ **jamais des OCTETS invalides**.
+    ➡️ **Troisième confirmation de l'acquis d'US-01.1** : la couverture de lignes est **aveugle à ce qui n'a
+    jamais été essayé** — ici elle **MONTE** à 97,9 % *sur le diff qui introduit le bloquant*.
+  - ✅ **Prouvé BON par exécution, et il faut le lire** : validation **au domaine** et non dans le widget,
+    les deux côtés de chaque borne · **R-10 prouvé** *(édition vers le passé **et** vers le 31/02 refusées
+    ⇒ le contournement en deux gestes est fermé)* · **NM-9 est honnête** *(l'heure inexistante du saut DST
+    est réellement refusée sur ce poste)* · **aucune traversée de répertoire** *(`id =
+    "../../../../etc/passwd"` accepté **comme id** et **jamais** utilisé comme chemin)* · version **future**
+    ⇒ **aucune écriture**, disque strictement inchangé · illisible ⇒ **`rename`, jamais `delete`** · résidus
+    et doublons d'`id` **ré-émis verbatim** *(R-2 tenu)* · **`gitleaks` 8.30.1 : `no leaks found`** sur
+    l'arbre **et** sur les 22 commits · **aucune surface réseau**, aucune injection *(`jsonEncode` seul, 0
+    JSON construit à la main)*, aucun `print` de contenu utilisateur.
+  - **Non bloquants** : **N-1** *(MEDIUM, **NON EXÉCUTÉ** — Windows a refusé la création du lien)*
+    `echeances.json.tmp` **prévisible**, suivi de lien possible · **N-2** *(MEDIUM)*
+    `getApplicationDocumentsDirectory()` = `Documents` **PARTAGÉ** sous Windows/Linux et **sauvegardé par
+    iCloud par défaut** sous iOS, **en tension avec la promesse d'AC-10** ⇒ **arbitrage @PO, porté à
+    US-01.3** · **N-3** `check_e2e_persistance.py` **absent de la CI** *(même dette que les autres
+    `selftest`)* · **N-4** « 24 paquets transitifs » **écrit à la main** : la mesure donne **24 ajoutés dont
+    23 transitifs** *(classe de défaut nº 1, jusque dans le visa @Dev)* · **N-5** **chemin de poste en dur**
+    dans `generer_e2e.py`, sur un **dépôt public** · **N-6** **aucune borne de taille en lecture** *(8 Mo et
+    200 000 entrées acceptés)* · **N-7** `migrer(racine)!` · **N-8** le port n'impose pas les règles métier ·
+    **N-9** permissions **non mesurables** sous Windows · **N-10** *(INFO)* `U+202E` accepté.
+  - ⚠️ **Relevé au passage et non signalé jusqu'ici** : le gate `deps_audit` porte **`"blocking": false`**
+    ⇒ **même s'il détectait un jour quelque chose, il ne bloquerait pas**.
+  - ⛔ **CE QUE CET AUDIT N'ATTESTE PAS** : **aucun SAST n'existe** *(`run_gates --gate sast` → **exit 1**,
+    le gate n'existe pas)* ⇒ **toute la revue est humaine, donc non exhaustive — et B-1 le prouve** ·
+    **aucun scan de CVE sur rien** *(`dart pub outdated` mesure l'**obsolescence**)* : les **24 paquets
+    ajoutés** et les **~342 lignes de Python** entrent **sans qu'aucune base de vulnérabilités ait été
+    consultée** · **N-1 et N-2 non exécutés** · permissions **non mesurées** · **NM-10** *(web exécuté)* et
+    **NM-8** *(`path_provider` exercé)* **entières**.
+
+- **⏳ Reste dû** : **⛔ RETOUR À @Developer — l'audit sécurité est en ÉCHEC.** Correctif de **B-1** *(avec
+  son test : un document **écrit en OCTETS non UTF-8**, classe que le harnais actuel **ne peut pas
+  produire**)*, puis **re-audit sécurité en contexte frais** — ⛔ **la revue de code devra elle aussi être
+  RAFRAÎCHIE si le correctif touche `lib/`** *(application directe de **NB-6** : le visa `✅ 🔍` porte sur
+  `5272ed1`, et **aucune machine ne sait dire qu'il a périmé**)*. **Ensuite seulement, QA.**
+  **Phase INCHANGÉE : `parallel_audit`.**
   ⚖️ **ARBITRAGE HUMAIN DU 2026-08-07 — LE CLIQUET RESTE À 95,2. ⛔ Ne pas le re-litiger.**
   Le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) : **97.8** »* — ⚠️ **c'est un AVIS, pas un
   échec** : `app.test` rend **✅** et la ligne `[HAUSSE]` est **informative**. ⛔ **Ne pas la lire comme
