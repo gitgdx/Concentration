@@ -108,6 +108,14 @@ class MagasinTemporaire {
 ///   l'écriture N'A PAS EU LIEU** ;
 /// * la même chose **répétée** ⇒ le fichier est écrit.
 ///
+/// ⚠️ **Le nombre de tours est GÉNÉREUX et la sortie est ANTICIPÉE** : sous la
+/// charge d'une suite complète *(plusieurs fichiers en parallèle)*, une chaîne
+/// de **deux** entrées-sorties réelles *(écriture puis rechargement)* met
+/// sensiblement plus longtemps qu'isolée. Un nombre juste suffisant **en
+/// isolement** produit un test **INSTABLE en suite** — observé, puis corrigé.
+/// La condition `jusqua` fait que le coût n'est payé **que** si l'attente est
+/// réelle.
+///
 /// ⛔ **Sans cet utilitaire, un E2E qui tape « Enregistrer » serait VERT en
 /// n'écrivant RIEN** — exactement le faux vert qu'ADR-010 §1 existe pour
 /// interdire. ⚠️ Et il aurait été **indétectable** : l'écran, lui, se met bien
@@ -115,14 +123,14 @@ class MagasinTemporaire {
 Future<void> reglerEcritures(
   WidgetTester tester, {
   bool Function()? jusqua,
-  int tours = 15,
+  int tours = 40,
 }) async {
   for (var i = 0; i < tours; i++) {
     await tester.pump();
     await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
     );
-    await tester.pump(const Duration(milliseconds: 5));
+    await tester.pump(const Duration(milliseconds: 10));
     if (jusqua != null && jusqua()) return;
   }
 }
