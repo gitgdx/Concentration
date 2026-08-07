@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | development_start | ✅ @PO | ✅ @Data | ✅ @UX | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2043,8 +2043,62 @@
     refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire « non
     déployable », la trace ne sait pas dire « le périmètre a changé ».
 
-- **⏳ Reste dû** : **@Developer**, tâches **T1 → T15**. ⚠️ **Le cliquet est à marge NULLE** — chaque tâche
+- ⛔ **PÉRIMÉ-2026-08-07** *(les 15 tâches sont livrées — voir le visa ci-dessous)*.
+  **⏳ Reste dû** : **@Developer**, tâches **T1 → T15**. ⚠️ **Le cliquet est à marge NULLE** — chaque tâche
   livre **son code ET ses tests dans le MÊME commit**, budget **`U ≤ 0,048·N + 0,152`**.
+
+- **✅ @Dev (2026-08-07) — 15/15 tâches, 16 commits. `EVT_CODE_READY` émis.**
+  **Tout ce qui suit a été REJOUÉ par @Architect, pas relu** *(séparation des pouvoirs : ⛔ ce visa n'est
+  PAS une certification, et @Developer a refusé de se certifier lui-même)*.
+  - **`run_gates --all` → exit 0, 5 gates** dont **`flutter build web --release`**. **344 tests**
+    *(112 → 344, **+232**)*. **Couverture 97,9 % (926/946)**, cliquet **95,2** — valeur **LUE dans la
+    sortie du gate**, ⛔ jamais estimée.
+  - 🎯 **LE CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00 EST SATISFAIT — la PREMIÈRE MIGRATION RÉELLEMENT
+    EXÉCUTÉE DU PROJET.** `migration_roundtrip_criterion.py` rend **`exit 0`**, **8 assertions vertes** :
+    *« le patron est INSTANCIÉ ET EXÉCUTÉ sur le premier schéma réel du projet »*. ⛔ **Et il l'est par le
+    CODE, pas par un critère abaissé** — **vérifié par @Architect** : le script porte **un seul commit
+    dans son historique** *(`2f9a57f`, celui de @DataEngineer)*, il est **bit-à-bit celui qui rendait
+    `exit 1` la veille**. **`non_inversibles_ici=a4,a6`** prouve que la **garde d'inversibilité est
+    EXERCÉE**, pas seulement écrite.
+  - **`check_gherkin_mapping` → 50 ↔ 50 *et* 13 ↔ 13, exit 0** *(T14 enregistrée **en dernier**, R-7
+    respecté)* · **`check_e2e_persistance` → CONFORME, 0 écart** *(les deux contrôles d'ADR-010 §1)*.
+  - **`sample_echeances.dart` est SORTI de `lib/`** vers `test/support/` — le déplacement qui rendait
+    `353/371 = 95,1482 %` **ROUGE** s'il avait été fait seul.
+  - 🔬 **QUATRE DÉFAUTS TROUVÉS PAR EXÉCUTION, JAMAIS PAR RELECTURE — et le nº 2 est un faux vert de la
+    classe exacte qu'ADR-010 existe pour empêcher** :
+    **①** fabriquer le texte candidat d'une **saisie** avec `DateTime` **normalise en silence** ⇒ la
+    mutation à refuser **serait déjà commise avant le prédicat** · **②** ⛔ **une écriture disque réelle
+    déclenchée par un tap N'ABOUTIT PAS sous `testWidgets`** ⇒ **l'E2E aurait été VERT EN N'ÉCRIVANT
+    RIEN**, et **indétectable** *(l'écran, lui, se met à jour)* · **③** un `tooltip` **ne renseigne pas**
+    le label sémantique ⇒ « Gérer les échéances » n'aurait eu **aucun nom accessible** · **④** sous
+    Windows le `rename` de l'écriture atomique **verrouille la cible** ⇒ le harnais levait **1 fois sur
+    3** et ⛔ **l'échec s'imputait au produit**.
+  - 🔬 **SIX MUTANTS JOUÉS, ET L'UN A SURVÉCU POUR LE CORRIGER** *(comme @Architect la veille)* : recharger
+    après un échec est **inoffensif** — ce **n'était pas** une mise à jour optimiste. La vraie est tuée
+    par le **scénario 48**. 📌 **Mesure la plus forte du lot** : le mutant *« écrire sans toucher un
+    octet »* **tue 23 des 50 scénarios** ⇒ les E2E **touchent réellement le disque**.
+  - **U-2 tranché par @Developer → champs textuels**, ⛔ **et pas pour la langue** : un sélecteur natif
+    **ne peut pas produire `31/02`**, il rendrait **les 2 scénarios d'AC-16 INOBSERVABLES**. **+0
+    dépendance** ⇒ aucune escalade. *(Application directe du corollaire de @UXDesigner : ce qui doit être
+    refusé doit d'abord pouvoir être saisi.)*
+  - **AC-17 éprouvé SANS magasin factice** *(ADR-010 §1)* : créer un **répertoire** nommé
+    `echeances.json.tmp` fait échouer le `writeAsString` **du code de production** par une
+    `FileSystemException` **réelle** — et c'est **réversible**, ce que le 2ᵉ scénario exige.
+  - ⛔ **CE QUE CE VISA N'ATTESTE PAS** : **aucun écran n'a été vu** · **`main()` n'a JAMAIS été exécuté**
+    *(`path_provider` n'existe pas en test hôte)* · l'application **n'a jamais tourné sur un appareil** ·
+    **NM-1, NM-2, NM-4 → NM-10 sont TOUTES ENTIÈRES**, ⛔ **aucune déguisée en test vert** — le refus
+    d'une **heure civile inexistante n'est PAS démontré**, seul son **ancrage** l'est *(NM-9)* · le
+    contraste est **calculé, jamais vu** *(NM-7)* · les `Semantics` sont **présents**, rien ne prouve
+    qu'un lecteur d'écran les **prononce** *(NM-6)* · **aucun SAST, aucun scan de CVE** sur les **24
+    paquets transitifs** de `path_provider` ni sur le Python ajouté · `check_gherkin_mapping` compare des
+    **titres**, ⛔ **il ne dit rien de ce que les 50 tests vérifient** · et ⛔ **le verdict QA d'US-01.1
+    reste PÉRIMÉ** — @Developer l'a **transmis**, il ne l'a **pas rafraîchi**.
+
+- **⏳ Reste dû** : **`/audit-us US-01.2`** *(contextes frais — Constitution Art. 2)*, puis **QA**.
+  ⚠️ **ACTION HUMAINE EN ATTENTE** : le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) :
+  **97.8** »*. `factory.config.json` est **protégé** ⇒ ⛔ **aucun agent ne l'édite**. Relever le cliquet
+  de **95,2 → 97,8** fermerait **2,6 points de marge** pour les US suivantes — **c'est un arbitrage, pas
+  une évidence.**
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
