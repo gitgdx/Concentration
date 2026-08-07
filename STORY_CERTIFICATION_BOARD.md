@@ -2095,10 +2095,16 @@
     reste PÉRIMÉ** — @Developer l'a **transmis**, il ne l'a **pas rafraîchi**.
 
 - **⏳ Reste dû** : **`/audit-us US-01.2`** *(contextes frais — Constitution Art. 2)*, puis **QA**.
-  ⚠️ **ACTION HUMAINE EN ATTENTE** : le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) :
-  **97.8** »*. `factory.config.json` est **protégé** ⇒ ⛔ **aucun agent ne l'édite**. Relever le cliquet
-  de **95,2 → 97,8** fermerait **2,6 points de marge** pour les US suivantes — **c'est un arbitrage, pas
-  une évidence.**
+  ⚖️ **ARBITRAGE HUMAIN DU 2026-08-07 — LE CLIQUET RESTE À 95,2. ⛔ Ne pas le re-litiger.**
+  Le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) : **97.8** »* — ⚠️ **c'est un AVIS, pas un
+  échec** : `app.test` rend **✅** et la ligne `[HAUSSE]` est **informative**. ⛔ **Ne pas la lire comme
+  une obligation non traitée.** `factory.config.json` est **protégé** ⇒ ⛔ **aucun agent ne l'édite**, et
+  aucun ne l'a édité.
+  **Motif du choix** : monter à **97,8** verrouillerait l'acquis mais **fermerait 2,6 points de marge**
+  pour toutes les US suivantes, en reconduisant la contrainte de marge nulle qu'US-01.2 vient de subir.
+  ⚠️ **Ce que la décision COÛTE, et il faut le savoir** : **rien n'empêche désormais une US future de
+  redescendre à 95,2** — les **2,6 points gagnés ne sont PAS protégés**, c'est le prix **assumé** de la
+  marge. *(Le cliquet **ne monte jamais seul** : c'est une constante depuis US-00.6.)*
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 
