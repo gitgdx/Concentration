@@ -13,6 +13,8 @@ import 'package:concentration/features/hub/presentation/hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/echeances_exemple.dart';
+import '../support/magasin_temporaire.dart';
 import '../support/rendu_couleur.dart';
 
 /// Scénarios de track FULL (T12a) — un test par scénario du `.feature`.
@@ -27,11 +29,10 @@ import '../support/rendu_couleur.dart';
 /// compris : `scripts/check_gherkin_mapping.py` le vérifie dans les deux sens.
 void main() {
   final maintenant = DateTime(2026, 8, 1, 12);
+  late MagasinTemporaire harnais;
 
-  Future<void> lancerApp(WidgetTester tester) async {
-    await tester.pumpWidget(ConcentrationApp(clock: FakeClock(maintenant)));
-    await tester.pump();
-  }
+  setUp(() => harnais = MagasinTemporaire.creer());
+  tearDown(() => harnais.nettoyer());
 
   /// ⛔ Monte la RACINE de l'application, jamais un sous-arbre.
   ///
@@ -39,11 +40,29 @@ void main() {
   /// `MaterialApp(home: HubPage)` — or c'est le fait de monter **l'application
   /// entière** qui a autorisé ADR-008 §1 à écarter `integration_test/`. Monter
   /// un sous-arbre, c'était garder l'autorisation sans tenir sa contrepartie.
+  ///
+  /// ⚖️ **US-01.2 (T11) — le seam `echeances:` A DISPARU** (ADR-011 §5). Le
+  /// jeu de données ne s'injecte plus : il est **ÉCRIT SUR LE DISQUE**, puis
+  /// **relu par le code de production**. ⛔ Aucun titre de scénario n'est
+  /// modifié ; c'est le CHEMIN qui change, pas ce qui est vérifié — et il
+  /// traverse désormais de vrais octets, comme ADR-010 §1 l'exige.
   Future<void> lancerAvec(WidgetTester tester, List<Echeance> echeances) async {
+    final notifier = await notifierCharge(
+      tester,
+      harnais,
+      echeances,
+      clock: FakeClock(maintenant),
+    );
     await tester.pumpWidget(
-      ConcentrationApp(clock: FakeClock(maintenant), echeances: echeances),
+      ConcentrationApp(notifier: notifier, clock: FakeClock(maintenant)),
     );
     await tester.pump();
+  }
+
+  Future<void> lancerApp(WidgetTester tester) async {
+    // Le jeu d'exemple ne vit plus dans `lib/` (AC-13) : il est POSÉ sur le
+    // disque comme n'importe quelle donnée de pratiquant.
+    await lancerAvec(tester, EcheancesExemple.depuis(FakeClock(maintenant)));
   }
 
   Echeance e(String id, Duration dans, [String d = 'Libellé']) =>
@@ -157,7 +176,13 @@ void main() {
       findsOneWidget,
       reason: 'commande « réglages » absente',
     );
-    for (final icone in [Icons.add, Icons.settings]) {
+    // ⚖️ **AMENDEMENT US-01.2 (T11), et il était ANNONCÉ ET MESURÉ** — l'étape
+    // du `.feature` est désormais bornée « au périmètre d'US-01.1 » (décision
+    // humaine du 2026-08-04), parce qu'AC-1 d'US-01.2 active UNE commande.
+    // ⛔ La boucle est RESSERRÉE sur `Icons.settings`, ⛔ PAS SUPPRIMÉE :
+    // « Réglages » doit RESTER non-interactif (AC-1 « Limite » d'US-01.2).
+    // ⛔ Le titre du scénario est INCHANGÉ.
+    for (final icone in [Icons.settings]) {
       expect(
         find.ancestor(
           of: find.byIcon(icone),
@@ -182,9 +207,16 @@ void main() {
     expect(
       find.byType(HubPage),
       findsOneWidget,
-      reason: 'aucune commande ne navigue',
+      reason: 'aucune commande HORS PÉRIMÈTRE ne navigue',
     );
-    expect(find.bySemanticsLabel('Ajouter une échéance'), findsOneWidget);
+    // ⚖️ Le libellé de la commande d'ajout devient « Gérer les échéances » :
+    // annoncer « Ajouter » en ouvrant une liste MENTIRAIT au lecteur d'écran.
+    expect(find.bySemanticsLabel('Gérer les échéances'), findsWidgets);
+    expect(
+      find.bySemanticsLabel('Ajouter une échéance'),
+      findsNothing,
+      reason: '⛔ l’ancien libellé ne doit subsister NULLE PART',
+    );
     expect(find.bySemanticsLabel('Réglages'), findsOneWidget);
   });
 

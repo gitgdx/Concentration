@@ -17,6 +17,11 @@ import 'dart:io';
 import 'package:concentration/core/time/clock.dart';
 import 'package:concentration/features/echeances/data/document_store.dart';
 import 'package:concentration/features/echeances/data/document_store_io.dart';
+import 'package:concentration/features/echeances/data/echeance_document_codec.dart';
+import 'package:concentration/features/echeances/data/echeance_document_repository.dart';
+import 'package:concentration/features/echeances/data/echeance_schema_migrations.dart';
+import 'package:concentration/features/echeances/domain/echeance.dart';
+import 'package:concentration/features/echeances/presentation/echeances_notifier.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Un magasin fichier neuf, dans un répertoire temporaire **qui lui est
@@ -43,7 +48,28 @@ class MagasinTemporaire {
   ///
   /// ⛔ C'est cette lecture — et non le rendu d'un widget — que les scénarios
   /// parlant du stockage doivent assertionner (ADR-010 §1, point 3).
-  String? octets() => fichier.existsSync() ? fichier.readAsStringSync() : null;
+  ///
+  /// 🔴 **DÉFAUT DE HARNAIS TROUVÉ PAR EXÉCUTION, ⛔ PAS un défaut du produit.**
+  /// Sous Windows, le `rename` de l'**écriture atomique** verrouille brièvement
+  /// la cible (`errno 32`, *« le fichier est utilisé par un autre
+  /// processus »*). Une lecture **synchrone** tombant dans cette fenêtre
+  /// **LÈVE** — et l'échec s'imputait au **produit**, sur un test **une fois
+  /// sur trois**. Or ce n'est NI « le fichier n'existe pas », NI « le contenu
+  /// vaut X » : c'est **« pas lisible à cet instant »**.
+  ///
+  /// ⛔ **On ne rend JAMAIS une valeur mémorisée** *(ce serait un mensonge, et
+  /// c'est précisément le mutant que le test du harnais tue)* et ⛔ **on
+  /// n'avale JAMAIS l'erreur** : on réessaie brièvement, puis on **RELÈVE**.
+  String? octets() {
+    for (var essai = 0; ; essai++) {
+      try {
+        return fichier.existsSync() ? fichier.readAsStringSync() : null;
+      } on FileSystemException {
+        if (essai >= 40) rethrow;
+        sleep(const Duration(milliseconds: 5));
+      }
+    }
+  }
 
   /// Pose un contenu **directement sur le disque**, avant tout démarrage.
   void poser(String contenu) => fichier.writeAsStringSync(contenu, flush: true);
@@ -93,6 +119,28 @@ class MagasinTemporaire {
       // Le système d'exploitation le récupérera.
     }
   }
+}
+
+/// Un notifier **ADOSSÉ AU DISQUE**, déjà chargé avec [echeances].
+///
+/// ⚖️ **Le seam `ConcentrationApp(echeances:)` d'US-01.1 a été SUPPRIMÉ**
+/// (ADR-011 §5) : un jeu de données ne s'**injecte** plus, il s'**écrit**.
+/// Cette fonction est la voie de remplacement, et elle **traverse le codec, le
+/// magasin fichier et le dépôt de PRODUCTION** — ⛔ elle ne court-circuite rien.
+Future<EcheancesNotifier> notifierCharge(
+  WidgetTester tester,
+  MagasinTemporaire harnais,
+  List<Echeance> echeances, {
+  required Clock clock,
+}) async {
+  const codec = EcheanceDocumentCodec();
+  harnais.poser(codec.encoder(codec.documentNeuf(versionCourante), echeances));
+  final notifier = EcheancesNotifier(
+    depot: EcheanceDocumentRepository(harnais.magasin),
+    clock: clock,
+  );
+  await tester.runAsync(notifier.charger);
+  return notifier;
 }
 
 /// 🔴 **FAIT MESURÉ, et il gouverne TOUS les tests de widgets de cette US** :
