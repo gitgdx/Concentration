@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ❌ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2173,11 +2173,65 @@
     consultée** · **N-1 et N-2 non exécutés** · permissions **non mesurées** · **NM-10** *(web exécuté)* et
     **NM-8** *(`path_provider` exercé)* **entières**.
 
-- **⏳ Reste dû** : **⛔ RETOUR À @Developer — l'audit sécurité est en ÉCHEC.** Correctif de **B-1** *(avec
-  son test : un document **écrit en OCTETS non UTF-8**, classe que le harnais actuel **ne peut pas
-  produire**)*, puis **re-audit sécurité en contexte frais** — ⛔ **la revue de code devra elle aussi être
-  RAFRAÎCHIE si le correctif touche `lib/`** *(application directe de **NB-6** : le visa `✅ 🔍` porte sur
-  `5272ed1`, et **aucune machine ne sait dire qu'il a périmé**)*. **Ensuite seulement, QA.**
+- **🔁 CYCLE DE CORRECTIF @Developer (2026-08-10) — `EVT_CODE_READY` RÉ-ÉMIS. ⚠️ LES DEUX CELLULES
+  D'AUDIT SONT REMISES À `⏳` PAR @Architect, ET C'EST LE CŒUR DE CE CYCLE.** Les visas du 2026-08-07
+  portaient sur **`5272ed1`** ; le code a changé ⇒ **ils sont périmés**, y compris le `✅ 🔍` qui était
+  **PASSED**. Commits : **`ca05128`** *(B-1)* et **`2d77778`** *(NB-B + NB-A)* — **visa de code sur
+  `2d77778`**, `HEAD` = **`cd789d5`** *(trace + PROJECT_LOG seuls : `git diff --name-only 2d77778..HEAD --
+  lib test scripts pubspec.*` rend **0 fichier**)*. Ré-émission légitime, **précédent d'US-01.1 du
+  2026-08-02T17:08** après son `EVT_QA_FAILED`.
+  - 🔴 **CE QUE CE CYCLE A ÉTABLI SUR LES INSTRUMENTS, ET QUI VAUT AU-DELÀ D'US-01.2** :
+    ⛔ **`EVT_QA_PASSED` n'exige que la PRÉSENCE de `EVT_CODE_REVIEW_PASSED` et
+    `EVT_SECURITY_AUDIT_PASSED`, sans AUCUNE contrainte d'ordre par rapport au dernier
+    `EVT_CODE_READY`** *(lu dans `scripts/events_catalog.json`, pas supposé)* ⇒ **rien dans la machine à
+    états n'aurait empêché une QA de consommer un visa périmé.** La remise à `⏳` est donc une **décision
+    humaine**, jamais une barrière. **5ᵉ instance de la même famille structurelle** *(le SCB ne sait pas
+    dire « QA à refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire
+    « non déployable », la trace ne sait pas dire « le périmètre a changé »)*. ➡️ **`/audit-methodo`.**
+  - ✅ **B-1 corrigé — et @Developer a ÉCARTÉ le correctif minimal de l'auditeur, en écrivant pourquoi.**
+    Au lieu d'une **sentinelle non-JSON** *(qui ne tient qu'à ce que l'appelant traite par chance une
+    valeur magique comme du JSON invalide)*, le port rend un **type SCELLÉ `LectureDocument`**
+    *(`DocumentAbsent` · `DocumentIllisible` · `DocumentLu`)* et `charger()` en fait un **`switch`
+    exhaustif** ⇒ **une barrière de COMPILATION remplace une discipline** : une future implémentation du
+    port **ne PEUT PAS** omettre le cas. Symétrie assumée avec `ResultatEcriture` *(« jamais `void` »)*.
+    ⛔ **Ni `allowMalformed`, ni `delete`** — vérifié par @Architect : `allowMalformed` n'apparaît **que
+    dans un commentaire qui le refuse**, et il n'y a **aucun `.delete`** dans la couche data ; la mise de
+    côté est un **`rename`**.
+    ⚠️ **Ce n'est PAS le correctif de 4 lignes annoncé** : **5 fichiers de production** touchés, dont le
+    **contrat du port**. ➡️ **La re-revue de code a donc une surface RÉELLE, pas formelle.**
+  - 🔬 **4 MUTANTS JOUÉS, 4 TUÉS, 0 SURVIVANT** *(arbre restauré, `git status` vide)* — dont **M2 =
+    `allowMalformed: true`, le correctif proscrit** : **TUÉ** par `Expected: empty / Actual: [Instance of
+    'Echeance']`, c'est-à-dire **la preuve PAR EXÉCUTION que ce correctif ferait AFFICHER l'échéance
+    altérée**. *(M1 garde retirée · M3 acte recodé en dur · M4 `remplacer` qui refuse.)*
+  - ✅ **La classe d'entrée qui était INVISIBLE est désormais produisible** : le harnais gagne
+    `poserOctets` / `octetsBruts`, là où `poser(String) → writeAsStringSync` **ne pouvait produire que de
+    l'UTF-8 valide**. **+12 tests** *(344 → **356**)*.
+  - ✅ **Placement des tests : voie (a) — hors du couple bidirectionnel** ⇒ `50 ↔ 50` **intact** et ⛔
+    **aucun nombre dérivé n'a bougé** *(le défaut ⑤ — « un nombre dérivé écrit à la main 23 fois » — n'est
+    pas déclenché)*. Motif de fond : **`main()` n'est pas exécutable en test hôte** *(`path_provider`
+    absent, **NM-8**)*, donc `charger()` sur le magasin **`io` réel** est le **niveau honnête**.
+  - ✅ **NB-A tranché : c'est la DOC qui avait tort**, pas l'implémentation — **aucun AC n'exige ce refus**,
+    et l'exiger créerait une **clause sans surface** *(acquis ② du design)*. **Changer le comportement
+    aurait été un changement de périmètre dans un cycle de correctif.** **NB-B corrigé et atteignable —
+    mesuré, pas supposé** : deux chemins réels **sans aucun fake**, avec contrôle négatif.
+  - **Compteurs relevés par @Architect lui-même, pas repris du rapport** : `run_gates --all` → **5 gates
+    verts**, **356 tests**, couverture **97.9 % (938/958)** contre cliquet **95.2 inchangé**
+    *(`factory.config.json` non édité)* · `check_gherkin_mapping` **50 ↔ 50** et **13 ↔ 13** ·
+    `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT, 8 assertions** ·
+    `validate_trace` et `check_scb_compliance` **conformes**.
+  - ⛔ **CE QUE CE CORRECTIF N'ATTESTE PAS** : **`runApp` ne s'exécute toujours pas en test** et **le hub ne
+    se dresse pas** — le niveau prouvé s'arrête à `charger()` sur le magasin `io` réel *(**NM-8
+    entière**)* · **NM-10 entière** *(aucun appareil, web non exécuté)* · **aucun SAST, aucun scan de
+    CVE** — *la revue qui a trouvé B-1 était **humaine**, donc la prochaine peut manquer autre chose* ·
+    **la couverture monte encore et cela ne prouve rien** sur la force des assertions : seuls les mutants
+    le font · le chemin de **NB-A reste inatteignable depuis l'IHM**, donc **aucun scénario ne l'observe**.
+  - **Non traités par choix assumé** *(précédent du **GEL** d'US-00.6 : on n'ouvre pas un cycle pour du non
+    bloquant)* : **N-2** → arbitrage @PO, **US-01.3** · **NB-C** et **N-3** → **US-00.8 /
+    `/audit-methodo`** · **N-5 → N-10**.
+
+- **⏳ Reste dû** : **`/audit-us US-01.2` À REJOUER EN ENTIER sur `cd789d5`** — ⛔ **les DEUX audits, pas
+  seulement la sécurité** *(application directe de **NB-6**, et de la borne mesurée ci-dessus : la machine
+  à états ne sait pas périmer un visa)*. **Ensuite seulement, QA.**
   **Phase INCHANGÉE : `parallel_audit`.**
   ⚖️ **ARBITRAGE HUMAIN DU 2026-08-07 — LE CLIQUET RESTE À 95,2. ⛔ Ne pas le re-litiger.**
   Le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) : **97.8** »* — ⚠️ **c'est un AVIS, pas un
