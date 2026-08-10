@@ -35,11 +35,44 @@ class DocumentStoreFichier implements DocumentStore {
   /// de ce qui rend AC-12 « Erreur » vrai **par construction**.
   File get _provisoire => File('${_cible.path}.tmp');
 
+  /// 🔴 **LA GARDE QUI FERME LE BLOQUANT `B-1`** *(audit sécurité du
+  /// 2026-08-07)*, et ⛔ **elle ne se relit pas : elle se MESURE.**
+  ///
+  /// `File.readAsString()` décode en UTF-8 **STRICT** et **LÈVE** une
+  /// `FileSystemException` — *« Failed to decode data using encoding 'utf-8' »*
+  /// — dès qu'**un seul octet** n'est pas décodable, dans un JSON par ailleurs
+  /// **parfaitement valide**. C'est le cas de « révision » enregistré en
+  /// **cp1252** par l'éditeur de texte du système, d'une **troncature** tombant
+  /// au milieu d'une séquence multi-octets *(le mot littéral d'AC-11)*, ou d'une
+  /// **restauration de sauvegarde partielle**.
+  ///
+  /// **Sans cette garde, l'exception traversait `charger()` puis `main()`, qui
+  /// l'`await` AVANT `runApp` ⇒ l'application ne démarrait plus jamais** ; et
+  /// comme l'échec avait lieu **à la lecture**, [mettreDeCote] n'était **jamais
+  /// atteint** ⇒ le document fautif **restait en place**, sans aucune issue
+  /// depuis l'application.
+  ///
+  /// ⚠️ **Le `try` n'entoure QUE la lecture, pas le test d'existence** : rendre
+  /// [DocumentIllisible] pour un fichier **absent** ferait mettre de côté ce qui
+  /// n'existe pas et **brouillerait `v0`**.
   @override
-  Future<String?> lire() async {
+  Future<LectureDocument> lire() async {
     final cible = _cible;
-    if (!cible.existsSync()) return null;
-    return cible.readAsString();
+    if (!cible.existsSync()) return const DocumentAbsent();
+    try {
+      return DocumentLu(await cible.readAsString());
+    } on FileSystemException {
+      // ⛔ Ni `allowMalformed`, ni valeur par défaut, ni fichier réparé : le
+      // document est traité comme ILLISIBLE, donc mis de côté par `rename` en
+      // amont — jamais réécrit, jamais supprimé (AC-11 « Erreur »).
+      //
+      // ⚠️ Le type attrapé est ÉTROIT par choix : `FileSystemException` couvre
+      // l'échec de décodage, le droit refusé et la disparition du fichier entre
+      // le test et la lecture (fenêtre TOCTOU). ⛔ Un `on Object` masquerait en
+      // plus les erreurs de programmation, ce qui rendrait un défaut futur
+      // INVISIBLE — exactement la classe de bug que cette garde corrige.
+      return const DocumentIllisible();
+    }
   }
 
   /// 🔴 **ÉCRITURE ATOMIQUE, TOUJOURS** : `.tmp` + `flush: true` + `rename`.

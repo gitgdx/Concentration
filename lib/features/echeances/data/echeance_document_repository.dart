@@ -23,14 +23,28 @@ class EcheanceDocumentRepository implements EcheanceRepository {
   /// [_ecrire]).
   DocumentEcheances? _document;
 
+  /// 🔴 **⛔ NE LÈVE JAMAIS** : `main()` l'`await` **avant `runApp`**, donc toute
+  /// exception qui sortirait d'ici **empêcherait l'application de démarrer** —
+  /// c'était le bloquant `B-1` (audit sécurité du 2026-08-07).
   @override
   Future<List<Echeance>> charger() async {
-    final texte = await magasin.lire();
-    if (texte == null) {
-      // `v0` — aucun fichier. L'état vide est ici RÉELLEMENT atteignable
-      // (AC-13 « Erreur »), et ⛔ rien n'est écrit avant un geste utilisateur.
-      _document = codec.documentNeuf(versionCourante);
-      return const <Echeance>[];
+    final String texte;
+    // ⚖️ `switch` sur un type SCELLÉ, donc EXHAUSTIF : le jour où le port gagne
+    // un quatrième cas, le compilateur **refuse ce fichier** au lieu de laisser
+    // l'application démarrer sur une branche non traitée.
+    switch (await magasin.lire()) {
+      case DocumentAbsent():
+        // `v0` — aucun fichier. L'état vide est ici RÉELLEMENT atteignable
+        // (AC-13 « Erreur »), et ⛔ rien n'est écrit avant un geste utilisateur.
+        _document = codec.documentNeuf(versionCourante);
+        return const <Echeance>[];
+      case DocumentIllisible():
+        // Le fichier EXISTE et n'a pas pu être lu (octets non décodables, droit
+        // refusé). ⛔ Ce n'est PAS `v0` : écrire sans mettre de côté écraserait
+        // un document qu'on n'a pas su lire.
+        return _misDeCotePuisEtatVide();
+      case DocumentLu(contenu: final lu):
+        texte = lu;
     }
 
     final racine = codec.lireRacine(texte);
@@ -39,10 +53,7 @@ class EcheanceDocumentRepository implements EcheanceRepository {
       // Document ENTIER illisible, ou `schemaVersion` absent / non entier /
       // `< 1`. ⛔ On ne DEVINE jamais une version : deviner « c'est sûrement du
       // v1 », c'est risquer d'appliquer un `up` sur une forme incomprise.
-      // ⇒ mise de côté par `rename`, puis état vide. ⛔ JAMAIS un `delete`.
-      await _mettreDeCoteSansBruit();
-      _document = codec.documentNeuf(versionCourante);
-      return const <Echeance>[];
+      return _misDeCotePuisEtatVide();
     }
 
     if (version > versionCourante) {
@@ -122,6 +133,23 @@ class EcheanceDocumentRepository implements EcheanceRepository {
       return ResultatEcriture.echec(acte);
     }
     return const ResultatEcriture.reussie();
+  }
+
+  /// Mise de côté **par `rename`** puis état vide — ⛔ **JAMAIS un `delete`**.
+  ///
+  /// ⚖️ **En UN SEUL exemplaire** *(règle du projet : « une règle n'existe qu'en
+  /// un seul exemplaire »)* : les **deux** familles d'illisible — le document
+  /// que le magasin n'a pas su rendre *(`B-1`)* et celui dont la racine ou la
+  /// version est incompréhensible — doivent aboutir **exactement** au même
+  /// traitement. Deux copies auraient dérivé.
+  ///
+  /// ⛔ Après cette mise de côté, `_document` est un document **NEUF** : la
+  /// prochaine écriture est **légitime** et n'écrase plus rien — **c'est ce qui
+  /// ferme la PERMANENCE de `B-1`**, où chaque démarrage échouait à l'identique.
+  Future<List<Echeance>> _misDeCotePuisEtatVide() async {
+    await _mettreDeCoteSansBruit();
+    _document = codec.documentNeuf(versionCourante);
+    return const <Echeance>[];
   }
 
   Future<void> _mettreDeCoteSansBruit() async {

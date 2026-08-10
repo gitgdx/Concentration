@@ -24,7 +24,7 @@ class MagasinCompteur implements DocumentStore {
   int ecritures = 0;
 
   @override
-  Future<String?> lire() => _delegue.lire();
+  Future<LectureDocument> lire() => _delegue.lire();
 
   @override
   Future<void> ecrire(String contenu) {
@@ -153,6 +153,87 @@ void main() {
         harnais.fichiers(),
         [nomDocument],
         reason: '⛔ un enregistrement fautif n’est NI réécrit NI mis de côté',
+      );
+    });
+
+    // -----------------------------------------------------------------------
+    // 🔴 **B-1 — LE NIVEAU HONNÊTE, et il est BORNÉ ; la borne est écrite, pas
+    // déguisée.** `main()` fait `await notifier.charger()` **avant `runApp`** :
+    // c'est cet `await` qui empêchait l'application de démarrer.
+    // ⛔ **`main()` n'est PAS exécutable en test hôte** — `path_provider` n'y
+    // existe pas *(borne **NM-8**, entière)* ⇒ ce qui est prouvé ici est que
+    // **`charger()` REND au lieu de LEVER**, sur le **magasin `io` de
+    // production**. Que `runApp` s'exécute ensuite et que le hub se dresse
+    // **reste non observé** ; ⛔ un magasin factice, lui, contournerait la garde
+    // et rendrait ces tests **verts à tort**.
+    // -----------------------------------------------------------------------
+
+    test(
+      '🔴 B-1 — un document NON DÉCODABLE : charger() REND l’état vide, et le '
+      'fautif est CONSERVÉ OCTET POUR OCTET',
+      () async {
+        final fautif = documentNonDecodable();
+        harnais.poserOctets(fautif);
+
+        // ⛔ L'ASSERTION QUI PORTE TOUT : avant le correctif, cet appel LEVAIT
+        // une FileSystemException ⇒ `runApp` n'était jamais atteint.
+        expect(await depotSur(harnais.magasin).charger(), isEmpty);
+
+        final misDeCote = harnais.fichiers().single;
+        expect(
+          misDeCote,
+          startsWith('$nomDocument.illisible-'),
+          reason: '⛔ JAMAIS un delete (AC-11 « Erreur »)',
+        );
+        expect(
+          harnais.octetsBrutsDe(misDeCote),
+          fautif,
+          reason:
+              'assertion SUR LES OCTETS : ni réécrit, ni réparé, ni tronqué — '
+              '⛔ `allowMalformed` aurait figé la corruption ici',
+        );
+        expect(
+          harnais.octetsBruts(),
+          isNull,
+          reason: 'la cible a bougé ⇒ l’application peut écrire de nouveau',
+        );
+      },
+    );
+
+    test('🔴 B-1 — la PERMANENCE est FERMÉE : le 2ᵉ démarrage aboutit et '
+        'l’écriture redevient possible', () async {
+      harnais.poserOctets(documentNonDecodable());
+      expect(await depotSur(harnais.magasin).charger(), isEmpty);
+
+      // Une INSTANCE NEUVE, comme à la RÉOUVERTURE de l'application. Avant le
+      // correctif, la mise de côté n'était jamais atteinte ⇒ chaque démarrage
+      // échouait à l'identique, ⛔ sans aucune issue depuis l'application.
+      final depot = depotSur(harnais.magasin);
+      expect(await depot.charger(), isEmpty);
+      final reprise = await depot.creer(
+        Echeance(
+          id: 'apres',
+          description: 'Reprise',
+          dateEcheance: DateTime(2027, 12, 1, 23, 59),
+        ),
+      );
+      expect(
+        reprise.estReussi,
+        isTrue,
+        reason: 'sans mise de côté, l’écriture écraserait l’illisible',
+      );
+      expect(harnais.octets(), contains('"description":"Reprise"'));
+    });
+
+    test('🔴 CONTRÔLE NÉGATIF — le MÊME document en UTF-8 valide est CHARGÉ, '
+        'et ⛔ AUCUN rename', () async {
+      // Un seul octet diffère de la fixture ci-dessus, et le verdict BASCULE.
+      harnais.poserOctets(documentDecodable());
+      expect(await depotSur(harnais.magasin).charger(), hasLength(1));
+      expect(
+        harnais.fichiers(),
+        [nomDocument],
+        reason: '⛔ un document LISIBLE ne doit JAMAIS être mis de côté',
       );
     });
 

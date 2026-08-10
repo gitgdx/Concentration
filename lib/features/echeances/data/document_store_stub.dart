@@ -21,8 +21,12 @@ import 'document_store.dart';
 class DocumentStoreStub implements DocumentStore {
   const DocumentStoreStub();
 
+  /// ⛔ **`DocumentAbsent`, et ⛔ JAMAIS `DocumentIllisible`** : sur une
+  /// plateforme sans stockage il n'y a **rien à mettre de côté**, et annoncer
+  /// « illisible » ferait tenter un `rename` qui lève *(voir [mettreDeCote])*.
+  /// C'est bien `v0` : l'état vide, avec un `ecrire` qui **refuse en le disant**.
   @override
-  Future<String?> lire() async => null;
+  Future<LectureDocument> lire() async => const DocumentAbsent();
 
   @override
   Future<void> ecrire(String contenu) async {

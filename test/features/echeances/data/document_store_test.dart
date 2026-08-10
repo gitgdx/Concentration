@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:concentration/core/time/clock.dart';
@@ -8,6 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../support/magasin_temporaire.dart';
 
+/// Le contenu **effectivement lu** — ⛔ jamais un simple `isA<DocumentLu>()`,
+/// qui passerait sur un magasin rendant n'importe quoi.
+Matcher estLu(String contenu) =>
+    isA<DocumentLu>().having((l) => l.contenu, 'contenu', contenu);
+
 /// Le magasin de plateforme (T6) — **de VRAIS octets sur un VRAI disque**.
 void main() {
   late MagasinTemporaire harnais;
@@ -16,14 +22,14 @@ void main() {
   tearDown(() => harnais.nettoyer());
 
   group('DocumentStoreFichier — écriture ATOMIQUE, lecture, mise de côté', () {
-    test('aucun fichier ⇒ lire() rend null (c’est `v0`)', () async {
-      expect(await harnais.magasin.lire(), isNull);
+    test('aucun fichier ⇒ lire() rend DocumentAbsent (c’est `v0`)', () async {
+      expect(await harnais.magasin.lire(), isA<DocumentAbsent>());
     });
 
     test('écrire puis relire rend LES MÊMES OCTETS', () async {
       const contenu = '{"schemaVersion":2,"echeances":[]}';
       await harnais.magasin.ecrire(contenu);
-      expect(await harnais.magasin.lire(), contenu);
+      expect(await harnais.magasin.lire(), estLu(contenu));
       // ⚠️ Assertion sur le DISQUE, pas sur la valeur de retour : sans elle,
       // un magasin qui garderait tout en mémoire passerait.
       expect(harnais.octets(), contenu);
@@ -43,7 +49,7 @@ void main() {
       File('${harnais.fichier.path}.tmp').writeAsStringSync('MOITIE ECRIT');
       expect(
         await harnais.magasin.lire(),
-        isNull,
+        isA<DocumentAbsent>(),
         reason:
             'lire() ne regarde QUE la cible — c’est la moitié de ce qui '
             'rend AC-12 « Erreur » vrai par construction',
@@ -57,7 +63,7 @@ void main() {
         harnais.poser(origine);
         File('${harnais.fichier.path}.tmp').writeAsStringSync('MOITIE ECRIT');
         expect(harnais.octets(), origine);
-        expect(await harnais.magasin.lire(), origine);
+        expect(await harnais.magasin.lire(), estLu(origine));
       },
     );
 
@@ -111,14 +117,80 @@ void main() {
     );
   });
 
+  group('🔴 B-1 — des OCTETS non décodables, ⛔ pas du JSON invalide', () {
+    // ⛔ **CE GROUPE EXISTE PARCE QUE 344 TESTS ET 97,9 % DE COUVERTURE N'ONT
+    // RIEN VU** (audit sécurité du 2026-08-07). Les 3 tests d'AC-11 exerçaient
+    // du **JSON invalide** ; le harnais, lui, ne pouvait poser que de l'UTF-8
+    // valide (`poser` → `writeAsStringSync`) ⇒ la classe entière était **hors
+    // d'atteinte**, et la couverture **MONTAIT** sur le diff qui introduisait le
+    // bloquant.
+    //
+    // ⚠️ Ces tests exercent le **MAGASIN DE PRODUCTION** (`DocumentStoreFichier`
+    // sur un répertoire temporaire réel) : ⛔ un magasin factice contournerait la
+    // garde et rendrait le test **vert à tort**.
+
+    test(
+      'un SEUL octet cp1252 ⇒ DocumentIllisible, et lire() NE LÈVE PAS',
+      () async {
+        final fautif = documentNonDecodable();
+        harnais.poserOctets(fautif);
+
+        expect(
+          await harnais.magasin.lire(),
+          isA<DocumentIllisible>(),
+          reason:
+              'avant le correctif, readAsString LEVAIT une FileSystemException '
+              'que personne n’attrapait, jusqu’à main() qui l’await AVANT runApp',
+        );
+        expect(
+          harnais.octetsBruts(),
+          fautif,
+          reason:
+              '⛔ lire() ne répare, ne réécrit et ne déplace RIEN — ⛔ surtout pas '
+              'par allowMalformed, qui figerait la corruption (AC-11, AC-16)',
+        );
+      },
+    );
+
+    test(
+      '🔴 CONTRÔLE NÉGATIF — le MÊME document en UTF-8 valide est LU',
+      () async {
+        // Un seul octet devient deux, au même endroit, et le verdict BASCULE.
+        // ⛔ Sans cette assertion, un magasin déclarant TOUT illisible passerait.
+        final sain = documentDecodable();
+        harnais.poserOctets(sain);
+        expect(await harnais.magasin.lire(), estLu(utf8.decode(sain)));
+      },
+    );
+
+    test(
+      'un document TRONQUÉ en pleine séquence ⇒ DocumentIllisible',
+      () async {
+        // « fichier tronqué » est le mot LITTÉRAL d'AC-11 « Erreur ».
+        harnais.poserOctets(documentTronqueEnPleineSequence());
+        expect(await harnais.magasin.lire(), isA<DocumentIllisible>());
+      },
+    );
+
+    test('UN SEUL octet 0x80 AJOUTÉ à un document parfait suffit', () async {
+      // ⚠️ Le document reste valide sur toute sa longueur : la faute peut être
+      // n’importe où, y compris ajoutée par un outil tiers en fin de fichier.
+      harnais.poserOctets(<int>[...documentDecodable(), 0x80]);
+      expect(await harnais.magasin.lire(), isA<DocumentIllisible>());
+    });
+  });
+
   group('R-15 — le STUB est importé DIRECTEMENT par un test', () {
     // ⛔ Se contenter de l'import conditionnel le rendrait INVISIBLE à la
     // couverture : un fichier de `lib/` non importé par un test n'entre pas au
     // dénominateur, donc il pourrait être faux sans qu'on le sache.
     const stub = DocumentStoreStub();
 
-    test('lire() rend null — la plateforme ne stocke rien', () async {
-      expect(await stub.lire(), isNull);
+    test('lire() rend DocumentAbsent — la plateforme ne stocke rien', () async {
+      // ⛔ ET SURTOUT PAS `DocumentIllisible` : il n'y a rien à mettre de côté,
+      // et le `rename` du stub LÈVE.
+      expect(await stub.lire(), isA<DocumentAbsent>());
+      expect(await stub.lire(), isNot(isA<DocumentIllisible>()));
     });
 
     test('🔴 ecrire() LÈVE — ⛔ jamais un échec silencieux', () async {
@@ -182,11 +254,47 @@ void main() {
         harnais.poser(contenu);
         expect(
           await harnais.magasin.lire(),
-          contenu,
+          estLu(contenu),
           reason: '`poser` et `lire` DOIVENT désigner le même fichier',
         );
       },
     );
+
+    test(
+      'MUTANT — `poserOctets` qui RÉ-ENCODERAIT : les octets relus diffèrent',
+      () {
+        // 🔴 Si `poserOctets` passait par `writeAsStringSync` (comme `poser`),
+        // il produirait de l'UTF-8 VALIDE et le test de `B-1` deviendrait vert
+        // pour la mauvaise raison — un harnais qui ne peut pas fabriquer
+        // l'entrée fautive EFFACE la clause qu'il prétend vérifier.
+        final fautif = documentNonDecodable();
+        harnais.poserOctets(fautif);
+        expect(
+          harnais.octetsBruts(),
+          fautif,
+          reason: 'les octets sur le disque sont ceux posés, OCTET POUR OCTET',
+        );
+        expect(
+          harnais.octetsBruts(),
+          isNot(documentDecodable()),
+          reason:
+              'assertion de GRANDEUR : le document posé n’est PAS sa variante '
+              'UTF-8 valide — sinon la paire de mutation ne mesurerait rien',
+        );
+      },
+    );
+
+    test('MUTANT — `octetsBrutsDe` doit désigner le fichier NOMMÉ', () {
+      harnais.poser('CIBLE');
+      expect(harnais.octetsBrutsDe(nomDocument), utf8.encode('CIBLE'));
+      expect(
+        harnais.octetsBrutsDe('$nomDocument.inexistant'),
+        isNull,
+        reason:
+            'un accesseur qui rendrait toujours la cible masquerait une mise '
+            'de côté au mauvais nom',
+      );
+    });
 
     test(
       'MUTANT — `octets` qui rendrait un cache : le disque fait foi',

@@ -12,6 +12,7 @@
 /// harnais **échoue** si on le fait mentir — voir son mutant nommé.
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:concentration/core/time/clock.dart';
@@ -23,6 +24,51 @@ import 'package:concentration/features/echeances/data/echeance_schema_migrations
 import 'package:concentration/features/echeances/domain/echeance.dart';
 import 'package:concentration/features/echeances/presentation/echeances_notifier.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// ---------------------------------------------------------------------------
+// Les documents du bloquant `B-1`, en **UN SEUL EXEMPLAIRE** — ⛔ jamais
+// recopiés dans un fichier de test : deux copies d'une fixture dérivent, et
+// c'est la classe de défaut nº 1 de ce dépôt.
+//
+// ⚠️ Ce sont des **fonctions**, pas des constantes : une liste partagée entre
+// deux tests pourrait être mutée par l'un et fausser l'autre en silence.
+// ---------------------------------------------------------------------------
+
+const String _prefixeB1 =
+    '{"schemaVersion":2,"echeances":[{"id":"b1","description":"r';
+const String _suffixeB1 = 'vision","dateEcheance":"2027-03-15T23:59"}]}';
+
+/// 🔴 **Le document de `B-1`** : un JSON **PARFAITEMENT VALIDE**, structure
+/// intacte, dont **UN SEUL octet** n'est pas décodable en UTF-8 — « révision »
+/// tel que l'écrit un éditeur de texte réglé en **cp1252** *(Notepad par
+/// défaut)*. Le pratiquant qui corrige un libellé à la main produit **exactement
+/// ceci**.
+List<int> documentNonDecodable() => <int>[
+  ...utf8.encode(_prefixeB1),
+  0xE9, // « é » en cp1252 — ⛔ séquence UTF-8 invalide à elle seule
+  ...utf8.encode(_suffixeB1),
+];
+
+/// ⛔ **LE CONTRÔLE NÉGATIF, et c'est lui qui fait de la paire une MESURE plutôt
+/// qu'une relecture** : le **MÊME** document, à la **MÊME** place, avec
+/// « révision » en UTF-8 **valide**. La seule différence est l'encodage d'une
+/// lettre — **un octet contre deux** — et le verdict doit **BASCULER**.
+///
+/// ⚠️ **Sans ce document, le test de `B-1` passerait aussi avec un magasin qui
+/// déclarerait TOUT illisible.**
+List<int> documentDecodable() => <int>[
+  ...utf8.encode(_prefixeB1),
+  ...utf8.encode('é'),
+  ...utf8.encode(_suffixeB1),
+];
+
+/// La **TRONCATURE** — le mot **littéral** d'AC-11 « Erreur » *(« fichier
+/// tronqué »)* : le document est coupé **au milieu** d'une séquence multi-octets,
+/// ce qu'aucune coupure d'un document purement ASCII ne peut produire.
+List<int> documentTronqueEnPleineSequence() => <int>[
+  ...utf8.encode(_prefixeB1),
+  utf8.encode('é').first,
+];
 
 /// Un magasin fichier neuf, dans un répertoire temporaire **qui lui est
 /// propre** — deux tests ne peuvent pas se marcher dessus.
@@ -61,9 +107,30 @@ class MagasinTemporaire {
   /// c'est précisément le mutant que le test du harnais tue)* et ⛔ **on
   /// n'avale JAMAIS l'erreur** : on réessaie brièvement, puis on **RELÈVE**.
   String? octets() {
+    final brut = octetsBruts();
+    return brut == null ? null : utf8.decode(brut);
+  }
+
+  /// Les octets **BRUTS** du fichier cible, ou `null` s'il n'existe pas.
+  ///
+  /// 🔴 **⛔ [octets] NE PEUT PAS servir à assertionner un document illisible** :
+  /// il **décode en UTF-8**, donc il **LÈVE** exactement dans le cas à
+  /// vérifier — c'est-à-dire sur le document du bloquant `B-1`. La clause
+  /// d'AC-11 *« ni réécrit ni supprimé »* ne se vérifie donc **que sur les
+  /// octets**.
+  List<int>? octetsBruts() => _lireOctets(fichier);
+
+  /// Les octets bruts d'un fichier du répertoire, **désigné par son nom** —
+  /// ⛔ jamais par sa position dans la liste.
+  List<int>? octetsBrutsDe(String nom) =>
+      _lireOctets(File('${repertoire.path}${Platform.pathSeparator}$nom'));
+
+  /// La boucle de réessai vit **ICI, en un seul exemplaire** : deux copies de
+  /// cette règle auraient dérivé, et l'une aurait fini par avaler l'erreur.
+  List<int>? _lireOctets(File source) {
     for (var essai = 0; ; essai++) {
       try {
-        return fichier.existsSync() ? fichier.readAsStringSync() : null;
+        return source.existsSync() ? source.readAsBytesSync() : null;
       } on FileSystemException {
         if (essai >= 40) rethrow;
         sleep(const Duration(milliseconds: 5));
@@ -73,6 +140,25 @@ class MagasinTemporaire {
 
   /// Pose un contenu **directement sur le disque**, avant tout démarrage.
   void poser(String contenu) => fichier.writeAsStringSync(contenu, flush: true);
+
+  /// Pose des **OCTETS ARBITRAIRES** directement sur le disque.
+  ///
+  /// 🔴 **CETTE MÉTHODE EXISTE PARCE QUE SON ABSENCE A RENDU `B-1` INVISIBLE, et
+  /// ce n'est pas une intuition : c'est une MESURE.** Avant le 2026-08-07,
+  /// `grep -rn "writeAsBytes|utf8.encode|latin1|0xFF|readAsBytes" test/` rendait
+  /// **AUCUNE occurrence** : [poser] passe par `writeAsStringSync`, donc
+  /// ⛔ **il ne PEUT produire que de l'UTF-8 valide**. Les 3 tests d'AC-11
+  /// exerçaient du **JSON invalide**, ⛔ **jamais des OCTETS invalides** ⇒ la
+  /// classe entière était **hors d'atteinte du harnais**, et **344 tests avec
+  /// 97,9 % de couverture n'ont rien vu**.
+  ///
+  /// ⚠️ **Ce que cela dit du cliquet, et qui vaut au-delà de cette US** : la
+  /// couverture **MONTAIT** sur le diff qui introduisait le bloquant. Un harnais
+  /// qui ne peut pas fabriquer l'entrée fautive **efface la clause** qu'il
+  /// prétendait vérifier — même famille que « ce qui doit être refusé doit
+  /// d'abord pouvoir être saisi ».
+  void poserOctets(List<int> octets) =>
+      fichier.writeAsBytesSync(octets, flush: true);
 
   /// Les fichiers présents dans le répertoire, **noms triés**.
   List<String> fichiers() =>
