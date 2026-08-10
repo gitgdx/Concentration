@@ -79,7 +79,36 @@ abstract interface class EcheanceRepository {
 
   Future<ResultatEcriture> creer(Echeance echeance);
 
-  /// Remplace l'échéance de **même `id`**. Sans correspondance : échec.
+  /// Remplace l'échéance de **même `id`**.
+  ///
+  /// ⚖️ **`NB-A` — TRANCHÉ le 2026-08-07 : c'était la DOC qui avait tort, pas le
+  /// comportement.** Cette phrase promettait *« sans correspondance : échec »*,
+  /// or l'implémentation réécrit la liste **inchangée** et rend un **succès** —
+  /// **les deux exemplaires de la règle avaient déjà divergé**, et la revue de
+  /// code l'a mesuré.
+  ///
+  /// **Contrat RÉEL, et il est désormais en UN SEUL exemplaire** : sans
+  /// correspondance d'`id`, le document est réécrit **à l'identique** et le
+  /// résultat est un **succès**.
+  ///
+  /// **Motifs du choix** *(⛔ pas une « mise à jour vague » : un des deux
+  /// énoncés devait disparaître)* :
+  /// * **① Aucun AC n'exige ce refus.** AC-6 ne parle que de l'édition d'une
+  ///   échéance **listée** ; aucune clause, aucun scénario, aucune réfutation
+  ///   de la table anti-orphelin ne mentionne l'absence de correspondance.
+  /// * **② Un refus pour une entrée que le produit ne peut pas produire serait
+  ///   une CLAUSE SANS SURFACE** — l'acquis ② du design d'US-01.2 : *« ce qui
+  ///   doit être refusé doit d'abord pouvoir être SAISI »*. Une édition part
+  ///   **toujours** d'une échéance listée ⇒ le chemin est **inatteignable
+  ///   depuis l'IHM**, et un scénario ne pourrait pas l'observer.
+  /// * **③ Changer le COMPORTEMENT au lieu de la doc serait un changement de
+  ///   périmètre** dans un cycle de **correctif d'audit**, sur un design
+  ///   **verrouillé** — et ⛔ aucun événement du catalogue ne modélise cela.
+  ///
+  /// ⚠️ **Ce que ce contrat n'excuse pas** : il **n'est pas la garantie qu'une
+  /// édition a modifié quelque chose**. Si un appelant devait un jour distinguer
+  /// « remplacé » de « rien à remplacer », il faudrait un **troisième acte** dans
+  /// [ActeEcriture] — ⛔ pas une lecture inversée de ce succès.
   Future<ResultatEcriture> remplacer(Echeance echeance);
 
   Future<ResultatEcriture> supprimer(String id);

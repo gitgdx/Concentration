@@ -122,7 +122,15 @@ class EcheanceDocumentRepository implements EcheanceRepository {
       // Aucun chargement, ou document de version FUTURE. ⛔ Écrire ici
       // ÉCRASERAIT un document qu'on n'a pas su lire — le refus est la
       // protection, pas une limitation.
-      return const ResultatEcriture.echec(ActeEcriture.enregistrement);
+      //
+      // 🔴 **`acte`, ⛔ JAMAIS `ActeEcriture.enregistrement` en dur** (`NB-B`,
+      // revue de code du 2026-08-07) : l'acte était codé en dur ici alors que
+      // la branche `catch` du même corps, elle, le portait correctement ⇒ une
+      // **suppression** refusée annonçait *« L'échéance n'a pas été
+      // enregistrée. »*. C'est exactement ce que le motif écrit dans le port
+      // interdit : *« Deux textes, pas un […] l'utilisateur doit savoir CE QUI
+      // n'a pas eu lieu. »*
+      return ResultatEcriture.echec(acte);
     }
     try {
       await magasin.ecrire(codec.encoder(document, muter(document.echeances)));

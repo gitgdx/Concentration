@@ -392,5 +392,101 @@ void main() {
       expect(resultat.estReussi, isFalse);
       expect(harnais.octets(), isNull);
     });
+
+    test('🔴 NB-B — un refus AVANT chargement porte l’acte RÉEL, ⛔ pas '
+        '« enregistrement » en dur', () async {
+      // ⚠️ **LA BRANCHE EST ATTEIGNABLE, et c'est mesuré ici, ⛔ pas simulé
+      // par un fake** : sans chargement préalable, `_document` est `null` —
+      // c'est le chemin de la revue de code (`NB-B`). Le deuxième porteur du
+      // même chemin est un document de version FUTURE.
+      final depot = depotSur(harnais.magasin);
+
+      final suppression = await depot.supprimer('a');
+      expect(suppression.estReussi, isFalse);
+      expect(
+        suppression.acteEchoue,
+        ActeEcriture.suppression,
+        reason:
+            'avant le correctif, une SUPPRESSION refusée annonçait « '
+            'L’échéance n’a pas été enregistrée. » — le port exige DEUX '
+            'textes : l’utilisateur doit savoir CE QUI n’a pas eu lieu',
+      );
+
+      // ⛔ CONTRÔLE NÉGATIF : l'autre acte, sur la MÊME branche, ne doit PAS
+      // avoir basculé — sinon le correctif aurait juste inversé l'erreur.
+      final creation = await depot.creer(e('a', 'x'));
+      expect(creation.acteEchoue, ActeEcriture.enregistrement);
+      expect(
+        creation.acteEchoue,
+        isNot(suppression.acteEchoue),
+        reason:
+            'assertion de GRANDEUR : les deux actes doivent DIFFÉRER sur la '
+            'même branche, sinon un message unique passerait',
+      );
+    });
+
+    test(
+      '🔴 NB-B — même refus sur un document de version FUTURE : la suppression '
+      'dit « suppression »',
+      () async {
+        // Le second porteur de la branche `document == null`, celui-ci ATTEINT
+        // par un chargement réel — ⛔ aucun fake, aucun accès à l'état privé.
+        harnais.poser(
+          '{"schemaVersion":${versionCourante + 1},"echeances":['
+          '{"id":"f","description":"venue du futur",'
+          '"dateEcheance":"2027-03-15T23:59"}]}',
+        );
+        final depot = depotSur(harnais.magasin);
+        await depot.charger();
+
+        final suppression = await depot.supprimer('f');
+        expect(suppression.acteEchoue, ActeEcriture.suppression);
+        expect(
+          suppression.message,
+          ActeEcriture.suppression.messageEchec,
+          reason: '⛔ le texte se LIT dans l’enum, jamais recopié dans un test',
+        );
+      },
+    );
+
+    test(
+      '⚖️ NB-A — `remplacer` SANS correspondance d’id : le document est réécrit '
+      'À L’IDENTIQUE et le résultat est un SUCCÈS',
+      () async {
+        // Ce test ÉPINGLE le contrat tranché le 2026-08-07 : la doc du port
+        // promettait un « échec » que l'implémentation n'a jamais rendu, et les
+        // deux exemplaires de la règle avaient DÉJÀ divergé. ⛔ Sans lui, rien
+        // n'empêcherait la doc et le code de re-divergér.
+        //
+        // ⚠️ Le chemin est INATTEIGNABLE depuis l'IHM (une édition part toujours
+        // d'une échéance listée) : il s'exerce donc au PORT, jamais par un
+        // scénario — un refus pour une entrée que le produit ne peut pas
+        // produire serait une clause sans surface.
+        final depot = depotSur(harnais.magasin);
+        await depot.charger();
+        expect((await depot.creer(e('present', 'Présente'))).estReussi, isTrue);
+        await depot.charger();
+        final avant = harnais.octets();
+
+        final resultat = await depot.remplacer(e('ABSENT', 'Fantome'));
+
+        expect(
+          resultat.estReussi,
+          isTrue,
+          reason: 'contrat RÉEL du port, désormais écrit tel qu’il est',
+        );
+        expect(
+          harnais.octets(),
+          avant,
+          reason: 'réécrit À L’IDENTIQUE : ⛔ rien n’est ajouté ni perdu',
+        );
+        expect(harnais.octets(), isNot(contains('Fantome')));
+        expect(
+          harnais.octets(),
+          contains('"description":"Présente"'),
+          reason: 'l’échéance existante est intacte',
+        );
+      },
+    );
   });
 }
