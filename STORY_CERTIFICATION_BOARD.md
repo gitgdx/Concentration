@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ❌ 🛡️ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2229,9 +2229,94 @@
     bloquant)* : **N-2** → arbitrage @PO, **US-01.3** · **NB-C** et **N-3** → **US-00.8 /
     `/audit-methodo`** · **N-5 → N-10**.
 
-- **⏳ Reste dû** : **`/audit-us US-01.2` À REJOUER EN ENTIER sur `cd789d5`** — ⛔ **les DEUX audits, pas
-  seulement la sécurité** *(application directe de **NB-6**, et de la borne mesurée ci-dessus : la machine
-  à états ne sait pas périmer un visa)*. **Ensuite seulement, QA.**
+- **🔁 2ᵉ TOUR D'AUDIT (2026-08-11) — visa de code sur `2d77778`, `HEAD` audité `c2a5d0d`.**
+  **✅ Revue `PASSED`** *(`EVT_CODE_REVIEW_PASSED`, [`code_review_delta.md`](reports/US-01.2/code_review_delta.md)
+  — ⛔ `code_review.md` **non écrasé**)* · **❌ Sécurité `FAILED`**
+  *(`EVT_SECURITY_AUDIT_FAILED`, [`security_delta.md`](reports/US-01.2/security_delta.md))*.
+  - ✅ **B-1 EST FERMÉ, ET LE TYPE SCELLÉ ÉTAIT MEILLEUR QUE CE QUE L'AUDIT AVAIT DEMANDÉ — c'est MESURÉ.**
+    Sur le magasin `io` **de production**, avec des fixtures fabriquées **indépendamment du harnais livré** :
+    `charger()` **rend** au lieu de lever, le document est mis de côté **par `rename`**, **inchangé octet
+    pour octet** *(assertion sur `readAsBytesSync`)*, la **permanence est fermée** *(3 démarrages
+    aboutissent, **une seule** mise de côté)*, et le **contrôle négatif bascule**. **3 mutants tués**, dont
+    ⛔ **`allowMalformed: true` → `Expected: empty / Actual: [Instance of 'Echeance']`** *(le correctif
+    proscrit ferait **afficher** l'échéance altérée)* et **un 4ᵉ cas ajouté au type scellé → `flutter
+    analyze` ROUGE** *(`non_exhaustive_switch_statement`)* ⇒ **la barrière de compilation est RÉELLE**, là
+    où la sentinelle ne tenait qu'à la bonne volonté de l'appelant.
+  - 🔴 **B-2 (HIGH, intégrité) — BLOQUANT. UNE MISE DE CÔTÉ QUI ÉCHOUE FAIT DÉTRUIRE LES DONNÉES PAR LA
+    PREMIÈRE SAISIE.** `_mettreDeCoteSansBruit()` avale **tout** échec de `rename` dans un `on Object` au
+    **corps vide**, puis `_misDeCotePuisEtatVide()` pose `_document = codec.documentNeuf(...)`
+    **INCONDITIONNELLEMENT** ⇒ l'écriture suivante devient légitime alors que le document illisible **est
+    toujours là**, et elle l'**écrase** : sans message, sans copie, sans trace. ⛔ **C'est la réfutation
+    LITTÉRALE d'AC-11 « Erreur » (Must)** — la table anti-orphelin donne *« l'enregistrement fautif est
+    **réécrit** ou supprimé »*. **La documentation du code affirme le contraire** *(« la prochaine écriture
+    est légitime et n'écrase plus rien »)* : **elle est fausse dès que le `rename` échoue**.
+    **Déclencheur sans adversaire et sans franchir aucune frontière de privilège, PROUVÉ PAR EXÉCUTION** :
+    le document de B-1 + une **poignée ouverte avec un verrou ordinaire** *(antivirus, OneDrive/iCloud,
+    agent de sauvegarde, 2ᵉ instance)* ⇒ `PathAccessException`, hub vide, verrou relâché,
+    `creer() => estReussi=true`, **données détruites**. **L'obstacle n'a même pas besoin de persister.**
+    🔬 **L'asymétrie prouve que le code sait se protéger à vingt lignes de là** : le chemin « version
+    FUTURE » pose `_document = null` et **REFUSE** l'écriture.
+    **Correctif exécuté par l'auditeur, pas proposé** : `_document = misDeCote ? documentNeuf : null`
+    *(2 lignes)* ⇒ **373/373 verts** en copie isolée ⇒ ⛔ **aucun test livré ne défend le comportement
+    actuel**, et la sonde **bascule**.
+  - ⚖️ **ARBITRAGE @Architect — LES DEUX AUDITEURS ONT TROUVÉ LE MÊME MÉCANISME ET L'ONT CLASSÉ
+    DIFFÉREMMENT ; LA MESURE TRANCHE.** La revue l'a vu *(**NB-I**, HIGH)* mais l'a jugé **non bloquant**,
+    sa sonde P4 n'ayant **pas trouvé** de déclencheur réaliste ; la sécurité en a **exécuté un**.
+    ➡️ **Un déclencheur EXÉCUTÉ bat une recherche de déclencheur RESTÉE VAINE** ⇒ **B-2 est BLOQUANT**, et
+    le verdict `FAILED` prévaut. *(Constante du projet : la mesure bat le raisonnement — ici entre deux
+    auditeurs, et non plus entre un auditeur et un producteur.)*
+  - ✅ **B-2 EST PRÉ-EXISTANT, PAS UNE RÉGRESSION DU CORRECTIF — vérifié par @Architect lui-même** :
+    `git show 5272ed1:…/echeance_document_repository.dart` porte **déjà** le même
+    `_mettreDeCoteSansBruit()` suivi d'un `_document = codec.documentNeuf(...)` **inconditionnel**.
+    ⚠️ **Ce que le correctif de B-1 a changé, c'est la PORTÉE** : l'octet cp1252 **butait avant sur B-1**
+    et n'atteignait jamais ce chemin. **Le correctif est juste ; il a rendu visible le défaut suivant.**
+  - 🔴 **TROIS DÉFAUTS D'INSTRUMENTS RELEVÉS PAR CE TOUR — TOUS `/audit-methodo`, et le premier vise LE
+    RITUEL QUI VIENT D'ÊTRE EXÉCUTÉ.**
+    **① `/audit-us` fait tourner DEUX audits mutants sur UN SEUL ARBRE DE TRAVAIL** *(NB-H de la
+    sécurité)* : les deux rôles doivent **muter le code** pour jouer leurs mutants, et la contamination a
+    été **observée** — les sondes de @CodeReviewer sont apparues dans `test/` pendant la session sécurité,
+    **l'une portant une erreur de compilation qui rendait `flutter analyze` ROUGE pour une raison
+    étrangère au produit**. ➡️ **Explique aussi les deux anomalies du 1ᵉʳ tour** *(l'entrée de permission
+    apparue puis disparue dans `.claude/settings.json`, et le **NB-L** « exécution non déterministe
+    observée une fois, non établie »)*. **Remède appliqué dès le prochain tour : un arbre de travail
+    ISOLÉ par auditeur** — @CodeReviewer l'avait fait spontanément *(`git worktree`)*, la sécurité aussi
+    *(copie isolée)*, ⛔ **le rituel ne le prescrit pas.**
+    **② UN `--rationale` PEUT ÊTRE MUTILÉ PAR LE SHELL SANS QU'AUCUN OUTIL NE LE VOIE.** Un backtick dans
+    la prose a déclenché une **substitution de commande** : la trace porte
+    **`affectation definie de )`** — un mot **amputé** — et `validate_trace.py` la déclare **conforme**.
+    ⛔ **Non réécrite : la trace est append-only.** ⚠️ **Ce n'est pas un défaut de `trace_append.py`** — la
+    mutilation a lieu **avant** qu'il voie le texte, donc **aucune implémentation ne pourrait la
+    détecter** ; le remède est **opératoire** *(⛔ jamais de backtick dans un `--rationale` passé au shell)*.
+    **③ LE DÉFAUT VIT DANS UN `catch` AU CORPS VIDE, DONC IL EST STRUCTURELLEMENT INVISIBLE À LA
+    COUVERTURE** *(NB-I de la revue)* : `lcov` **n'instrumente AUCUNE ligne** de ce bloc *(corps en
+    commentaires)* ⇒ ⛔ **la couverture ne pourra JAMAIS le signaler**, et le mutant correspondant
+    **SURVIT à 356/356 tests verts**. ➡️ **Aggravation nette de l'acquis d'US-01.1** : la couverture n'est
+    pas seulement **aveugle à la force des assertions**, elle est **incapable d'instrumenter** la branche
+    où le défaut habite.
+  - **Statut des 8 non bloquants du 1ᵉʳ tour** : **NB-A ✅ fermé · NB-B ✅ fermé** *(mutant rejoué → 2 tests
+    rouges, **exactement** le chiffre annoncé ; branche atteignable par **2 chemins réels sans fake**)* ·
+    **NB-C, NB-D, NB-E, NB-F, NB-G, NB-H ⏳ subsistants**, tous **hors du périmètre du delta**, chacun
+    vérifié par exécution, **report assumé** *(précédent du GEL d'US-00.6)*.
+  - **Non bloquants nouveaux** : côté revue **NB-J** *(`charger()` promet « ne lève JAMAIS » sans que rien
+    ne le garantisse)* · **NB-K** *(le motif écrit dans le stub est **réfuté par la sonde P2**)* ·
+    **NB-L** *(non déterminisme **non établi** — 5/5 verts en isolation ; imputé au ① ci-dessus)* · côté
+    sécurité **NB-E** *(un `rename` échoué laisse `echeances.json.tmp` **avec les données utilisateur**)* ·
+    **NB-F** *(`File.existsSync()` confond « aucun fichier » et « pas un fichier »)* · **NB-G** *(la boucle
+    anti-collision est **aveugle** à un occupant non-fichier et la destination reste **prévisible**)*.
+    ⛔ **La piste que @Architect avait ouverte — « nom fixe ⇒ la 2ᵉ corruption écrase la 1ʳᵉ » — est
+    INFIRMÉE par la mesure**, horloge figée incluse. *(Une piste d'orchestrateur se mesure comme les
+    autres ; celle-ci était fausse.)*
+  - ⛔ **CE QUE CE TOUR N'ATTESTE PAS** : **`N-1 → N-10` tous OUVERTS, aucun aggravé** · `pubspec*` et
+    `.github/**` non touchés ⇒ **borne CVE identique** · **aucun SAST** *(`exit 1`)*, **aucun scan de
+    CVE** · `deps_audit` porte **`blocking: false`** · **`main()` n'a PAS été exécuté** *(**NM-8**)* : le
+    niveau prouvé s'arrête à `charger()` · **NM-10 entière**.
+
+- **⏳ Reste dû** : **⛔ RETOUR À @Developer — 2ᵉ `FAILED` sécurité, sur `B-2`.** Correctif de **2 lignes**
+  *(`_document = misDeCote ? documentNeuf : null`)* **avec son test** — ⛔ **et le test est le vrai
+  travail** : il doit faire **échouer le `rename`** *(la sonde de l'auditeur y arrive par un **verrou
+  ordinaire** sur la destination)*, classe qu'⛔ **aucun test livré n'exerce**. Traiter aussi **NB-D**
+  *(le commentaire qui **légitime** l'avalement est devenu **faux**)*. Puis **3ᵉ tour d'audit — les DEUX
+  audits, en ARBRES DE TRAVAIL ISOLÉS** *(défaut ① ci-dessus)*. **Ensuite seulement, QA.**
   **Phase INCHANGÉE : `parallel_audit`.**
   ⚖️ **ARBITRAGE HUMAIN DU 2026-08-07 — LE CLIQUET RESTE À 95,2. ⛔ Ne pas le re-litiger.**
   Le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) : **97.8** »* — ⚠️ **c'est un AVIS, pas un
