@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:concentration/core/time/clock.dart';
 import 'package:concentration/features/echeances/data/document_store.dart';
+import 'package:concentration/features/echeances/data/document_store_io.dart';
 import 'package:concentration/features/echeances/data/echeance_document_repository.dart';
 import 'package:concentration/features/echeances/data/echeance_schema_migrations.dart';
 import 'package:concentration/features/echeances/domain/echeance.dart';
@@ -34,6 +38,38 @@ class MagasinCompteur implements DocumentStore {
 
   @override
   Future<void> mettreDeCote() => _delegue.mettreDeCote();
+}
+
+/// Décorateur dont **la seule mise de côté échoue**, tout le reste étant
+/// délégué au magasin **RÉEL**.
+///
+/// ⚖️ **Pourquoi il existe alors que le test suivant fait échouer un `rename`
+/// POUR DE VRAI** : celui-ci isole la **décision du DÉPÔT** de la plateforme —
+/// il vaut sous Windows, sous POSIX et en CI **à l'identique**, quels que soient
+/// les mécanismes d'échec de `rename` du système de fichiers hôte. ⛔ Il ne
+/// remplace pas le test réel, il le **complète** : sans le test réel, rien ne
+/// prouverait que la classe est **atteignable** ; sans celui-ci, la preuve
+/// dépendrait d'un comportement de plateforme.
+///
+/// ⚠️ Comme `MagasinCompteur`, il vit **hors de `test/e2e/**`**, où ADR-010 §1
+/// interdit jusqu'aux décorateurs.
+class MagasinMiseDeCoteImpossible implements DocumentStore {
+  MagasinMiseDeCoteImpossible(this._delegue);
+
+  final DocumentStore _delegue;
+  int tentatives = 0;
+
+  @override
+  Future<LectureDocument> lire() => _delegue.lire();
+
+  @override
+  Future<void> ecrire(String contenu) => _delegue.ecrire(contenu);
+
+  @override
+  Future<void> mettreDeCote() async {
+    tentatives++;
+    throw const FileSystemException('mise de côté impossible');
+  }
 }
 
 void main() {
@@ -234,6 +270,172 @@ void main() {
         harnais.fichiers(),
         [nomDocument],
         reason: '⛔ un document LISIBLE ne doit JAMAIS être mis de côté',
+      );
+    });
+
+    // -----------------------------------------------------------------------
+    // 🔴 **B-2 — UNE MISE DE CÔTÉ QUI ÉCHOUE NE DOIT PAS AUTORISER L'ÉCRITURE**
+    // *(bloquant, audit sécurité du 2026-08-11)*.
+    //
+    // ⛔ **CETTE CLASSE N'AVAIT AUCUN TEST, et c'est ce qui l'a laissée
+    // passer** : les 5 tests de `mettreDeCote` livrés jusqu'ici l'exerçaient
+    // **dans son cas de SUCCÈS**, ou la faisaient lever **sur le stub, sans
+    // passer par le dépôt** ⇒ ce que le dépôt fait d'un échec n'était **jamais
+    // observé**. ⛔ Et la couverture ne pouvait pas le dire : le `catch` fautif
+    // avait un **corps fait de commentaires**, donc **aucune ligne à
+    // instrumenter** *(`NB-I`)*.
+    // -----------------------------------------------------------------------
+
+    test(
+      '🔴 B-2 — mise de côté IMPOSSIBLE : charger() rend, l’écriture est '
+      'REFUSÉE, et le document illisible est INTACT OCTET POUR OCTET',
+      () async {
+        final fautif = documentNonDecodable();
+        harnais.poserOctets(fautif);
+        final magasin = MagasinMiseDeCoteImpossible(harnais.magasin);
+        final depot = depotSur(magasin);
+
+        // ⛔ L'application s'ouvre quand même : `charger()` est `await`é AVANT
+        // `runApp` (c'était `B-1`), donc elle ne doit pas lever ici non plus.
+        expect(await depot.charger(), isEmpty);
+        expect(magasin.tentatives, 1, reason: 'la mise de côté a été TENTÉE');
+
+        final creation = await depot.creer(
+          Echeance(
+            id: 'ecrase',
+            description: 'Saisie du pratiquant',
+            dateEcheance: DateTime(2027, 12, 1, 23, 59),
+          ),
+        );
+
+        // 🔴 L'ASSERTION QUI PORTE TOUT : avant le correctif, `estReussi` valait
+        // `true` et les octets d'origine étaient DÉTRUITS à cet instant.
+        expect(
+          creation.estReussi,
+          isFalse,
+          reason:
+              'le document illisible est TOUJOURS sur le disque : écrire '
+              'l’écraserait, ce qu’AC-11 « Erreur » interdit littéralement',
+        );
+        expect(creation.acteEchoue, ActeEcriture.enregistrement);
+        expect(
+          harnais.octetsBruts(),
+          fautif,
+          reason:
+              '⛔ ni réécrit, ni réparé, ni tronqué — assertion SUR LES OCTETS',
+        );
+        expect(
+          harnais.fichiers(),
+          [nomDocument],
+          reason:
+              '⛔ aucune copie `.illisible-` : rien n’a été déplacé, donc rien '
+              'n’autorisait à écrire',
+        );
+      },
+    );
+
+    test(
+      '🔴 CONTRÔLE NÉGATIF de B-2 — la MÊME séquence quand la mise de côté '
+      'RÉUSSIT : le document est déplacé ET l’écriture est AUTORISÉE',
+      () async {
+        // ⛔ Sans ce contrôle, un dépôt qui refuserait TOUJOURS d’écrire
+        // passerait le test ci-dessus.
+        harnais.poserOctets(documentNonDecodable());
+        final depot = depotSur(harnais.magasin);
+
+        expect(await depot.charger(), isEmpty);
+        final creation = await depot.creer(
+          Echeance(
+            id: 'apres',
+            description: 'Reprise',
+            dateEcheance: DateTime(2027, 12, 1, 23, 59),
+          ),
+        );
+
+        expect(creation.estReussi, isTrue);
+        expect(
+          harnais.fichiers().where((n) => n.contains('.illisible-')),
+          hasLength(1),
+          reason:
+              'le document fautif a bien été mis de côté, ⛔ jamais supprimé',
+        );
+        expect(harnais.octets(), contains('"description":"Reprise"'));
+      },
+    );
+
+    test('🔴 B-2 sur le magasin de PRODUCTION — un `rename` qui ÉCHOUE POUR DE '
+        'VRAI : l’écriture est refusée, puis elle REDEVIENT possible', () async {
+      // ⚠️ **AUCUN MAGASIN FACTICE ICI** : l'échec vient de la boucle de
+      // `mettreDeCote` du **code de production**, dont **tous** les noms de
+      // destination sont occupés par des **répertoires** — un obstacle réel,
+      // déterministe et réversible, de la même nature que celui qu'AC-17
+      // emploie déjà pour l'écriture.
+      //
+      // 🔴 **CE DÉCLENCHEUR NE DÉPEND PAS DES CORRECTIFS DE `NB-F`/`NB-G`, et
+      // c'était le piège** : avec la boucle AVEUGLE d'avant, le `rename`
+      // partait **droit sur le répertoire** et levait ; avec la boucle
+      // corrigée, il **épuise sa borne** et lève. **Les deux régimes échouent**
+      // — vérifié par mutant, ⛔ pas supposé.
+      final fige = MagasinTemporaire.creer(
+        clock: FakeClock(DateTime(2026, 8, 11, 9)),
+      );
+      addTearDown(fige.nettoyer);
+      final fautif = documentNonDecodable();
+      fige.poserOctets(fautif);
+      final obstacles = <Directory>[
+        for (var rang = 0; rang < essaisMiseDeCote; rang++)
+          Directory(fige.magasin.destinationMiseDeCote(rang))..createSync(),
+      ];
+
+      final depot = depotSur(fige.magasin);
+      expect(
+        await depot.charger(),
+        isEmpty,
+        reason: '⛔ l’application s’ouvre : `charger()` NE LÈVE PAS',
+      );
+
+      final refus = await depot.creer(
+        Echeance(
+          id: 'ecrase',
+          description: 'Saisie du pratiquant',
+          dateEcheance: DateTime(2027, 12, 1, 23, 59),
+        ),
+      );
+      expect(refus.estReussi, isFalse);
+      expect(
+        fige.octetsBruts(),
+        fautif,
+        reason: 'les octets du pratiquant sont INTACTS — c’est tout l’enjeu',
+      );
+
+      // ✅ **L'ÉTAT N'EST PAS UN CUL-DE-SAC** : l'obstacle retiré, le
+      // démarrage suivant met de côté et l'écriture redevient possible.
+      for (final obstacle in obstacles) {
+        obstacle.deleteSync();
+      }
+      final apres = depotSur(fige.magasin);
+      expect(await apres.charger(), isEmpty);
+      final reprise = await apres.creer(
+        Echeance(
+          id: 'apres',
+          description: 'Reprise',
+          dateEcheance: DateTime(2027, 12, 1, 23, 59),
+        ),
+      );
+      expect(
+        reprise.estReussi,
+        isTrue,
+        reason: 'le refus était CONDITIONNEL à l’obstacle, ⛔ pas permanent',
+      );
+      expect(
+        fige.octetsBrutsDe(
+          fige.magasin
+              .destinationMiseDeCote(0)
+              .split(Platform.pathSeparator)
+              .last,
+        ),
+        fautif,
+        reason: 'et le document fautif est mis de côté, OCTET POUR OCTET',
       );
     });
 

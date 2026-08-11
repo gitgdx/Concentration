@@ -151,22 +151,68 @@ class EcheanceDocumentRepository implements EcheanceRepository {
   /// version est incompréhensible — doivent aboutir **exactement** au même
   /// traitement. Deux copies auraient dérivé.
   ///
-  /// ⛔ Après cette mise de côté, `_document` est un document **NEUF** : la
-  /// prochaine écriture est **légitime** et n'écrase plus rien — **c'est ce qui
-  /// ferme la PERMANENCE de `B-1`**, où chaque démarrage échouait à l'identique.
+  /// 🔴 **CE QUE CETTE MÉTHODE FAIT DÉPEND DE L'ISSUE DE LA MISE DE CÔTÉ, et
+  /// c'était le bloquant `B-2`** *(audit sécurité du 2026-08-11)*.
+  ///
+  /// * **Mise de côté RÉUSSIE** ⇒ `_document` est un document **NEUF** : le nom
+  ///   du document est **libre**, la prochaine écriture est **légitime** et
+  ///   n'écrase plus rien — **c'est ce qui ferme la PERMANENCE de `B-1`**, où
+  ///   chaque démarrage échouait à l'identique.
+  /// * **Mise de côté ÉCHOUÉE** ⇒ `_document` reste **`null`**, donc [_ecrire]
+  ///   **REFUSE tout** : le document illisible est **toujours sur le disque**, et
+  ///   écrire par-dessus lui serait **exactement** la réfutation qu'AC-11
+  ///   « Erreur » inscrit dans sa table *(« l'enregistrement fautif est
+  ///   **réécrit** ou supprimé »)*. ⛔ **Une destruction totale, silencieuse et
+  ///   irréversible** — ⛔ pas une gêne d'ergonomie.
+  ///
+  /// ⚠️ **La version antérieure posait `documentNeuf` INCONDITIONNELLEMENT** et
+  /// sa documentation affirmait *« la prochaine écriture est légitime et n'écrase
+  /// plus rien »* : c'était **FAUX dès que le `rename` échouait**, et la première
+  /// saisie du pratiquant détruisait ses données **sans message, sans copie, sans
+  /// trace**. Le chemin « version FUTURE » de [charger], à vingt lignes d'ici,
+  /// **traitait déjà correctement le même danger** — les deux convergent enfin.
+  ///
+  /// ⚖️ **État résultant, assumé** *(même compromis que « version FUTURE »,
+  /// arbitré au Story File)* : hub **vide** et écriture **refusée avec le message
+  /// du port** (AC-17). ✅ **Et il s'AUTO-RÉPARE** : l'obstacle disparu, le
+  /// démarrage suivant met le document de côté et l'écriture redevient possible.
   Future<List<Echeance>> _misDeCotePuisEtatVide() async {
-    await _mettreDeCoteSansBruit();
-    _document = codec.documentNeuf(versionCourante);
+    _document = await _tenterMiseDeCote()
+        ? codec.documentNeuf(versionCourante)
+        : null;
     return const <Echeance>[];
   }
 
-  Future<void> _mettreDeCoteSansBruit() async {
+  /// `true` **si et seulement si** le document n'est plus au nom du document.
+  ///
+  /// 🔴 **L'exception est CONVERTIE, ⛔ jamais perdue** — et c'est là toute la
+  /// différence avec l'avalement d'avant *(un `on Object` au corps **vide**,
+  /// donc **sans aucune ligne à instrumenter** : ⛔ la couverture ne pouvait
+  /// **structurellement pas** signaler qu'il n'était jamais emprunté)*.
+  ///
+  /// ⚖️ **Pourquoi le `catch` doit RESTER, alors que `B-2` est corrigé** *(la
+  /// question posée par `NB-D`)* : [charger] est `await`é **avant `runApp`** ⇒ une
+  /// exception qui sortirait d'ici **empêcherait l'application de démarrer**,
+  /// c'est-à-dire **`B-1` à nouveau**. Le devoir de ce `catch` n'est donc pas de
+  /// **taire** l'échec mais de le **rendre exploitable** : `false` **désarme
+  /// l'écriture**.
+  ///
+  /// ⛔ **`NB-D` — le motif écrit ici invoquait le stub** *(« une plateforme sans
+  /// stockage lève ici »)* : **c'est FAUX, et la mesure le montre** — le stub rend
+  /// **toujours** `DocumentAbsent`, cas sur lequel [charger] **retourne**, donc ce
+  /// chemin y est **INATTEIGNABLE**. Une doc périmée **légitimait** un
+  /// comportement dangereux et **décourageait de le regarder**. Le motif RÉEL est
+  /// le magasin **fichier** : `rename` refusé *(document ouvert par un antivirus,
+  /// une synchronisation, une seconde instance)*, occupant non-fichier au nom du
+  /// document, ou **tous** les noms de destination déjà pris *(borne de
+  /// `mettreDeCote`)*.
+  Future<bool> _tenterMiseDeCote() async {
     try {
       await magasin.mettreDeCote();
+      return true;
     } on Object {
-      // Une plateforme sans stockage lève ici (stub). Il n'y a rien à mettre
-      // de côté, et ⛔ l'ouverture de l'application ne doit pas en dépendre :
-      // le hub doit rester debout (AC-11 « Nominal »).
+      // ⛔ Le document est TOUJOURS là. L'appelant doit REFUSER d'écrire.
+      return false;
     }
   }
 }
