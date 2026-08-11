@@ -77,7 +77,9 @@ final class DocumentLu extends LectureDocument {
 
 /// Le document **EXISTE** et le magasin **n'a pas su le rendre** : octets non
 /// décodables, droit refusé, disparition entre le test d'existence et la
-/// lecture.
+/// lecture, ou **un occupant qui n'est pas un fichier** *(`NB-F` : un
+/// **répertoire** portant le nom du document — « il y a quelque chose et je n'ai
+/// pas su le lire », ⛔ **jamais `v0`**)*.
 ///
 /// 🔴 **C'est « ILLISIBLE », pas « FATAL »** (AC-11 « Erreur ») : l'application
 /// **s'ouvre**, le document fautif est **mis de côté par `rename`** — ⛔ jamais
@@ -108,5 +110,15 @@ abstract interface class DocumentStore {
   /// ⛔ **JAMAIS un `delete`** (AC-11 « Limite ») : un document illisible se met
   /// de côté pour que l'application puisse écrire de nouveau, ⛔ il ne se
   /// détruit pas.
+  ///
+  /// 🔴 **LÈVE quand la mise de côté N'A PAS EU LIEU — ⛔ jamais un succès
+  /// silencieux, et c'est le contrat sur lequel repose la correction de `B-2`**
+  /// *(audit sécurité du 2026-08-11)* : si l'appelant ne peut pas distinguer
+  /// « déplacé » de « toujours là », il **autorise l'écriture par-dessus un
+  /// document qu'il n'a pas su lire** ⇒ **destruction silencieuse**, exactement
+  /// la réfutation qu'AC-11 « Erreur » inscrit dans sa table.
+  /// ⚠️ Rendre normalement **signifie donc** : *« il n'y a plus rien à ce nom »*
+  /// — soit parce que le document a été déplacé, soit parce qu'il n'y avait
+  /// **rien** à déplacer.
   Future<void> mettreDeCote();
 }

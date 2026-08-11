@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:concentration/core/time/clock.dart';
 import 'package:concentration/features/echeances/data/document_store.dart';
+import 'package:concentration/features/echeances/data/document_store_io.dart';
 import 'package:concentration/features/echeances/data/document_store_plateforme.dart';
 import 'package:concentration/features/echeances/data/document_store_stub.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,6 +98,145 @@ void main() {
         expect(harnais.fichiers(), isEmpty);
       },
     );
+
+    test(
+      '🔴 NB-F — un RÉPERTOIRE portant le nom du document : lire() rend '
+      'DocumentIllisible, ⛔ PAS DocumentAbsent (ce n’est pas `v0`)',
+      () async {
+        Directory(harnais.fichier.path).createSync();
+
+        final lu = await harnais.magasin.lire();
+        expect(
+          lu,
+          isA<DocumentIllisible>(),
+          reason:
+              'File.existsSync() rend FALSE pour un répertoire ⇒ le nom était '
+              'annoncé « v0 » alors que quelque chose l’occupait',
+        );
+        // ⛔ ASSERTION DE GRANDEUR : c'est le basculement qui compte, pas
+        // l'égalité — un magasin rendant TOUJOURS `absent` passait avant.
+        expect(lu, isNot(isA<DocumentAbsent>()));
+        expect(
+          FileSystemEntity.typeSync(harnais.fichier.path),
+          FileSystemEntityType.directory,
+          reason: '⛔ lire() ne déplace, ne répare et ne supprime RIEN',
+        );
+      },
+    );
+
+    test('🔴 CONTRÔLE NÉGATIF de NB-F — un VRAI fichier au MÊME nom est LU, et '
+        'l’absence reste `v0`', () async {
+      // Sans ce contrôle, un magasin déclarant tout occupant « illisible »
+      // passerait le test ci-dessus.
+      expect(await harnais.magasin.lire(), isA<DocumentAbsent>());
+      harnais.poser('{"schemaVersion":2,"echeances":[]}');
+      expect(
+        await harnais.magasin.lire(),
+        estLu('{"schemaVersion":2,"echeances":[]}'),
+      );
+    });
+
+    test('🔴 NB-G — un RÉPERTOIRE sur la destination prédite est ESQUIVÉ, ⛔ le '
+        '`rename` ne part plus droit dessus', () async {
+      // Horloge FIGÉE : la destination de rang 0 est PRÉDICTIBLE, et c'est
+      // exactement le point aveugle mesuré par l'audit — la boucle testait
+      // l'occupation avec `File.existsSync()`, qui rend `false` pour un
+      // répertoire ⇒ elle croyait la place libre et le `rename` LEVAIT.
+      final fige = MagasinTemporaire.creer(
+        clock: FakeClock(DateTime(2026, 8, 11, 9)),
+      );
+      addTearDown(fige.nettoyer);
+      fige.poser('illisible');
+      // ⛔ Le nom se DEMANDE au magasin : le recopier ici mesurerait ma copie.
+      final occupee = fige.magasin.destinationMiseDeCote(0);
+      Directory(occupee).createSync();
+
+      await fige.magasin.mettreDeCote();
+
+      expect(
+        FileSystemEntity.typeSync(occupee),
+        FileSystemEntityType.directory,
+        reason: '⛔ l’occupant n’est ni écrasé ni supprimé',
+      );
+      expect(
+        fige.octetsBrutsDe(
+          fige.magasin
+              .destinationMiseDeCote(1)
+              .split(Platform.pathSeparator)
+              .last,
+        ),
+        utf8.encode('illisible'),
+        reason: 'la mise de côté a pris le rang SUIVANT, et rien n’est perdu',
+      );
+      expect(fige.octets(), isNull, reason: 'la cible a bien bougé');
+    });
+
+    test('🔴 NB-G — la boucle est BORNÉE : tous les candidats occupés ⇒ '
+        'mettreDeCote LÈVE, et ⛔ la cible reste INTACTE', () async {
+      final fige = MagasinTemporaire.creer(
+        clock: FakeClock(DateTime(2026, 8, 11, 9)),
+      );
+      addTearDown(fige.nettoyer);
+      fige.poser('illisible');
+      // ⛔ Le NOMBRE se LIT dans `lib/`, jamais écrit à la main ici.
+      for (var rang = 0; rang < essaisMiseDeCote; rang++) {
+        Directory(fige.magasin.destinationMiseDeCote(rang)).createSync();
+      }
+
+      await expectLater(
+        fige.magasin.mettreDeCote(),
+        throwsA(isA<FileSystemException>()),
+        reason:
+            '⛔ un `return` muet ici serait EXACTEMENT B-2 : l’appelant '
+            'croirait le document mis de côté et l’écraserait',
+      );
+      expect(
+        fige.octets(),
+        'illisible',
+        reason: '⛔ rien n’est supprimé, rien n’est écrasé',
+      );
+    });
+
+    test('🔴 ANTI-DÉRIVE — le nom que la boucle PRODUIT est celui que '
+        '`destinationMiseDeCote` annonce', () async {
+      // La règle de nommage était écrite DEUX fois dans la boucle. Ce test
+      // tue le mutant « une seule des deux copies change » : il compare le
+      // nom RÉELLEMENT produit sur le disque à celui que l'accesseur annonce.
+      final fige = MagasinTemporaire.creer(
+        clock: FakeClock(DateTime(2026, 8, 11, 9)),
+      );
+      addTearDown(fige.nettoyer);
+      fige.poser('illisible');
+      final attendu = fige.magasin
+          .destinationMiseDeCote(0)
+          .split(Platform.pathSeparator)
+          .last;
+
+      await fige.magasin.mettreDeCote();
+
+      expect(fige.fichiers(), [attendu]);
+      expect(
+        attendu,
+        startsWith('$nomDocument.illisible-'),
+        reason: 'la forme du nom reste celle qu’AC-11 « Limite » décrit',
+      );
+      expect(
+        fige.magasin.destinationMiseDeCote(1),
+        endsWith('-1'),
+        reason: 'le rang n’apparaît QU’À partir de 1, comme avant',
+      );
+      // 🔴 ASSERTION RELATIONNELLE — ⛔ et surtout PAS « le rang 0 ne finit pas
+      // par `-<chiffres>` », que j'ai écrite d'abord et que la MESURE a réfutée :
+      // l'horodatage lui-même finit par `-<chiffres>`, donc ce prédicat était
+      // FAUX même sur l'arbre propre. C'est le rapport entre deux rangs qui
+      // porte la règle : le rang 0 est le nom NU, le rang N y ajoute `-N`.
+      expect(
+        fige.magasin.destinationMiseDeCote(1),
+        '${fige.magasin.destinationMiseDeCote(0)}-1',
+        reason:
+            'un nommage qui suffixerait « -0 » au premier rang tomberait ici',
+      );
+    });
 
     test(
       '🔴 deux mises de côté au MÊME instant n’en écrasent pas une',
