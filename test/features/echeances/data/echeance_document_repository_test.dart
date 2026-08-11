@@ -54,9 +54,18 @@ class MagasinCompteur implements DocumentStore {
 /// ⚠️ Comme `MagasinCompteur`, il vit **hors de `test/e2e/**`**, où ADR-010 §1
 /// interdit jusqu'aux décorateurs.
 class MagasinMiseDeCoteImpossible implements DocumentStore {
-  MagasinMiseDeCoteImpossible(this._delegue);
+  MagasinMiseDeCoteImpossible(
+    this._delegue, {
+    this.erreur = const FileSystemException('mise de côté impossible'),
+  });
 
   final DocumentStore _delegue;
+
+  /// ⚠️ **Paramétrable EXPRÈS** : le stub, lui, lève un `UnsupportedError`. Un
+  /// `catch` trop étroit dans le dépôt laisserait **ressortir** cette classe
+  /// d'exception ⇒ `B-1` à nouveau, et **aucun test ne le dirait** si tous
+  /// levaient la même.
+  final Object erreur;
   int tentatives = 0;
 
   @override
@@ -68,8 +77,27 @@ class MagasinMiseDeCoteImpossible implements DocumentStore {
   @override
   Future<void> mettreDeCote() async {
     tentatives++;
-    throw const FileSystemException('mise de côté impossible');
+    throw erreur;
   }
+}
+
+/// Un magasin qui **VIOLE son contrat** : sa lecture lève.
+///
+/// ⚖️ Il existe pour **épingler une BORNE**, ⛔ pas pour décrire un comportement
+/// souhaitable *(`NB-J`)* : la promesse de `charger()` s'arrête au contrat du
+/// port, et cela doit être **mesuré** plutôt qu'écrit.
+class MagasinQuiLeveALaLecture implements DocumentStore {
+  const MagasinQuiLeveALaLecture();
+
+  @override
+  Future<LectureDocument> lire() async =>
+      throw StateError('le magasin viole son contrat');
+
+  @override
+  Future<void> ecrire(String contenu) async {}
+
+  @override
+  Future<void> mettreDeCote() async {}
 }
 
 void main() {
@@ -467,6 +495,84 @@ void main() {
       expect(harnais.octets(), isNot(contains('"id":"ok1"')));
     });
   });
+
+  group(
+    '⚖️ NB-J — ce que « charger() ne lève pas » COUVRE, et où ça S’ARRÊTE',
+    () {
+      // La doc de `charger()` promettait « ⛔ NE LÈVE JAMAIS », **sans qu'aucun
+      // mécanisme ne le garantisse** (revue de code du 2026-08-11). La promesse
+      // est ramenée à ce qui est DÉMONTRÉ ; ce groupe porte les deux classes qui
+      // n'avaient pas de test, plus la BORNE.
+
+      test(
+        '🔴 un OCCUPANT NON-FICHIER au nom du document : charger() rend l’état '
+        'vide et ⛔ ne détruit rien',
+        () async {
+          // Le chemin complet de `NB-F` vu depuis le dépôt : `lire()` rend
+          // « illisible » (⛔ plus « v0 »), la mise de côté d'un répertoire est
+          // refusée par `File.rename`, et l'échec devient un REFUS d'écrire.
+          Directory(harnais.fichier.path).createSync();
+
+          expect(await depotSur(harnais.magasin).charger(), isEmpty);
+
+          final restants = harnais.fichiers();
+          expect(restants, hasLength(1), reason: '⛔ rien n’est supprimé');
+          expect(
+            FileSystemEntity.typeSync(
+              '${harnais.repertoire.path}${Platform.pathSeparator}'
+              '${restants.single}',
+            ),
+            FileSystemEntityType.directory,
+            reason:
+                'l’occupant survit — déplacé ou laissé en place selon la '
+                'plateforme, mais ⛔ JAMAIS détruit ni vidé',
+          );
+        },
+      );
+
+      test(
+        '🔴 une mise de côté qui lève un UnsupportedError (le cas du STUB) ne '
+        'traverse PAS charger()',
+        () async {
+          // ⛔ Un `on FileSystemException` au lieu d'`on Object` laisserait
+          // ressortir CELLE-CI, et l'application ne démarrerait plus : c'est
+          // exactement `B-1`, par une autre porte.
+          harnais.poserOctets(documentNonDecodable());
+          final magasin = MagasinMiseDeCoteImpossible(
+            harnais.magasin,
+            erreur: UnsupportedError('cette plateforme ne stocke rien'),
+          );
+          final depot = depotSur(magasin);
+
+          expect(await depot.charger(), isEmpty);
+          expect(magasin.tentatives, 1);
+          expect(
+            (await depot.creer(
+              Echeance(
+                id: 'x',
+                description: 'x',
+                dateEcheance: DateTime(2027, 12, 1, 23, 59),
+              ),
+            )).estReussi,
+            isFalse,
+            reason: 'le document est toujours là ⇒ l’écriture reste refusée',
+          );
+        },
+      );
+
+      test('⛔ LA BORNE — si le magasin VIOLE son contrat et lève à la lecture, '
+          'charger() LÈVE : la promesse s’arrête là, et c’est MESURÉ', () async {
+        // ⚖️ Ce test ne décrit pas un comportement souhaitable : il **épingle**
+        // ce que la doc affirme désormais, pour qu'elle ne puisse plus dériver.
+        // ⛔ Attraper ici masquerait les erreurs de PROGRAMMATION — même motif
+        // que la garde étroite du magasin fichier.
+        await expectLater(
+          depotSur(const MagasinQuiLeveALaLecture()).charger(),
+          throwsA(isA<StateError>()),
+        );
+      });
+    },
+  );
 
   group('🔴 version FUTURE — état vide ET AUCUNE écriture, AUCUN rename', () {
     // ⚖️ Règle laissée SANS AC par l'arbitrage du 2026-08-06 (voie b).

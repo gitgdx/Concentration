@@ -23,9 +23,35 @@ class EcheanceDocumentRepository implements EcheanceRepository {
   /// [_ecrire]).
   DocumentEcheances? _document;
 
-  /// 🔴 **⛔ NE LÈVE JAMAIS** : `main()` l'`await` **avant `runApp`**, donc toute
-  /// exception qui sortirait d'ici **empêcherait l'application de démarrer** —
-  /// c'était le bloquant `B-1` (audit sécurité du 2026-08-07).
+  /// 🔴 **Pourquoi une exception d'ici est FATALE** : `main()` l'`await` **avant
+  /// `runApp`**, donc toute exception qui en sortirait **empêcherait
+  /// l'application de démarrer** — c'était le bloquant `B-1` (audit sécurité du
+  /// 2026-08-07).
+  ///
+  /// ⚖️ **`NB-J` (revue de code du 2026-08-11) — la version antérieure écrivait
+  /// « ⛔ NE LÈVE JAMAIS », une affirmation ABSOLUE qu'aucun mécanisme
+  /// n'enforçait** : ni type de retour, ni gate, ni test. **Même classe que
+  /// `NB-A`** *(un contrat écrit qui n'est pas garanti DÉRIVE)*, et la voie prise
+  /// est la même : **la doc dit ce qui EST, et rien de plus**.
+  ///
+  /// **⛔ NE LÈVE PAS pour ces classes d'échec — et chacune a SON test** :
+  /// * **aucun fichier** (`v0`) et **document lu normalement** ;
+  /// * **octets non décodables**, y compris à **un seul octet** près *(`B-1`)* ;
+  /// * un **occupant qui n'est pas un fichier** au nom du document *(`NB-F`)* ;
+  /// * **racine non-JSON**, `schemaVersion` **absent**, **non entier** ou `< 1` ;
+  /// * document de **version FUTURE** ;
+  /// * **échec de la réécriture** qui suit une migration montante ;
+  /// * **échec de la mise de côté**, quelle que soit l'exception levée par le
+  ///   magasin *(`on Object`, ⛔ pas `on FileSystemException` : le stub lève un
+  ///   `UnsupportedError`, et un type attrapé trop étroit ferait ressortir
+  ///   l'exception ⇒ **`B-1` à nouveau**)*.
+  ///
+  /// ⛔ **CE QUI N'EST PAS GARANTI, et c'est écrit au lieu d'être promis** : elle
+  /// **LÈVE** si le magasin **viole son contrat** en levant depuis
+  /// [DocumentStore.lire] — ⛔ ce n'est **pas** attrapé ici, délibérément *(un
+  /// `catch` de plus masquerait les erreurs de PROGRAMMATION, exactement ce que
+  /// la garde étroite de `document_store_io.dart` refuse)*. **Cette borne est
+  /// épinglée par un test**, ⛔ pas laissée à la relecture.
   @override
   Future<List<Echeance>> charger() async {
     final String texte;
