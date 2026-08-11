@@ -99,6 +99,59 @@ void main() {
       },
     );
 
+    test('🔴 NB-E — un `rename` qui ÉCHOUE ne laisse AUCUN `.tmp` porteur des '
+        'données du pratiquant, et l’échec est RELANCÉ', () async {
+      // Obstacle RÉEL et déterministe : un RÉPERTOIRE occupe le nom de la
+      // cible ⇒ `writeAsString` réussit, et le `rename` du code de production
+      // échoue pour de vrai. ⛔ Aucun magasin factice.
+      Directory(harnais.fichier.path).createSync();
+
+      await expectLater(
+        harnais.magasin.ecrire('{"schemaVersion":2,"echeances":[]}'),
+        throwsA(isA<FileSystemException>()),
+        reason: '⛔ un échec ne devient JAMAIS un succès (contrat du port)',
+      );
+
+      expect(
+        harnais.fichiers().where((n) => n.endsWith('.tmp')),
+        isEmpty,
+        reason:
+            'le provisoire portait le document ENTIER du pratiquant, à un '
+            'nom prévisible, dans un répertoire que N-2 dit partagé',
+      );
+      expect(
+        FileSystemEntity.typeSync(harnais.fichier.path),
+        FileSystemEntityType.directory,
+        reason: '⛔ l’occupant est intact : le ménage n’efface QUE le `.tmp`',
+      );
+    });
+
+    test(
+      '🔴 CONTRÔLE de NB-E — le ménage n’efface QUE ce que l’appel a écrit : '
+      'l’obstacle d’AC-17 SURVIT et le blocage reste RÉVERSIBLE',
+      () async {
+        // ⛔ Si le ménage débordait sur l'échec de `writeAsString`, il
+        // s'attaquerait à l'obstacle même qui rend le stockage non
+        // inscriptible, et le 2ᵉ scénario d'AC-17 (« quand le stockage
+        // redevient inscriptible ») ne mesurerait plus rien.
+        harnais.bloquerEcriture();
+
+        await expectLater(
+          harnais.magasin.ecrire('{"schemaVersion":2,"echeances":[]}'),
+          throwsA(isA<FileSystemException>()),
+        );
+
+        expect(
+          FileSystemEntity.typeSync('${harnais.fichier.path}.tmp'),
+          FileSystemEntityType.directory,
+          reason: 'on n’efface QUE ce qu’on a écrit',
+        );
+        harnais.debloquerEcriture();
+        await harnais.magasin.ecrire('{"schemaVersion":2,"echeances":[]}');
+        expect(harnais.fichiers(), [nomDocument]);
+      },
+    );
+
     test(
       '🔴 NB-F — un RÉPERTOIRE portant le nom du document : lire() rend '
       'DocumentIllisible, ⛔ PAS DocumentAbsent (ce n’est pas `v0`)',

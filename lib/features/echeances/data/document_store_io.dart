@@ -104,11 +104,43 @@ class DocumentStoreFichier implements DocumentStore {
   /// ⛔ **Jamais d'écriture en place.** C'est l'autre moitié d'AC-12 « Erreur » :
   /// une interruption laisse la cible **intacte**, parce qu'elle n'a jamais été
   /// ouverte en écriture.
+  /// 🔴 **`NB-E` (audit sécurité du 2026-08-11) — un `rename` qui échoue ne
+  /// laisse plus `echeances.json.tmp` sur le disque AVEC LES DONNÉES DU
+  /// PRATIQUANT.** Le provisoire est **inerte pour le produit** *(⛔ [lire] ne
+  /// regarde que la cible — c'est une propriété VOULUE d'AC-12)*, mais c'était
+  /// une **rémanence de données** à un nom **prévisible**, dans un répertoire que
+  /// **`N-2`** dit **partagé** sous Windows et Linux.
+  ///
+  /// ⛔ **Ce que ce ménage NE FAIT PAS** : il ne transforme **jamais** un échec en
+  /// succès — l'exception est **relancée telle quelle**, et un échec du ménage
+  /// **lui-même** est **avalé** *(⛔ il ne doit pas MASQUER l'échec réel, qui est
+  /// le seul que l'appelant doive connaître)*.
+  ///
+  /// ⚠️ **Le `try` n'entoure QUE le `rename`, et la portée est le point** : on
+  /// n'arrive au ménage qu'**après avoir écrit le provisoire soi-même**, donc il
+  /// n'efface **que ce que cet appel a créé**. ⛔ L'obstacle qu'AC-17 emploie pour
+  /// rendre le stockage non inscriptible est un **répertoire portant le nom du
+  /// provisoire** : il fait échouer `writeAsString`, **avant** ce `try` ⇒ il n'est
+  /// jamais touché. *(Une **garde de type** avait d'abord été écrite ici ; elle a
+  /// été **retirée parce qu'aucun mutant ne pouvait la tuer** — le provisoire est
+  /// **nécessairement** le fichier qu'on vient d'écrire. Une branche
+  /// inatteignable qu'aucun test ne peut mettre en défaut est une **fausse
+  /// sécurité**, et la borne réelle est écrite ici.)*
   @override
   Future<void> ecrire(String contenu) async {
     final provisoire = _provisoire;
     await provisoire.writeAsString(contenu, flush: true);
-    await provisoire.rename(_cible.path);
+    try {
+      await provisoire.rename(_cible.path);
+    } on Object {
+      try {
+        await provisoire.delete();
+      } on Object {
+        // Le système d'exploitation le récupérera. ⛔ Surtout ne pas masquer
+        // l'échec d'écriture, seule information utile à l'appelant.
+      }
+      rethrow;
+    }
   }
 
   /// Le nom de destination d'une mise de côté, **pour un rang donné**.
