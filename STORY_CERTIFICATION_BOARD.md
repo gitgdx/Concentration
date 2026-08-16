@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ❌ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2311,7 +2311,60 @@
     CVE** · `deps_audit` porte **`blocking: false`** · **`main()` n'a PAS été exécuté** *(**NM-8**)* : le
     niveau prouvé s'arrête à `charger()` · **NM-10 entière**.
 
-- **⏳ Reste dû** : **⛔ RETOUR À @Developer — 2ᵉ `FAILED` sécurité, sur `B-2`.** Correctif de **2 lignes**
+- **🔁 2ᵉ CYCLE DE CORRECTIF @Developer (2026-08-11) — PÉRIMÈTRE ÉLARGI PAR ARBITRAGE HUMAIN, et les deux
+  cellules d'audit repassent à `⏳`.** 6 commits, **code figé à `28d9504`** *(`git diff --name-only
+  28d9504..HEAD -- lib test scripts pubspec.*` rend **0 fichier**)*, `HEAD` = **`e991749`**,
+  `EVT_CODE_READY` ré-émis.
+  ⚖️ **Motif de l'élargissement (décision humaine du 2026-08-11)** : B-1 et B-2 sont **de la même famille
+  — un chemin d'erreur qui avale** — et **chaque tour coûte une paire d'audits complète**. Le **GEL
+  d'US-00.6** interdit d'*ouvrir* un cycle pour du non bloquant ; un cycle était **déjà ouvert** par B-2.
+  ⇒ **la famille est refermée d'un coup** : **B-2** *(bloquant)* + **NB-D, NB-E, NB-F, NB-G, NB-J**.
+  ⛔ **Élargissement borné aux chemins d'erreur de la persistance** — aucune autre extension.
+  - ✅ **B-2 corrigé, et de la forme qui referme AUSSI le trou d'instrumentation** :
+    `_document = await _tenterMiseDeCote() ? documentNeuf : null`. ⛔ **L'exception n'est plus AVALÉE, elle
+    est CONVERTIE** en booléen — donc le `catch` **au corps vide** *(zéro ligne instrumentable, invisible
+    à `lcov` : c'était **NB-I**)* **n'existe plus**. **Les deux chemins du fichier convergent enfin** : la
+    mise de côté échouée refuse l'écriture, **exactement comme le chemin « version FUTURE » le faisait
+    déjà à vingt lignes de là**. Et l'état **s'auto-répare** : l'obstacle disparu, le démarrage suivant met
+    le document de côté et l'écriture redevient possible.
+  - 🔬 **@Architect A REJOUÉ LE MUTANT INVERSE LUI-MÊME, PARCE QUE LE PIÈGE ÉTAIT ARMÉ ET SIGNALÉ
+    D'AVANCE** : **NB-F/NB-G ont été corrigés AVANT B-2** *(`e26d791` précède `e5d471e`)*, or le
+    déclencheur le plus évident **était** le point aveugle de NB-G *(un **répertoire** au nom de
+    destination, que `File.existsSync()` déclare absent)* ⇒ **le corriger d'abord pouvait rendre le test de
+    B-2 VACUEUX en le laissant vert.** **Ce n'est pas arrivé** : le déclencheur retenu occupe **TOUS** les
+    candidats avec des répertoires, **horloge figée** pour rendre les noms déterministes.
+    **Mesure** : correctif remis en `documentNeuf` inconditionnel ⇒ **3 tests ROUGES**, dont
+    `Expected: false / Actual: <true>` sur *« le document est toujours là ⇒ l'écriture reste refusée »*.
+    ⇒ ⛔ **le test n'est pas vacué**, et il **survit** au correctif de NB-F/NB-G. Arbre restauré,
+    `git status` **vide**.
+  - ✅ **NB-D fermé avec B-2** : le `catch` **reste** *(`charger()` est `await` avant `runApp`, donc une
+    exception qui sortirait rendrait **B-1**)*, mais ⛔ **`on Object` et non `on FileSystemException`** —
+    le stub lève un `UnsupportedError`, et un type attrapé **trop étroit** ferait ressortir l'exception.
+    Son motif ne se réclame plus du stub, **où le chemin est inatteignable**.
+  - ✅ **NB-E** *(un `rename` échoué n'abandonne plus les données dans `echeances.json.tmp`)* · **NB-F et
+    NB-G** *(la boucle anti-collision regarde désormais **le TYPE de l'occupant**, pas sa seule
+    existence)* · **NB-J** *(la promesse absolue « ⛔ NE LÈVE JAMAIS » est remplacée par **l'énumération
+    des classes couvertes, chacune avec son test, ET SA BORNE ÉCRITE** : elle **LÈVE** si le magasin
+    **viole son contrat** en levant à la lecture — ⛔ délibérément non attrapé, *« un `catch` de plus
+    masquerait les erreurs de PROGRAMMATION »* — et **cette borne est épinglée par un test**)*.
+    ➡️ **Même voie que NB-A, et c'est cohérent** : *une doc dit ce qui EST*.
+  - **Compteurs relevés par @Architect, pas repris du rapport** : **5 gates verts**, **369 tests**,
+    couverture **97.9 % (941/961)** contre cliquet **95.2 inchangé** · `check_gherkin_mapping`
+    **50 ↔ 50** et **13 ↔ 13** ⇒ **voie (a) tenue, aucun nombre dérivé n'a bougé** ·
+    `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT, 8 assertions** ·
+    `validate_trace` et `check_scb_compliance` **conformes** · `git status` **vide**.
+  - ⛔ **CE QUE CE CYCLE N'ATTESTE PAS** : **il ne juge pas sa propre suffisance** — c'est au 3ᵉ tour
+    d'audit de le dire, et **les deux tours précédents ont chacun trouvé un bloquant qu'aucun gate n'avait
+    vu** · **NM-8 et NM-10 entières** *(`main()` jamais exécuté, aucun appareil, web non exécuté)* ·
+    **aucun SAST, aucun scan de CVE** · **N-1, N-2, NB-C, N-3, N-5 → N-10 restent OUVERTS**.
+
+- **⏳ Reste dû** : **3ᵉ TOUR D'AUDIT sur `28d9504`** *(`HEAD` = `e991749`)* — **les DEUX audits**, ⛔ **et
+  cette fois EN ARBRES DE TRAVAIL ISOLÉS**, ce qui corrige le défaut ① relevé par la sécurité au 2ᵉ tour
+  *(`/audit-us` faisait tourner deux audits **mutants** sur **un seul** arbre ; les deux auditeurs
+  s'étaient isolés **spontanément**, le rituel ne le prescrivait pas)*. **Ensuite seulement, QA.**
+  **Phase INCHANGÉE : `parallel_audit`.**
+  ⛔ **Historique conservé, non repeint — ce qui suit était le « Reste dû » du 2ᵉ tour :**
+  **⛔ RETOUR À @Developer — 2ᵉ `FAILED` sécurité, sur `B-2`.** Correctif de **2 lignes**
   *(`_document = misDeCote ? documentNeuf : null`)* **avec son test** — ⛔ **et le test est le vrai
   travail** : il doit faire **échouer le `rename`** *(la sonde de l'auditeur y arrive par un **verrou
   ordinaire** sur la destination)*, classe qu'⛔ **aucun test livré n'exerce**. Traiter aussi **NB-D**
