@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2358,7 +2358,134 @@
     vu** · **NM-8 et NM-10 entières** *(`main()` jamais exécuté, aucun appareil, web non exécuté)* ·
     **aucun SAST, aucun scan de CVE** · **N-1, N-2, NB-C, N-3, N-5 → N-10 restent OUVERTS**.
 
-- **⏳ Reste dû** : **3ᵉ TOUR D'AUDIT sur `28d9504`** *(`HEAD` = `e991749`)* — **les DEUX audits**, ⛔ **et
+- **🔁 3ᵉ TOUR D'AUDIT (2026-08-17) — ✅✅ DOUBLE VISA, le PREMIER du cycle. Code audité `28d9504`,
+  `HEAD` `b77e3cf`, ⛔ EN ARBRES DE TRAVAIL ISOLÉS.**
+  **✅ Revue `PASSED`** *(`EVT_CODE_REVIEW_PASSED`, [`code_review_delta2.md`](reports/US-01.2/code_review_delta2.md))* ·
+  **✅ Sécurité `PASSED`** *(`EVT_SECURITY_AUDIT_PASSED`, [`security_delta2.md`](reports/US-01.2/security_delta2.md))*
+  — ⛔ **aucun des 4 rapports antérieurs n'a été écrasé**.
+  - ✅ **L'ISOLATION PAR `git worktree` N'EST PLUS UNE PRÉCAUTION : ELLE A SERVI, ET L'INCIDENT LE PROUVE.**
+    Le lanceur de mutants de la sécurité est **mort sur `cp1252` ENTRE l'application d'un mutant et sa
+    restauration**, laissant `lib/` **muté** dans son arbre. ⇒ **sans isolation, cette mutilation frappait
+    l'arbre où la revue travaillait au même moment** — exactement le défaut ① du 2ᵉ tour. **Second fait, de
+    la même veine** : le 3ᵉ tour avait déjà été lancé puis **interrompu** dans une session antérieure, et
+    ses deux arbres orphelins portaient **une sonde** et **un mutant en vol** ; l'arbre principal, lui,
+    était **resté vide** *(`git status --porcelain`)*. ➡️ **Le remède est validé par les incidents mêmes
+    qu'il était censé contenir.**
+  - ✅ **`B-2` EST FERMÉ, ET LES DEUX AUDITEURS L'ONT ÉTABLI PAR DES CHEMINS DIFFÉRENTS.**
+    **Sécurité** : déclencheur **choisi différent de celui des tests livrés** — un **verrou exclusif
+    ordinaire** *(classe antivirus / OneDrive)* sur le magasin `io` de production ⇒ `creer()` rend
+    `estReussi = false`, document **intact octet pour octet**, aucune copie, **auto-réparation** dès
+    l'obstacle levé, **contrôle négatif qui bascule dans les deux sens** ; les **deux** façons de
+    réintroduire `B-2` sont **tuées** par les tests livrés.
+    **Revue** : ⛔ **le test livré n'est PAS VACUEUX**, et elle l'a établi **seule, par trois mesures** —
+    remettre la boucle aveugle de `NB-G` ⇒ **seul** le test de `NB-G` rougit, `B-2` **reste vert** ;
+    remettre `existsSync` dans `lire()` ⇒ **seul** celui de `NB-F` rougit ; retirer les obstacles ⇒
+    **`B-2` ROUGIT**. 🔬 **Le piège que j'avais armé et signalé d'avance est donc fermé PAR UN TIERS** :
+    mon propre rejeu du 2026-08-12 disait la même chose, mais *un producteur qui vérifie son propre piège
+    n'est pas une preuve* — désormais c'en est une.
+  - 🔴 **UN CONSTAT DE `security_delta.md` EST RÉFUTÉ PAR LA MESURE, ET C'EST L'AUDIT SÉCURITÉ QUI RÉFUTE
+    SON PRÉDÉCESSEUR** *(`SEC-NB-K`, MEDIUM)* : le §7 du rapport du 2ᵉ tour laissait entendre que
+    **Windows refuserait** un `rename` sur une destination existante. ⛔ **Faux — `File.rename` ÉCRASE
+    SILENCIEUSEMENT sous Windows AUSSI** *(sonde `Q-2` : `leve=Null`, destination = contenu **nouveau**,
+    antérieure **écrasée**)*. ⇒ la promesse écrite dans le code — *« le nom ne doit JAMAIS écraser une mise
+    de côté antérieure »* — **ne repose sur AUCUNE garantie du système** : elle tient **entièrement** à la
+    boucle `typeSync`, qui **n'est pas atomique** *(fenêtre TOCTOU)*. **Aggravant mesuré** : l'espace des
+    noms est **1000 fois plus étroit que le format ne le suggère** — suffixe à **16 chiffres**, mais
+    **20 000 appels rendent 4 valeurs distinctes** *(granularité d'horloge ≈ 1 ms)*.
+    ⚖️ **NON BLOQUANT, et le motif est la RÉCIPROQUE de la règle qui avait fait bloquer `B-2`** : *un
+    déclencheur exécuté bat un raisonnement* ⇒ **un raisonnement sans déclencheur ne bloque pas**.
+    L'auditeur a **cherché** la séquence destructive **depuis le produit** et ⛔ **ne l'a pas atteinte** —
+    la boucle protège *(`K-3` : les deux documents survivent, même horloge figée)*. **Il l'écrit
+    lui-même** : *« ce serait malhonnête d'en faire un bloquant, et malhonnête de le taire. »*
+    **Remède = celui de `N-1`** *(création exclusive ou suffixe aléatoire)*, **hors périmètre**.
+  - 🔴 **`NB-I` EST FERMÉ COMME DÉFAUT, ⛔ PAS COMME ANGLE MORT D'INSTRUMENT — et c'est LU dans
+    `lcov.info`, pas déduit** *(`REV-NB-N`, MEDIUM)*. Le `catch` n'a plus un corps vide *(il porte
+    `return false;`)*, ce qui **suggère** que la branche est redevenue visible : sur `_tenterMiseDeCote`,
+    les **seules** lignes instrumentées sont **`{235: 2, 237: 4}`** — ⛔ **ni le `return true` ni le
+    `return false` n'ont d'entrée `DA`** ⇒ **aucune couverture, à aucun seuil, ne peut dire si la branche
+    d'échec est exercée** ; **97,9 % ne dit toujours RIEN de ce chemin**. 🔬 **7ᵉ instance de la thèse du
+    projet, et la plus nette** : la couverture n'est pas seulement **aveugle à la force des assertions**,
+    elle l'est à **l'EXISTENCE de la branche — même après correction**. *(Confirmé de l'autre côté :
+    `SEC-NB-M` montre qu'**inverser la décision produit** du dernier `on Object` à corps de commentaires
+    laisse **100 tests verts** ⇒ **rien ne défend le choix actuel, et rien ne défendrait le choix
+    inverse**.)*
+  - 🔴 **COLLISION D'IDENTIFIANTS — le tour la DÉCOUVRE et l'AGGRAVE dans le même geste** *(`REV-NB-O`,
+    MEDIUM)*. `NB-D`, `NB-E`, `NB-F`, `NB-G` désignent **deux jeux de findings différents** selon qu'on lit
+    `code_review.md` *(1ᵉʳ tour)* ou `security_delta.md` ; **les tâches C5 et C6 cochent la série
+    SÉCURITÉ**, et ⛔ **la liste « hors périmètre » du Story File ne nomme PAS ceux de la REVUE** — vérifiés
+    **OUVERTS par exécution** *(chemin de poste en dur dans `generer_e2e.py` · `refusEditionEchue` à un
+    **seul** appelant · `lcov` : ligne **117** non couverte, le bouton « Fermer »)*. ⇒ **un lecteur d'audit
+    conclura qu'ils sont fermés. Ils le sont pour la sécurité, ⛔ pas pour la revue.**
+    ⚠️ **Et ce tour en ajoute QUATRE** : la sécurité nomme `NB-K`, `NB-L`, `NB-M`, `NB-N` ; la revue
+    `NB-M`, `NB-N`, `NB-O`, `NB-P` ⇒ ⛔ **`NB-M` et `NB-N` désignent chacun DEUX choses dans le MÊME
+    tour**, et `NB-K`/`NB-L` en désignaient déjà deux depuis le 2ᵉ. **Convention appliquée à partir d'ici
+    et dans tout ce paragraphe : préfixer par la grille — `REV-` / `SEC-`.** **Même famille que `NB-6`** :
+    *le corpus ne modélise pas ce sur quoi un identifiant PORTE.* ➡️ **`/audit-methodo`.**
+  - 🟠 **LE DÉCOMPTE DE MUTANTS D'`EVT_CODE_READY` EST FAUX, ET IL EST GELÉ** *(`REV-NB-M`, MEDIUM —
+    **re-vérifié par @Architect lui-même**)* : la trace et le PROJECT_LOG disent *« 11 MUTANTS joués …
+    **8 TUÉS** »*, or la somme des tâches **C4 → C7** du Story File donne **`2 + 4 + 2 + 2 = 10` tués**
+    *(l'écart omet les **2 mutants de C7**)*, et ⛔ **l'arithmétique de la trace ne boucle même pas sur
+    elle-même** : `8 tués + 2 contrôles + 1 anti-vacuité + 1 survivant + 1 non représentable` = **13**,
+    pour **11 annoncés**. **Classe de défaut nº 1 du projet**, cette fois **dans une trace append-only**
+    ⇒ ⛔ **elle ne sera PAS réécrite**, comme le mot amputé du 2ᵉ tour. **Non bloquant** : l'écart
+    **SOUS-ESTIME** le travail fait, et **la revue a rejoué la campagne elle-même** *(12 mutants, 10 tués,
+    1 survivant confirmé, 1 non représentable — **aucun survivant non annoncé**)*. ➡️ **Vraie sortie** :
+    *un décompte de mutants doit être PRODUIT par le script de campagne, jamais recopié dans un
+    `rationale`.*
+  - ✅ **LE SURVIVANT QUE @DEVELOPER AVAIT NOMMÉ LUI-MÊME EST VÉRIFIÉ — et la sécurité l'ÉLARGIT** :
+    `M-E4` *(= son `M-7`)* est confirmé survivant, mais la caractérisation *« `File.delete` refuse un
+    répertoire »* est **trop étroite** — l'occupant survit **aussi** s'il est un **fichier tiers en lecture
+    seule** ou **verrouillé** ⇒ ⛔ **le `try` étroit n'est pas seulement « non testable », il est
+    STRICTEMENT PLUS SÛR**, et le commentaire du code donne la bonne raison. **Le survivant `M-11` de
+    `SEC-NB-L` est NON REPRÉSENTABLE sous Windows, mesuré** : *les conditions qui font échouer le `rename`
+    sont exactement celles qui font échouer le `delete`* ⇒ la propriété tient par **coïncidence de
+    plateforme**, ⛔ **pas par un test** — ⚠️ **à rejouer sous POSIX**, où un fichier en lecture seule
+    **est** supprimable.
+  - **Autres non bloquants** : **`SEC-NB-L`** *(le **premier `delete` de fichier** entré dans `lib/` —
+    correct **par construction** : cible bâtie uniquement sur `const nomDocument`, **aucune composante
+    contrôlée par l'utilisateur** ; 2 mutants tués)* · **`SEC-NB-M`** *(le dernier `on Object` à corps de
+    commentaires n'est assertionné **dans aucun sens**)* · **`SEC-NB-N`** *(restauration de mutant à mettre
+    en `finally`, `PYTHONIOENCODING=utf-8` — ➡️ `/audit-methodo`, dossier mutation)* · **`REV-NB-P`**
+    *(l'énumération de `charger()` nomme **une** classe de levée ; **deux autres sites lisibles dans le
+    même corps** — `migrer(racine)!` et `firstWhere` sans `orElse` — sont **sûrs aujourd'hui, vérifiés dans
+    le code**, mais **non nommés**)*.
+  - **Findings antérieurs** : **`NB-D/E/F/G/J` (série sécurité) fermés**, chacun par un **mutant tué** ·
+    **aucun finding précédent aggravé** · **`NB-E` confirmé OUVERT sur l'INTERRUPTION** *(un `.tmp`
+    orphelin porteur de données survit à 4 démarrages — **comme le Story File le dit lui-même**)* ·
+    **`REV-NB-C`, `REV-NB-H`** subsistants, **re-mesurés**, non aggravés · **bornes CVE / SAST
+    INCHANGÉES** *(0 fichier `.github`, `pubspec` identique **comparé par ensembles**)*.
+  - **Compteurs relevés par @Architect lui-même, ⛔ pas repris des rapports** : `run_gates --all` →
+    **5 gates verts**, **369 tests**, couverture **97.9 % (941/961)** contre cliquet **95.2** *(valeur
+    **LUE** dans `factory.config.json`, **non édité**)* · `check_gherkin_mapping` **50 ↔ 50** et
+    **13 ↔ 13** · `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT,
+    8 assertions** · `validate_trace` et `check_scb_compliance` **conformes** · arbre principal ne portant
+    **QUE** les 2 rapports et la ligne de trace · **rationales de trace relues dans le fichier** :
+    **0 backtick**, **0 `$`**, aucun mot amputé ⇒ **le piège du 2ᵉ tour n'a pas rejoué**.
+  - ⛔ **CE QUE CE DOUBLE ✅ N'ATTESTE PAS** : **aucun SAST** *(`run_gates --gate sast` → **exit 1**, le
+    gate n'existe pas)*, **aucun scan de CVE** ⇒ **les deux revues sont HUMAINES, donc non exhaustives** —
+    et la sécurité l'écrit : *« un troisième défaut de même nature ne serait pas contredit par ce
+    rapport »*, ⚠️ **précédent à l'appui, puisque `B-2` était PRÉ-EXISTANT et n'est apparu que parce que le
+    correctif de `B-1` avait déplacé la PORTÉE** · **TOUT est mesuré sous Windows**, un seul système de
+    fichiers, un seul fuseau — ⛔ **or la famille `B-2` / `NB-E` / `NB-G` dépend précisément du `rename`** ·
+    **`main()` n'a JAMAIS été exécuté** *(**NM-8** entière)* · **aucun écran vu** *(**NM-6**, **NM-7**,
+    **NM-10** entières)* · la **fenêtre TOCTOU de `SEC-NB-K`** n'est **ni franchie ni réfutée** ·
+    l'instabilité `REV-NB-L` est **non observée en 17 exécutions**, ce qui ⛔ **ne la réfute pas** — *une
+    sonde qui ne trouve pas ne prouve rien* · ⛔ **la revue n'a PAS lu le rapport de sécurité de ce tour, et
+    réciproquement** : chaque `PASSED` n'atteste **que sa grille** · `check_gherkin_mapping` compare des
+    **TITRES** · **`N-1`, `N-2`, `REV-NB-C`, `N-3`, `N-5` → `N-10` restent OUVERTS**.
+
+- **⏳ Reste dû** : **QA** *(@QA_Tester)* sur le code `28d9504`. Les **deux préconditions**
+  d'`EVT_QA_PASSED` sont satisfaites *(`EVT_CODE_REVIEW_PASSED` **et** `EVT_SECURITY_AUDIT_PASSED`,
+  postérieurs au dernier `EVT_CODE_READY` — ⚠️ **cet ordre n'est exigé par AUCUNE barrière**, c'est la
+  5ᵉ instance déjà inscrite plus haut)*.
+  ⚠️ **LA CELLULE DE PHASE RESTE `parallel_audit`, ET CE N'EST PAS DE LA PRUDENCE : C'EST UN REFUS
+  D'OUTIL, MESURÉ.** L'avancer à `quality_assurance` a été **tenté** et
+  **`check_scb_compliance.py` l'a REJETÉ** — *« QA Status est ⏳ alors que la phase est bloquante
+  (quality_assurance) »*. ⇒ **la cellule de phase nomme la phase dont le visa est POSÉ, jamais celle qui
+  est EN COURS** — à savoir avant d'y lire un état d'avancement.
+  ⛔ **Historique conservé, non repeint — PÉRIMÉ-2026-08-17 : ce qui suit était le « Reste dû » AVANT le
+  3ᵉ tour, et il est SOLDÉ :**
+  **3ᵉ TOUR D'AUDIT sur `28d9504`** *(`HEAD` = `e991749`)* — **les DEUX audits**, ⛔ **et
   cette fois EN ARBRES DE TRAVAIL ISOLÉS**, ce qui corrige le défaut ① relevé par la sécurité au 2ᵉ tour
   *(`/audit-us` faisait tourner deux audits **mutants** sur **un seul** arbre ; les deux auditeurs
   s'étaient isolés **spontanément**, le rituel ne le prescrivait pas)*. **Ensuite seulement, QA.**
