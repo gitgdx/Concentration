@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | parallel_audit | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -2474,7 +2474,78 @@
     réciproquement** : chaque `PASSED` n'atteste **que sa grille** · `check_gherkin_mapping` compare des
     **TITRES** · **`N-1`, `N-2`, `REV-NB-C`, `N-3`, `N-5` → `N-10` restent OUVERTS**.
 
-- **⏳ Reste dû** : **QA** *(@QA_Tester)* sur le code `28d9504`. Les **deux préconditions**
+- **✅ QA `🧪 PASS` (2026-08-18, `EVT_QA_PASSED`, contexte FRAIS — code `28d9504`, `HEAD` `ef87d8f`)** —
+  [`qa.md`](reports/US-01.2/qa.md). **Exécutée dans un worktree VIERGE** *(ni `.dart_tool` ni `build`)* ⇒
+  ⛔ **ce qui est mesuré est ce qu'obtiendrait un dépôt frais**, pas un état de cache local.
+  - **369 passed · 0 failed · 0 skipped** — et le `skipped = 0` est **MESURÉ** *(`--reporter json`)*,
+    ⛔ **pas déduit de l'absence du signe `~`** · couverture **97.9 % (941/961)**, cliquet **95.2 LU** dans
+    `factory.config.json` · **5 gates verts** · **8 contrôles projet à `exit 0`**, dont
+    `migration_roundtrip_criterion` → `VERDICT|OK|`.
+  - ✅ **AUCUN AC ORPHELIN** : **16/16 AC actifs** couverts par des scénarios **exécutés**, **AC-9 vacant**
+    conforme à sa déclaration, **0 test hors d'un groupe d'AC** — croisement **EN ENSEMBLES**, et
+    l'instrument **porte son autotest**.
+  - 🔬 **LA MESURE QUE PERSONNE N'AVAIT FAITE, ET C'EST LE VRAI APPORT DE CETTE QA** : la revue avait
+    **borné** sa campagne à `test/features/echeances/data/` ; la QA a joué **10 mutants sur `lib/`** pour
+    mesurer ce que **l'e2e SEULE** tue — **8 sur 10**. Les **2 « survivants » d'AC-16 sont une REDONDANCE
+    DE GARDES**, ⛔ **pas une règle sans défenseur** : le contrôle `MQA8`, qui retire **les DEUX** gardes,
+    fait **rougir les 2 scénarios e2e** ⇒ **0 survivant réel**.
+    ➡️ **RÉPONSE À LA QUESTION QUE LE PROJET SE POSE DEPUIS EPIC_00** — *« un `.feature` est-il un test ou
+    une décoration ? »* : ici les **50 scénarios ne sont pas seulement MAPPÉS PAR TITRE, ils DÉFENDENT le
+    code** — **38/50 assertent les octets du fichier**, **0 test à moins de 2 `expect`**. ⚠️ **La borne
+    demeure** : `check_gherkin_mapping` **compare des titres** et l'imprime lui-même.
+  - 🔴 **LA QA A RETIRÉ SON PROPRE INSTRUMENT — 4ᵉ fois dans l'histoire du projet, et c'est toujours
+    compté comme un ACQUIS** : sa sonde v1 comptait **94 `expect`** là où le fichier en porte **3**, parce
+    qu'**une apostrophe française dans un commentaire** désynchronisait son scanner. **v1 RETIRÉE** *(⛔ pas
+    rafistolée)*, **v2 publiée AVEC le mutant qui la tue** *(autotest 8/8)*.
+    ⚠️ **Et ses scripts ont planté DEUX FOIS sur `cp1252`** — **la classe de bug déjà payée en US-00.6**,
+    et **déjà rencontrée le même jour par la sécurité** *(dont le lanceur de mutants en est mort en
+    laissant `lib/` muté)*. ⇒ **3 occurrences, 3 rôles différents, 1 remède d'une ligne
+    (`PYTHONIOENCODING=utf-8`) qui n'est écrit NULLE PART.** ➡️ **`/audit-methodo`.**
+  - **5 non bloquants, 0 bloquant** : **`Q-1`** *(MEDIUM — la compensation déclarée de **NM-9** est
+    **imprécise** : les 2 scénarios d'AC-16 **n'atteignent JAMAIS** la barrière **V-1**, la garde calendrier
+    court-circuitant ; ce qui l'éprouve est `date_civile_test.dart`, que **la même ligne nomme dans sa
+    seconde moitié** ⇒ **la règle EST défendue, c'est la DESCRIPTION de l'instrument qui dépasse la
+    mesure**)* · **`Q-2`** *(MEDIUM — **DoD cochée 1/25** alors que **19 cases sont matériellement
+    satisfaites**, et la case « PR ouverte » est **FAUSSE** : `gh pr list` rend **vide** — **re-vérifié par
+    @Architect**)* · **`Q-3`** *(LOW — le Story File déclare `feat/US-01.2-gestion-echeances`, la branche
+    réelle est **`feat/US-01.2-design`** — **re-vérifié**)* · **`Q-4`** *(LOW — le point ② renvoyé à
+    l'humain n'a **aucun verdict daté** là où la DoD le cherche)* · **`Q-5`** *(LOW — `AC-10 N` parle de
+    persistance et n'asserte que l'écran ; ⛔ **non vacueux**, le disque est traversé par un dépôt neuf)*.
+  - ⛔ **CE QUE CE `🧪 PASS` N'ATTESTE PAS** : **aucun écran vu** · **`main()` JAMAIS exécuté** —
+    `main.dart` est **absent du `lcov`** ⇒ **NM-8 encore vraie** · l'application **n'a jamais tourné sur un
+    appareil** ⇒ **NM-1, NM-2, NM-4, NM-6, NM-7 NON LEVÉES**, et ⛔ **NM-10 ne se lèvera PAS avec
+    US-01.3** · **aucun SAST, aucun scan de CVE** *(bornes connues, réénoncées)* · **tout mesuré sous
+    Windows**, un seul fuseau, ⛔ **or les mécanismes d'échec du `rename` diffèrent sous POSIX** ·
+    campagne de mutation **non exhaustive** · ⛔ **le `🧪 PASS` d'US-01.1 reste PÉRIMÉ — ce rapport ne le
+    rafraîchit pas.**
+
+- ⚖️ **RECTIFICATION D'UNE PHRASE QUE J'AI ÉCRITE LA VEILLE, ET ELLE EST DE LA CLASSE DE DÉFAUT Nº 1**
+  *(@Architect, 2026-08-18)*. J'ai écrit que *« la cellule de phase nomme la phase dont le visa est POSÉ,
+  jamais celle qui est EN COURS »* — ⛔ **déduit d'UN refus d'outil au lieu d'être LU dans le script**.
+  **C'est une sur-lecture.** La règle réelle, **lue dans `check_scb_compliance.py`** : `BLOCKING_PHASES`
+  *(`quality_assurance` → `epic_closure`)* exigent `QA Status != ⏳`, et **`prepare_deployment` exige en
+  outre `QA Status == 🧪 PASS`**. ⇒ **une fois le `🧪 PASS` posé, `quality_assurance` ET
+  `prepare_deployment` sont TOUS DEUX légaux** ; ce qui tranche est `WORKFLOW.yaml`
+  *(`quality_assurance` → `SUCCESS: prepare_deployment`)* et le **précédent d'US-01.1**.
+  ⛔ **La phrase de la veille n'est PAS repeinte** — elle est **datée et corrigée ici**. *Le refus d'outil,
+  lui, reste un fait : il a bien eu lieu, et il était juste.*
+
+- **⏳ Reste dû** : **Déploiement**, puis **certification**. ⛔ **ET US-01.2 BUTE SUR LE MÊME MUR
+  QU'US-01.1, dont le motif est DÉJÀ TRANCHÉ — ne pas le re-litiger** : `/certify` s'arrêtera au **gate 6**
+  tant que `Déploiement` vaut `⏳`, `EVT_CERTIFIED_PROD` exige `EVT_DEPLOYMENT_SUCCESS` en précondition, et
+  le déploiement réel est **impossible aujourd'hui** *(Android sans JDK, iOS non scaffoldé, aucun keystore,
+  aucun compte store ; `flutter build web --release` est un **gate de constructibilité**, ⛔ **pas une
+  plateforme cible produit**)*. ⛔ **Le précédent « déploiement = fusion sur `main` » NE SE TRANSFÈRE
+  PAS** — son motif était **« 0 fichier Dart livré »**, et US-01.2 en livre.
+  ➡️ **C'est exactement ce que le plan arrêté le 2026-08-03 prévoit** : **② US-01.3** rend `🚀 DEPLOYED`
+  **signifiant**, et c'est le **seul chemin vers `🚀 OUI` pour US-01.1 ET US-01.2**.
+  **Deux actions documentaires AVANT cela, ⛔ aucune bloquante** : les findings **`Q-2`** et **`Q-3`**
+  portent sur le **Story File** *(DoD cochée **1/25**, case « PR ouverte » **fausse**, nom de branche
+  **erroné**)* — ⚠️ **laisser une DoD à 1/25 sur une US en `prepare_deployment` prépare exactement ce que
+  le gate 4 de `/certify` refusera**, et US-00.6 a déjà payé une case **littéralement insatisfiable**.
+  ⛔ **Historique conservé, non repeint — PÉRIMÉ-2026-08-18 : ce qui suit était le « Reste dû » AVANT la
+  QA, et il est SOLDÉ :**
+  **QA** *(@QA_Tester)* sur le code `28d9504`. Les **deux préconditions**
   d'`EVT_QA_PASSED` sont satisfaites *(`EVT_CODE_REVIEW_PASSED` **et** `EVT_SECURITY_AUDIT_PASSED`,
   postérieurs au dernier `EVT_CODE_READY` — ⚠️ **cet ordre n'est exigé par AUCUNE barrière**, c'est la
   5ᵉ instance déjà inscrite plus haut)*.
