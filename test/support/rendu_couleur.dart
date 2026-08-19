@@ -33,11 +33,31 @@ double clarteDe(Color couleur) => Oklab.depuisRgb(rgbDe(couleur)).l;
 /// Sans ce point d'observation, « la couleur de fond de la tuile est bleue »
 /// restait une étape Gherkin décorative : le test comparait une valeur
 /// **recalculée à côté**, jamais celle que la tuile rend.
+///
+/// 🔴 **CORRECTIF NB-7 (US-01.2, T6) — assertion d'UNICITÉ avant sélection.**
+/// Cette fonction sélectionnait **par position** (`.first`, sans rien vérifier).
+/// Avec **deux `DecoratedBox` imbriquées**, elle lisait l'**extérieure** : la
+/// tuile pouvait rendre **toujours orange** avec **112 tests verts** — défaut
+/// **démontré**, pas supposé (sonde `reports/US-01.1/qa_delta_nb7_probe.py`).
+/// ⚠️ **US-01.2 rend le défaut IMMINENT** : ses cartes, champs et boutons
+/// introduisent des `Material`, `InkWell` et `Container`, qui en apportent
+/// **tous** une seconde. ⇒ le correctif **précède T9/T10/T11**, faute de quoi
+/// AC-5 d'US-01.1 tomberait **sans un seul rouge**.
 Color fondDeLaTuile(WidgetTester tester, {Finder? tuile}) {
   final cible = tuile ?? find.byType(EcheanceTile).first;
-  final boite = tester.widget<DecoratedBox>(
-    find.descendant(of: cible, matching: find.byType(DecoratedBox)).first,
+  final boites = find.descendant(
+    of: cible,
+    matching: find.byType(DecoratedBox),
   );
+  expect(
+    boites,
+    findsOneWidget,
+    reason:
+        'NB-7 : plusieurs DecoratedBox sous la tuile ⇒ « .first » désignerait '
+        'la mauvaise, et la couleur observée ne serait plus celle qui est '
+        'peinte — un faux vert que rien d’autre ne verrait',
+  );
+  final boite = tester.widget<DecoratedBox>(boites);
   return (boite.decoration as BoxDecoration).color!;
 }
 

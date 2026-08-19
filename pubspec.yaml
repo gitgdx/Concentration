@@ -35,6 +35,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # US-01.2 (T1) — SEULE dependance d'execution ajoutee par cette US (ADR-009 §M-2).
+  # Elle sert UN SEUL appel : obtenir le repertoire de documents de l'appareil.
+  # ⛔ Appelee depuis un unique fichier `*_io.dart`, atteint par IMPORT CONDITIONNEL
+  #    (ADR-009 §2) : ses 24 paquets transitifs sont EXCLUS du bundle web (mesure M-4).
+  # ⚠️ Ce projet n'a NI SAST NI scanner de CVE : sa seule barriere est la revue humaine.
+  path_provider: ^2.1.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

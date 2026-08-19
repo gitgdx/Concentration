@@ -7,6 +7,8 @@ import 'package:concentration/features/hub/presentation/hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../support/magasin_temporaire.dart';
+
 /// La grille sur PLUSIEURS GABARITS — le trou que l'application tournant a
 /// révélé.
 ///
@@ -17,6 +19,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// responsive.**
 void main() {
   final maintenant = DateTime(2026, 8, 1, 12);
+  late MagasinTemporaire harnais;
+
+  setUp(() => harnais = MagasinTemporaire.creer());
+  tearDown(() => harnais.nettoyer());
 
   List<Echeance> neuf() => [
     for (var i = 0; i < 9; i++)
@@ -35,11 +41,19 @@ void main() {
     tester.view.physicalSize = taille;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
+    // ⚖️ US-01.2 (T11) : le seam `echeances:` a disparu — le jeu de données
+    // passe désormais par le DISQUE et le dépôt de production (ADR-011 §5).
+    final notifier = await notifierCharge(
+      tester,
+      harnais,
+      neuf(),
+      clock: FakeClock(maintenant),
+    );
     await tester.pumpWidget(
       MaterialApp(
         theme: ConcentrationTheme.sombre,
         home: hub
-            ? HubPage(echeances: neuf(), clock: FakeClock(maintenant))
+            ? HubPage(notifier: notifier, clock: FakeClock(maintenant))
             : Scaffold(
                 body: EcheancesGrid(
                   echeances: neuf(),

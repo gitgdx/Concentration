@@ -1,4 +1,5 @@
 import 'package:concentration/features/echeances/domain/echeance.dart';
+import 'package:concentration/features/echeances/domain/echeance_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Tests de l'entité et de son ordre (T2 / `MODELE_ECHEANCE.md`).
@@ -48,6 +49,9 @@ void main() {
       expect(
         Echeance.depuisDonnee({'id': '', 'dateEcheance': DateTime(2026)}),
         isNull,
+        reason:
+            'NB-1 : le refus d’un id vide doit être du CODE EXÉCUTÉ — '
+            'l’assert du constructeur est retiré en release',
       );
       expect(
         Echeance.depuisDonnee({'id': 42, 'dateEcheance': DateTime(2026)}),
@@ -66,6 +70,121 @@ void main() {
       });
       expect(lu, isNotNull);
       expect(lu!.description, '');
+    });
+  });
+
+  group('NB-1 — la BARRIÈRE est du code exécuté, pas l’assert (T2)', () {
+    // 🔴 Réfutation exigée par T2 : ce test doit ÉCHOUER si `depuisDonnee`
+    // acceptait un `id` vide EN MODE RELEASE. On ne peut pas exécuter la suite
+    // en release ici ; ce qui est éprouvé, c'est que le refus ne dépend PAS de
+    // l'assert — il est prononcé par une instruction `return null` que le
+    // compilateur conserve. Le mutant qui le tue : retirer la clause
+    // `id.isEmpty` de `depuisDonnee` (l'assert, lui, ne serait plus atteint,
+    // puisque `depuisDonnee` n'appellerait le constructeur qu'après).
+    test(
+      'un id vide est refusé SANS qu’aucune AssertionError ne soit levée',
+      () {
+        Object? capture;
+        try {
+          capture = Echeance.depuisDonnee({
+            'id': '',
+            'dateEcheance': DateTime(2026),
+          });
+        } on Object catch (erreur) {
+          fail('depuisDonnee a LEVÉ ($erreur) là où I-6 exige un null');
+        }
+        expect(capture, isNull);
+      },
+    );
+
+    test('un id NON VIDE passe la même frontière — contrôle négatif', () {
+      // ⛔ Sans lui, un `depuisDonnee` qui rendrait TOUJOURS null passerait
+      // pour un validateur exemplaire.
+      expect(
+        Echeance.depuisDonnee({'id': 'a', 'dateEcheance': DateTime(2026)}),
+        isNotNull,
+      );
+    });
+  });
+
+  group('avec() — recopie modifiée, id CONSERVÉ (AC-6, T2)', () {
+    final base = e('id-stable', DateTime(2026, 5, 5), 'Convention');
+
+    test('la description change, l’id et la date NE CHANGENT PAS', () {
+      final modifiee = base.avec(description: 'Convention annuelle');
+      expect(modifiee.id, 'id-stable');
+      expect(modifiee.description, 'Convention annuelle');
+      expect(modifiee.dateEcheance, DateTime(2026, 5, 5));
+    });
+
+    test('la date change, l’id et la description NE CHANGENT PAS', () {
+      final modifiee = base.avec(dateEcheance: DateTime(2027, 1, 2));
+      expect(modifiee.id, 'id-stable');
+      expect(modifiee.description, 'Convention');
+      expect(modifiee.dateEcheance, DateTime(2027, 1, 2));
+    });
+
+    test('sans argument, la recopie est ÉGALE PAR VALEUR à l’originale', () {
+      expect(base.avec(), base);
+    });
+
+    test('une description VIDE est une valeur, pas une omission (I-3)', () {
+      // ⚠️ Assertion de GRANDEUR, pas une égalité au token : si `avec` traitait
+      // `''` comme « inchangé » (par un `?.isEmpty` de trop), l'édition ne
+      // pourrait JAMAIS vider une description — et le test ci-dessus, lui,
+      // resterait vert.
+      expect(base.avec(description: '').description, isEmpty);
+      expect(base.avec(description: '').id, 'id-stable');
+    });
+  });
+
+  group('ResultatEcriture — refus TYPÉ du port, jamais void (U-6 ①)', () {
+    test('une réussite ne porte AUCUN message', () {
+      const resultat = ResultatEcriture.reussie();
+      expect(resultat.estReussi, isTrue);
+      expect(resultat.message, isNull);
+    });
+
+    test('un échec porte le message de SON acte, et ils DIFFÈRENT', () {
+      const enregistrement = ResultatEcriture.echec(
+        ActeEcriture.enregistrement,
+      );
+      const suppression = ResultatEcriture.echec(ActeEcriture.suppression);
+      expect(enregistrement.estReussi, isFalse);
+      expect(suppression.estReussi, isFalse);
+      // 🔴 Design UX §14.5 : DEUX textes, pas un. Un message générique unique
+      // satisferait la lettre et raterait l'objet.
+      expect(
+        enregistrement.message,
+        isNot(suppression.message),
+        reason: 'l’utilisateur doit savoir CE QUI n’a pas eu lieu',
+      );
+    });
+
+    test('aucun message ne porte de trace technique (AC-17 « Nominal »)', () {
+      // ⛔ Une assertion doit ÉCHOUER si un libellé d'exception, un chemin ou un
+      // code d'erreur entrait dans ces textes.
+      const interdits = [
+        'Exception',
+        'Error',
+        'null',
+        '.json',
+        '/',
+        r'\',
+        'code',
+        'réessai',
+        'brouillon',
+      ];
+      for (final acte in ActeEcriture.values) {
+        expect(acte.messageEchec, isNotEmpty);
+        for (final interdit in interdits) {
+          expect(
+            acte.messageEchec.toLowerCase(),
+            isNot(contains(interdit.toLowerCase())),
+            reason: '« ${acte.messageEchec} » ne doit pas porter « $interdit »',
+          );
+        }
+      }
     });
   });
 

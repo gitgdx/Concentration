@@ -19,7 +19,7 @@
 | US-00.7 | Protection `main` : application effective + preuve par l'effet | epic_closure | ✅ @PO | N/A | N/A | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | 🚀 DEPLOYED | 🚀 OUI |
 | **EPIC_01** | **Module Échéances (MVP)** | | | | | | | | | | |
 | US-01.1 | Affichage Hub & grille d'échéances | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS ⚠️ PÉRIMÉ-2026-08-04 | ⏳ | ⏳ |
-| US-01.2 | Gestion des échéances (CRUD) | business_alignment | ✅ @PO | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ |
+| US-01.2 | Gestion des échéances (CRUD) | prepare_deployment | ✅ @PO | ✅ @Data | ✅ @UX | ✅ @Dev | ✅ 🔍 | ✅ 🛡️ | 🧪 PASS | ⏳ | ⏳ |
 
 ## 🛠 Détails des Visas (Preuves de travail)
 
@@ -1695,6 +1695,12 @@
   [`docs/stories/US-01.2-gestion-echeances.md`](docs/stories/US-01.2-gestion-echeances.md) ·
   [`.feature`](tests/features/US-01.2-gestion-echeances.feature). **14 AC actifs · 42 clauses ·
   45 scénarios** *(comptés par commande, pas estimés)*.
+  ⚖️ **PÉRIMÉ-2026-08-06 pour le décompte SEUL — le visa du 2026-08-03/04, lui, reste ce qu'il était.**
+  Décompte faisant autorité depuis l'ajout d'**AC-16** et **AC-17** : **16 AC actifs** *(⛔ **AC-9 reste
+  vacant et n'est PAS réutilisé** — un identifiant qui glisse casse en silence les références déjà
+  écrites, y compris celles d'US-01.4)* · **48 clauses** · **50 scénarios**. **Mesuré par commande, pas
+  déduit** : **50** occurrences de `^  Scénario: ` dans le `.feature`, **0 titre en double**.
+  *(Contrôle d'arithmétique : `+2 AC ⇒ +6 clauses`, cohérent avec `14 × 3 = 42` et `16 × 3 = 48`.)*
   - 🎓 **CE QUE CE STORY FILE FAIT ET QU'US-01.1 N'AVAIT PAS FAIT** : il porte une table
     **`clause → scénario → RÉFUTATION`** — pour chaque clause, **l'observation qui la contredirait**.
     ⛔ C'est l'antidote direct aux **2 faux verts** d'US-01.1 *(une assertion **auto-référentielle** et une
@@ -1780,8 +1786,799 @@
     d'audit** *(qui portaient déjà sur `173fb62` — **NB-6**)*. ⇒ **qui certifiera US-01.1 après US-01.3
     devra RE-AUDITER *et* RE-QA.** Le coût du report grandit ; il reste inférieur à celui d'un `🚀 OUI`
     fabriqué. Une **ligne de DoD** exige que cette péremption soit **transmise**.
-- **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**
+- ⛔ **PÉRIMÉ-2026-08-06 — sa 1ʳᵉ mention est tombée** *(l'événement a été émis le 2026-08-05 ; voir la
+  puce suivante)*. Ligne **conservée** : on date, on ne repeint pas.
+  **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**
   *(track FULL — ⛔ **aucun `N/A` possible**)*, puis l'Integration Lock.
+- **✅ `EVT_STORY_READY` (11:49:56) et `EVT_ARCHI_VALIDATED` (11:50:30) ÉMIS le 2026-08-05 — commités le
+  2026-08-06.** `python scripts/validate_trace.py --us US-01.2` → **`Traçabilité conforme`**.
+  **Phase → `parallel_design`** — ⛔ **lue dans `WORKFLOW.yaml`, pas écrite de mémoire** :
+  `technical_validation` émet `[EVT_TRACK_SELECTED, EVT_ARCHI_VALIDATED]` et porte
+  `next_on: "SUCCESS -> parallel_design"`.
+  - 🔴 **LA CELLULE DE PHASE AFFICHAIT ENCORE `business_alignment` PENDANT CE TEMPS — c'est l'écart
+    SCB ↔ trace, dans le sens INVERSE de celui qu'US-01.1 a payé.** Là-bas un **visa PO affiché 8 jours
+    sans son événement** bloquait tout l'aval ; ici **deux événements émis** sans que la cellule bouge —
+    et la cellule était **déjà fausse** avant `EVT_ARCHI_VALIDATED`, puisqu'`EVT_STORY_READY` clôt
+    `business_alignment`. ⚠️ **Aucun outil ne l'a vu** : `check_scb_compliance.py` rend
+    *« SCB conforme »* et `validate_trace.py` rend *« conforme »* — **les deux séparément, aucun ne
+    croise la cellule de phase avec le dernier événement tracé**. ➡️ **Candidat `/audit-methodo`**,
+    même famille que NB-6 *(la trace ne sait pas dire « sur quel commit »)*.
+  - 📌 **`EVT_STORY_READY` a été émis APRÈS le travail technique, et sa propre `rationale` le dit** :
+    *« cet événement aurait dû être émis AVANT le travail technique et il est émis en retard, l'ordre réel
+    du travail étant conservé dans le PROJECT_LOG et non repeint »*. ⛔ **Rien n'est rétro-daté.**
+- ⛔ **PÉRIMÉ-2026-08-06** *(les deux branches sont livrées le jour même — voir les deux visas
+  ci-dessous ; on date, on ne repeint pas)*.
+  **⏳ Reste dû au 2026-08-06** : Design **Data** *(@DataEngineer)* et Design **UX** *(@UXDesigner)*, en
+  **parallèle** — ⛔ **aucun `N/A` possible** : track FULL, et **ADR-010 ne remplace que la décision nº 1
+  d'ADR-008**, dont la **nº 3** *(Design Data dû)* reste en vigueur. Puis l'**Integration Lock**
+  @Architect → `EVT_DESIGN_COMPLETED`, **seul déverrouillage de @Developer** *(`development_start` porte
+  `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*.
+
+- **✅ Design UX @UX (2026-08-06)** — [`docs/design/US-01.2-DESIGN-UX.md`](docs/design/US-01.2-DESIGN-UX.md)
+  *(5 wireframes mobile-first, gabarit 360 dp, vérification exigée à 320 et 390 · 8 composants · 4 tokens
+  nouveaux · 15 exigences chiffrées · table **AC → surface → RÉFUTATION**)* ·
+  [`us_01_2_contrastes.py`](docs/design/us_01_2_contrastes.py) · 4 blocs **ajoutés et datés** au
+  [`DESIGN_SYSTEM.md`](docs/design/DESIGN_SYSTEM.md) *(⛔ aucun token existant modifié)* · section
+  « Design UX » du Story File.
+  - 🔬 **LE CONTRASTE EST PUBLIÉ COMME UN SCRIPT EXÉCUTABLE, PAS COMME UNE PHRASE** — 11 couples
+    **exigés**, **3 couples REFUSÉS** *(contrôle négatif)*, 3 constats « couleur seule », autotest de
+    mutation aux mutants pris **hors du vocabulaire de la règle**, verdicts comparés **en ensembles**.
+    ⚠️ **Il porte sa propre date de péremption** : **T9 doit le SUPPRIMER** une fois
+    `test/core/theme/contraste_tokens_test.dart` écrit — *deux copies d'une règle dérivent*.
+  - 🔴 **LE DESIGNER N'A PAS PU L'EXÉCUTER ET L'A DIT** *(aucun shell dans sa dotation)* : ses ratios
+    étaient un **calcul à la main**, soit la **classe de défaut nº 1 du projet**, **nommée au lieu d'être
+    masquée**. ✅ **@Architect l'a exécuté avant de poser ce visa** : `exit 0` *(11 exigés passés, 3 refus
+    qui tiennent)* et `--selftest` **`exit 0`, 12 assertions**, dont **`M1a` : l'ancre noir/blanc
+    **NE TUE PAS** le mutant de gamma** *(contrôle négatif sur son propre mutant)*. ⇒ **toutes les valeurs
+    manuelles sont CONFIRMÉES par le programme, zéro divergence.**
+  - **Trois refus portés par la MESURE, et tous les trois visent la maquette** : bordure
+    `outline-variant` **1,99:1** *(< 3:1, SC 1.4.11)* → remplacée par `contour` **5,86:1** · traitement
+    `opacity-40` sur le groupe des échues **2,72:1**, qui frapperait **précisément** le groupe que le @PO
+    veut rendre évident ⇒ ⛔ **opacité interdite sur tout token de texte** · `moduleGrise` **1,50:1**,
+    licite tant que la commande est **inerte** *(exemptée SC 1.4.3)*, illicite dès qu'elle devient
+    **interactive** *(SC 1.4.11)* → `moduleActif` **10,89:1**.
+  - 🔬 **Une mesure qui inverse une intuition** : `erreur`, `moduleActif` et `texteSecondaire` sont à
+    **1,00:1 ENTRE EUX** *(luminances 0,5684 / 0,5664 / 0,5677)* ⇒ **non séparables par la luminance** :
+    « **jamais la couleur seule** » cesse d'être une recommandation et devient **obligatoire**.
+  - 📌 **Deux réflexes de formulaire REFUSÉS parce qu'ils tueraient un scénario** : un bouton d'ajout
+    **désactivé** à 9 et une icône « modifier » **retirée** sur une échue rendraient **INOBSERVABLES** les
+    deux clauses qui disent « je **tente** » ⇒ règle **aucune barrière muette**. Et ⛔ **ni `maxLength` ni
+    compteur** sur la description : `maxLength` empêcherait de taper le **81ᵉ** caractère, donc le refus
+    d'**AC-2 « Limite » n'aurait JAMAIS LIEU** *(le compteur est par ailleurs nommément interdit par
+    AC-15)*.
+  - ⚠️ **Contradiction SIGNALÉE, non contournée** : `libelleAccessibilite` **embarque `', $description'`**
+    *(mesuré dans `remaining_time_calculator.dart`)* ⇒ l'afficher verbatim rendrait « 3 semaines,
+    Convention annuelle ». **Écart avec la LETTRE du Story File, assumé et écrit.**
+  - ⚠️ **Lacune NOMMÉE sans inventer d'AC** : l'**échec d'écriture** n'a **aucun AC, aucun scénario,
+    aucune surface**.
+  - **Ce que ce design N'ATTESTE PAS** : ⛔ **aucun écran n'a été vu** *(ni maquette rendue, ni appareil)* ·
+    **NM-6** *(annonce réelle d'un lecteur d'écran)* et **NM-7** *(l'œil, le rendu à grande police)*
+    **restent NON LEVÉES** · **aucun test de vision des couleurs** — « jamais la couleur seule » est
+    déduite d'une **arithmétique de luminance**, pas d'une simulation. ⛔ **Un design ne couvre aucune
+    clause : il la rend observable.**
+
+- **✅ Design Data @Data (2026-08-06)** —
+  [`docs/architecture/SCHEMA_STOCKAGE_ECHEANCES.md`](docs/architecture/SCHEMA_STOCKAGE_ECHEANCES.md)
+  *(**premier schéma PERSISTÉ du projet** : diagramme ER de la forme **sur disque**, grammaire de chaque
+  valeur **avec sa réfutation**, contrat d'appel des migrations, matrice de corruption)* ·
+  [`reports/US-01.2/migration_roundtrip_criterion.py`](reports/US-01.2/migration_roundtrip_criterion.py) ·
+  2 ajouts **datés** à `MODELE_ECHEANCE.md` *(texte existant non repeint)*.
+  - **Conventions du rôle NOMMÉES, pas cochées** : `snake_case` **écartée sciemment** *(les clés miroitent
+    les champs de l'entité Dart, figés par un ADR immuable — deux graphies exigeraient une table de
+    correspondance, soit **deux exemplaires d'une même règle**)* · **3NF appliquée et structurante** :
+    ⛔ **aucun fait dérivable persisté** *(`estEchue` et `RemainingTime` restent CALCULÉS)* · index
+    **sans objet et interdits** par AC-10 « Limite » · séparation DDL/données **sans objet** *(un document
+    JSON n'a pas de DDL)*.
+  - **Patron** : `v0` = **absence de fichier** · `v1` = instant UTC canonique · `v2` = **date civile**
+    *(`versionCourante`)*. ⚠️ **Déviation d'ADR-005 §1 NOMMÉE et datée** : il n'existe **aucune étape
+    `v0→v1`** — créer le fichier n'est pas une transformation de données, et son `down` serait **le seul
+    `down` destructif du projet**, pour un chemin que rien n'emprunte.
+  - 🔴 **CE QUI N'A PAS PU ÊTRE JOUÉ, DIT PLATEMENT** : `echeance_schema_migrations.dart` **n'existe pas**
+    *(T2→T7, @Developer)* ⇒ **le patron n'a PAS été joué sur `lib/`**, et le mode par défaut du critère
+    rend **`exit 1` EN LE DISANT**. ⛔ **Le risque nº 4 d'EPIC_00 RESTE OUVERT** et **le critère d'entrée
+    transféré par EPIC_00 N'EST PAS SATISFAIT** — *« un ADR n'est pas une exécution, un critère de sortie
+    non plus »*. Il le sera à l'`exit 0` **contre le module réel**.
+  - ✅ **Ce qui a RÉELLEMENT tourné** *(rejoué par @Architect avant ce visa)* : `--selftest` **`exit 0`**,
+    ensembles attendus **==** obtenus **8/8**, et **les 8 assertions sont tuées par au moins un mutant**
+    *(7 mutants **comportementaux**)*. **Défaut trouvé en route et publié** : un mutant a tué **son propre
+    garde-fou** — la 1ʳᵉ version du contrôle négatif **ne pouvait structurellement jamais rougir** ;
+    corrigée, puis **prouvée vivante** par un mutant que seule elle voit, avec contrôle de faux positif.
+  - 🔴 **LA MESURE CONTREDIT UN CONSTAT D'ADR-009, et c'est la trouvaille de la branche.** Son
+    §*Conséquences* écrit que l'aller-retour est *« exact dans un fuseau donné »* — **c'est FAUX**, et
+    `--sonde` le montre **dans le SEUL fuseau Paris** : `ALLER_RETOUR_EXACT=false` pour toute **seconde**
+    ou **milliseconde** non nulle *(`22:59:30Z` → `23:59` → `22:59:00Z`, **30 s détruites**)* **et** pour
+    la **2ᵉ occurrence de la bascule d'automne** *(`01:30Z` et `00:30Z` rendent la **même** heure civile
+    `02:30`)*. ⛔ **ADR-009 n'est PAS édité** — immuable, et sa **décision** n'est pas touchée : c'est un
+    **constat de son §Conséquences qui a vieilli**.
+    ⇒ **Conséquence non décorative** : un couple `up`/`down` naïf **violerait ADR-005 §2** ⇒ la **garde
+    d'inversibilité** est **la condition** du couple `v1⇄v2`, pas une élégance. Elle vaut **exactement**
+    l'exactitude de l'aller-retour, **7 cas sur 7, dans les deux sens** *(caractérisation exacte, pas
+    approximation prudente)*. Étape **non destructive**, ⛔ **aucune dérogation demandée**.
+  - 🔴 **Second piège MESURÉ, pour T3/T4** : **`DateTime.parse("2026-02-31T23:59")` NE LÈVE PAS** et rend
+    **`2026-03-03T23:59`**. ⇒ **une exception n'est pas une barrière — la barrière est la comparaison à la
+    FORME CANONIQUE.** D'où la règle **V-1** : la saisie doit refuser une **heure civile inexistante
+    localement**, sinon l'app écrit une valeur **qu'elle refusera de relire** et ⛔ **l'échéance disparaît
+    sans message**.
+  - ⚠️ **Trois règles SANS AUCUN AC ni scénario**, déclarées telles et non déguisées : **version FUTURE**
+    *(état vide, aucune écriture, ⛔ **SURTOUT AUCUN `rename`** — déplacer une donnée valide d'une version
+    récente est **destructeur en effet**)* · **`id` en double** · **`schemaVersion` absent**. ⛔ **Ne pas
+    leur écrire de Gherkin** : `45 ↔ 45` deviendrait rouge au job `Governance`.
+    - 🔴 **PÉRIMÉ-2026-08-06 — LA SECONDE MOITIÉ DE LA PUCE CI-DESSUS EST FAUSSE, ET C'EST @ARCHITECT QUI
+      L'A ÉCRITE, DANS LE COMMIT MÊME OÙ IL SE FÉLICITAIT D'AVOIR EXÉCUTÉ LES INSTRUMENTS.** Je l'ai
+      relayée de @DataEngineer **sans lancer `check_gherkin_mapping.py`** ; je ne l'ai lancé que **plus
+      tard**, quand une décision humaine m'y a obligé. **Ce que la commande rend réellement** :
+      `COUPLES` est une **tuple codée en dur ne contenant qu'US-01.1**, la sortie dit *« 13 scénarios ↔
+      13 tests »*, `exit 0` — ⛔ **US-01.2 n'est PAS sous contrôle**, et **ajouter un scénario n'a AUCUN
+      effet sur le job requis aujourd'hui**. La contrainte ne mord qu'à **T14**, ce que le **risque R-7**
+      du Story File énonçait déjà **correctement** : *« enregistré TROP TÔT rend `Governance` rouge »*.
+      ⇒ **Le Story File était juste, le résumé qui le citait était faux.** ⛔ **Classe de défaut nº 1 du
+      projet, commise par l'@Architect, le jour même où il vérifiait le travail des autres.** *(La 1ʳᵉ
+      moitié — « ne pas leur écrire de Gherkin » — **reste vraie** : c'est l'arbitrage humain, voie (b).)*
+    - ✅ **CONSÉQUENCE UTILE, et elle a changé une décision** : la voie (a) *(créer les AC manquants)*
+      était **gratuite** au regard du gate, alors qu'elle paraissait coûteuse. **AC-16 et AC-17 ont été
+      créés.**
+  - 📌 **`EVT_MIGRATION_SCRIPT_READY` VOLONTAIREMENT NON ÉMIS** : le catalogue le définit comme migration
+    *« validée »*, or la commande par défaut rend **`exit 1`** ⇒ **la claim serait réfutée par une commande
+    que n'importe qui peut lancer**. Vérifié qu'**aucun événement n'en dépend** — rien n'est bloqué.
+  - **Empreinte sur les gates : NULLE et mesurée** — `analyze` *No issues found*, `format` *32 files
+    (0 changed)*. Le Dart du critère vit dans `.dart_tool/` *(gitignoré, invisible à l'analyseur)* ⇒
+    **0 ligne de `lib/`, 0 effet sur le cliquet à marge nulle**.
+
+- 🔴 **DEUX DÉFAUTS STRUCTURELS RELEVÉS PAR CETTE PHASE — versés à `/audit-methodo`.**
+  - **① La « Sortie obligatoire » de `@UXDesigner` est IMPOSSIBLE avec sa propre dotation d'outils** :
+    `.claude/agents/ux-designer.md` déclare `tools: Read, Grep, Glob, Edit, Write` et son §2 exige
+    d'**exécuter** `trace_append.py`. Il a **refusé d'écrire la ligne de trace à la main** après avoir
+    vérifié **dans le code** les **4 contrôles** qu'une écriture manuelle contournerait *(alias dépréciés,
+    événement inconnu, **préconditions**, existence du `report`)* + le `ts` machine.
+    `EVT_UX_DESIGN_COMPLETED` **émis par @Architect pour son compte**, inscrit comme tel dans le
+    `rationale`. **Précédent identique le 2026-08-05** : le @PO, privé de shell, avait **refusé de coller
+    une sortie plausible**. **Même famille que la dette `emitter` non enforcé.**
+  - **② `EVT_MIGRATION_SCRIPT_READY` ne sera JAMAIS émis si personne ne le réclame** *(relevé par
+    @DataEngineer)* : son `emitter` déclaré est `data-engineer`, sa précondition sera satisfaite par **T5
+    (@Developer)**, et ⛔ **aucune phase de `WORKFLOW.yaml` ne rappelle @DataEngineer après
+    `development_start`.**
+
+- ⛔ **PÉRIMÉ-2026-08-06** *(le lock est posé — voir ci-dessous)*.
+  **⏳ Reste dû** : l'**Integration Lock** @Architect *(cohérence Data ↔ UX)* → `EVT_DESIGN_COMPLETED`,
+  **seul déverrouillage de @Developer** *(`development_start` porte
+  `pre_condition: "EVT_DESIGN_COMPLETED tracé"`)*. ⚠️ **Une question tranchée AVANT T9** : champs textuels
+  **vs** sélecteurs natifs — `showDatePicker` **sans `flutter_localizations`** afficherait *« Select date
+  / CANCEL / OK »* **en anglais et en thème clair**, or **ADR-009 interdit la dépendance**.
+
+- **⚖️ AC-16 et AC-17 CRÉÉS @PO (2026-08-06) — en `integration_lock`, par décision humaine.**
+  🔴 **Ils manquaient DEPUIS LA CRÉATION du Story File, et aucun contrôle du projet ne l'a signalé** :
+  la table anti-orphelin vérifie que les clauses **écrites** ont un scénario, ⛔ **jamais qu'une clause
+  MANQUE**. ⇒ **Ce sont deux documents de design produits EN PARALLÈLE qui l'ont révélé** — @Data a publié
+  la règle **V-1**, @UX a **nommé la lacune sans inventer d'AC**. **Candidat `/audit-methodo`.**
+  - **AC-16 — refus d'une date ou d'une heure civile qui n'existe pas** *(Must)*. Clause **Limite** :
+    **même refus à l'ÉDITION** *(sinon deux chemins dérivent, R-10)*. ⚠️ Le volet **heure DST** n'a
+    **aucun scénario** — borne **NM-9**, motif **borné** : le fuseau du processus Dart n'est pas pilotable
+    et sous `TZ=UTC` **il n'existe aucune transition**, donc le test y serait **vrai quoi qu'il arrive**
+    — ⛔ **le faux vert d'US-01.1 refait à l'identique.**
+  - **AC-17 — échec d'écriture** *(Must)*, une règle en une phrase : **« ce qui est affiché correspond
+    toujours à ce qui est sur le disque. »** ⛔ Ni réessai automatique, ni file d'attente, ni brouillon
+    persisté *(les trois exigeraient d'écrire, ce qui vient d'échouer)* · ⛔ **la saisie est CONSERVÉE**.
+    Borne **NM-10** *(web exécuté)* — ⚠️ **elle ne se lèvera PAS avec US-01.3**, qui vise iOS/Android.
+  - 📌 **Le @PO a ÉCARTÉ la recommandation U-4 de @UXDesigner** *(ranger l'échec d'écriture en borne
+    `NM-*`)*, motif inscrit : *« une borne dit qu'on ne sait pas mesurer ; ici on sait exactement quoi
+    observer — ranger une lacune de SPÉCIFICATION dans le tiroir des limites de MESURE, c'est ce que le
+    projet a payé avec RNF-02 »*. **@UXDesigner en a convenu** : *« ma recommandation aurait fabriqué un
+    AC orphelin de plus »*.
+  - **Décompte** : `45 → 50` scénarios, `42 → 48` clauses, `14 → 16` AC actifs. **Mesuré par commande** :
+    **50** scénarios, **0 titre en double**. ⛔ **AC-9 reste vacant, jamais réutilisé.**
+
+- **✅ Design UX @UX — COMPLÉMENT (2026-08-06), §14 de sa doc dédiée.** ⚠️ **Il est revenu parce que son
+  visa initial couvrait 14 AC alors que le Story File en porte 16** — ⛔ **NB-6 en train de se reproduire**,
+  arrêté avant le lock.
+  - 📌 **Sa conclusion la plus utile est un REFUS DE TRAVAIL** : **AC-16 n'a besoin d'AUCUNE surface
+    nouvelle** — c'est un refus de validation à la soumission, comme AC-2/3/4, donc **C-4 + C-5
+    existants**. Et la clause « même refus à l'édition » est **tenue par construction** : son design ne
+    prévoit **qu'un seul formulaire** *(même widget, deux titres)*. ⚠️ **Réserve qu'il pose lui-même** :
+    *« R-10 vise la FONCTION de validation, pas la surface — je supprime la divergence de présentation,
+    je ne dis rien de l'unicité du prédicat »*.
+  - 🔬 **TROISIÈME OCCURRENCE DE LA MÊME CLASSE DE DÉFAUT DANS CE DESIGN**, et il la nomme :
+    **4ᵉ interdit du formulaire — aucun formateur de saisie qui corrige, borne ou réécrit** la valeur du
+    champ date. *Réfuté par* : `31/02/2027` **intapable** ⇒ le scénario devient **inobservable**.
+    ➡️ **Corollaire à retenir bien au-delà d'US-01.2** : ⛔ **ce qui doit être refusé doit d'abord pouvoir
+    être SAISI — un contrôle qui empêche de produire l'entrée fautive EFFACE la clause qui protégeait
+    l'utilisateur.** *(Après `maxLength` qui tuait le refus du 81ᵉ caractère, et le bouton désactivé qui
+    tuait le refus de la 10ᵉ échéance.)*
+  - **AC-17 : une règle unique, deux surfaces ÉTENDUES** — ⛔ *« une surface d'écriture ne se ferme jamais
+    sur un échec »* *(fermer, c'est dire « c'est fait »)*. **C-5** gagne un 3ᵉ ancrage *(le pied de
+    l'action)*, **C-7** un 2ᵉ état *(le dialogue de suppression **reste ouvert**)*. Variante « fermer le
+    dialogue » **nommée et refusée** : elle exigerait un ancrage **par carte**, donc le mécanisme nouveau
+    qu'on lui interdisait d'inventer, *« et l'écran obtenu est précisément celui qui a l'air de rien ne
+    s'est passé »*.
+  - 🔬 **Le piège qu'il signale « parce que personne ne le verrait en revue »** : le message d'échec doit
+    être **retiré puis re-posé** à chaque tentative — une `liveRegion` **dont le texte ne change pas n'est
+    pas ré-annoncée** ⇒ une **2ᵉ** tentative échouée serait **silencieuse pour un lecteur d'écran**, et
+    l'utilisateur en conclurait qu'elle a réussi. ⛔ **Exactement le mensonge qu'AC-17 interdit.**
+  - **Contrastes : ZÉRO couple nouveau** — 10 éléments peints énumérés, chacun rattaché à une entrée
+    **déjà** dans le script. ⇒ ⛔ **aucune relance nécessaire**, et il publie le **contrôle négatif** : ce
+    qui *aurait* créé un couple *(bandeau à fond teinté, assombrissement du dialogue, remplissage `erreur`
+    du champ, estompage pendant l'écriture)* est **explicitement refusé, avec motif**.
+  - ⚠️ **Ce qu'il n'atteste pas** : *« je n'ai lu la sortie d'aucun programme dans cette session non plus
+    — l'`exit 0` et le `--selftest` 12/12 me sont RAPPORTÉS par @Architect. Fait rapporté, pas observé. »*
+
+- **🔒 INTEGRATION LOCK @Architect (2026-08-06) — cohérence Data ↔ UX vérifiée, 2 décisions prises.**
+  🔴 **Ce que le lock a réellement trouvé, et c'est sa justification** : **les deux branches ont tourné
+  EN AVEUGLE l'une de l'autre**, et leur jointure portait **quatre trous** dont **aucune des deux ne
+  pouvait être tenue pour responsable** — V-1 sans surface, 3 règles data sans AC, l'échec d'écriture sans
+  rien, et U-2. ⇒ ⛔ **Un `parallel_branch` sans étape de jointure aurait livré les quatre.**
+  - **⚖️ U-5 — où vit le texte de l'échec d'écriture.** **Pattern nº 10 AMENDÉ** : sa règle
+    *(« un seul exemplaire »)* était bonne, **son PORTEUR était trop étroit** — l'échec d'écriture n'est
+    **pas** un refus de validation, donc son texte serait allé **dans le widget** par défaut. Il est
+    désormais porté par le **refus typé rendu par le port** *(couche `domain`)*.
+  - **⚖️ U-6 — rendre l'échec OBSERVABLE, et c'est ÉLIMINATOIRE pour AC-17** *(si l'écriture est tirée et
+    oubliée, **les 3 scénarios sont inobservables** — même classe que le bouton désactivé)*. **Deux
+    moitiés, aucune ne suffit seule** : **①** le port rend un **refus typé**, ⛔ **jamais `void`**, et
+    ⛔ **l'état en mémoire n'est jamais muté avant un succès** *(aucune mise à jour optimiste)* ·
+    **②** **`unawaited_futures` ACTIVÉ** dans `analysis_options.yaml`.
+    🔬 **PORTÉE DE ② MESURÉE PAR MUTANT, ET LA 1ʳᵉ FORMULATION D'@ARCHITECT ÉTAIT FAUSSE** — le premier
+    mutant a **SURVÉCU** : le lint **ne fire QUE dans une fonction `async`** *(gate **ROUGE**, `exit 1`)*
+    et ⛔ **PAS dans un appelant synchrone** *(gate **vert, faussement**)*. Sans ce mutant, le SCB porterait
+    *« le lint attrape les écritures tirées-et-oubliées »*, **faux pour la moitié des cas**. Le résidu est
+    fermé par **① + le test d'AC-17 « Erreur »**. *(Mesuré aussi : `unawaited_futures` **n'est fourni ni
+    par `flutter_lints` 6.0.0 ni par `lints` 6.1.0** ; son activation laisse `analyze` **vert** sur
+    l'existant.)*
+  - **U-2 tranché** *(champs textuels vs sélecteurs natifs)* : ⚠️ **ce n'était pas une question de langue,
+    mais d'INTÉGRITÉ DE DONNÉE.** Un sélecteur natif **ne peut pas produire** `2026-02-31` ; un champ
+    texte, **si** — et `DateTime.parse` l'avale en silence. ⇒ **le champ texte CRÉE le risque que V-1
+    doit rattraper.** ⛔ **Mais V-1 reste nécessaire dans les deux cas** : `showTimePicker` propose `02:30`
+    **même le jour du saut de printemps**. **Mesuré** : `flutter_localizations` = **+2 paquets**
+    *(lui-même, du SDK, et **`intl`** de pub.dev)* — ⛔ **pas le mur que la formulation laissait croire**
+    *(à comparer aux écartés d'ADR-009 : `sqflite`+ffi **+23**, `path_provider` **+24**, `drift` **+49**)*.
+    ⚖️ **Décision : la question reste OUVERTE pour @Developer avant T9** — elle **n'est plus bloquante**
+    parce qu'**AC-16 protège les DEUX options**, et elle **coûte +2 paquets**, pas +24. ⛔ **Un lock ne
+    tranche pas ce qui n'a pas besoin de l'être avant sa tâche.**
+  - **Points reportés, non bloquants** : U-1 *(moment du refus à la limite de 9)* · U-3 *(icône
+    `Icons.add`)* · le **harnais** pour provoquer un échec d'écriture **sans magasin factice**
+    *(ADR-010 §1)*, à décider en T12.
+  - ⚠️ **CE QUE LE LOCK N'ATTESTE PAS** : ⛔ **aucune ligne de `lib/` n'existe encore** · le **risque nº 4
+    d'EPIC_00 reste OUVERT** *(le patron de migration n'a pas été joué sur le module réel)* · **aucun
+    écran n'a été vu** · **NM-6, NM-7, NM-9, NM-10** non levées · et ⛔ **la trace ne sait pas dire
+    « le périmètre a changé »** : les AC ont bougé **après** `EVT_STORY_READY` et **aucun événement du
+    catalogue ne modélise cela** — ⛔ **aucun n'a été détourné** *(précédent : les arbitrages n'émettent
+    rien)*. **4ᵉ instance de la même famille**, versée à `/audit-methodo` : le SCB ne sait pas dire « QA à
+    refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire « non
+    déployable », la trace ne sait pas dire « le périmètre a changé ».
+
+- ⛔ **PÉRIMÉ-2026-08-07** *(les 15 tâches sont livrées — voir le visa ci-dessous)*.
+  **⏳ Reste dû** : **@Developer**, tâches **T1 → T15**. ⚠️ **Le cliquet est à marge NULLE** — chaque tâche
+  livre **son code ET ses tests dans le MÊME commit**, budget **`U ≤ 0,048·N + 0,152`**.
+
+- **✅ @Dev (2026-08-07) — 15/15 tâches, 16 commits. `EVT_CODE_READY` émis.**
+  **Tout ce qui suit a été REJOUÉ par @Architect, pas relu** *(séparation des pouvoirs : ⛔ ce visa n'est
+  PAS une certification, et @Developer a refusé de se certifier lui-même)*.
+  - **`run_gates --all` → exit 0, 5 gates** dont **`flutter build web --release`**. **344 tests**
+    *(112 → 344, **+232**)*. **Couverture 97,9 % (926/946)**, cliquet **95,2** — valeur **LUE dans la
+    sortie du gate**, ⛔ jamais estimée.
+  - 🎯 **LE CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00 EST SATISFAIT — la PREMIÈRE MIGRATION RÉELLEMENT
+    EXÉCUTÉE DU PROJET.** `migration_roundtrip_criterion.py` rend **`exit 0`**, **8 assertions vertes** :
+    *« le patron est INSTANCIÉ ET EXÉCUTÉ sur le premier schéma réel du projet »*. ⛔ **Et il l'est par le
+    CODE, pas par un critère abaissé** — **vérifié par @Architect** : le script porte **un seul commit
+    dans son historique** *(`2f9a57f`, celui de @DataEngineer)*, il est **bit-à-bit celui qui rendait
+    `exit 1` la veille**. **`non_inversibles_ici=a4,a6`** prouve que la **garde d'inversibilité est
+    EXERCÉE**, pas seulement écrite.
+  - **`check_gherkin_mapping` → 50 ↔ 50 *et* 13 ↔ 13, exit 0** *(T14 enregistrée **en dernier**, R-7
+    respecté)* · **`check_e2e_persistance` → CONFORME, 0 écart** *(les deux contrôles d'ADR-010 §1)*.
+  - **`sample_echeances.dart` est SORTI de `lib/`** vers `test/support/` — le déplacement qui rendait
+    `353/371 = 95,1482 %` **ROUGE** s'il avait été fait seul.
+  - 🔬 **QUATRE DÉFAUTS TROUVÉS PAR EXÉCUTION, JAMAIS PAR RELECTURE — et le nº 2 est un faux vert de la
+    classe exacte qu'ADR-010 existe pour empêcher** :
+    **①** fabriquer le texte candidat d'une **saisie** avec `DateTime` **normalise en silence** ⇒ la
+    mutation à refuser **serait déjà commise avant le prédicat** · **②** ⛔ **une écriture disque réelle
+    déclenchée par un tap N'ABOUTIT PAS sous `testWidgets`** ⇒ **l'E2E aurait été VERT EN N'ÉCRIVANT
+    RIEN**, et **indétectable** *(l'écran, lui, se met à jour)* · **③** un `tooltip` **ne renseigne pas**
+    le label sémantique ⇒ « Gérer les échéances » n'aurait eu **aucun nom accessible** · **④** sous
+    Windows le `rename` de l'écriture atomique **verrouille la cible** ⇒ le harnais levait **1 fois sur
+    3** et ⛔ **l'échec s'imputait au produit**.
+  - 🔬 **SIX MUTANTS JOUÉS, ET L'UN A SURVÉCU POUR LE CORRIGER** *(comme @Architect la veille)* : recharger
+    après un échec est **inoffensif** — ce **n'était pas** une mise à jour optimiste. La vraie est tuée
+    par le **scénario 48**. 📌 **Mesure la plus forte du lot** : le mutant *« écrire sans toucher un
+    octet »* **tue 23 des 50 scénarios** ⇒ les E2E **touchent réellement le disque**.
+  - **U-2 tranché par @Developer → champs textuels**, ⛔ **et pas pour la langue** : un sélecteur natif
+    **ne peut pas produire `31/02`**, il rendrait **les 2 scénarios d'AC-16 INOBSERVABLES**. **+0
+    dépendance** ⇒ aucune escalade. *(Application directe du corollaire de @UXDesigner : ce qui doit être
+    refusé doit d'abord pouvoir être saisi.)*
+  - **AC-17 éprouvé SANS magasin factice** *(ADR-010 §1)* : créer un **répertoire** nommé
+    `echeances.json.tmp` fait échouer le `writeAsString` **du code de production** par une
+    `FileSystemException` **réelle** — et c'est **réversible**, ce que le 2ᵉ scénario exige.
+  - ⛔ **CE QUE CE VISA N'ATTESTE PAS** : **aucun écran n'a été vu** · **`main()` n'a JAMAIS été exécuté**
+    *(`path_provider` n'existe pas en test hôte)* · l'application **n'a jamais tourné sur un appareil** ·
+    **NM-1, NM-2, NM-4 → NM-10 sont TOUTES ENTIÈRES**, ⛔ **aucune déguisée en test vert** — le refus
+    d'une **heure civile inexistante n'est PAS démontré**, seul son **ancrage** l'est *(NM-9)* · le
+    contraste est **calculé, jamais vu** *(NM-7)* · les `Semantics` sont **présents**, rien ne prouve
+    qu'un lecteur d'écran les **prononce** *(NM-6)* · **aucun SAST, aucun scan de CVE** sur les **24
+    paquets transitifs** de `path_provider` ni sur le Python ajouté · `check_gherkin_mapping` compare des
+    **titres**, ⛔ **il ne dit rien de ce que les 50 tests vérifient** · et ⛔ **le verdict QA d'US-01.1
+    reste PÉRIMÉ** — @Developer l'a **transmis**, il ne l'a **pas rafraîchi**.
+
+- **✅ Audit Rev 🔍 (2026-08-07, `EVT_CODE_REVIEW_PASSED`, contexte FRAIS — commit `5272ed1`)** :
+  **PASSED**, **0 finding bloquant**, **8 non bloquants** *(NB-A → NB-H)*. Rapport :
+  [`reports/US-01.2/code_review.md`](reports/US-01.2/code_review.md).
+  **16/16 AC actifs couverts par des assertions qui portent sur l'exigence** — ⛔ **aucun cas « bon titre,
+  assertion absente »**, la classe même du bloquant **B-2 d'US-01.1**. **10 bornes `NM-*` jugées honnêtes**,
+  aucune déguisée en test vert.
+  - 🔬 **CE QUE CET AUDIT A APPORTÉ QUE LES GATES NE POUVAIENT PAS DONNER** : **5 mutants que @Developer
+    n'avait PAS joués**, **5 tués, 0 survivant**, arbre restauré *(`git status --porcelain` vide)* — 81ᵉ
+    caractère *(3 tests rouges)* · 10ᵉ échéance *(9)* · **retrait de la barrière de forme canonique V-1**
+    *(9, dont celui qui prouve que `jourExisteAuCalendrier` **n'est pas un doublon**)* · **mise à jour
+    optimiste** *(3)* · **retrait de l'atomicité `.tmp` + `rename`** *(14)*.
+  - ✅ **LE CRITÈRE D'ENTRÉE TRANSFÉRÉ PAR EPIC_00 EST FERMÉ PAR EXÉCUTION, ET IL NE PEUT PAS AVOIR ÉTÉ
+    PLIÉ POUR PASSER** : `migration_roundtrip_criterion.py` rend **`exit 0`, 8 assertions**, et
+    `git log --follow` montre **un seul commit — `2f9a57f`, phase design, antérieur à la première ligne de
+    `lib/`** ⇒ **le critère a été écrit avant le code qu'il juge et jamais retouché**. *C'est la seule
+    configuration dans laquelle un critère de sortie prouve quelque chose.* ➡️ **risque nº 4 d'EPIC_00
+    fermé**, non plus transféré.
+  - ✅ **NB-7 d'US-01.1 est CORRIGÉ** *(l'assertion d'unicité précède la sélection de la `DecoratedBox`)*.
+  - **Non bloquants les plus actionnables** : **NB-B** *(1 ligne)* — dans `_ecrire`, la branche
+    `document == null` code **en dur** `ActeEcriture.enregistrement` alors que `acte` est disponible ⇒ une
+    **suppression** échouée annoncerait « *L'échéance n'a pas été enregistrée.* » · **NB-A** — la doc de
+    `remplacer` promet « sans correspondance : **échec** », l'implémentation rend **succès** · **NB-C**
+    *(mesuré par sonde)* — `check_e2e_persistance.py` ne voit **ni** un magasin factice nommé hors
+    vocabulaire, **ni** un fichier `test/e2e/**` **sans aucun `pumpWidget`** *(le contrôle « racine » passe
+    **à vide**)* · **NB-H** — `find.textContaining('9')` est **tautologique** dans deux tests.
+
+- **❌ Audit Sec 🛡️ (2026-08-07, `EVT_SECURITY_AUDIT_FAILED`, contexte FRAIS — commit `5272ed1`)** :
+  **FAILED**, **1 finding BLOQUANT**. Rapport : [`reports/US-01.2/security.md`](reports/US-01.2/security.md).
+  - 🔴 **B-1 (HIGH) — UN DOCUMENT LOCAL NON DÉCODABLE EN UTF-8 EMPÊCHE DÉFINITIVEMENT L'APPLICATION DE
+    DÉMARRER.** `document_store_io.dart` → `lire()` rend `cible.readAsString()` **sans garde** ;
+    `echeance_document_repository.dart` → `charger()` fait `await magasin.lire()` **sans garde** ;
+    `main.dart` fait `await notifier.charger()` **avant `runApp`**. `File.readAsString()` décode en **UTF-8
+    strict** et **lève** ⇒ **`runApp` n'est jamais appelé**. Et comme l'échec a lieu **à la LECTURE**,
+    `mettreDeCote()` **n'est jamais atteint** ⇒ **le document fautif reste en place** ⇒ **chaque démarrage
+    échoue à l'identique, sans issue depuis l'application**.
+    ⛔ **CE N'EST PAS UNE OPINION D'AUDITEUR — LA RÉFUTATION EST CELLE QUE LE STORY FILE ÉCRIT LUI-MÊME** :
+    la table anti-orphelin donne pour **AC-11 « Erreur » (Must)** la réfutation littérale
+    « **L'application refuse de s'ouvrir** ». **B-1 la produit.**
+    **Vérifié une seconde fois par @Architect, indépendamment de l'auditeur** *(un JSON valide dont **un
+    SEUL octet** est en cp1252 → `FileSystemException: Failed to decode data using encoding 'utf-8'`, et
+    `grep` de `try`/`catch` sur les trois fichiers du chemin → **aucune garde**)*.
+    **Correctif attendu : ~4 lignes** — une garde `on FileSystemException` rendant une **sentinelle non
+    JSON**, de sorte que le chemin « illisible » **déjà correct** fasse la mise de côté par `rename`.
+    ⛔ **PAS `allowMalformed: true`** : il transformerait un document illisible en document **silencieusement
+    corrigé**, exactement ce qu'AC-11 et AC-16 interdisent.
+  - 🔬 **POURQUOI 344 TESTS ET 97,9 % DE COUVERTURE NE L'ONT PAS VU — MESURÉ, PAS SUPPOSÉ** :
+    `grep -rn "writeAsBytes|utf8.encode|latin1|0xFF" test/` → **aucune occurrence**, et le harnais
+    `magasin_temporaire.dart` pose par `writeAsStringSync` ⇒ **il ne PEUT produire que de l'UTF-8 valide**.
+    Les 3 tests d'AC-11 exercent du **JSON invalide**, ⛔ **jamais des OCTETS invalides**.
+    ➡️ **Troisième confirmation de l'acquis d'US-01.1** : la couverture de lignes est **aveugle à ce qui n'a
+    jamais été essayé** — ici elle **MONTE** à 97,9 % *sur le diff qui introduit le bloquant*.
+  - ✅ **Prouvé BON par exécution, et il faut le lire** : validation **au domaine** et non dans le widget,
+    les deux côtés de chaque borne · **R-10 prouvé** *(édition vers le passé **et** vers le 31/02 refusées
+    ⇒ le contournement en deux gestes est fermé)* · **NM-9 est honnête** *(l'heure inexistante du saut DST
+    est réellement refusée sur ce poste)* · **aucune traversée de répertoire** *(`id =
+    "../../../../etc/passwd"` accepté **comme id** et **jamais** utilisé comme chemin)* · version **future**
+    ⇒ **aucune écriture**, disque strictement inchangé · illisible ⇒ **`rename`, jamais `delete`** · résidus
+    et doublons d'`id` **ré-émis verbatim** *(R-2 tenu)* · **`gitleaks` 8.30.1 : `no leaks found`** sur
+    l'arbre **et** sur les 22 commits · **aucune surface réseau**, aucune injection *(`jsonEncode` seul, 0
+    JSON construit à la main)*, aucun `print` de contenu utilisateur.
+  - **Non bloquants** : **N-1** *(MEDIUM, **NON EXÉCUTÉ** — Windows a refusé la création du lien)*
+    `echeances.json.tmp` **prévisible**, suivi de lien possible · **N-2** *(MEDIUM)*
+    `getApplicationDocumentsDirectory()` = `Documents` **PARTAGÉ** sous Windows/Linux et **sauvegardé par
+    iCloud par défaut** sous iOS, **en tension avec la promesse d'AC-10** ⇒ **arbitrage @PO, porté à
+    US-01.3** · **N-3** `check_e2e_persistance.py` **absent de la CI** *(même dette que les autres
+    `selftest`)* · **N-4** « 24 paquets transitifs » **écrit à la main** : la mesure donne **24 ajoutés dont
+    23 transitifs** *(classe de défaut nº 1, jusque dans le visa @Dev)* · **N-5** **chemin de poste en dur**
+    dans `generer_e2e.py`, sur un **dépôt public** · **N-6** **aucune borne de taille en lecture** *(8 Mo et
+    200 000 entrées acceptés)* · **N-7** `migrer(racine)!` · **N-8** le port n'impose pas les règles métier ·
+    **N-9** permissions **non mesurables** sous Windows · **N-10** *(INFO)* `U+202E` accepté.
+  - ⚠️ **Relevé au passage et non signalé jusqu'ici** : le gate `deps_audit` porte **`"blocking": false`**
+    ⇒ **même s'il détectait un jour quelque chose, il ne bloquerait pas**.
+  - ⛔ **CE QUE CET AUDIT N'ATTESTE PAS** : **aucun SAST n'existe** *(`run_gates --gate sast` → **exit 1**,
+    le gate n'existe pas)* ⇒ **toute la revue est humaine, donc non exhaustive — et B-1 le prouve** ·
+    **aucun scan de CVE sur rien** *(`dart pub outdated` mesure l'**obsolescence**)* : les **24 paquets
+    ajoutés** et les **~342 lignes de Python** entrent **sans qu'aucune base de vulnérabilités ait été
+    consultée** · **N-1 et N-2 non exécutés** · permissions **non mesurées** · **NM-10** *(web exécuté)* et
+    **NM-8** *(`path_provider` exercé)* **entières**.
+
+- **🔁 CYCLE DE CORRECTIF @Developer (2026-08-10) — `EVT_CODE_READY` RÉ-ÉMIS. ⚠️ LES DEUX CELLULES
+  D'AUDIT SONT REMISES À `⏳` PAR @Architect, ET C'EST LE CŒUR DE CE CYCLE.** Les visas du 2026-08-07
+  portaient sur **`5272ed1`** ; le code a changé ⇒ **ils sont périmés**, y compris le `✅ 🔍` qui était
+  **PASSED**. Commits : **`ca05128`** *(B-1)* et **`2d77778`** *(NB-B + NB-A)* — **visa de code sur
+  `2d77778`**, `HEAD` = **`cd789d5`** *(trace + PROJECT_LOG seuls : `git diff --name-only 2d77778..HEAD --
+  lib test scripts pubspec.*` rend **0 fichier**)*. Ré-émission légitime, **précédent d'US-01.1 du
+  2026-08-02T17:08** après son `EVT_QA_FAILED`.
+  - 🔴 **CE QUE CE CYCLE A ÉTABLI SUR LES INSTRUMENTS, ET QUI VAUT AU-DELÀ D'US-01.2** :
+    ⛔ **`EVT_QA_PASSED` n'exige que la PRÉSENCE de `EVT_CODE_REVIEW_PASSED` et
+    `EVT_SECURITY_AUDIT_PASSED`, sans AUCUNE contrainte d'ordre par rapport au dernier
+    `EVT_CODE_READY`** *(lu dans `scripts/events_catalog.json`, pas supposé)* ⇒ **rien dans la machine à
+    états n'aurait empêché une QA de consommer un visa périmé.** La remise à `⏳` est donc une **décision
+    humaine**, jamais une barrière. **5ᵉ instance de la même famille structurelle** *(le SCB ne sait pas
+    dire « QA à refaire », la trace ne sait pas dire « sur quel commit », le workflow ne sait pas dire
+    « non déployable », la trace ne sait pas dire « le périmètre a changé »)*. ➡️ **`/audit-methodo`.**
+  - ✅ **B-1 corrigé — et @Developer a ÉCARTÉ le correctif minimal de l'auditeur, en écrivant pourquoi.**
+    Au lieu d'une **sentinelle non-JSON** *(qui ne tient qu'à ce que l'appelant traite par chance une
+    valeur magique comme du JSON invalide)*, le port rend un **type SCELLÉ `LectureDocument`**
+    *(`DocumentAbsent` · `DocumentIllisible` · `DocumentLu`)* et `charger()` en fait un **`switch`
+    exhaustif** ⇒ **une barrière de COMPILATION remplace une discipline** : une future implémentation du
+    port **ne PEUT PAS** omettre le cas. Symétrie assumée avec `ResultatEcriture` *(« jamais `void` »)*.
+    ⛔ **Ni `allowMalformed`, ni `delete`** — vérifié par @Architect : `allowMalformed` n'apparaît **que
+    dans un commentaire qui le refuse**, et il n'y a **aucun `.delete`** dans la couche data ; la mise de
+    côté est un **`rename`**.
+    ⚠️ **Ce n'est PAS le correctif de 4 lignes annoncé** : **5 fichiers de production** touchés, dont le
+    **contrat du port**. ➡️ **La re-revue de code a donc une surface RÉELLE, pas formelle.**
+  - 🔬 **4 MUTANTS JOUÉS, 4 TUÉS, 0 SURVIVANT** *(arbre restauré, `git status` vide)* — dont **M2 =
+    `allowMalformed: true`, le correctif proscrit** : **TUÉ** par `Expected: empty / Actual: [Instance of
+    'Echeance']`, c'est-à-dire **la preuve PAR EXÉCUTION que ce correctif ferait AFFICHER l'échéance
+    altérée**. *(M1 garde retirée · M3 acte recodé en dur · M4 `remplacer` qui refuse.)*
+  - ✅ **La classe d'entrée qui était INVISIBLE est désormais produisible** : le harnais gagne
+    `poserOctets` / `octetsBruts`, là où `poser(String) → writeAsStringSync` **ne pouvait produire que de
+    l'UTF-8 valide**. **+12 tests** *(344 → **356**)*.
+  - ✅ **Placement des tests : voie (a) — hors du couple bidirectionnel** ⇒ `50 ↔ 50` **intact** et ⛔
+    **aucun nombre dérivé n'a bougé** *(le défaut ⑤ — « un nombre dérivé écrit à la main 23 fois » — n'est
+    pas déclenché)*. Motif de fond : **`main()` n'est pas exécutable en test hôte** *(`path_provider`
+    absent, **NM-8**)*, donc `charger()` sur le magasin **`io` réel** est le **niveau honnête**.
+  - ✅ **NB-A tranché : c'est la DOC qui avait tort**, pas l'implémentation — **aucun AC n'exige ce refus**,
+    et l'exiger créerait une **clause sans surface** *(acquis ② du design)*. **Changer le comportement
+    aurait été un changement de périmètre dans un cycle de correctif.** **NB-B corrigé et atteignable —
+    mesuré, pas supposé** : deux chemins réels **sans aucun fake**, avec contrôle négatif.
+  - **Compteurs relevés par @Architect lui-même, pas repris du rapport** : `run_gates --all` → **5 gates
+    verts**, **356 tests**, couverture **97.9 % (938/958)** contre cliquet **95.2 inchangé**
+    *(`factory.config.json` non édité)* · `check_gherkin_mapping` **50 ↔ 50** et **13 ↔ 13** ·
+    `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT, 8 assertions** ·
+    `validate_trace` et `check_scb_compliance` **conformes**.
+  - ⛔ **CE QUE CE CORRECTIF N'ATTESTE PAS** : **`runApp` ne s'exécute toujours pas en test** et **le hub ne
+    se dresse pas** — le niveau prouvé s'arrête à `charger()` sur le magasin `io` réel *(**NM-8
+    entière**)* · **NM-10 entière** *(aucun appareil, web non exécuté)* · **aucun SAST, aucun scan de
+    CVE** — *la revue qui a trouvé B-1 était **humaine**, donc la prochaine peut manquer autre chose* ·
+    **la couverture monte encore et cela ne prouve rien** sur la force des assertions : seuls les mutants
+    le font · le chemin de **NB-A reste inatteignable depuis l'IHM**, donc **aucun scénario ne l'observe**.
+  - **Non traités par choix assumé** *(précédent du **GEL** d'US-00.6 : on n'ouvre pas un cycle pour du non
+    bloquant)* : **N-2** → arbitrage @PO, **US-01.3** · **NB-C** et **N-3** → **US-00.8 /
+    `/audit-methodo`** · **N-5 → N-10**.
+
+- **🔁 2ᵉ TOUR D'AUDIT (2026-08-11) — visa de code sur `2d77778`, `HEAD` audité `c2a5d0d`.**
+  **✅ Revue `PASSED`** *(`EVT_CODE_REVIEW_PASSED`, [`code_review_delta.md`](reports/US-01.2/code_review_delta.md)
+  — ⛔ `code_review.md` **non écrasé**)* · **❌ Sécurité `FAILED`**
+  *(`EVT_SECURITY_AUDIT_FAILED`, [`security_delta.md`](reports/US-01.2/security_delta.md))*.
+  - ✅ **B-1 EST FERMÉ, ET LE TYPE SCELLÉ ÉTAIT MEILLEUR QUE CE QUE L'AUDIT AVAIT DEMANDÉ — c'est MESURÉ.**
+    Sur le magasin `io` **de production**, avec des fixtures fabriquées **indépendamment du harnais livré** :
+    `charger()` **rend** au lieu de lever, le document est mis de côté **par `rename`**, **inchangé octet
+    pour octet** *(assertion sur `readAsBytesSync`)*, la **permanence est fermée** *(3 démarrages
+    aboutissent, **une seule** mise de côté)*, et le **contrôle négatif bascule**. **3 mutants tués**, dont
+    ⛔ **`allowMalformed: true` → `Expected: empty / Actual: [Instance of 'Echeance']`** *(le correctif
+    proscrit ferait **afficher** l'échéance altérée)* et **un 4ᵉ cas ajouté au type scellé → `flutter
+    analyze` ROUGE** *(`non_exhaustive_switch_statement`)* ⇒ **la barrière de compilation est RÉELLE**, là
+    où la sentinelle ne tenait qu'à la bonne volonté de l'appelant.
+  - 🔴 **B-2 (HIGH, intégrité) — BLOQUANT. UNE MISE DE CÔTÉ QUI ÉCHOUE FAIT DÉTRUIRE LES DONNÉES PAR LA
+    PREMIÈRE SAISIE.** `_mettreDeCoteSansBruit()` avale **tout** échec de `rename` dans un `on Object` au
+    **corps vide**, puis `_misDeCotePuisEtatVide()` pose `_document = codec.documentNeuf(...)`
+    **INCONDITIONNELLEMENT** ⇒ l'écriture suivante devient légitime alors que le document illisible **est
+    toujours là**, et elle l'**écrase** : sans message, sans copie, sans trace. ⛔ **C'est la réfutation
+    LITTÉRALE d'AC-11 « Erreur » (Must)** — la table anti-orphelin donne *« l'enregistrement fautif est
+    **réécrit** ou supprimé »*. **La documentation du code affirme le contraire** *(« la prochaine écriture
+    est légitime et n'écrase plus rien »)* : **elle est fausse dès que le `rename` échoue**.
+    **Déclencheur sans adversaire et sans franchir aucune frontière de privilège, PROUVÉ PAR EXÉCUTION** :
+    le document de B-1 + une **poignée ouverte avec un verrou ordinaire** *(antivirus, OneDrive/iCloud,
+    agent de sauvegarde, 2ᵉ instance)* ⇒ `PathAccessException`, hub vide, verrou relâché,
+    `creer() => estReussi=true`, **données détruites**. **L'obstacle n'a même pas besoin de persister.**
+    🔬 **L'asymétrie prouve que le code sait se protéger à vingt lignes de là** : le chemin « version
+    FUTURE » pose `_document = null` et **REFUSE** l'écriture.
+    **Correctif exécuté par l'auditeur, pas proposé** : `_document = misDeCote ? documentNeuf : null`
+    *(2 lignes)* ⇒ **373/373 verts** en copie isolée ⇒ ⛔ **aucun test livré ne défend le comportement
+    actuel**, et la sonde **bascule**.
+  - ⚖️ **ARBITRAGE @Architect — LES DEUX AUDITEURS ONT TROUVÉ LE MÊME MÉCANISME ET L'ONT CLASSÉ
+    DIFFÉREMMENT ; LA MESURE TRANCHE.** La revue l'a vu *(**NB-I**, HIGH)* mais l'a jugé **non bloquant**,
+    sa sonde P4 n'ayant **pas trouvé** de déclencheur réaliste ; la sécurité en a **exécuté un**.
+    ➡️ **Un déclencheur EXÉCUTÉ bat une recherche de déclencheur RESTÉE VAINE** ⇒ **B-2 est BLOQUANT**, et
+    le verdict `FAILED` prévaut. *(Constante du projet : la mesure bat le raisonnement — ici entre deux
+    auditeurs, et non plus entre un auditeur et un producteur.)*
+  - ✅ **B-2 EST PRÉ-EXISTANT, PAS UNE RÉGRESSION DU CORRECTIF — vérifié par @Architect lui-même** :
+    `git show 5272ed1:…/echeance_document_repository.dart` porte **déjà** le même
+    `_mettreDeCoteSansBruit()` suivi d'un `_document = codec.documentNeuf(...)` **inconditionnel**.
+    ⚠️ **Ce que le correctif de B-1 a changé, c'est la PORTÉE** : l'octet cp1252 **butait avant sur B-1**
+    et n'atteignait jamais ce chemin. **Le correctif est juste ; il a rendu visible le défaut suivant.**
+  - 🔴 **TROIS DÉFAUTS D'INSTRUMENTS RELEVÉS PAR CE TOUR — TOUS `/audit-methodo`, et le premier vise LE
+    RITUEL QUI VIENT D'ÊTRE EXÉCUTÉ.**
+    **① `/audit-us` fait tourner DEUX audits mutants sur UN SEUL ARBRE DE TRAVAIL** *(NB-H de la
+    sécurité)* : les deux rôles doivent **muter le code** pour jouer leurs mutants, et la contamination a
+    été **observée** — les sondes de @CodeReviewer sont apparues dans `test/` pendant la session sécurité,
+    **l'une portant une erreur de compilation qui rendait `flutter analyze` ROUGE pour une raison
+    étrangère au produit**. ➡️ **Explique aussi les deux anomalies du 1ᵉʳ tour** *(l'entrée de permission
+    apparue puis disparue dans `.claude/settings.json`, et le **NB-L** « exécution non déterministe
+    observée une fois, non établie »)*. **Remède appliqué dès le prochain tour : un arbre de travail
+    ISOLÉ par auditeur** — @CodeReviewer l'avait fait spontanément *(`git worktree`)*, la sécurité aussi
+    *(copie isolée)*, ⛔ **le rituel ne le prescrit pas.**
+    **② UN `--rationale` PEUT ÊTRE MUTILÉ PAR LE SHELL SANS QU'AUCUN OUTIL NE LE VOIE.** Un backtick dans
+    la prose a déclenché une **substitution de commande** : la trace porte
+    **`affectation definie de )`** — un mot **amputé** — et `validate_trace.py` la déclare **conforme**.
+    ⛔ **Non réécrite : la trace est append-only.** ⚠️ **Ce n'est pas un défaut de `trace_append.py`** — la
+    mutilation a lieu **avant** qu'il voie le texte, donc **aucune implémentation ne pourrait la
+    détecter** ; le remède est **opératoire** *(⛔ jamais de backtick dans un `--rationale` passé au shell)*.
+    **③ LE DÉFAUT VIT DANS UN `catch` AU CORPS VIDE, DONC IL EST STRUCTURELLEMENT INVISIBLE À LA
+    COUVERTURE** *(NB-I de la revue)* : `lcov` **n'instrumente AUCUNE ligne** de ce bloc *(corps en
+    commentaires)* ⇒ ⛔ **la couverture ne pourra JAMAIS le signaler**, et le mutant correspondant
+    **SURVIT à 356/356 tests verts**. ➡️ **Aggravation nette de l'acquis d'US-01.1** : la couverture n'est
+    pas seulement **aveugle à la force des assertions**, elle est **incapable d'instrumenter** la branche
+    où le défaut habite.
+  - **Statut des 8 non bloquants du 1ᵉʳ tour** : **NB-A ✅ fermé · NB-B ✅ fermé** *(mutant rejoué → 2 tests
+    rouges, **exactement** le chiffre annoncé ; branche atteignable par **2 chemins réels sans fake**)* ·
+    **NB-C, NB-D, NB-E, NB-F, NB-G, NB-H ⏳ subsistants**, tous **hors du périmètre du delta**, chacun
+    vérifié par exécution, **report assumé** *(précédent du GEL d'US-00.6)*.
+  - **Non bloquants nouveaux** : côté revue **NB-J** *(`charger()` promet « ne lève JAMAIS » sans que rien
+    ne le garantisse)* · **NB-K** *(le motif écrit dans le stub est **réfuté par la sonde P2**)* ·
+    **NB-L** *(non déterminisme **non établi** — 5/5 verts en isolation ; imputé au ① ci-dessus)* · côté
+    sécurité **NB-E** *(un `rename` échoué laisse `echeances.json.tmp` **avec les données utilisateur**)* ·
+    **NB-F** *(`File.existsSync()` confond « aucun fichier » et « pas un fichier »)* · **NB-G** *(la boucle
+    anti-collision est **aveugle** à un occupant non-fichier et la destination reste **prévisible**)*.
+    ⛔ **La piste que @Architect avait ouverte — « nom fixe ⇒ la 2ᵉ corruption écrase la 1ʳᵉ » — est
+    INFIRMÉE par la mesure**, horloge figée incluse. *(Une piste d'orchestrateur se mesure comme les
+    autres ; celle-ci était fausse.)*
+  - ⛔ **CE QUE CE TOUR N'ATTESTE PAS** : **`N-1 → N-10` tous OUVERTS, aucun aggravé** · `pubspec*` et
+    `.github/**` non touchés ⇒ **borne CVE identique** · **aucun SAST** *(`exit 1`)*, **aucun scan de
+    CVE** · `deps_audit` porte **`blocking: false`** · **`main()` n'a PAS été exécuté** *(**NM-8**)* : le
+    niveau prouvé s'arrête à `charger()` · **NM-10 entière**.
+
+- **🔁 2ᵉ CYCLE DE CORRECTIF @Developer (2026-08-11) — PÉRIMÈTRE ÉLARGI PAR ARBITRAGE HUMAIN, et les deux
+  cellules d'audit repassent à `⏳`.** 6 commits, **code figé à `28d9504`** *(`git diff --name-only
+  28d9504..HEAD -- lib test scripts pubspec.*` rend **0 fichier**)*, `HEAD` = **`e991749`**,
+  `EVT_CODE_READY` ré-émis.
+  ⚖️ **Motif de l'élargissement (décision humaine du 2026-08-11)** : B-1 et B-2 sont **de la même famille
+  — un chemin d'erreur qui avale** — et **chaque tour coûte une paire d'audits complète**. Le **GEL
+  d'US-00.6** interdit d'*ouvrir* un cycle pour du non bloquant ; un cycle était **déjà ouvert** par B-2.
+  ⇒ **la famille est refermée d'un coup** : **B-2** *(bloquant)* + **NB-D, NB-E, NB-F, NB-G, NB-J**.
+  ⛔ **Élargissement borné aux chemins d'erreur de la persistance** — aucune autre extension.
+  - ✅ **B-2 corrigé, et de la forme qui referme AUSSI le trou d'instrumentation** :
+    `_document = await _tenterMiseDeCote() ? documentNeuf : null`. ⛔ **L'exception n'est plus AVALÉE, elle
+    est CONVERTIE** en booléen — donc le `catch` **au corps vide** *(zéro ligne instrumentable, invisible
+    à `lcov` : c'était **NB-I**)* **n'existe plus**. **Les deux chemins du fichier convergent enfin** : la
+    mise de côté échouée refuse l'écriture, **exactement comme le chemin « version FUTURE » le faisait
+    déjà à vingt lignes de là**. Et l'état **s'auto-répare** : l'obstacle disparu, le démarrage suivant met
+    le document de côté et l'écriture redevient possible.
+  - 🔬 **@Architect A REJOUÉ LE MUTANT INVERSE LUI-MÊME, PARCE QUE LE PIÈGE ÉTAIT ARMÉ ET SIGNALÉ
+    D'AVANCE** : **NB-F/NB-G ont été corrigés AVANT B-2** *(`e26d791` précède `e5d471e`)*, or le
+    déclencheur le plus évident **était** le point aveugle de NB-G *(un **répertoire** au nom de
+    destination, que `File.existsSync()` déclare absent)* ⇒ **le corriger d'abord pouvait rendre le test de
+    B-2 VACUEUX en le laissant vert.** **Ce n'est pas arrivé** : le déclencheur retenu occupe **TOUS** les
+    candidats avec des répertoires, **horloge figée** pour rendre les noms déterministes.
+    **Mesure** : correctif remis en `documentNeuf` inconditionnel ⇒ **3 tests ROUGES**, dont
+    `Expected: false / Actual: <true>` sur *« le document est toujours là ⇒ l'écriture reste refusée »*.
+    ⇒ ⛔ **le test n'est pas vacué**, et il **survit** au correctif de NB-F/NB-G. Arbre restauré,
+    `git status` **vide**.
+  - ✅ **NB-D fermé avec B-2** : le `catch` **reste** *(`charger()` est `await` avant `runApp`, donc une
+    exception qui sortirait rendrait **B-1**)*, mais ⛔ **`on Object` et non `on FileSystemException`** —
+    le stub lève un `UnsupportedError`, et un type attrapé **trop étroit** ferait ressortir l'exception.
+    Son motif ne se réclame plus du stub, **où le chemin est inatteignable**.
+  - ✅ **NB-E** *(un `rename` échoué n'abandonne plus les données dans `echeances.json.tmp`)* · **NB-F et
+    NB-G** *(la boucle anti-collision regarde désormais **le TYPE de l'occupant**, pas sa seule
+    existence)* · **NB-J** *(la promesse absolue « ⛔ NE LÈVE JAMAIS » est remplacée par **l'énumération
+    des classes couvertes, chacune avec son test, ET SA BORNE ÉCRITE** : elle **LÈVE** si le magasin
+    **viole son contrat** en levant à la lecture — ⛔ délibérément non attrapé, *« un `catch` de plus
+    masquerait les erreurs de PROGRAMMATION »* — et **cette borne est épinglée par un test**)*.
+    ➡️ **Même voie que NB-A, et c'est cohérent** : *une doc dit ce qui EST*.
+  - **Compteurs relevés par @Architect, pas repris du rapport** : **5 gates verts**, **369 tests**,
+    couverture **97.9 % (941/961)** contre cliquet **95.2 inchangé** · `check_gherkin_mapping`
+    **50 ↔ 50** et **13 ↔ 13** ⇒ **voie (a) tenue, aucun nombre dérivé n'a bougé** ·
+    `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT, 8 assertions** ·
+    `validate_trace` et `check_scb_compliance` **conformes** · `git status` **vide**.
+  - ⛔ **CE QUE CE CYCLE N'ATTESTE PAS** : **il ne juge pas sa propre suffisance** — c'est au 3ᵉ tour
+    d'audit de le dire, et **les deux tours précédents ont chacun trouvé un bloquant qu'aucun gate n'avait
+    vu** · **NM-8 et NM-10 entières** *(`main()` jamais exécuté, aucun appareil, web non exécuté)* ·
+    **aucun SAST, aucun scan de CVE** · **N-1, N-2, NB-C, N-3, N-5 → N-10 restent OUVERTS**.
+
+- **🔁 3ᵉ TOUR D'AUDIT (2026-08-17) — ✅✅ DOUBLE VISA, le PREMIER du cycle. Code audité `28d9504`,
+  `HEAD` `b77e3cf`, ⛔ EN ARBRES DE TRAVAIL ISOLÉS.**
+  **✅ Revue `PASSED`** *(`EVT_CODE_REVIEW_PASSED`, [`code_review_delta2.md`](reports/US-01.2/code_review_delta2.md))* ·
+  **✅ Sécurité `PASSED`** *(`EVT_SECURITY_AUDIT_PASSED`, [`security_delta2.md`](reports/US-01.2/security_delta2.md))*
+  — ⛔ **aucun des 4 rapports antérieurs n'a été écrasé**.
+  - ✅ **L'ISOLATION PAR `git worktree` N'EST PLUS UNE PRÉCAUTION : ELLE A SERVI, ET L'INCIDENT LE PROUVE.**
+    Le lanceur de mutants de la sécurité est **mort sur `cp1252` ENTRE l'application d'un mutant et sa
+    restauration**, laissant `lib/` **muté** dans son arbre. ⇒ **sans isolation, cette mutilation frappait
+    l'arbre où la revue travaillait au même moment** — exactement le défaut ① du 2ᵉ tour. **Second fait, de
+    la même veine** : le 3ᵉ tour avait déjà été lancé puis **interrompu** dans une session antérieure, et
+    ses deux arbres orphelins portaient **une sonde** et **un mutant en vol** ; l'arbre principal, lui,
+    était **resté vide** *(`git status --porcelain`)*. ➡️ **Le remède est validé par les incidents mêmes
+    qu'il était censé contenir.**
+  - ✅ **`B-2` EST FERMÉ, ET LES DEUX AUDITEURS L'ONT ÉTABLI PAR DES CHEMINS DIFFÉRENTS.**
+    **Sécurité** : déclencheur **choisi différent de celui des tests livrés** — un **verrou exclusif
+    ordinaire** *(classe antivirus / OneDrive)* sur le magasin `io` de production ⇒ `creer()` rend
+    `estReussi = false`, document **intact octet pour octet**, aucune copie, **auto-réparation** dès
+    l'obstacle levé, **contrôle négatif qui bascule dans les deux sens** ; les **deux** façons de
+    réintroduire `B-2` sont **tuées** par les tests livrés.
+    **Revue** : ⛔ **le test livré n'est PAS VACUEUX**, et elle l'a établi **seule, par trois mesures** —
+    remettre la boucle aveugle de `NB-G` ⇒ **seul** le test de `NB-G` rougit, `B-2` **reste vert** ;
+    remettre `existsSync` dans `lire()` ⇒ **seul** celui de `NB-F` rougit ; retirer les obstacles ⇒
+    **`B-2` ROUGIT**. 🔬 **Le piège que j'avais armé et signalé d'avance est donc fermé PAR UN TIERS** :
+    mon propre rejeu du 2026-08-12 disait la même chose, mais *un producteur qui vérifie son propre piège
+    n'est pas une preuve* — désormais c'en est une.
+  - 🔴 **UN CONSTAT DE `security_delta.md` EST RÉFUTÉ PAR LA MESURE, ET C'EST L'AUDIT SÉCURITÉ QUI RÉFUTE
+    SON PRÉDÉCESSEUR** *(`SEC-NB-K`, MEDIUM)* : le §7 du rapport du 2ᵉ tour laissait entendre que
+    **Windows refuserait** un `rename` sur une destination existante. ⛔ **Faux — `File.rename` ÉCRASE
+    SILENCIEUSEMENT sous Windows AUSSI** *(sonde `Q-2` : `leve=Null`, destination = contenu **nouveau**,
+    antérieure **écrasée**)*. ⇒ la promesse écrite dans le code — *« le nom ne doit JAMAIS écraser une mise
+    de côté antérieure »* — **ne repose sur AUCUNE garantie du système** : elle tient **entièrement** à la
+    boucle `typeSync`, qui **n'est pas atomique** *(fenêtre TOCTOU)*. **Aggravant mesuré** : l'espace des
+    noms est **1000 fois plus étroit que le format ne le suggère** — suffixe à **16 chiffres**, mais
+    **20 000 appels rendent 4 valeurs distinctes** *(granularité d'horloge ≈ 1 ms)*.
+    ⚖️ **NON BLOQUANT, et le motif est la RÉCIPROQUE de la règle qui avait fait bloquer `B-2`** : *un
+    déclencheur exécuté bat un raisonnement* ⇒ **un raisonnement sans déclencheur ne bloque pas**.
+    L'auditeur a **cherché** la séquence destructive **depuis le produit** et ⛔ **ne l'a pas atteinte** —
+    la boucle protège *(`K-3` : les deux documents survivent, même horloge figée)*. **Il l'écrit
+    lui-même** : *« ce serait malhonnête d'en faire un bloquant, et malhonnête de le taire. »*
+    **Remède = celui de `N-1`** *(création exclusive ou suffixe aléatoire)*, **hors périmètre**.
+  - 🔴 **`NB-I` EST FERMÉ COMME DÉFAUT, ⛔ PAS COMME ANGLE MORT D'INSTRUMENT — et c'est LU dans
+    `lcov.info`, pas déduit** *(`REV-NB-N`, MEDIUM)*. Le `catch` n'a plus un corps vide *(il porte
+    `return false;`)*, ce qui **suggère** que la branche est redevenue visible : sur `_tenterMiseDeCote`,
+    les **seules** lignes instrumentées sont **`{235: 2, 237: 4}`** — ⛔ **ni le `return true` ni le
+    `return false` n'ont d'entrée `DA`** ⇒ **aucune couverture, à aucun seuil, ne peut dire si la branche
+    d'échec est exercée** ; **97,9 % ne dit toujours RIEN de ce chemin**. 🔬 **7ᵉ instance de la thèse du
+    projet, et la plus nette** : la couverture n'est pas seulement **aveugle à la force des assertions**,
+    elle l'est à **l'EXISTENCE de la branche — même après correction**. *(Confirmé de l'autre côté :
+    `SEC-NB-M` montre qu'**inverser la décision produit** du dernier `on Object` à corps de commentaires
+    laisse **100 tests verts** ⇒ **rien ne défend le choix actuel, et rien ne défendrait le choix
+    inverse**.)*
+  - 🔴 **COLLISION D'IDENTIFIANTS — le tour la DÉCOUVRE et l'AGGRAVE dans le même geste** *(`REV-NB-O`,
+    MEDIUM)*. `NB-D`, `NB-E`, `NB-F`, `NB-G` désignent **deux jeux de findings différents** selon qu'on lit
+    `code_review.md` *(1ᵉʳ tour)* ou `security_delta.md` ; **les tâches C5 et C6 cochent la série
+    SÉCURITÉ**, et ⛔ **la liste « hors périmètre » du Story File ne nomme PAS ceux de la REVUE** — vérifiés
+    **OUVERTS par exécution** *(chemin de poste en dur dans `generer_e2e.py` · `refusEditionEchue` à un
+    **seul** appelant · `lcov` : ligne **117** non couverte, le bouton « Fermer »)*. ⇒ **un lecteur d'audit
+    conclura qu'ils sont fermés. Ils le sont pour la sécurité, ⛔ pas pour la revue.**
+    ⚠️ **Et ce tour en ajoute QUATRE** : la sécurité nomme `NB-K`, `NB-L`, `NB-M`, `NB-N` ; la revue
+    `NB-M`, `NB-N`, `NB-O`, `NB-P` ⇒ ⛔ **`NB-M` et `NB-N` désignent chacun DEUX choses dans le MÊME
+    tour**, et `NB-K`/`NB-L` en désignaient déjà deux depuis le 2ᵉ. **Convention appliquée à partir d'ici
+    et dans tout ce paragraphe : préfixer par la grille — `REV-` / `SEC-`.** **Même famille que `NB-6`** :
+    *le corpus ne modélise pas ce sur quoi un identifiant PORTE.* ➡️ **`/audit-methodo`.**
+  - 🟠 **LE DÉCOMPTE DE MUTANTS D'`EVT_CODE_READY` EST FAUX, ET IL EST GELÉ** *(`REV-NB-M`, MEDIUM —
+    **re-vérifié par @Architect lui-même**)* : la trace et le PROJECT_LOG disent *« 11 MUTANTS joués …
+    **8 TUÉS** »*, or la somme des tâches **C4 → C7** du Story File donne **`2 + 4 + 2 + 2 = 10` tués**
+    *(l'écart omet les **2 mutants de C7**)*, et ⛔ **l'arithmétique de la trace ne boucle même pas sur
+    elle-même** : `8 tués + 2 contrôles + 1 anti-vacuité + 1 survivant + 1 non représentable` = **13**,
+    pour **11 annoncés**. **Classe de défaut nº 1 du projet**, cette fois **dans une trace append-only**
+    ⇒ ⛔ **elle ne sera PAS réécrite**, comme le mot amputé du 2ᵉ tour. **Non bloquant** : l'écart
+    **SOUS-ESTIME** le travail fait, et **la revue a rejoué la campagne elle-même** *(12 mutants, 10 tués,
+    1 survivant confirmé, 1 non représentable — **aucun survivant non annoncé**)*. ➡️ **Vraie sortie** :
+    *un décompte de mutants doit être PRODUIT par le script de campagne, jamais recopié dans un
+    `rationale`.*
+  - ✅ **LE SURVIVANT QUE @DEVELOPER AVAIT NOMMÉ LUI-MÊME EST VÉRIFIÉ — et la sécurité l'ÉLARGIT** :
+    `M-E4` *(= son `M-7`)* est confirmé survivant, mais la caractérisation *« `File.delete` refuse un
+    répertoire »* est **trop étroite** — l'occupant survit **aussi** s'il est un **fichier tiers en lecture
+    seule** ou **verrouillé** ⇒ ⛔ **le `try` étroit n'est pas seulement « non testable », il est
+    STRICTEMENT PLUS SÛR**, et le commentaire du code donne la bonne raison. **Le survivant `M-11` de
+    `SEC-NB-L` est NON REPRÉSENTABLE sous Windows, mesuré** : *les conditions qui font échouer le `rename`
+    sont exactement celles qui font échouer le `delete`* ⇒ la propriété tient par **coïncidence de
+    plateforme**, ⛔ **pas par un test** — ⚠️ **à rejouer sous POSIX**, où un fichier en lecture seule
+    **est** supprimable.
+  - **Autres non bloquants** : **`SEC-NB-L`** *(le **premier `delete` de fichier** entré dans `lib/` —
+    correct **par construction** : cible bâtie uniquement sur `const nomDocument`, **aucune composante
+    contrôlée par l'utilisateur** ; 2 mutants tués)* · **`SEC-NB-M`** *(le dernier `on Object` à corps de
+    commentaires n'est assertionné **dans aucun sens**)* · **`SEC-NB-N`** *(restauration de mutant à mettre
+    en `finally`, `PYTHONIOENCODING=utf-8` — ➡️ `/audit-methodo`, dossier mutation)* · **`REV-NB-P`**
+    *(l'énumération de `charger()` nomme **une** classe de levée ; **deux autres sites lisibles dans le
+    même corps** — `migrer(racine)!` et `firstWhere` sans `orElse` — sont **sûrs aujourd'hui, vérifiés dans
+    le code**, mais **non nommés**)*.
+  - **Findings antérieurs** : **`NB-D/E/F/G/J` (série sécurité) fermés**, chacun par un **mutant tué** ·
+    **aucun finding précédent aggravé** · **`NB-E` confirmé OUVERT sur l'INTERRUPTION** *(un `.tmp`
+    orphelin porteur de données survit à 4 démarrages — **comme le Story File le dit lui-même**)* ·
+    **`REV-NB-C`, `REV-NB-H`** subsistants, **re-mesurés**, non aggravés · **bornes CVE / SAST
+    INCHANGÉES** *(0 fichier `.github`, `pubspec` identique **comparé par ensembles**)*.
+  - **Compteurs relevés par @Architect lui-même, ⛔ pas repris des rapports** : `run_gates --all` →
+    **5 gates verts**, **369 tests**, couverture **97.9 % (941/961)** contre cliquet **95.2** *(valeur
+    **LUE** dans `factory.config.json`, **non édité**)* · `check_gherkin_mapping` **50 ↔ 50** et
+    **13 ↔ 13** · `check_e2e_persistance` **0 écart** · `migration_roundtrip_criterion` **SATISFAIT,
+    8 assertions** · `validate_trace` et `check_scb_compliance` **conformes** · arbre principal ne portant
+    **QUE** les 2 rapports et la ligne de trace · **rationales de trace relues dans le fichier** :
+    **0 backtick**, **0 `$`**, aucun mot amputé ⇒ **le piège du 2ᵉ tour n'a pas rejoué**.
+  - ⛔ **CE QUE CE DOUBLE ✅ N'ATTESTE PAS** : **aucun SAST** *(`run_gates --gate sast` → **exit 1**, le
+    gate n'existe pas)*, **aucun scan de CVE** ⇒ **les deux revues sont HUMAINES, donc non exhaustives** —
+    et la sécurité l'écrit : *« un troisième défaut de même nature ne serait pas contredit par ce
+    rapport »*, ⚠️ **précédent à l'appui, puisque `B-2` était PRÉ-EXISTANT et n'est apparu que parce que le
+    correctif de `B-1` avait déplacé la PORTÉE** · **TOUT est mesuré sous Windows**, un seul système de
+    fichiers, un seul fuseau — ⛔ **or la famille `B-2` / `NB-E` / `NB-G` dépend précisément du `rename`** ·
+    **`main()` n'a JAMAIS été exécuté** *(**NM-8** entière)* · **aucun écran vu** *(**NM-6**, **NM-7**,
+    **NM-10** entières)* · la **fenêtre TOCTOU de `SEC-NB-K`** n'est **ni franchie ni réfutée** ·
+    l'instabilité `REV-NB-L` est **non observée en 17 exécutions**, ce qui ⛔ **ne la réfute pas** — *une
+    sonde qui ne trouve pas ne prouve rien* · ⛔ **la revue n'a PAS lu le rapport de sécurité de ce tour, et
+    réciproquement** : chaque `PASSED` n'atteste **que sa grille** · `check_gherkin_mapping` compare des
+    **TITRES** · **`N-1`, `N-2`, `REV-NB-C`, `N-3`, `N-5` → `N-10` restent OUVERTS**.
+
+- **✅ QA `🧪 PASS` (2026-08-18, `EVT_QA_PASSED`, contexte FRAIS — code `28d9504`, `HEAD` `ef87d8f`)** —
+  [`qa.md`](reports/US-01.2/qa.md). **Exécutée dans un worktree VIERGE** *(ni `.dart_tool` ni `build`)* ⇒
+  ⛔ **ce qui est mesuré est ce qu'obtiendrait un dépôt frais**, pas un état de cache local.
+  - **369 passed · 0 failed · 0 skipped** — et le `skipped = 0` est **MESURÉ** *(`--reporter json`)*,
+    ⛔ **pas déduit de l'absence du signe `~`** · couverture **97.9 % (941/961)**, cliquet **95.2 LU** dans
+    `factory.config.json` · **5 gates verts** · **8 contrôles projet à `exit 0`**, dont
+    `migration_roundtrip_criterion` → `VERDICT|OK|`.
+  - ✅ **AUCUN AC ORPHELIN** : **16/16 AC actifs** couverts par des scénarios **exécutés**, **AC-9 vacant**
+    conforme à sa déclaration, **0 test hors d'un groupe d'AC** — croisement **EN ENSEMBLES**, et
+    l'instrument **porte son autotest**.
+  - 🔬 **LA MESURE QUE PERSONNE N'AVAIT FAITE, ET C'EST LE VRAI APPORT DE CETTE QA** : la revue avait
+    **borné** sa campagne à `test/features/echeances/data/` ; la QA a joué **10 mutants sur `lib/`** pour
+    mesurer ce que **l'e2e SEULE** tue — **8 sur 10**. Les **2 « survivants » d'AC-16 sont une REDONDANCE
+    DE GARDES**, ⛔ **pas une règle sans défenseur** : le contrôle `MQA8`, qui retire **les DEUX** gardes,
+    fait **rougir les 2 scénarios e2e** ⇒ **0 survivant réel**.
+    ➡️ **RÉPONSE À LA QUESTION QUE LE PROJET SE POSE DEPUIS EPIC_00** — *« un `.feature` est-il un test ou
+    une décoration ? »* : ici les **50 scénarios ne sont pas seulement MAPPÉS PAR TITRE, ils DÉFENDENT le
+    code** — **38/50 assertent les octets du fichier**, **0 test à moins de 2 `expect`**. ⚠️ **La borne
+    demeure** : `check_gherkin_mapping` **compare des titres** et l'imprime lui-même.
+  - 🔴 **LA QA A RETIRÉ SON PROPRE INSTRUMENT — 4ᵉ fois dans l'histoire du projet, et c'est toujours
+    compté comme un ACQUIS** : sa sonde v1 comptait **94 `expect`** là où le fichier en porte **3**, parce
+    qu'**une apostrophe française dans un commentaire** désynchronisait son scanner. **v1 RETIRÉE** *(⛔ pas
+    rafistolée)*, **v2 publiée AVEC le mutant qui la tue** *(autotest 8/8)*.
+    ⚠️ **Et ses scripts ont planté DEUX FOIS sur `cp1252`** — **la classe de bug déjà payée en US-00.6**,
+    et **déjà rencontrée le même jour par la sécurité** *(dont le lanceur de mutants en est mort en
+    laissant `lib/` muté)*. ⇒ **3 occurrences, 3 rôles différents, 1 remède d'une ligne
+    (`PYTHONIOENCODING=utf-8`) qui n'est écrit NULLE PART.** ➡️ **`/audit-methodo`.**
+  - **5 non bloquants, 0 bloquant** : **`Q-1`** *(MEDIUM — la compensation déclarée de **NM-9** est
+    **imprécise** : les 2 scénarios d'AC-16 **n'atteignent JAMAIS** la barrière **V-1**, la garde calendrier
+    court-circuitant ; ce qui l'éprouve est `date_civile_test.dart`, que **la même ligne nomme dans sa
+    seconde moitié** ⇒ **la règle EST défendue, c'est la DESCRIPTION de l'instrument qui dépasse la
+    mesure**)* · **`Q-2`** *(MEDIUM — **DoD cochée 1/25** alors que **19 cases sont matériellement
+    satisfaites**, et la case « PR ouverte » est **FAUSSE** : `gh pr list` rend **vide** — **re-vérifié par
+    @Architect**)* · **`Q-3`** *(LOW — le Story File déclare `feat/US-01.2-gestion-echeances`, la branche
+    réelle est **`feat/US-01.2-design`** — **re-vérifié**)* · **`Q-4`** *(LOW — le point ② renvoyé à
+    l'humain n'a **aucun verdict daté** là où la DoD le cherche)* · **`Q-5`** *(LOW — `AC-10 N` parle de
+    persistance et n'asserte que l'écran ; ⛔ **non vacueux**, le disque est traversé par un dépôt neuf)*.
+  - ⛔ **CE QUE CE `🧪 PASS` N'ATTESTE PAS** : **aucun écran vu** · **`main()` JAMAIS exécuté** —
+    `main.dart` est **absent du `lcov`** ⇒ **NM-8 encore vraie** · l'application **n'a jamais tourné sur un
+    appareil** ⇒ **NM-1, NM-2, NM-4, NM-6, NM-7 NON LEVÉES**, et ⛔ **NM-10 ne se lèvera PAS avec
+    US-01.3** · **aucun SAST, aucun scan de CVE** *(bornes connues, réénoncées)* · **tout mesuré sous
+    Windows**, un seul fuseau, ⛔ **or les mécanismes d'échec du `rename` diffèrent sous POSIX** ·
+    campagne de mutation **non exhaustive** · ⛔ **le `🧪 PASS` d'US-01.1 reste PÉRIMÉ — ce rapport ne le
+    rafraîchit pas.**
+
+- ⚖️ **RECTIFICATION D'UNE PHRASE QUE J'AI ÉCRITE LA VEILLE, ET ELLE EST DE LA CLASSE DE DÉFAUT Nº 1**
+  *(@Architect, 2026-08-18)*. J'ai écrit que *« la cellule de phase nomme la phase dont le visa est POSÉ,
+  jamais celle qui est EN COURS »* — ⛔ **déduit d'UN refus d'outil au lieu d'être LU dans le script**.
+  **C'est une sur-lecture.** La règle réelle, **lue dans `check_scb_compliance.py`** : `BLOCKING_PHASES`
+  *(`quality_assurance` → `epic_closure`)* exigent `QA Status != ⏳`, et **`prepare_deployment` exige en
+  outre `QA Status == 🧪 PASS`**. ⇒ **une fois le `🧪 PASS` posé, `quality_assurance` ET
+  `prepare_deployment` sont TOUS DEUX légaux** ; ce qui tranche est `WORKFLOW.yaml`
+  *(`quality_assurance` → `SUCCESS: prepare_deployment`)* et le **précédent d'US-01.1**.
+  ⛔ **La phrase de la veille n'est PAS repeinte** — elle est **datée et corrigée ici**. *Le refus d'outil,
+  lui, reste un fait : il a bien eu lieu, et il était juste.*
+
+- **⏳ Reste dû** : **Déploiement**, puis **certification**. ⛔ **ET US-01.2 BUTE SUR LE MÊME MUR
+  QU'US-01.1, dont le motif est DÉJÀ TRANCHÉ — ne pas le re-litiger** : `/certify` s'arrêtera au **gate 6**
+  tant que `Déploiement` vaut `⏳`, `EVT_CERTIFIED_PROD` exige `EVT_DEPLOYMENT_SUCCESS` en précondition, et
+  le déploiement réel est **impossible aujourd'hui** *(Android sans JDK, iOS non scaffoldé, aucun keystore,
+  aucun compte store ; `flutter build web --release` est un **gate de constructibilité**, ⛔ **pas une
+  plateforme cible produit**)*. ⛔ **Le précédent « déploiement = fusion sur `main` » NE SE TRANSFÈRE
+  PAS** — son motif était **« 0 fichier Dart livré »**, et US-01.2 en livre.
+  ➡️ **C'est exactement ce que le plan arrêté le 2026-08-03 prévoit** : **② US-01.3** rend `🚀 DEPLOYED`
+  **signifiant**, et c'est le **seul chemin vers `🚀 OUI` pour US-01.1 ET US-01.2**.
+  **Deux actions documentaires AVANT cela, ⛔ aucune bloquante** : les findings **`Q-2`** et **`Q-3`**
+  portent sur le **Story File** *(DoD cochée **1/25**, case « PR ouverte » **fausse**, nom de branche
+  **erroné**)* — ⚠️ **laisser une DoD à 1/25 sur une US en `prepare_deployment` prépare exactement ce que
+  le gate 4 de `/certify` refusera**, et US-00.6 a déjà payé une case **littéralement insatisfiable**.
+  ⛔ **Historique conservé, non repeint — PÉRIMÉ-2026-08-18 : ce qui suit était le « Reste dû » AVANT la
+  QA, et il est SOLDÉ :**
+  **QA** *(@QA_Tester)* sur le code `28d9504`. Les **deux préconditions**
+  d'`EVT_QA_PASSED` sont satisfaites *(`EVT_CODE_REVIEW_PASSED` **et** `EVT_SECURITY_AUDIT_PASSED`,
+  postérieurs au dernier `EVT_CODE_READY` — ⚠️ **cet ordre n'est exigé par AUCUNE barrière**, c'est la
+  5ᵉ instance déjà inscrite plus haut)*.
+  ⚠️ **LA CELLULE DE PHASE RESTE `parallel_audit`, ET CE N'EST PAS DE LA PRUDENCE : C'EST UN REFUS
+  D'OUTIL, MESURÉ.** L'avancer à `quality_assurance` a été **tenté** et
+  **`check_scb_compliance.py` l'a REJETÉ** — *« QA Status est ⏳ alors que la phase est bloquante
+  (quality_assurance) »*. ⇒ **la cellule de phase nomme la phase dont le visa est POSÉ, jamais celle qui
+  est EN COURS** — à savoir avant d'y lire un état d'avancement.
+  ⛔ **Historique conservé, non repeint — PÉRIMÉ-2026-08-17 : ce qui suit était le « Reste dû » AVANT le
+  3ᵉ tour, et il est SOLDÉ :**
+  **3ᵉ TOUR D'AUDIT sur `28d9504`** *(`HEAD` = `e991749`)* — **les DEUX audits**, ⛔ **et
+  cette fois EN ARBRES DE TRAVAIL ISOLÉS**, ce qui corrige le défaut ① relevé par la sécurité au 2ᵉ tour
+  *(`/audit-us` faisait tourner deux audits **mutants** sur **un seul** arbre ; les deux auditeurs
+  s'étaient isolés **spontanément**, le rituel ne le prescrivait pas)*. **Ensuite seulement, QA.**
+  **Phase INCHANGÉE : `parallel_audit`.**
+  ⛔ **Historique conservé, non repeint — ce qui suit était le « Reste dû » du 2ᵉ tour :**
+  **⛔ RETOUR À @Developer — 2ᵉ `FAILED` sécurité, sur `B-2`.** Correctif de **2 lignes**
+  *(`_document = misDeCote ? documentNeuf : null`)* **avec son test** — ⛔ **et le test est le vrai
+  travail** : il doit faire **échouer le `rename`** *(la sonde de l'auditeur y arrive par un **verrou
+  ordinaire** sur la destination)*, classe qu'⛔ **aucun test livré n'exerce**. Traiter aussi **NB-D**
+  *(le commentaire qui **légitime** l'avalement est devenu **faux**)*. Puis **3ᵉ tour d'audit — les DEUX
+  audits, en ARBRES DE TRAVAIL ISOLÉS** *(défaut ① ci-dessus)*. **Ensuite seulement, QA.**
+  **Phase INCHANGÉE : `parallel_audit`.**
+  ⚖️ **ARBITRAGE HUMAIN DU 2026-08-07 — LE CLIQUET RESTE À 95,2. ⛔ Ne pas le re-litiger.**
+  Le gate imprime *« Valeur a consigner (arrondie VERS LE BAS) : **97.8** »* — ⚠️ **c'est un AVIS, pas un
+  échec** : `app.test` rend **✅** et la ligne `[HAUSSE]` est **informative**. ⛔ **Ne pas la lire comme
+  une obligation non traitée.** `factory.config.json` est **protégé** ⇒ ⛔ **aucun agent ne l'édite**, et
+  aucun ne l'a édité.
+  **Motif du choix** : monter à **97,8** verrouillerait l'acquis mais **fermerait 2,6 points de marge**
+  pour toutes les US suivantes, en reconduisant la contrainte de marge nulle qu'US-01.2 vient de subir.
+  ⚠️ **Ce que la décision COÛTE, et il faut le savoir** : **rien n'empêche désormais une US future de
+  redescendre à 95,2** — les **2,6 points gagnés ne sont PAS protégés**, c'est le prix **assumé** de la
+  marge. *(Le cliquet **ne monte jamais seul** : c'est une constante depuis US-00.6.)*
 
 ### [US-01.1] Affichage Hub & grille d'échéances
 

@@ -53,6 +53,14 @@ COUPLES: tuple[tuple[str, str], ...] = (
         'tests/features/US-01.1-affichage-hub-grille.feature',
         'test/e2e/hub_echeances_test.dart',
     ),
+    # US-01.2 — ⛔ ENREGISTRE EN DERNIER (T14, risque R-7). Tant que ce couple
+    # n'etait pas la, US-01.2 n'etait sous AUCUN controle de correspondance et
+    # ⛔ l'absence de rouge ne prouvait RIEN. L'inscrire plus tot aurait rendu
+    # le job REQUIS « Governance » rouge a chaque scenario ajoute.
+    (
+        'tests/features/US-01.2-gestion-echeances.feature',
+        'test/e2e/gestion_echeances_test.dart',
+    ),
 )
 
 MOTIF_SCENARIO = re.compile(r'^[ \t]*(?:Scénario|Scenario|Plan du scénario|Scenario Outline)'

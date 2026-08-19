@@ -16,6 +16,16 @@
 #    Conséquence à connaître ici : en US-01.2, une échéance échue reste sur la grille jusqu'à sa
 #    SUPPRESSION — c'est la seule issue disponible pour libérer une place (AC-5).
 #
+# ⚖️ DEUX AC AJOUTÉS PAR DÉCISION HUMAINE LE 2026-08-06 — AC-16 et AC-17, 5 scénarios (45 → 50).
+#    Ils ont été découverts À LA JOINTURE des deux branches de design, qui ont tourné en aveugle
+#    l'une de l'autre : @DataEngineer a MESURÉ la chaîne de défaut (règle V-1), @UXDesigner a NOMMÉ
+#    la lacune de l'échec d'écriture (§10.5) sans inventer d'AC — ce qui était correct de sa part.
+#    ⛔ Les numéros AC-16 et AC-17 SUIVENT AC-15 : AC-9 reste VACANT et rien n'est renuméroté.
+#    ⛔ TROIS règles du schéma de stockage restent DÉLIBÉRÉMENT sans AC et sans scénario
+#      (document de version FUTURE, `id` en double, `schemaVersion` absent — arbitrage humain du
+#      2026-08-06, voie (b)) : contrat interne invisible à l'utilisateur, couvert par des tests
+#      unitaires déclarés. ⛔ NE PAS leur écrire de Gherkin.
+#
 # ⚠️ CE FICHIER EST NORMATIF. En cas de divergence avec un résumé en prose (Story File, SCB,
 #    PROJECT_LOG), c'est LUI qui fait foi. Défaut réel d'US-01.1 : 13 scénarios et 13 lignes de
 #    résumé divergeaient par 5 titres.
@@ -397,3 +407,71 @@ Fonctionnalité: Gestion des échéances — création, édition, suppression, l
     Quand le message de validation est affiché
     Alors il utilise la couleur d'erreur du design system et reste lisible
     Et aucun badge, compteur, alerte animée ni élément de gamification n'apparaît
+
+  # ---------------------------------------------------------------------------
+  # AC-16 — Refus d'une date ou d'une heure civile qui n'existe pas (RNF-04 ; règle V-1 de
+  #         docs/architecture/SCHEMA_STOCKAGE_ECHEANCES.md §6). ⚖️ Créé le 2026-08-06.
+  #         FAIT MESURÉ par @DataEngineer, rejoué et confirmé par @Architect :
+  #           DateTime.parse("2026-02-31T23:59") NE LÈVE PAS et rend 2026-03-03T23:59.
+  #         ⇒ Une exception n'est PAS une barrière ; la barrière est la comparaison à la FORME
+  #         CANONIQUE. Sans refus à la SAISIE, l'application écrit une valeur qu'elle refusera de
+  #         relire (résidu, AC-11) ⇒ L'ÉCHÉANCE DISPARAÎT SANS MESSAGE. C'est cette conséquence
+  #         utilisateur qui fait l'AC, pas la subtilité de l'analyseur syntaxique.
+  #         ⛔ AUCUNE DATE DE CALENDRIER EN DUR (R-13) : « le 31 février de l'année prochaine » se
+  #         dérive de l'horloge injectée et ne devient jamais passé. Le 31 février VISÉ est dans le
+  #         futur ⇒ le refus ne peut pas être imputé à AC-4, et le 28 février de la même année est
+  #         l'AUTRE CÔTÉ de la borne — sans lui, la règle serait satisfaite par un refus systématique.
+  # ---------------------------------------------------------------------------
+
+  Scénario: Une date qui n'existe pas au calendrier est refusée sans correction silencieuse
+    Étant donné que le formulaire de création est ouvert
+    Quand je valide le formulaire avec une description valide et la date du 31 février de l'année prochaine
+    Alors la création est refusée par un message explicite désignant la date
+    Et le stockage local ne contient aucune échéance
+    Et la même création avec la date du 28 février de l'année prochaine est acceptée
+
+  Scénario: Une édition vers une date qui n'existe pas au calendrier est refusée
+    Étant donné qu'une échéance active existe avec sa date d'origine
+    Quand je modifie sa date pour le 31 février de l'année prochaine et que je valide
+    Alors la modification est refusée par un message explicite désignant la date
+    Et l'échéance conserve sa date d'origine dans le stockage local
+
+  # ⚠️ L'HEURE CIVILE INEXISTANTE du passage à l'heure d'été (02:30 le jour du saut de printemps)
+  #    relève de LA MÊME RÈGLE et de la MÊME clause (AC-16 « Limite »), mais elle N'A PAS DE
+  #    SCÉNARIO — délibérément : le fuseau du processus Dart n'est pas pilotable depuis un test
+  #    (même cause que NM-5) et un hôte sous TZ=UTC N'A AUCUNE transition ⇒ le scénario y serait
+  #    VRAI QUOI QU'IL ARRIVE, soit exactement l'un des 2 faux verts d'US-01.1.
+  #    ⇒ Borne déclarée NM-9 dans le Story File. Ce qui est mesuré à la place : le MÊME prédicat de
+  #    forme canonique, en UN SEUL EXEMPLAIRE (règle V-2), éprouvé en test unitaire de la validation.
+
+  # ---------------------------------------------------------------------------
+  # AC-17 — Échec d'écriture dans le stockage local (RNF-01). ⚖️ Créé le 2026-08-06 sur la lacune
+  #         NOMMÉE par @UXDesigner (§10.5 du Design UX) : « l'échec d'écriture n'a aucun AC, aucun
+  #         scénario, aucune surface ». Il a REFUSÉ d'inventer l'AC — la valeur métier est au @PO.
+  #         Le magasin de plateforme non-`dart:io` LÈVE par conception (« jamais un échec
+  #         silencieux ») ; un disque plein ou un droit refusé produit la même chose sur l'appareil.
+  #         RÈGLE MÉTIER TRANCHÉE : ce qui est AFFICHÉ correspond TOUJOURS à ce qui est SUR LE
+  #         DISQUE — ⛔ jamais un écran qui laisse croire à un enregistrement qui n'a pas eu lieu.
+  #         ⚠️ Provoquer l'échec dans un E2E doit se faire SANS MAGASIN FACTICE (ADR-010 §1,
+  #         contrôlé par check_e2e_persistance.py). Le COMMENT appartient à @Architect ; le @PO ne
+  #         prescrit que le comportement observable.
+  # ---------------------------------------------------------------------------
+
+  Scénario: Un échec d'écriture est annoncé et rien n'est enregistré
+    Étant donné que le stockage local ne peut pas être écrit
+    Quand je crée une échéance valide
+    Alors un message sobre indique que l'enregistrement n'a pas eu lieu
+    Et aucune échéance n'est listée dans la page de gestion ni affichée sur la grille
+    Et aucune trace technique ni aucun code d'erreur n'est affiché
+
+  Scénario: Après un échec d'écriture la saisie est conservée et la nouvelle tentative aboutit
+    Étant donné qu'une création vient d'échouer parce que le stockage local ne peut pas être écrit
+    Alors le formulaire est toujours ouvert et porte encore la description et la date saisies
+    Quand le stockage local redevient inscriptible et que je valide de nouveau
+    Alors l'échéance est enregistrée sans que j'aie eu à ressaisir la description ni la date
+
+  Scénario: Une suppression qui ne peut pas être écrite laisse l'échéance en place
+    Étant donné qu'une échéance est listée et que le stockage local ne peut pas être écrit
+    Quand je demande sa suppression et que je confirme
+    Alors un message sobre indique que la suppression n'a pas eu lieu
+    Et l'échéance est toujours listée, toujours sur la grille et toujours dans le stockage local

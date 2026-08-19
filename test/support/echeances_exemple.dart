@@ -1,18 +1,25 @@
-import '../../../core/time/clock.dart';
-import '../domain/echeance.dart';
+import 'package:concentration/core/time/clock.dart';
+import 'package:concentration/features/echeances/domain/echeance.dart';
 
-/// Données d'exemple injectées (T11).
+/// Données d'exemple — ⚖️ **DÉPLACÉES de `lib/` vers `test/` par US-01.2 (T11)**.
 ///
-/// ⚠️ **Remplacées par la persistance en US-01.2** — aucune écriture disque,
-/// aucun CRUD ici.
+/// 🔴 **Elles ne sont plus DANS LE PRODUIT, et c'est tout l'objet d'AC-13** :
+/// *« sur une installation neuve, la grille affiche l'état vide — ⛔ JAMAIS des
+/// échéances d'exemple »*. Tant qu'elles vivaient dans `lib/`, l'état vide
+/// spécifié par US-01.1 était **inatteignable**.
+///
+/// ⚠️ **Elles restent ici pour une raison précise** : le scénario *« aucune
+/// échéance d'exemple ne figure sur la grille »* a besoin de **NOMMER** une
+/// description du jeu d'exemple pour exiger `findsNothing`. Une assertion qui
+/// n'aurait aucun exemple à citer serait **vraie quoi qu'il arrive**.
 ///
 /// Couverture exigée par `MODELE_ECHEANCE.md` : **au moins une échéance par
 /// unité** (années, mois, semaines, jours, heures), **une échue**, **une à
 /// description vide** (I-3), et **deux de même date** (départage par `id`).
 /// ⛔ Le cas « 9 tuiles » et l'état vide relèvent des **tests** : l'application
 /// démarre sur un jeu **lisible**, pas sur un cas limite.
-class SampleEcheances {
-  const SampleEcheances._();
+class EcheancesExemple {
+  const EcheancesExemple._();
 
   static List<Echeance> depuis(Clock clock) {
     final maintenant = clock.now();

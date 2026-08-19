@@ -8,6 +8,7 @@ import 'package:concentration/features/hub/presentation/hub_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../support/magasin_temporaire.dart';
 import '../../../support/rendu_couleur.dart';
 
 /// AC-2 « Nominal » — les modules futurs sont **rendus** estompés.
@@ -21,21 +22,24 @@ import '../../../support/rendu_couleur.dart';
 void main() {
   final maintenant = DateTime(2026, 8, 1, 12);
   const registre = PracticeModuleRegistry();
+  late MagasinTemporaire harnais;
+
+  setUp(() => harnais = MagasinTemporaire.creer());
+  tearDown(() => harnais.nettoyer());
 
   Future<void> monter(WidgetTester tester) async {
+    // ⚖️ US-01.2 (T11) : le seam `echeances:` a disparu (ADR-011 §5).
+    final notifier = await notifierCharge(tester, harnais, [
+      Echeance(
+        id: 'a',
+        description: 'Rendez-vous',
+        dateEcheance: maintenant.add(const Duration(hours: 6)),
+      ),
+    ], clock: FakeClock(maintenant));
     await tester.pumpWidget(
       MaterialApp(
         theme: ConcentrationTheme.sombre,
-        home: HubPage(
-          echeances: [
-            Echeance(
-              id: 'a',
-              description: 'Rendez-vous',
-              dateEcheance: maintenant.add(const Duration(hours: 6)),
-            ),
-          ],
-          clock: FakeClock(maintenant),
-        ),
+        home: HubPage(notifier: notifier, clock: FakeClock(maintenant)),
       ),
     );
     await tester.pump();
