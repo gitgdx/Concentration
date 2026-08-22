@@ -24,6 +24,29 @@
 #     est DÉCLARÉ, daté et motivé dans le Story File. ⛔ NE PAS écrire ici ni ailleurs que ce point
 #     est conforme : le ré-appui n'est aucune des exceptions littérales du SC.
 #
+# ⚖️ UN AC AJOUTÉ PAR DÉCISION HUMAINE LE 2026-08-22 — AC-11, ses 4 scénarios sont EN FIN DE FICHIER.
+#    Objet : UN RETRAIT DONT L'ÉCRITURE ÉCHOUE. Lacune de SPÉCIFICATION nommée et MESURÉE par
+#    @Architect au gate `analyze` (§A-1 / R-6 du Story File), qui a REFUSÉ de l'écrire — c'était le
+#    bon geste : c'est une décision de valeur métier. Précédent identique : AC-17 d'US-01.2, né du
+#    même refus de la part de @UXDesigner (point U-4).
+#    Trois faits mesurés qui la rendaient invisible :
+#      - AC-17 d'US-01.2 énumère TROIS actes (création, édition, suppression) ; le retrait est un
+#        QUATRIÈME et n'y est pas nommé — seule sa règle générale le couvre : « ce qui est AFFICHÉ
+#        correspond TOUJOURS à ce qui est SUR LE DISQUE » ;
+#      - `ActeEcriture` ne porte que DEUX textes, alors que son propre motif exige « deux textes, pas
+#        un — l'utilisateur doit savoir CE QUI n'a pas eu lieu » (réutiliser un texte reproduirait le
+#        bloquant NB-B) ;
+#      - le hub n'a AUCUNE surface de message (`MessageValidation` n'est monté que par la page de
+#        gestion) ⇒ le geste le plus fréquent de cette US était le seul acte d'écriture du produit
+#        sans aucun moyen de dire qu'il a échoué.
+#    ⛔ LE TEXTE DU MESSAGE ET SA SURFACE NE SONT PAS ÉCRITS ICI : ils sont dus à @UXDesigner
+#      (entrées U-1 et U-2 du Story File), et `parallel_design` n'a pas commencé. Les scénarios
+#      assèrent donc QU'UN MESSAGE EST PRÉSENT et CE QU'IL NE FAIT PAS — ⛔ jamais une chaîne
+#      inventée, qui serait fausse dès que le vrai texte arrivera.
+#    ⚠️ ET CET AC ARRIVE APRÈS `EVT_STORY_READY` (émis le 2026-08-21) : ⛔ aucun événement du
+#      catalogue ne modélise un changement de périmètre, ⛔ aucun n'a été détourné. La décision vit
+#      dans le corpus durable (Métadonnées, AC-11, DoD). ➡️ /audit-methodo.
+#
 # ⚠️ CE FICHIER EST NORMATIF. En cas de divergence avec un résumé en prose (Story File, SCB,
 #    PROJECT_LOG), c'est LUI qui fait foi. Défaut réel d'US-01.1 : 13 scénarios et 13 lignes de
 #    résumé divergeaient par 5 titres.
@@ -306,3 +329,39 @@ Fonctionnalité: Gestes sur la tuile — révélation de la description et retra
     Quand je la retire par un double appui
     Alors l'état vide sobre est affiché
     Et aucune erreur technique n'est affichée
+
+  # ─── AC-11 — un retrait dont l'ÉCRITURE ÉCHOUE (⚖️ ajouté le 2026-08-22).
+  # Mode de défaillance INVERSE de celui d'AC-17 d'US-01.2 : là-bas une donnée saisie disparaissait,
+  # ici une tuile retirée REVIENT. La règle est la même : l'affiché ÉGALE le disque.
+  Scénario: Un retrait qui ne peut pas être écrit est annoncé et la tuile reste
+    Étant donné qu'une échéance est échue depuis deux jours
+    Et que le stockage local ne peut pas être écrit
+    Quand je double-appuie sur sa tuile
+    Alors un message indique que le retrait n'a pas eu lieu
+    Et la tuile est toujours présente sur la grille, à sa place dans le tri
+    Et aucune trace technique ni code d'erreur n'est affiché
+    Et l'application reste utilisable
+
+  Scénario: Un retrait qui ne peut pas être écrit ne joue aucune animation de disparition
+    Étant donné qu'une échéance est échue depuis deux jours
+    Et que le stockage local ne peut pas être écrit
+    Quand je double-appuie sur sa tuile
+    Alors aucune animation de disparition ne se joue
+    Et la tuile ne quitte à aucun moment la grille
+
+  Scénario: Une échue dont le retrait a échoué compte toujours dans la limite de neuf
+    Étant donné huit échéances actives et une échéance échue présentes sur la grille
+    Et que le stockage local ne peut pas être écrit
+    Quand je double-appuie sur la tuile de l'échéance échue
+    Et que je tente de créer une nouvelle échéance
+    Alors la création est refusée
+    Et le stockage local contient toujours neuf échéances
+
+  Scénario: Après un échec de retrait le geste réessayé aboutit
+    Étant donné qu'une échéance est échue depuis deux jours
+    Et que le stockage local ne peut pas être écrit
+    Et que j'ai double-appuyé sur sa tuile sans que le retrait ait lieu
+    Quand le stockage local redevient inscriptible
+    Et que je double-appuie de nouveau sur sa tuile
+    Alors la tuile est absente de la grille
+    Et l'échéance est conservée dans le stockage local
