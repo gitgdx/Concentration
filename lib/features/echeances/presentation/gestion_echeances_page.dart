@@ -4,6 +4,7 @@ import '../../../core/theme/concentration_tokens.dart';
 import '../../../core/theme/rgb_extension.dart';
 import '../../../core/time/clock.dart';
 import '../domain/echeance.dart';
+import '../domain/echeance_etat.dart';
 import 'echeances_notifier.dart';
 import 'widgets/confirmation_suppression.dart';
 import 'widgets/formulaire_echeance.dart';
@@ -57,16 +58,18 @@ class GestionEcheancesPage extends StatelessWidget {
           builder: (context, _) {
             final maintenant = clock.now();
             // AC-8 « Nominal » — actives par date CROISSANTE (RF-07)...
+            // ⛔ Prédicat UNIQUE (T1) : les deux comparaisons qui vivaient
+            // ici sont désormais les deux faces du MÊME exemplaire.
             final actives =
                 notifier.echeances
-                    .where((e) => e.dateEcheance.isAfter(maintenant))
+                    .where((e) => !estEchue(e, maintenant))
                     .toList()
                   ..sort();
             // ...et échues de la plus RÉCEMMENT échue à la plus ancienne : la
             // consultation d'un historique va du récent vers l'ancien.
             final echues =
                 notifier.echeances
-                    .where((e) => !e.dateEcheance.isAfter(maintenant))
+                    .where((e) => estEchue(e, maintenant))
                     .toList()
                   ..sort((a, b) => b.compareTo(a));
 

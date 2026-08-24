@@ -1,6 +1,7 @@
 import '../../../core/time/clock.dart';
 import 'date_civile.dart';
 import 'echeance.dart';
+import 'echeance_etat.dart';
 
 /// Le champ visé par un refus — il détermine **où le message s'ancre**
 /// (Design UX §14.2.1 : *« le message est ancré sur CE QUI A ÉCHOUÉ : un champ
@@ -84,7 +85,8 @@ class ValidationEcheance {
   /// §4.3) : la retirer rendrait le scénario *« je **tente** de modifier cette
   /// échéance »* **inobservable**. C'est ce refus qui est la réponse au geste.
   RefusValidation? refusEditionEchue(Echeance echeance) {
-    if (echeance.dateEcheance.isAfter(clock.now())) return null;
+    // ⛔ Prédicat UNIQUE (T1) — ⛔ pas une comparaison écrite ici.
+    if (!estEchue(echeance, clock.now())) return null;
     return const RefusValidation(
       ChampEcheance.formulaire,
       'Une échéance échue se consulte ou se supprime, elle ne se modifie pas.',
@@ -198,6 +200,10 @@ class ValidationEcheance {
 
     // AC-4 — futur STRICT : `T = 0` est REFUSÉ. Sans cela, une échéance
     // naîtrait « à zéro » et occuperait une des 9 places sans jamais servir.
+    // ⛔ CE N'EST PAS le prédicat « est échue » de `echeance_etat.dart`, malgré
+    // la forme identique : celui-ci refuse une SAISIE, l'autre qualifie une
+    // échéance EXISTANTE. Les fondre les rendrait solidaires, et déplacer la
+    // borne de l'un déplacerait l'autre sans qu'aucun AC ne le demande.
     if (!instant.isAfter(clock.now())) {
       return const ResultatValidation.refusee(
         RefusValidation(ChampEcheance.date, 'La date doit être dans le futur.'),
