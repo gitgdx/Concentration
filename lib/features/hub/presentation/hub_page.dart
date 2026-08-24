@@ -38,10 +38,17 @@ class HubPage extends StatelessWidget {
       // ⛔ La grille se reconstruit par NOTIFICATION, jamais par redémarrage
       // (AC-6 « Nominal », AC-13 « Limite »). `EcheancesGrid` est INCHANGÉE :
       // elle reçoit une `List<Echeance>` et n'a pas à connaître le dépôt.
+      //
+      // ⚖️ **`presentes` ET ⛔ PAS `echeances` depuis le 2026-08-24 (T4
+      // d'US-01.4)** : une échue **retirée** est **conservée** mais ⛔ **absente
+      // de la grille** *(AC-4, AC-5)*. **C-7** — c'est le **MÊME** getter que
+      // consomme la limite de 9, ⛔ **jamais un second filtre écrit ici** : deux
+      // filtres dériveraient, et le symptôme serait *la grille montre 8 tuiles
+      // et la création est refusée*.
       body: ListenableBuilder(
         listenable: notifier,
         builder: (context, _) =>
-            EcheancesGrid(echeances: notifier.echeances, clock: clock),
+            EcheancesGrid(echeances: notifier.presentes, clock: clock),
       ),
       bottomNavigationBar: _BarreModules(
         registre: registre,

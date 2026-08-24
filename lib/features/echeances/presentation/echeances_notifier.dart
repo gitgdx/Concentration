@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/time/clock.dart';
 import '../domain/echeance.dart';
+import '../domain/echeance_etat.dart';
 import '../domain/echeance_repository.dart';
 import '../domain/validation_echeance.dart';
 
@@ -40,7 +41,23 @@ class EcheancesNotifier extends ChangeNotifier {
   /// n'offre aucune garantie d'immuabilité, c'est à l'implémentation de la
   /// tenir — sans quoi I-1 perdrait son effet et l'ordre des tuiles cesserait
   /// d'être déterministe.
+  /// La liste **COMPLÈTE**, retirées comprises — **la page de GESTION en a
+  /// besoin** *(AC-7 d'US-01.4 : une échue retirée reste listée et supprimable)*.
+  /// ⛔ Ne pas la confondre avec [presentes].
   List<Echeance> get echeances => _echeances;
+
+  /// Les échéances **PRÉSENTES SUR LA GRILLE** — ⛔ les retirées en sont exclues.
+  ///
+  /// 🔴 **C-7 — UN SEUL FILTRE, UN SEUL DÉCOMPTE.** Ce getter est consommé **par
+  /// la grille** *(ce qui s'affiche)* **ET** par la **limite de 9**
+  /// *(`refusDeLimite`, plus bas)*. ⛔ **Deux filtres dériveraient**, et le
+  /// symptôme serait le pire possible : *la grille montre 8 tuiles et la
+  /// création est refusée*.
+  ///
+  /// ⛔ **Le filtre lui-même vit dans le DOMAINE**, en un seul exemplaire
+  /// *(`echeance_etat.dart`)* : ce getter ne fait que **l'exposer**, il ne le
+  /// **réécrit pas**.
+  List<Echeance> get presentes => presentesSurLaGrille(_echeances);
 
   Future<void> charger() async {
     _echeances = List<Echeance>.unmodifiable(await _depot.charger());
@@ -58,7 +75,10 @@ class EcheancesNotifier extends ChangeNotifier {
       description: description,
       date: date,
       heure: heure,
-      presentes: _echeances,
+      // ⛔ `presentes`, ⛔ JAMAIS `_echeances` (C-7) : une échéance RETIRÉE ne
+      // doit pas occuper une des 9 places — c'est le sens même d'AC-6 d'US-01.4,
+      // *« une échue retirée LIBÈRE une place »*.
+      presentes: presentes,
     );
     if (!resultat.estAcceptee) return resultat.refus;
     return _appliquer(await _depot.creer(resultat.echeance!));
@@ -77,7 +97,7 @@ class EcheancesNotifier extends ChangeNotifier {
       description: description,
       date: date,
       heure: heure,
-      presentes: _echeances,
+      presentes: presentes,
       original: original,
     );
     if (!resultat.estAcceptee) return resultat.refus;
@@ -86,6 +106,24 @@ class EcheancesNotifier extends ChangeNotifier {
 
   Future<RefusValidation?> supprimer(String id) async =>
       _appliquer(await _depot.supprimer(id));
+
+  /// **RETIRE de la grille** — l'échéance est **CONSERVÉE** *(AC-4, AC-5)*.
+  ///
+  /// 🔴 **Rend `null` en cas de SUCCÈS, sinon le REFUS À AFFICHER** — ⛔ jamais
+  /// `void`, ⛔ jamais un booléen nu, ⛔ **aucune mise à jour optimiste** : on
+  /// **recharge** après succès, exactement comme les quatre autres écritures.
+  /// C'est ce type de retour qui rend **AC-11 observable** *(« la tuile RESTE si
+  /// l'écriture échoue »)*.
+  ///
+  /// ⚠️ **`unawaited_futures` ne suffirait PAS** : mesuré par mutant dans les
+  /// deux sens, il est **AVEUGLE dans un appelant synchrone**. C'est le **type de
+  /// retour**, plus le test d'AC-11, qui ferme le résidu.
+  ///
+  /// ⚖️ **`String id` et ⛔ pas `Echeance`** — ce paramètre **s'aligne sur
+  /// [supprimer] juste au-dessus** et sur la signature du port, rectifiée par
+  /// ADR-012 §6. ⛔ **Deux formes d'argument pour le même geste dériveraient.**
+  Future<RefusValidation?> retirer(String id) async =>
+      _appliquer(await _depot.retirer(id));
 
   /// ⛔ **Rien n'est rechargé, donc rien n'est affiché, tant que l'écriture n'a
   /// pas RÉUSSI.** Le message d'échec est celui du **port**, en un seul

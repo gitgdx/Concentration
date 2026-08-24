@@ -24,14 +24,34 @@ import 'echeance.dart';
 /// ⛔ Ces textes ne contiennent **ni nom de fichier, ni chemin, ni exception,
 /// ni code d'erreur** (AC-17 « Nominal » : *« aucune trace technique »*), ⛔ ni
 /// promesse de réessai ou de brouillon — **il n'y en a aucun** (AC-17 « Limite »).
+/// ⚖️ **TROISIÈME VALEUR AJOUTÉE PAR US-01.4 (T4)** — le **retrait**.
+/// **Texte livré par le Design UX** *(entrée **U-1**,
+/// `docs/design/US-01.4-DESIGN-UX.md` §4.1)*, ⛔ **jamais inventé ici** :
+/// *inventer un libellé, c'est fabriquer une assertion de test que le vrai
+/// texte rendra fausse.*
+///
+/// 🔴 **POURQUOI UN TROISIÈME ACTE, et ⛔ pas `remplacer` détourné** :
+/// `remplacer` porte `enregistrement`, donc un retrait refusé annoncerait
+/// *« L'échéance n'a pas été enregistrée. »* — **reproduction EXACTE du bloquant
+/// `NB-B`**, ouvert pour ce défaut précis. Et `remplacer` porte en outre le
+/// contrat *« sans correspondance d'`id` ⇒ succès »*, qui rendrait un retrait
+/// **sans effet** indiscernable d'un succès.
 enum ActeEcriture {
   enregistrement("L'échéance n'a pas été enregistrée."),
-  suppression("La suppression n'a pas eu lieu.");
+  suppression("La suppression n'a pas eu lieu."),
+  retrait("L'échéance n'a pas été retirée de la grille.");
 
   const ActeEcriture(this.messageEchec);
 
   /// ⛔ **UN SEUL EXEMPLAIRE** — ⛔ jamais recopié dans un widget ni dans un
   /// test (deux copies d'une règle dérivent, vérifié trois fois sur ce corpus).
+  ///
+  /// ✅ **CONTRÔLE EXIGÉ PAR ADR-012 §6, et il porte DEUX propriétés, ⛔ pas
+  /// une** : les trois messages sont **deux à deux distincts** **ET** ⛔ **aucun
+  /// n'est SOUS-CHAÎNE d'un autre**. *« Distincts »* seul laisserait passer un
+  /// futur *« L'échéance n'a pas été enregistrée. »* / *« … enregistrée. »* — et
+  /// c'est **exactement la famille de `NB-B`** *(recommandation du Design UX
+  /// §4.1, suivie)*.
   final String messageEchec;
 }
 
@@ -64,7 +84,12 @@ class ResultatEcriture {
   String? get message => acteEchoue?.messageEchec;
 }
 
-/// Le port : quatre opérations, **aucune** ne rend `void`.
+/// Le port : **CINQ** opérations, **aucune** ne rend `void`.
+///
+/// ⚖️ **Ce commentaire disait « quatre » jusqu'au 2026-08-24** — il est **faux
+/// dès l'ajout de [retirer]**, et il est corrigé **dans le même commit**
+/// *(ADR-012 §6)*. ⛔ **Un décompte écrit à la main dans une doc est la classe de
+/// défaut nº 1 du projet** : il ne se met pas à jour tout seul.
 ///
 /// 🔴 **Règle métier d'AC-17, prise à la lettre** : *« ce qui est affiché
 /// correspond TOUJOURS à ce qui est sur le disque »* ⇒ ⛔ **l'état en mémoire
@@ -112,4 +137,36 @@ abstract interface class EcheanceRepository {
   Future<ResultatEcriture> remplacer(Echeance echeance);
 
   Future<ResultatEcriture> supprimer(String id);
+
+  /// **RETIRE DE LA GRILLE** l'échéance de `id` — elle est **CONSERVÉE**
+  /// *(RF-06, AC-4 et AC-5 d'US-01.4)*. ⛔ **Ce n'est PAS une suppression** : la
+  /// donnée reste sur le disque et l'échéance reste listée en gestion.
+  ///
+  /// 🔴 **POURQUOI `String id` ET ⛔ PAS `Echeance` — le motif est MESURÉ, pas
+  /// esthétique** *(ADR-012 §6, qui RECTIFIE la note du Story File)* :
+  /// * l'implémentation applique sa mutation à la liste **DU DOCUMENT**. Avec un
+  ///   `id`, le retrait s'écrit
+  ///   `[for (e in liste) if (e.id == id) e.avec(retiree: true) else e]` ⇒
+  ///   ⛔ **aucun autre champ ne peut être écrasé**, quelle que soit la
+  ///   **fraîcheur** de ce que détient l'appelant ;
+  /// * avec une **entité**, une copie **périmée** réécrirait la description et
+  ///   la date **de l'ancien état** — une **mise à jour perdue, SILENCIEUSE**,
+  ///   et ⛔ **qu'aucun AC de l'US ne fait rougir** ;
+  /// * **symétrie** : [supprimer] est déjà l'autre opération déclenchée depuis
+  ///   une tuile identifiée par son `id`.
+  ///
+  /// ⇒ cette signature **rend l'écrasement IMPOSSIBLE**, au lieu de l'interdire
+  /// par convention.
+  ///
+  /// ⚠️ **Contrat, dit au lieu d'être promis** *(leçon `NB-A`)* : **sans
+  /// correspondance d'`id`**, la liste est réécrite **inchangée** et le
+  /// résultat est un **SUCCÈS** — comme [remplacer], et pour la même raison
+  /// *(un retrait part toujours d'une tuile affichée, donc le chemin est
+  /// **inatteignable depuis l'IHM** et un scénario ne pourrait pas l'observer)*.
+  ///
+  /// ⚠️ **Retirer une échéance DÉJÀ retirée est un SUCCÈS sans effet** : la
+  /// mutation est **idempotente**. ⛔ Aucun AC ne demande de la refuser, et un
+  /// refus pour un état que l'IHM ne peut pas produire serait une **clause sans
+  /// surface**.
+  Future<ResultatEcriture> retirer(String id);
 }
