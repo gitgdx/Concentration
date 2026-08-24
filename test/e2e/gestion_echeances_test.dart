@@ -930,8 +930,18 @@ void main() {
   testWidgets("Un enregistrement illisible n'est ni réécrit ni supprimé", (
     tester,
   ) async {
+    // ⚖️ **ADAPTÉ le 2026-08-24 (T3 d'US-01.4)** : ce document était posé à
+    // `"schemaVersion":2` — **la version courante À L'ÉPOQUE**, écrite à la
+    // main. Depuis le bump à `v3`, un document `v2` est une version
+    // **ANTÉRIEURE** ⇒ l'ouverture le **migre et le réécrit légitimement**, et
+    // l'assertion « octet pour octet inchangé » tombait pour une raison qui
+    // ⛔ **n'a rien à voir avec ce que ce scénario observe**.
+    // ⇒ la version est désormais **LUE** dans la constante, donc le document est
+    // **à la version courante** et l'assertion retrouve son objet EXACT :
+    // *un enregistrement illisible n'est ni réécrit ni supprimé*.
+    // ⛔ **L'assertion n'est PAS affaiblie** — elle porte toujours sur les octets.
     const document =
-        '{"schemaVersion":2,"echeances":['
+        '{"schemaVersion":$versionCourante,"echeances":['
         '{"id":"","description":"illisible","dateEcheance":"2027-04-01T09:00"}]}';
     harnais.poser(document);
     await ouvrirApplication(tester);
@@ -985,7 +995,7 @@ void main() {
       await ouvrirApplication(tester);
 
       expect(persistees(), hasLength(3));
-      expect(harnais.octets(), contains('"schemaVersion":2'));
+      expect(harnais.octets(), contains('"schemaVersion":$versionCourante'));
       // La migration s'exécute UNE SEULE FOIS : à la relecture, le document
       // porte déjà la version courante, donc plus rien à migrer.
       final apresPremiere = harnais.octets();
@@ -1036,7 +1046,7 @@ void main() {
     harnais.poser(v1);
     // La migration MONTANTE a été exécutée : l'application s'ouvre.
     await ouvrirApplication(tester);
-    expect(lireVersion(codec.lireRacine(harnais.octets()!)!), 2);
+    expect(lireVersion(codec.lireRacine(harnais.octets()!)!), versionCourante);
 
     // La migration DESCENDANTE est exécutée, avec le code de production.
     final redescendu = migrer(codec.lireRacine(harnais.octets()!)!, cible: 1);
