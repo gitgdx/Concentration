@@ -42,3 +42,20 @@ import 'echeance.dart';
 /// *(ADR-012 §Contexte 4)*.
 bool estEchue(Echeance echeance, DateTime instant) =>
     !echeance.dateEcheance.isAfter(instant);
+
+/// Les échéances **PRÉSENTES SUR LA GRILLE** — `ACTIVE + ÉCHUE`,
+/// ⛔ **`ÉCHUE RETIRÉE` exclue** *(vocabulaire d'état du §AC d'US-01.4)*.
+///
+/// 🔴 **C-7 — UN SEUL FILTRE, UN SEUL DÉCOMPTE.** Ce filtre est consommé **à la
+/// fois** par la grille *(ce qui s'affiche)* **et** par `refusDeLimite` *(la
+/// limite de 9)*. ⛔ **Deux filtres dériveraient**, et le symptôme serait le
+/// pire possible : *la grille montre 8 tuiles et la création est refusée*.
+///
+/// ⚠️ **Il ne dépend PAS de l'horloge, et c'est voulu** : une échue **non
+/// retirée** est **présente**. Le seul motif d'absence est le **retrait**, qui
+/// est un **geste**, ⛔ jamais un effet du temps *(AC-5 : « aucune tuile ne
+/// disparaît sans geste »)*. C'est aussi pourquoi cette fonction ne prend
+/// **aucun instant** : lui en passer un serait suggérer que le temps peut
+/// retirer une tuile.
+List<Echeance> presentesSurLaGrille(List<Echeance> echeances) =>
+    List<Echeance>.unmodifiable(echeances.where((e) => !e.retiree));

@@ -145,24 +145,56 @@ class EcheanceDocumentCodec {
     if (description is! String) return null;
     // Passe par la frontière de l'entité (I-6) : c'est ici que `depuisDonnee`
     // gagne son PREMIER APPELANT RÉEL (finding N-6 d'US-01.1).
+    //
+    // 🔴 **F-1 — `retiree` est TRANSPORTÉ BRUT, ⛔ jamais validé ici.** Le refus
+    // d'une valeur hors domaine vit à `Echeance.depuisDonnee`, **en un seul
+    // exemplaire** : un second contrôle ici serait **non assertable**, la
+    // première barrière rendant la seconde inatteignable.
+    //
+    // ⛔ **`containsKey`, ⛔ JAMAIS `ligne['retiree'] != null`** (D-4) : un
+    // `retiree: null` est une valeur **PRÉSENTE et non booléenne**, donc un
+    // **RÉSIDU** — le confondre avec l'absence afficherait comme présente une
+    // tuile dont l'état n'a pas pu être lu.
     return Echeance.depuisDonnee(<String, Object?>{
       'id': id,
       'description': description,
       'dateEcheance': instant,
+      if (ligne.containsKey('retiree')) 'retiree': ligne['retiree'],
     });
   }
 
+  /// 🔴 **LE POINT EXACT OÙ UN BUG SE CACHE, et il est MESURÉ** *(ADR-012 §2.3)*.
+  ///
+  /// Les clés d'[origine] sont copiées **AVANT** les clés explicites — c'est ce
+  /// qui donne les deux garanties d'[encoder] *(clés inconnues préservées, et
+  /// **position** de première insertion conservée, donc **une entrée inchangée
+  /// se réécrit à l'identique**)*. ⛔ **Mais cela rend un
+  /// `if (echeance.retiree) 'retiree': true` SEUL INSUFFISANT** : un
+  /// `retiree: true` **d'origine SURVIVRAIT** à une entité non retirée, et la
+  /// tuile resterait absente de la grille **pour toujours**.
+  ///
+  /// ⇒ **le RETRAIT EXPLICITE de la clé est la décision**, ⛔ pas un détail
+  /// d'implémentation. ⚠️ Et ⛔ **aucun test générique ne le verrait** : les deux
+  /// formes sont identiques sur un document qui n'a jamais porté la clé.
+  ///
+  /// **F-3 / D-5** : quand la clé est émise **et** qu'elle existait déjà, elle
+  /// **garde sa position** — le littéral n'insère pas deux fois.
   Map<String, Object?> _encoderEntree(
     Echeance echeance,
     Map<Object?, Object?>? origine,
   ) {
-    return <String, Object?>{
+    final entree = <String, Object?>{
       if (origine != null)
         for (final cle in origine.keys) '$cle': origine[cle],
       'id': echeance.id,
       'description': echeance.description,
       // AC-14 : date-heure CIVILE, ⛔ ni `Z`, ni décalage, ni secondes.
       'dateEcheance': formatCivil(echeance.dateEcheance),
+      // ⛔ Émise **si et seulement si** `true` : `false` est la forme licite que
+      // le produit **n'écrit jamais** (ADR-012 §2).
+      if (echeance.retiree) 'retiree': true,
     };
+    if (!echeance.retiree) entree.remove('retiree');
+    return entree;
   }
 }
