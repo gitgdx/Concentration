@@ -18,6 +18,21 @@ class EcheanceTile extends StatelessWidget {
     this.gradient = const TemporalGradient(),
   });
 
+  /// 🔴 **NB-7 (T7) — LA BOÎTE QUI PORTE LE FOND SE DÉSIGNE PAR SON IDENTITÉ,
+  /// ⛔ JAMAIS PAR SA POSITION.**
+  ///
+  /// **Défaut DÉMONTRÉ, pas supposé** *(sonde d'US-01.2)* : quand **deux**
+  /// boîtes décorées se retrouvent sous la tuile, un sélecteur en `.first`
+  /// désigne l'**extérieure** ⇒ la tuile pouvait rendre **toujours orange** avec
+  /// **112 tests VERTS**. La clé rend la cible **non ambiguë**, et
+  /// ⛔ **l'assertion d'unicité reste** — sur la clé, désormais.
+  ///
+  /// ⚠️ **Cette constante est dans le produit et consommée par les tests, et
+  /// c'est ASSUMÉ** : une clé est une propriété de l'**arbre de widgets**, et
+  /// l'alternative — un nom de type ou une position — est **précisément** ce qui
+  /// a produit le faux vert.
+  static const Key cleFond = Key('echeance-tile-fond');
+
   final RemainingTime temps;
   final String description;
   final TemporalGradient gradient;
@@ -33,6 +48,7 @@ class EcheanceTile extends StatelessWidget {
       label: temps.libelleAccessibilite,
       child: ExcludeSemantics(
         child: DecoratedBox(
+          key: cleFond,
           decoration: BoxDecoration(
             color: fond.couleur,
             borderRadius: BorderRadius.circular(16),
