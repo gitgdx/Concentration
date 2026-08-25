@@ -86,4 +86,30 @@ class ConcentrationTokens {
 
   /// Période de rafraîchissement (RF-05 : au moins une fois par minute).
   static const Duration periodeRafraichissement = Duration(seconds: 30);
+
+  // ─── Tokens AJOUTÉS par US-01.4 (Design UX §7.1) — deux, pas un de plus.
+
+  /// Durée pendant laquelle la description remplace le nombre (AC-2).
+  ///
+  /// ⛔ **Cette valeur ne s'écrit NULLE PART ailleurs** : ni dans un widget,
+  /// ni dans un `hint` *(« pendant 3 secondes » y serait une **copie** de ce
+  /// token — classe de défaut nº 1 — et il faudrait gérer le pluriel)*, ni
+  /// dans une avance de test *(elles se **calculent** depuis ce token et
+  /// depuis [periodeRafraichissement])*.
+  ///
+  /// ⚠️ **Elle est STRICTEMENT INFÉRIEURE à [periodeRafraichissement], et
+  /// c'est ce qui rend AC-2 « Limite » observable** *(un rafraîchissement peut
+  /// tomber PENDANT la fenêtre)*. La garde est **assertée par un test**,
+  /// ⛔ pas seulement écrite ici.
+  static const Duration fenetreRevelation = Duration(seconds: 3);
+
+  /// Plancher de taille de la **description révélée** (Design UX §7.2).
+  ///
+  /// 🔴 **La réduction porte sur la taille de DESIGN, ⛔ JAMAIS sur le facteur
+  /// d'échelle de l'utilisateur** : le plancher **effectif** est
+  /// `11 × échelle`, soit **22 à ×2,0**. Un ajustement qui « ferait rentrer »
+  /// le texte en annulant le réglage système reprendrait d'une main ce que
+  /// l'accessibilité donne de l'autre *(SC 1.4.4)* ⇒ **ratio de réduction
+  /// maximal `11/13`, et rien de plus.**
+  static const double plancherDescriptionRevelee = 11;
 }

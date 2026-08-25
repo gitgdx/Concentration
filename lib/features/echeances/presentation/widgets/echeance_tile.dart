@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/color/temporal_gradient.dart';
 import '../../../../core/theme/concentration_theme.dart';
+import '../../../../core/theme/concentration_tokens.dart';
 import '../../../../core/theme/rgb_extension.dart';
 import '../../domain/remaining_time.dart';
 
@@ -16,6 +17,7 @@ class EcheanceTile extends StatelessWidget {
     required this.description,
     required this.intention,
     super.key,
+    this.revele = false,
     this.gradient = const TemporalGradient(),
   });
 
@@ -67,6 +69,18 @@ class EcheanceTile extends StatelessWidget {
   /// muette** que le pattern nº 13 interdit.
   final VoidCallback? intention;
 
+  /// La description prend-elle **la place du nombre** ? (AC-2, T9)
+  ///
+  /// ⛔ **L'état ne vit PAS ici** : il vit dans `_EcheancesGridState`, en UN
+  /// exemplaire nullable — l'exclusivité du verdict nº 7 est **structurelle**
+  /// (ADR-013 §1). La tuile reste une **fonction pure de ses entrées**, ce qui
+  /// est la condition pour que la grille la reconstruise à chaque tic sans
+  /// rien lui faire perdre.
+  ///
+  /// ⛔ **Par défaut `false`** : une tuile construite sans cet argument rend
+  /// **exactement** ce qu'elle rendait avant T9.
+  final bool revele;
+
   final TemporalGradient gradient;
 
   @override
@@ -75,6 +89,13 @@ class EcheanceTile extends StatelessWidget {
     // foregroundFor ÉCHOUE BRUYAMMENT si aucun token n'atteint le seuil : c'est
     // voulu (ADR-003 §5), un dégradé illisible est un défaut de tokens.
     final avant = gradient.foregroundFor(temps.progression).couleur;
+
+    // ⛔ La révélation ne concerne QUE la tuile `ACTIVE` qui a une
+    // description : une `ÉCHUE` affiche déjà la sienne en permanence (verdict
+    // clarify nº 1) et une tuile sans description n'a rien à révéler (AC-3).
+    // ⇒ un `revele: true` égaré ne peut RIEN changer sur ces deux régimes.
+    final revelationVisible =
+        revele && !temps.estEchue && description.isNotEmpty;
 
     final rendu = DecoratedBox(
       key: cleFond,
@@ -100,28 +121,43 @@ class EcheanceTile extends StatelessWidget {
             // AC-3 « Limite » exige que 9 tuiles restent embrassables d'un
             // regard, donc sans débordement, quelle que soit la taille de
             // cellule. Un `Text` nu débordait à 9 tuiles — mesuré par T12a.
-            Expanded(
-              child: FittedBox(
-                // ⛔ `BoxFit.contain` est INTERDIT (§G-7) : il AGRANDIT
-                // jusqu'à remplir, donc la taille du glyphe dépendrait du
-                // NOMBRE DE CHIFFRES — au rafraîchissement, `10 → 9`
-                // doublerait le chiffre sous les yeux du pratiquant, et
-                // 9 tuiles porteraient 9 tailles différentes.
-                // ✅ La taille s'augmente dans le TOKEN ; `scaleDown` reste
-                // le FILET qui a fermé le débordement à 9 tuiles.
-                fit: BoxFit.scaleDown,
-                alignment: temps.estEchue
-                    ? Alignment.topLeft
-                    : Alignment.center,
-                child: Text(
-                  '${temps.nombreAffiche}',
-                  style: ConcentrationTheme.styleNombrePour(
-                    estEchue: temps.estEchue,
-                  ).copyWith(color: avant),
+            if (revelationVisible)
+              // MÊME endroit, MÊME boîte — et ⛔ le nombre est ABSENT (Design
+              // UX §3.2). ⛔ AUCUNE animation, ni à l'apparition ni à
+              // l'extinction : le verdict clarify nº 1 a été pris POUR
+              // L'IMMÉDIATETÉ, une transition la rendrait différée.
+              Expanded(
+                child: _DescriptionRevelee(texte: description, couleur: avant),
+              )
+            else
+              Expanded(
+                child: FittedBox(
+                  // ⛔ `BoxFit.contain` est INTERDIT (§G-7) : il AGRANDIT
+                  // jusqu'à remplir, donc la taille du glyphe dépendrait du
+                  // NOMBRE DE CHIFFRES — au rafraîchissement, `10 → 9`
+                  // doublerait le chiffre sous les yeux du pratiquant, et
+                  // 9 tuiles porteraient 9 tailles différentes.
+                  // ✅ La taille s'augmente dans le TOKEN ; `scaleDown` reste
+                  // le FILET qui a fermé le débordement à 9 tuiles.
+                  fit: BoxFit.scaleDown,
+                  alignment: temps.estEchue
+                      ? Alignment.topLeft
+                      : Alignment.center,
+                  child: Text(
+                    '${temps.nombreAffiche}',
+                    style: ConcentrationTheme.styleNombrePour(
+                      estEchue: temps.estEchue,
+                    ).copyWith(color: avant),
+                  ),
                 ),
               ),
-            ),
-            if (description.isNotEmpty)
+            // ⛔ La description n'est JAMAIS rendue deux fois : révélée, elle
+            // vit dans la boîte du nombre et nulle part ailleurs.
+            // ⚠️ Le masquage de cette description AU REPOS sur une `ACTIVE`
+            // (AC-1 « Erreur ») arrive avec **T13**, dans le MÊME commit que
+            // l'étape Gherkin d'US-01.1 et son assertion appariée — ⛔ le
+            // dissocier rendrait le corpus faux à ce commit.
+            if (description.isNotEmpty && !revelationVisible)
               Text(
                 description,
                 maxLines: 2,
@@ -223,4 +259,81 @@ class EcheanceTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// La **description révélée** — à la place du nombre, dans la MÊME boîte
+/// (Design UX §3.2), **réduite jusqu'à un plancher**, puis **ellipsée**
+/// (§7.2).
+///
+/// 🔴 **POURQUOI CE N'EST PAS UN `FittedBox`, ni un `maxLines` écrit à la
+/// main.** Un `FittedBox(scaleDown)` réduirait **sans plancher** et
+/// **annulerait le facteur d'échelle de l'utilisateur** — le produit
+/// reprendrait d'une main ce que l'accessibilité donne de l'autre
+/// *(SC 1.4.4)*. Un `maxLines` en dur serait un **nombre dérivé écrit à la
+/// main**, faux dès que la tuile change de taille.
+/// ⇒ **la réduction porte sur la taille de DESIGN** *(deux valeurs, toutes
+/// deux nommées : `styleDescription` puis `plancherDescriptionRevelee`)* et le
+/// **nombre de lignes se MESURE** sur le paragraphe lui-même.
+///
+/// ⛔ **`maxLines: 2` est INTERDIT ici** : c'est la valeur du rendu **de
+/// repos** d'US-01.1, et la révélation occupe **toute** la boîte de contenu.
+class _DescriptionRevelee extends StatelessWidget {
+  const _DescriptionRevelee({required this.texte, required this.couleur});
+
+  final String texte;
+  final Color couleur;
+
+  @override
+  Widget build(BuildContext context) {
+    // ⛔ L'échelle de l'utilisateur est TRANSMISE au mesureur, jamais
+    // neutralisée : sans elle, le texte mesuré ne serait pas celui qui sera
+    // peint, et le plancher effectif ne serait plus `11 × échelle`.
+    final echelle = MediaQuery.textScalerOf(context);
+    final base = ConcentrationTheme.styleDescription.copyWith(color: couleur);
+
+    return LayoutBuilder(
+      builder: (context, contraintes) {
+        var style = base;
+        var hauteurDeLigne = 0.0;
+        for (final taille in <double>[
+          base.fontSize!,
+          ConcentrationTokens.plancherDescriptionRevelee,
+        ]) {
+          style = base.copyWith(fontSize: taille);
+          final peintre = TextPainter(
+            text: TextSpan(text: texte, style: style),
+            textAlign: TextAlign.center,
+            textDirection: Directionality.of(context),
+            textScaler: echelle,
+          )..layout(maxWidth: contraintes.maxWidth);
+          final tientEntierement = peintre.height <= contraintes.maxHeight;
+          final lignes = peintre.computeLineMetrics();
+          hauteurDeLigne = lignes.isEmpty ? 0 : lignes.first.height;
+          peintre.dispose();
+          if (tientEntierement) return _texte(style, null);
+        }
+
+        // Même au plancher le texte dépasse : on garde le plancher et on
+        // ellipse — bornés par le nombre de lignes qui TIENNENT réellement.
+        final possibles = hauteurDeLigne <= 0
+            ? 1
+            : (contraintes.maxHeight / hauteurDeLigne).floor();
+        return _texte(style, possibles < 1 ? 1 : possibles);
+      },
+    );
+  }
+
+  /// ⛔ `Center` **et** `TextAlign.center` : les DEUX, un par axe — le
+  /// premier place le BLOC de texte dans la boîte, le second aligne ses
+  /// LIGNES entre elles. En retirer un laisse la description en haut, ou ses
+  /// lignes à gauche (même famille de défaut que le centrage du nombre, T6).
+  Widget _texte(TextStyle style, int? maxLignes) => Center(
+    child: Text(
+      texte,
+      textAlign: TextAlign.center,
+      maxLines: maxLignes,
+      overflow: TextOverflow.ellipsis,
+      style: style,
+    ),
+  );
 }

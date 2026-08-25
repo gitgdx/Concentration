@@ -1,5 +1,6 @@
 import 'package:concentration/core/color/temporal_gradient.dart';
 import 'package:concentration/core/theme/concentration_theme.dart';
+import 'package:concentration/core/theme/concentration_tokens.dart';
 import 'package:concentration/core/theme/rgb_extension.dart';
 import 'package:concentration/features/echeances/domain/remaining_time.dart';
 import 'package:concentration/features/echeances/domain/time_unit.dart';
@@ -841,5 +842,226 @@ void main() {
         );
       }
     });
+  });
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔴 T9 — LE RENDU DE LA RÉVÉLATION : même endroit, même boîte, ⛔ le
+  // nombre est ABSENT (AC-2, Design UX §3.2 et §7.2).
+  // ═══════════════════════════════════════════════════════════════════════
+  group('T9 — la description révélée', () {
+    Future<void> monter(
+      WidgetTester tester, {
+      required bool revele,
+      bool estEchue = false,
+      String description = 'revue annuelle',
+      double cote = 220,
+      double echelle = 1,
+    }) => tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(echelle)),
+        child: hote(
+          EcheanceTile(
+            temps: temps(
+              0.5,
+              nombre: estEchue ? 0 : 6,
+              estEchue: estEchue,
+              suffixeLibelle: description.isEmpty ? '' : ', $description',
+            ),
+            description: description,
+            revele: revele,
+            intention: () {},
+          ),
+          cote: cote,
+        ),
+      ),
+    );
+
+    double tailleDe(WidgetTester tester, String texte) =>
+        tester.widget<Text>(find.text(texte)).style!.fontSize!;
+
+    testWidgets(
+      '🔴 révélée — le nombre est ABSENT et la description occupe SA boîte, '
+      'centrée sur les DEUX axes',
+      (tester) async {
+        await monter(tester, revele: false);
+        final auRepos = tester.getRect(find.text('revue annuelle')).center;
+        expect(find.text('6'), findsOneWidget);
+
+        await monter(tester, revele: true);
+        expect(
+          find.text('6'),
+          findsNothing,
+          reason: 'la description prend LA PLACE du nombre (§3.2)',
+        );
+        // ⛔ Et elle n'est rendue qu'UNE fois : la description de repos ne
+        // reste pas en bas pendant que la révélation est affichée.
+        expect(find.text('revue annuelle'), findsOneWidget);
+
+        final revelee = tester.getRect(find.text('revue annuelle')).center;
+        final tuile = tester.getRect(find.byType(EcheanceTile));
+        expect(revelee.dx, closeTo(tuile.center.dx, 1));
+        expect(revelee.dy, closeTo(tuile.center.dy, 1));
+        // Assertion de GRANDEUR — c'est elle qui prouve le DÉPLACEMENT : au
+        // repos la description est en BAS de la tuile.
+        expect(
+          revelee.dy,
+          lessThan(auRepos.dy),
+          reason:
+              'mesuré : révélée $revelee, au repos $auRepos — même boîte que '
+              'le nombre, ⛔ pas la ligne du bas',
+        );
+      },
+    );
+
+    testWidgets(
+      '⛔ la description révélée n’est PAS bornée à `maxLines: 2` — c’est la '
+      'valeur du rendu DE REPOS d’US-01.1',
+      (tester) async {
+        await monter(tester, revele: false);
+        expect(
+          tester.widget<Text>(find.text('revue annuelle')).maxLines,
+          2,
+          reason: 'contrôle positif : le rendu de repos, lui, borne à 2',
+        );
+
+        await monter(tester, revele: true);
+        expect(
+          tester.widget<Text>(find.text('revue annuelle')).maxLines,
+          isNot(2),
+          reason: 'la révélation occupe TOUTE la boîte de contenu (§3.2)',
+        );
+      },
+    );
+
+    testWidgets(
+      '⛔ AUCUNE animation sur la révélation — le verdict clarify nº 1 a été '
+      'pris POUR L’IMMÉDIATETÉ',
+      (tester) async {
+        await monter(tester, revele: true);
+        for (final animation in [
+          find.byType(AnimatedSwitcher),
+          find.byType(FadeTransition),
+          find.byType(AnimatedOpacity),
+          find.byType(AnimatedCrossFade),
+        ]) {
+          expect(
+            find.descendant(of: find.byType(EcheanceTile), matching: animation),
+            findsNothing,
+            reason: 'une transition rendrait la révélation DIFFÉRÉE',
+          );
+        }
+      },
+    );
+
+    testWidgets(
+      '🔴 §7.2 — la description révélée se RÉDUIT jusqu’au PLANCHER, jamais '
+      'en dessous, puis ELLIPSE',
+      (tester) async {
+        const longue =
+            'préparation du projet de rénovation complète de la maison de '
+            'famille avant la fin de la garantie décennale';
+
+        // Une grande tuile : le texte tient à la taille de design.
+        await monter(tester, revele: true, cote: 400);
+        final grande = tailleDe(tester, 'revue annuelle');
+        expect(grande, ConcentrationTheme.styleDescription.fontSize);
+
+        // Une petite tuile avec un texte long : on descend AU PLANCHER, et on
+        // s'y arrête — ⛔ jamais en dessous, sinon le réglage d'échelle de
+        // l'utilisateur serait annulé par le produit (SC 1.4.4).
+        await monter(tester, revele: true, description: longue, cote: 120);
+        final petite = tailleDe(tester, longue);
+        expect(petite, ConcentrationTokens.plancherDescriptionRevelee);
+        // La RELATION, pas les chiffres : le plancher est strictement plus
+        // petit que la taille de design, sinon « réduire » n'aurait aucun sens.
+        expect(petite, lessThan(grande));
+        // …et le texte est ELLIPSÉ, borné par les lignes qui TIENNENT.
+        final rendu = tester.widget<Text>(find.text(longue));
+        expect(rendu.overflow, TextOverflow.ellipsis);
+        expect(rendu.maxLines, isNotNull);
+        expect(rendu.maxLines, greaterThanOrEqualTo(1));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      '🔴 SC 1.4.4 — la réduction porte sur la taille de DESIGN, ⛔ JAMAIS sur '
+      'le facteur d’échelle : à ×2,0 le texte rendu DOUBLE',
+      (tester) async {
+        // ⚠️ La tuile est GRANDE exprès : aux deux échelles la taille de
+        // design retenue est la MÊME, sinon la comparaison mesurerait la
+        // réduction et non l'échelle.
+        await monter(tester, revele: true, cote: 400);
+        final hauteurX1 = tester.getRect(find.text('revue annuelle')).height;
+        final tailleX1 = tailleDe(tester, 'revue annuelle');
+
+        await monter(tester, revele: true, cote: 400, echelle: 2);
+        final hauteurX2 = tester.getRect(find.text('revue annuelle')).height;
+
+        expect(
+          tailleDe(tester, 'revue annuelle'),
+          tailleX1,
+          reason: 'même taille de DESIGN aux deux échelles',
+        );
+        expect(
+          hauteurX2,
+          greaterThan(hauteurX1 * 1.9),
+          reason:
+              'le texte PEINT doit suivre le réglage système — mesuré : '
+              '×1,0 → $hauteurX1, ×2,0 → $hauteurX2',
+        );
+      },
+    );
+
+    testWidgets(
+      '🔴 la MESURE prend l’échelle de l’utilisateur en compte — sinon la '
+      'réduction se décide sur un texte qui n’est PAS celui qui sera peint',
+      (tester) async {
+        // 🔴 CE TEST EXISTE PARCE QU’UN MUTANT A SURVÉCU : neutraliser
+        // l’échelle DANS LE MESUREUR (`TextScaler.noScaling`) ne faisait
+        // rougir AUCUN test, alors que le défaut est réel — la taille de
+        // design serait choisie sur un texte deux fois plus petit que le
+        // texte rendu, donc conservée à 13 là où elle doit descendre.
+        // ⚠️ Le cas doit être une PETITE tuile : dans une grande, les deux
+        // échelles retiennent la MÊME taille et le mutant est invisible.
+        await monter(tester, revele: true, cote: 90);
+        final aX1 = tailleDe(tester, 'revue annuelle');
+        expect(
+          aX1,
+          ConcentrationTheme.styleDescription.fontSize,
+          reason:
+              'contrôle : à ×1,0 le texte TIENT dans cette tuile, donc la '
+              'taille de design est CONSERVÉE — sans quoi le test ci-dessous '
+              'serait vrai pour la mauvaise raison',
+        );
+
+        await monter(tester, revele: true, cote: 90, echelle: 2);
+        expect(
+          tailleDe(tester, 'revue annuelle'),
+          ConcentrationTokens.plancherDescriptionRevelee,
+          reason:
+              'à ×2,0 le même texte NE TIENT PLUS : la réduction doit se '
+              'déclencher, et elle ne peut le faire que si la mesure connaît '
+              'l’échelle',
+        );
+      },
+    );
+
+    testWidgets(
+      '🔴 CONTRÔLE NÉGATIF — `revele: true` ne change RIEN sur une ÉCHUE ni '
+      'sur une ACTIVE SANS description',
+      (tester) async {
+        // Une échue affiche déjà sa description EN PERMANENCE (verdict
+        // clarify nº 1) : son « 0 » ne disparaît pas.
+        await monter(tester, revele: true, estEchue: true);
+        expect(find.text('0'), findsOneWidget);
+        expect(find.text('revue annuelle'), findsOneWidget);
+
+        // Une tuile sans description n'a RIEN à révéler (AC-3) : ⛔ aucun
+        // texte inventé, aucun tiret, aucune date.
+        await monter(tester, revele: true, description: '');
+        expect(find.text('6'), findsOneWidget);
+        expect(find.byType(Text), findsOneWidget);
+      },
+    );
   });
 }

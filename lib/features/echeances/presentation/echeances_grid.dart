@@ -35,6 +35,22 @@ class EcheancesGrid extends StatefulWidget {
 class _EcheancesGridState extends State<EcheancesGrid> {
   Timer? _minuterie;
 
+  /// 🔴 **L'EXCLUSIVITÉ DE LA RÉVÉLATION EST STRUCTURELLE** (C-1) : un champ
+  /// nullable **ne peut pas** contenir deux `id`, donc *« appuyer une seconde
+  /// tuile referme la première »* est vrai **par CONSTRUCTION** — ⛔ pas
+  /// surveillé par une règle qu'on pourrait oublier.
+  String? _idRevele;
+
+  /// ⛔ **UN SEUL minuteur de révélation, JAMAIS un par tuile** (C-1, mutant
+  /// **M-9**) : un minuteur par tuile ferait de l'exclusivité une propriété
+  /// *surveillée* et ferait tourner jusqu'à 9 minuteurs concurrents.
+  ///
+  /// ⛔ **Et il est INDÉPENDANT de [_minuterie]** (C-2) : le `setState(() {})`
+  /// périodique reconstruit la grille et **ne touche ni l'un ni l'autre** ⇒ la
+  /// fenêtre n'est **ni coupée ni prolongée** *(AC-2 « Limite », mutant
+  /// **M-10**)*.
+  Timer? _minuterieRevelation;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +63,43 @@ class _EcheancesGridState extends State<EcheancesGrid> {
   @override
   void dispose() {
     _minuterie?.cancel();
+    _minuterieRevelation?.cancel();
     super.dispose();
+  }
+
+  /// Révèle la description de `id` pour [ConcentrationTokens.fenetreRevelation].
+  ///
+  /// **Un nouvel appui REDÉMARRE la fenêtre** — le minuteur précédent est
+  /// annulé, ⛔ jamais laissé courir : sinon la description d'une tuile
+  /// pourrait se refermer à cause de l'appui fait sur une AUTRE.
+  void _reveler(String id) {
+    _minuterieRevelation?.cancel();
+    setState(() => _idRevele = id);
+    _minuterieRevelation = Timer(
+      ConcentrationTokens.fenetreRevelation,
+      () => setState(() => _idRevele = null),
+    );
+  }
+
+  Widget _tuile(Echeance e) {
+    // ⛔ Le temps est calculé UNE fois par tuile et par construction : la
+    // tuile est une fonction PURE de ses entrées, et c'est ce qui permet à la
+    // grille de la reconstruire à chaque tic sans rien lui faire perdre.
+    final temps = widget.calculateur.calculer(clock: widget.clock, echeance: e);
+    return EcheanceTile(
+      key: ValueKey(e.id),
+      temps: temps,
+      description: e.description,
+      // ⛔ Le nombre revenu à l'expiration est celui du CALCUL COURANT, pas
+      // celui de l'instant de l'appui : rien n'est mémorisé, la révélation
+      // n'est qu'un aiguillage de RENDU.
+      revele: _idRevele == e.id,
+      // ⛔ Une ÉCHUE n'a RIEN à activer à ce commit : son intention est le
+      // RETRAIT, qui n'existe pas encore (le rappel arrive avec T10/T19).
+      // Lui donner l'enveloppe sans rappel serait exactement J-1, et lui
+      // donner un rappel vide serait la barrière muette (M-15).
+      intention: temps.estEchue ? null : () => _reveler(e.id),
+    );
   }
 
   @override
@@ -86,24 +138,7 @@ class _EcheancesGridState extends State<EcheancesGrid> {
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  for (final e in bornees)
-                    EcheanceTile(
-                      key: ValueKey(e.id),
-                      description: e.description,
-                      // ⛔ AUCUNE intention à ce commit (T8) : l'enveloppe
-                      // interactive de la tuile est CONDITIONNELLE, et une
-                      // enveloppe sans rappel serait le mensonge d'interface
-                      // qu'AC-9 « Erreur » interdit (ADR-014 §A.1). La
-                      // révélation arrive en T9, le retrait avec le rappel.
-                      // ⛔ Un rappel VIDE serait pire (M-15) : barrière muette.
-                      intention: null,
-                      temps: widget.calculateur.calculer(
-                        clock: widget.clock,
-                        echeance: e,
-                      ),
-                    ),
-                ],
+                children: [for (final e in bornees) _tuile(e)],
               ),
             ),
           ),
