@@ -65,17 +65,55 @@ class ValidationEcheance {
   static final RegExp _gabaritDate = RegExp(r'^(\d{2})/(\d{2})/(\d{4})$');
   static final RegExp _gabaritHeure = RegExp(r'^(\d{2}):(\d{2})$');
 
-  /// AC-5 « Erreur » — `null` tant qu'il reste une place.
+  /// La phrase de la limite — **en UN SEUL exemplaire**, partagée par les deux
+  /// variantes du refus.
   ///
-  /// ⚖️ **Le message ne promet PAS « faire disparaître »** : ce geste est
-  /// **US-01.4**, il n'existe pas ici ; l'annoncer inviterait le pratiquant à un
-  /// geste inexistant. La **seule** issue disponible est la suppression.
+  /// ⛔ **Le « 9 » ne s'écrit jamais à la main** : il est **interpolé** depuis
+  /// [maxPresentesSurGrille]. Et la phrase n'est **pas recopiée** dans la
+  /// seconde variante : deux copies d'un même énoncé dérivent — le projet l'a
+  /// vérifié trois fois.
+  static const String _phraseLimite =
+      'Limite de $maxPresentesSurGrille échéances atteinte.';
+
+  /// AC-5 « Erreur » d'US-01.2 **et** AC-6 « Erreur » d'US-01.4 — `null` tant
+  /// qu'il reste une place, sinon un refus **dont le message est CONDITIONNEL**.
+  ///
+  /// 🔴 **POURQUOI DEUX VARIANTES, et pourquoi ce n'est pas un confort**
+  /// *(verdict clarify nº 6 du 2026-08-21)* : le message doit nommer les issues
+  /// **réellement disponibles**. « Retirer de la grille » n'existe que s'il y a
+  /// **au moins une échue présente** ; l'annoncer sans échue inviterait le
+  /// pratiquant à un geste **indisponible** — c'est la règle qu'US-01.2 s'était
+  /// imposée à elle-même *(elle refusait d'annoncer un geste **inexistant**)*,
+  /// appliquée ici à un geste **existant mais indisponible**.
+  ///
+  /// ⚖️ **PÉRIMÉ-2026-08-25 (US-01.4)** — le motif d'US-01.2 disait : *« ⚖️ Le
+  /// message ne promet PAS « faire disparaître » : ce geste est US-01.4, il
+  /// n'existe pas ici ; l'annoncer inviterait le pratiquant à un geste
+  /// inexistant. La seule issue disponible est la suppression. »* **Il était
+  /// vrai jusqu'au 2026-08-24 : le geste existe depuis.** ⛔ Sa **seconde
+  /// phrase** reste vraie, et c'est exactement la variante « sans échue »
+  /// ci-dessous, **inchangée au caractère près**. *On date, on ne repeint pas.*
+  ///
+  /// ⛔ **[presentes] est la liste des PRÉSENTES SUR LA GRILLE**, retirées
+  /// exclues *(C-7)* : ⛔ ce n'est pas à cette fonction de filtrer — un second
+  /// filtre dériverait du getter `presentes` du notifier, et le symptôme serait
+  /// le pire possible *(la grille montre 8 tuiles et la création est refusée)*.
   RefusValidation? refusDeLimite(List<Echeance> presentes) {
     if (presentes.length < maxPresentesSurGrille) return null;
-    return const RefusValidation(
+    // ⛔ Prédicat UNIQUE (T1) — ⛔ pas une comparaison écrite ici.
+    final instant = clock.now();
+    final auMoinsUneEchue = presentes.any((e) => estEchue(e, instant));
+    return RefusValidation(
       ChampEcheance.formulaire,
-      'Limite de $maxPresentesSurGrille échéances atteinte. '
-      'Il faut supprimer une échéance existante pour en créer une nouvelle.',
+      auMoinsUneEchue
+          // ⚠️ « atteinte » est le mot du produit pour ÉCHUE : c'est déjà celui
+          // du libellé d'accessibilité (« échéance atteinte », posé par
+          // US-01.1). ⛔ Aucun jargon nouveau, ⛔ jamais « échue » à l'écran.
+          ? '$_phraseLimite Un double appui sur une échéance atteinte la '
+                'retire de la grille sans la supprimer ; sinon, il faut en '
+                'supprimer une.'
+          : '$_phraseLimite Il faut supprimer une échéance existante pour en '
+                'créer une nouvelle.',
     );
   }
 

@@ -68,9 +68,13 @@ class _FormulaireEcheanceState extends State<FormulaireEcheance> {
     // AC-5 : à 9 présentes, le message de la limite est affiché EN TÊTE, dès
     // l'ouverture. ⛔ Il n'est pas réécrit ici : c'est celui du domaine, en un
     // seul exemplaire (pattern nº 10).
+    // ⛔ `presentes`, ⛔ JAMAIS `echeances` (C-7, US-01.4 T5) : sur la liste
+    // complète, une échue RETIRÉE aurait compté dans les 9 ET déclenché la
+    // variante « retrait » du message — soit l'annonce d'un geste
+    // INDISPONIBLE, ce qu'AC-6 « Erreur » interdit nommément.
     if (origine == null) {
       _refus = widget.notifier.validation.refusDeLimite(
-        widget.notifier.echeances,
+        widget.notifier.presentes,
       );
     }
   }

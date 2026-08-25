@@ -214,7 +214,12 @@ class _AffordanceAjout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final limite = notifier.validation.refusDeLimite(notifier.echeances);
+    // ⛔ `presentes`, ⛔ JAMAIS `echeances` (C-7, US-01.4 T5) : une échéance
+    // RETIRÉE n'occupe aucune des 9 places. Avec la liste complète, ce bouton
+    // annonçait la limite alors que 8 tuiles seulement étaient sur la grille,
+    // et `creer()` — qui lit bien `presentes` — acceptait la création : le
+    // symptôme exact que C-7 nomme, à l'envers.
+    final limite = notifier.validation.refusDeLimite(notifier.presentes);
     final disponible = limite == null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

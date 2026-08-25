@@ -2,7 +2,10 @@ import 'package:concentration/core/theme/concentration_theme.dart';
 import 'package:concentration/core/theme/concentration_tokens.dart';
 import 'package:concentration/core/theme/rgb_extension.dart';
 import 'package:concentration/core/time/clock.dart';
+import 'package:concentration/features/echeances/data/echeance_document_codec.dart';
 import 'package:concentration/features/echeances/data/echeance_document_repository.dart';
+import 'package:concentration/features/echeances/data/echeance_schema_migrations.dart';
+import 'package:concentration/features/echeances/domain/echeance.dart';
 import 'package:concentration/features/echeances/presentation/echeances_notifier.dart';
 import 'package:concentration/features/echeances/presentation/gestion_echeances_page.dart';
 import 'package:concentration/features/echeances/presentation/widgets/confirmation_suppression.dart';
@@ -234,6 +237,109 @@ void main() {
     ) async {
       await remplir(tester, 8);
       await ouvrir(tester);
+      expect(find.byType(FilledButton), findsOneWidget);
+      expect(find.byType(OutlinedButton), findsNothing);
+      expect(find.byType(MessageValidation), findsNothing);
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 🔴 AC-6 d'US-01.4 (T5) — LA SURFACE, et le décompte qui la gouverne.
+  //
+  // ⛔ Le message du domaine est LU, jamais recopié : ce groupe asserte des
+  // PROPRIÉTÉS observables sur l'écran (variante annoncée, décompte).
+  // ───────────────────────────────────────────────────────────────────────
+  group('AC-6 (US-01.4) — le message de la limite sur la page de gestion', () {
+    /// Écrit [echeances] sur le disque **à travers le codec de PRODUCTION**,
+    /// puis recharge le notifier de la page. ⛔ Aucun seam, aucun faux dépôt :
+    /// c'est le seul moyen d'obtenir une échéance **échue** ou **retirée**, que
+    /// `creer()` refuse par construction (futur strict d'AC-4).
+    Future<void> poserEtCharger(
+      WidgetTester tester,
+      List<Echeance> echeances,
+    ) async {
+      const codec = EcheanceDocumentCodec();
+      harnais.poser(
+        codec.encoder(codec.documentNeuf(versionCourante), echeances),
+      );
+      await tester.runAsync(notifier.charger);
+    }
+
+    Echeance active(int i) => Echeance(
+      id: 'a$i',
+      description: 'Active $i',
+      dateEcheance: maintenant.add(Duration(days: i + 1)),
+    );
+
+    Echeance echue(int i, {bool retiree = false}) => Echeance(
+      id: 'e$i',
+      description: 'Echue $i',
+      dateEcheance: maintenant.subtract(Duration(days: i + 1)),
+      retiree: retiree,
+    );
+
+    /// Le mot du geste POINTEUR, celui que le message enseigne. ⛔ La durée, le
+    /// nombre 9 et le reste de la prose ne sont pas répliqués ici.
+    Finder annonceDuGeste() => find.textContaining('double appui');
+
+    testWidgets('🔴 avec une échue PRÉSENTE, le message ANNONCE le retrait', (
+      tester,
+    ) async {
+      await poserEtCharger(tester, [
+        for (var i = 0; i < 8; i++) active(i),
+        echue(0),
+      ]);
+      await ouvrir(tester);
+
+      // ⛔ CONTRÔLE POSITIF D'ABORD : sans lui, « le message annonce » serait
+      // vrai sur une page qui n'affiche aucun message.
+      expect(notifier.presentes, hasLength(9));
+      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(
+        annonceDuGeste(),
+        findsWidgets,
+        reason:
+            'c’est le SEUL endroit du produit qui enseigne le double appui '
+            '(lacune de découvrabilité, Design UX §2)',
+      );
+    });
+
+    testWidgets(
+      '🔴 sans échue, le message N’ANNONCE PAS le retrait — l’autre côté',
+      (tester) async {
+        await poserEtCharger(tester, [for (var i = 0; i < 9; i++) active(i)]);
+        await ouvrir(tester);
+
+        expect(notifier.presentes, hasLength(9));
+        expect(find.byType(MessageValidation), findsOneWidget);
+        expect(
+          annonceDuGeste(),
+          findsNothing,
+          reason:
+              '⛔ JAMAIS un geste indisponible : aucune tuile n’est retirable '
+              'ici. Sans ce test, un message UNIQUE satisferait la règle',
+        );
+      },
+    );
+
+    testWidgets('🔴 une échue RETIRÉE ne compte pas : 9 en base, 8 présentes, '
+        'affordance PLEINE', (tester) async {
+      // 🔴 LE MUTANT QUE CE TEST TUE, et il était EN PLACE avant T5 :
+      // `refusDeLimite(notifier.echeances)` — la forme livrée par US-01.2,
+      // restée telle quelle après T4. Elle comptait l’échéance RETIRÉE, donc
+      // annonçait la limite alors que **8 tuiles seulement** sont sur la
+      // grille, tandis que `creer()` — qui lit bien `presentes` — acceptait
+      // la création. ⇒ AC-6 « Nominal » d’US-01.4 (*« après un retrait, la
+      // création suivante aboutit »*) était FAUX **par le bouton**, pas par
+      // la règle. C’est le symptôme que C-7 nomme, dans l’autre sens.
+      await poserEtCharger(tester, [
+        for (var i = 0; i < 8; i++) active(i),
+        echue(0, retiree: true),
+      ]);
+      await ouvrir(tester);
+
+      expect(notifier.echeances, hasLength(9), reason: 'contrôle positif');
+      expect(notifier.presentes, hasLength(8));
       expect(find.byType(FilledButton), findsOneWidget);
       expect(find.byType(OutlinedButton), findsNothing);
       expect(find.byType(MessageValidation), findsNothing);
