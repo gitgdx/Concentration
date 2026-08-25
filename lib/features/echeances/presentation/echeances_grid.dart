@@ -91,6 +91,13 @@ class _EcheancesGridState extends State<EcheancesGrid> {
                     EcheanceTile(
                       key: ValueKey(e.id),
                       description: e.description,
+                      // ⛔ AUCUNE intention à ce commit (T8) : l'enveloppe
+                      // interactive de la tuile est CONDITIONNELLE, et une
+                      // enveloppe sans rappel serait le mensonge d'interface
+                      // qu'AC-9 « Erreur » interdit (ADR-014 §A.1). La
+                      // révélation arrive en T9, le retrait avec le rappel.
+                      // ⛔ Un rappel VIDE serait pire (M-15) : barrière muette.
+                      intention: null,
                       temps: widget.calculateur.calculer(
                         clock: widget.clock,
                         echeance: e,

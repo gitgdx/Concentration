@@ -54,7 +54,11 @@ void main() {
               child: Container(
                 key: const Key('enveloppe-de-la-sonde'),
                 decoration: const BoxDecoration(color: couleurIntruse),
-                child: EcheanceTile(temps: temps, description: ''),
+                child: EcheanceTile(
+                  temps: temps,
+                  description: '',
+                  intention: null,
+                ),
               ),
             ),
           ),
@@ -100,7 +104,11 @@ void main() {
           body: Center(
             child: SizedBox.square(
               dimension: 220,
-              child: EcheanceTile(temps: temps, description: ''),
+              child: EcheanceTile(
+                temps: temps,
+                description: '',
+                intention: null,
+              ),
             ),
           ),
         ),

@@ -4,7 +4,10 @@ import 'package:concentration/core/theme/rgb_extension.dart';
 import 'package:concentration/features/echeances/domain/remaining_time.dart';
 import 'package:concentration/features/echeances/domain/time_unit.dart';
 import 'package:concentration/features/echeances/presentation/widgets/echeance_tile.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../support/rendu_couleur.dart';
@@ -23,12 +26,20 @@ void main() {
     double progression, {
     int nombre = 6,
     bool estEchue = false,
+    // ⚠️ Le libellé d'accessibilité PORTE DÉJÀ la description en production
+    // (mesuré : `suffixe = ', ${echeance.description}'` dans
+    // `remaining_time_calculator.dart`, injecté des deux côtés). Le reproduire
+    // ici est ce qui rend les assertions de T8 comparables au réel — ⛔ et il
+    // n'est PAS retouché par cette US : P-2 et les mutants X-2 / X-3 en
+    // dépendent.
+    String suffixeLibelle = '',
   }) => RemainingTime(
     unite: TimeUnit.heures,
     nombreAffiche: nombre,
     progression: progression,
     estEchue: estEchue,
-    libelleAccessibilite: estEchue ? 'échéance atteinte' : '$nombre heures',
+    libelleAccessibilite:
+        (estEchue ? 'échéance atteinte' : '$nombre heures') + suffixeLibelle,
   );
 
   Widget hote(Widget enfant, {double cote = 220}) => MaterialApp(
@@ -42,7 +53,16 @@ void main() {
 
   Future<Color> fondPour(WidgetTester tester, double progression) async {
     await tester.pumpWidget(
-      hote(EcheanceTile(temps: temps(progression), description: 'Rendez-vous')),
+      hote(
+        EcheanceTile(
+          temps: temps(progression),
+          description: 'Rendez-vous',
+          // ⛔ Les tests de rendu montent la tuile TELLE QU'ELLE VIT EN
+          // PRODUCTION, enveloppe interactive comprise : sans intention, ils
+          // n'exerceraient plus l'arbre réel après T8.
+          intention: () {},
+        ),
+      ),
     );
     return fondDeLaTuile(tester);
   }
@@ -97,7 +117,13 @@ void main() {
     'AC-3 « Nominal » — la tuile PORTE la description de son échéance',
     (tester) async {
       await tester.pumpWidget(
-        hote(EcheanceTile(temps: temps(0.5), description: 'Visite médicale')),
+        hote(
+          EcheanceTile(
+            temps: temps(0.5),
+            description: 'Visite médicale',
+            intention: () {},
+          ),
+        ),
       );
       expect(
         find.descendant(
@@ -128,6 +154,7 @@ void main() {
           EcheanceTile(
             temps: temps(0.5, nombre: nombre),
             description: 'Passeport',
+            intention: () {},
           ),
           cote: cote,
         ),
@@ -212,6 +239,7 @@ void main() {
         EcheanceTile(
           temps: temps(0.5, nombre: nombre, estEchue: estEchue),
           description: description,
+          intention: () {},
         ),
         cote: cote,
       ),
@@ -333,5 +361,485 @@ void main() {
         );
       },
     );
+  });
+  // ═══════════════════════════════════════════════════════════════════════
+  // 🔴 T8 — L'ENVELOPPE INTERACTIVE EST **CONDITIONNELLE** (ADR-014 §A.1).
+  //
+  // ⛔ POURQUOI LA FORME « HABITUELLE » DE CE CONTRÔLE NE SUFFIT PAS, et
+  // c'est MESURÉ : `T-P4` telle qu'ADR-013 §2 la prescrit lit le **widget
+  // pointeur** ; or sur la tuile `ACTIVE` **sans description** le défaut J-1
+  // est ENTIÈREMENT dans les couches sémantique et focus — la couche pointeur
+  // y est **exactement conforme** (`pointeurs = 0`). ⇒ une `T-P4` écrite dans
+  // cette forme serait **VERTE SUR LE DÉFAUT**. Pour ce régime, le contrôle
+  // asserte donc **l'ABSENCE DU NŒUD** : les SEPT propriétés d'ADR-014 §A.2.
+  //
+  // ⛔ ET JAMAIS SUR LE NŒUD SÉMANTIQUE POUR LES DEUX AUTRES RÉGIMES : la
+  // tuile échue **doit** porter `Semantics(onTap:)` — c'est le canal du
+  // clavier et de l'AT — donc une assertion sémantique « l'échue ne porte pas
+  // d'action tap » serait **incompatible avec AC-9** (mutant **M-20** : un
+  // contrôle qui EXIGE le défaut, vert sur M-19 et rouge sur l'arbre juste).
+  // ═══════════════════════════════════════════════════════════════════════
+  group('T8 — l’enveloppe interactive, par RÉGIME de tuile', () {
+    /// Tous les nœuds sémantiques de l'arbre monté.
+    ///
+    /// ⚠️ **Piège de mesure payé par la sonde d'ADR-014 §Contexte-4, à ne pas
+    /// re-payer** : `isFocusable` ne vit **PAS** sur le nœud du label mais sur
+    /// son **ANCÊTRE**, celui de `Focus` — une assertion écrite sur « le nœud
+    /// du label » est donc **aveugle à la focusabilité** et **verte à tort**.
+    /// ⇒ on lit **l'UNION** des drapeaux et des actions sur **tous** les
+    /// nœuds ; l'absence d'apport de l'hôte est **assertée** ci-dessous.
+    /// **TOUS** les nœuds sémantiques de la vue — ⛔ pas seulement celui du
+    /// label.
+    ///
+    /// ⚠️ **Piège de mesure payé par la sonde d'ADR-014 §Contexte-4, à ne pas
+    /// re-payer** : `isFocusable` ne vit **PAS** sur le nœud du label mais sur
+    /// son **ANCÊTRE**, celui de `Focus` — une assertion écrite sur « le nœud
+    /// du label » est donc **aveugle à la focusabilité**, et elle serait
+    /// **verte à tort**. ⇒ on lit **l'UNION** des drapeaux et des actions sur
+    /// **tous** les nœuds ; l'absence d'apport de l'hôte est **assertée**
+    /// ci-dessous, sans quoi cette union ne serait pas attribuable à la tuile.
+    Iterable<SemanticsNode> tousLesNoeuds() =>
+        find.semantics.byPredicate((_) => true).evaluate();
+
+    Set<String> actionsDeLArbre() => {
+      for (final n in tousLesNoeuds())
+        for (final a in SemanticsAction.values)
+          if (n.getSemanticsData().hasAction(a)) a.name,
+    };
+
+    int boutonsDeLArbre() =>
+        find.semantics.byFlag(SemanticsFlag.isButton).evaluate().length;
+
+    int focusablesDeLArbre() =>
+        find.semantics.byFlag(SemanticsFlag.isFocusable).evaluate().length;
+
+    /// Les gestionnaires **POINTEUR** réellement branchés sous la tuile.
+    /// ⛔ La sélection ne désigne aucun widget par sa POSITION (`.first`,
+    /// `.at(n)`) : c'est la sélection par position qui a produit **NB-7**.
+    List<GestureDetector> pointeursDeLaTuile(WidgetTester tester) => tester
+        .widgetList<GestureDetector>(
+          find.descendant(
+            of: find.byType(EcheanceTile),
+            matching: find.byType(GestureDetector),
+          ),
+        )
+        .where(
+          (g) =>
+              g.onTap != null || g.onDoubleTap != null || g.onLongPress != null,
+        )
+        .toList(growable: false);
+
+    int widgetsFocusDeLaTuile(WidgetTester tester) => tester
+        .widgetList(
+          find.descendant(
+            of: find.byType(EcheanceTile),
+            matching: find.byType(Focus),
+          ),
+        )
+        .length;
+
+    /// Le focus primaire est-il **DANS** la tuile après une tabulation ?
+    /// C'est le mot littéral d'AC-9 — « atteignable au clavier » — et il lit
+    /// un **parcours réellement effectué**, ⛔ pas un drapeau déclaré.
+    Future<bool> tabulationAtteintLaTuile(WidgetTester tester) async {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
+      final ctx = FocusManager.instance.primaryFocus?.context;
+      return ctx != null &&
+          ctx.findAncestorWidgetOfExactType<EcheanceTile>() != null;
+    }
+
+    Future<void> monterTuile(
+      WidgetTester tester, {
+      required bool estEchue,
+      required String description,
+      VoidCallback? intention,
+    }) => tester.pumpWidget(
+      hote(
+        EcheanceTile(
+          temps: temps(
+            0.5,
+            nombre: estEchue ? 0 : 6,
+            estEchue: estEchue,
+            suffixeLibelle: description.isEmpty ? '' : ', $description',
+          ),
+          description: description,
+          intention: intention,
+        ),
+      ),
+    );
+
+    testWidgets(
+      '⛔ CONTRÔLE POSITIF DE L’INSTRUMENT — l’hôte SEUL n’apporte ni action, '
+      'ni bouton, ni focusable',
+      (tester) async {
+        // Sans cette mesure, « l’ensemble des actions du sous-arbre est vide »
+        // pourrait être vrai POUR UNE AUTRE RAISON que l’absence d’enveloppe,
+        // et les sept assertions seraient vertes sans rien observer.
+        final poignee = tester.ensureSemantics();
+        await tester.pumpWidget(hote(const SizedBox()));
+
+        expect(actionsDeLArbre(), isEmpty);
+        expect(boutonsDeLArbre(), 0);
+        expect(focusablesDeLArbre(), 0);
+        poignee.dispose();
+      },
+    );
+
+    testWidgets(
+      '🔴 T-P4 « ACTIVE avec description » — `onTap` SEUL sur la couche '
+      'pointeur, et le nœud est annoncé BOUTON',
+      (tester) async {
+        final poignee = tester.ensureSemantics();
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: 'revue annuelle',
+          intention: () {},
+        );
+
+        final pointeurs = pointeursDeLaTuile(tester);
+        expect(pointeurs, hasLength(1));
+        expect(pointeurs.single.onTap, isNotNull);
+        // 🔴 LE MUTANT M-8, et rien d’autre ne le verrait : `onDoubleTap` en
+        // plus imposerait `kDoubleTapTimeout` (300 ms) à la révélation et
+        // ferait CLIGNOTER le 1ᵉʳ appui — ⛔ aucun scénario fonctionnel ne
+        // rougirait, « la révélation marcherait, juste 300 ms plus tard ».
+        expect(
+          pointeurs.single.onDoubleTap,
+          isNull,
+          reason: 'M-8 : une ACTIVE ne porte JAMAIS onDoubleTap',
+        );
+
+        // Pendant sémantique — SÉPARÉ et POSITIF (ADR-014 §A.2).
+        final noeud = tester.getSemantics(
+          find.bySemanticsLabel('6 heures, revue annuelle'),
+        );
+        expect(noeud.hint, EcheanceTile.hintRevelation);
+        expect(actionsDeLArbre(), contains(SemanticsAction.tap.name));
+        expect(boutonsDeLArbre(), 1);
+        poignee.dispose();
+      },
+    );
+
+    testWidgets(
+      '🔴 T-P4 « ÉCHUE » — `onDoubleTap` SEUL sur la couche pointeur, ET le '
+      'nœud porte `tap` (sans quoi AC-9 tombe)',
+      (tester) async {
+        final poignee = tester.ensureSemantics();
+        await monterTuile(
+          tester,
+          estEchue: true,
+          description: 'revue annuelle',
+          intention: () {},
+        );
+
+        final pointeurs = pointeursDeLaTuile(tester);
+        expect(pointeurs, hasLength(1));
+        expect(pointeurs.single.onDoubleTap, isNotNull);
+        expect(
+          pointeurs.single.onTap,
+          isNull,
+          reason:
+              'un appui simple retirerait la tuile, contre l’arbitrage '
+              'clarify nº 1',
+        );
+
+        // 🔴 M-19 — LE DÉFAUT LE PLUS SILENCIEUX DE CETTE US : une échue qui
+        // ne porterait QUE `onDoubleTap` rend `tap=false focusable=true`,
+        // clavier ET AT inopérants, ⛔ SANS lever aucune erreur. AC-9 tombe
+        // entièrement et ⛔ aucun scénario au pointeur ne rougit.
+        expect(actionsDeLArbre(), contains(SemanticsAction.tap.name));
+        expect(boutonsDeLArbre(), 1);
+        expect(focusablesDeLArbre(), 1);
+        expect(
+          tester
+              .getSemantics(
+                find.bySemanticsLabel('échéance atteinte, revue annuelle'),
+              )
+              .hint,
+          EcheanceTile.hintRetrait,
+        );
+        poignee.dispose();
+      },
+    );
+    testWidgets(
+      '🔴 SEPT ASSERTIONS — la tuile « ACTIVE SANS description » n’a AUCUNE '
+      'enveloppe : le contrôle porte sur l’ABSENCE DU NŒUD (J-1)',
+      (tester) async {
+        final poignee = tester.ensureSemantics();
+        // ⚠️ L’intention est FOURNIE : sans elle, les sept assertions
+        // seraient vertes POUR LA MAUVAISE RAISON — « pas d’enveloppe faute
+        // de rappel » au lieu de « pas d’enveloppe faute de description ».
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: '',
+          intention: () {},
+        );
+
+        // 1 — aucun gestionnaire POINTEUR (la forme d’ADR-013 §2, conservée :
+        //     c’est elle qui tue le `onTap` VIDE, mutant M-15).
+        expect(pointeursDeLaTuile(tester), isEmpty);
+        // 2 — l’ensemble des actions sémantiques est VIDE. ⛔ Pas
+        //     `onTap == null` : un nœud de `Focus` publie à lui seul l’action
+        //     `focus`, ce qui rend cette assertion PLUS forte que prévu.
+        expect(actionsDeLArbre(), isEmpty);
+        // 3 — aucun nœud ne porte `isButton`.
+        expect(boutonsDeLArbre(), 0);
+        // 4 — aucun nœud n’est focusable, LU SUR L’ARBRE et non sur le label.
+        expect(focusablesDeLArbre(), 0);
+        // 5 — aucun widget `Focus` sous la tuile.
+        expect(widgetsFocusDeLaTuile(tester), 0);
+        // 6 — une tabulation laisse le focus primaire HORS de la tuile.
+        expect(await tabulationAtteintLaTuile(tester), isFalse);
+        // 7 — ✅ CONTRÔLE : le label est PRÉSENT, UNIQUE et ÉGAL au libellé
+        //     d’accessibilité. ⛔ Sans lui, « tout retirer » passerait — et
+        //     la tuile deviendrait invisible aux lecteurs d’écran, défaut
+        //     PIRE que celui qu’on corrige.
+        expect(find.bySemanticsLabel('6 heures'), findsOneWidget);
+        poignee.dispose();
+      },
+    );
+
+    testWidgets(
+      '🔴 CONTRÔLE NÉGATIF DES SEPT — la MÊME tuile, la MÊME intention, une '
+      'description en plus : les sept basculent',
+      (tester) async {
+        // ⛔ Sans ce test, les sept assertions ci-dessus pourraient être
+        // vertes sur un arbre où l’enveloppe n’existe POUR PERSONNE : elles
+        // mesureraient l’absence de widget, pas la CONDITION.
+        final poignee = tester.ensureSemantics();
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: 'revue annuelle',
+          intention: () {},
+        );
+
+        expect(pointeursDeLaTuile(tester), hasLength(1));
+        expect(actionsDeLArbre(), isNotEmpty);
+        expect(boutonsDeLArbre(), 1);
+        expect(focusablesDeLArbre(), 1);
+        expect(widgetsFocusDeLaTuile(tester), 1);
+        expect(await tabulationAtteintLaTuile(tester), isTrue);
+        expect(
+          find.bySemanticsLabel('6 heures, revue annuelle'),
+          findsOneWidget,
+        );
+        poignee.dispose();
+      },
+    );
+
+    testWidgets(
+      '🔴 UNE intention, QUATRE canaux — pointeur, `Entrée`, `Espace`, action '
+      '`tap` d’une AT (ADR-013 §3, mesuré)',
+      (tester) async {
+        final poignee = tester.ensureSemantics();
+        var invocations = 0;
+        await monterTuile(
+          tester,
+          estEchue: true,
+          description: 'revue annuelle',
+          intention: () => invocations++,
+        );
+        final tuile = find.byType(EcheanceTile);
+        final centre = tester.getRect(tuile).center;
+
+        // ⓪ Un appui SIMPLE sur une échue ⇒ RIEN (clause héritée d’US-01.2).
+        await tester.tap(tuile);
+        await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 1));
+        expect(invocations, 0, reason: 'un appui simple ne retire pas');
+
+        // ① pointeur : DEUX appuis
+        await tester.tapAt(centre);
+        await tester.pump(kDoubleTapMinTime + const Duration(milliseconds: 10));
+        await tester.tapAt(centre);
+        await tester.pump();
+        expect(invocations, 1);
+
+        // ② clavier `Entrée` — après tabulation, donc le focus est ATTEINT
+        expect(await tabulationAtteintLaTuile(tester), isTrue);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(invocations, 2, reason: 'ActivateIntent');
+
+        // ③ clavier `Espace`
+        await tester.sendKeyEvent(LogicalKeyboardKey.space);
+        await tester.pump();
+        expect(invocations, 3, reason: 'ButtonActivateIntent');
+
+        // ④ AT : l’action sémantique `tap`, sur le SEUL nœud annoncé
+        tester.semantics.tap(
+          find.semantics.byLabel('échéance atteinte, revue annuelle'),
+        );
+        await tester.pump();
+        expect(invocations, 4, reason: 'canal de l’AT');
+
+        // ⛔ UN SEUL nœud annoncé — `excludeFromSemantics: true` sur le
+        // détecteur intérieur, ⛔ jamais deux.
+        expect(
+          find.bySemanticsLabel('échéance atteinte, revue annuelle'),
+          findsOneWidget,
+        );
+
+        // ⚠️ Le reconnaisseur de double appui garde un minuteur de
+        // `kDoubleTapTimeout` en attente : sans cette avance, le test échoue
+        // sur `!timersPending` au démontage — et ⛔ ce n'est PAS un défaut du
+        // produit, c'est la mécanique du reconnaisseur.
+        await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 1));
+        poignee.dispose();
+      },
+    );
+
+    testWidgets(
+      '🔴 M-8 (l’autre face) — deux appuis RAPPROCHÉS sur une ACTIVE donnent '
+      'DEUX révélations immédiates, ⛔ aucun `kDoubleTapTimeout`',
+      (tester) async {
+        var invocations = 0;
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: 'revue annuelle',
+          intention: () => invocations++,
+        );
+        final centre = tester.getRect(find.byType(EcheanceTile)).center;
+
+        await tester.tapAt(centre);
+        await tester.pump(kDoubleTapMinTime + const Duration(milliseconds: 10));
+        await tester.tapAt(centre);
+        await tester.pump();
+
+        // ⛔ C’est ici que M-8 meurt par le COMPORTEMENT et non par la
+        // structure : avec `onDoubleTap` en plus, le 1ᵉʳ appui attendrait
+        // 300 ms et cette mesure rendrait 1, jamais 2.
+        expect(
+          invocations,
+          2,
+          reason: 'SONDE-6b : deux appuis rapprochés ⇒ deux révélations',
+        );
+      },
+    );
+
+    testWidgets(
+      '🔴 la surface du geste est la tuile PEINTE — un appui sur une zone '
+      'VIDE agit (le détecteur n’entoure pas que le nombre)',
+      (tester) async {
+        var invocations = 0;
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: 'revue annuelle',
+          intention: () => invocations++,
+        );
+        final tuile = tester.getRect(find.byType(EcheanceTile));
+
+        // Deux points HORS du nombre et hors de la description : le bord
+        // gauche à mi-hauteur (dans la marge de 16) et le bas de la boîte.
+        // ⚠️ MESURÉ : la surface sensible est la tuile **PEINTE**
+        // (`BoxDecoration.hitTest`), donc les quatre ergots hors du rayon de
+        // 16 ne réagissent pas — ⛔ ce qui est le comportement VOULU : ces
+        // pixels n’appartiennent pas à la tuile mais à la gouttière.
+        await tester.tapAt(Offset(tuile.left + 2, tuile.center.dy));
+        await tester.pump();
+        expect(
+          invocations,
+          1,
+          reason: 'le bord de la tuile fait partie de la cible',
+        );
+        await tester.tapAt(Offset(tuile.left + 20, tuile.bottom - 2));
+        await tester.pump();
+        expect(invocations, 2);
+      },
+    );
+
+    testWidgets(
+      '🔴 M-13, garde de NON-RETOUR — aucun `InkWell` sous la tuile, donc '
+      'aucune ondulation ne peut encoder l’interaction (RF-04)',
+      (tester) async {
+        await monterTuile(
+          tester,
+          estEchue: true,
+          description: 'revue annuelle',
+          intention: () {},
+        );
+        // ⛔ Le risque R-11 a disparu STRUCTURELLEMENT : `InkWell` lie
+        // l’activation clavier à `onTap` — interdit sur une échue — et son
+        // `splashColor` ferait ENCODER L’INTERACTION PAR LA COULEUR.
+        expect(
+          find.descendant(
+            of: find.byType(EcheanceTile),
+            matching: find.byType(InkWell),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(EcheanceTile),
+            matching: find.byType(InkResponse),
+          ),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      '🔴 M-17 — le geste MARCHE et la tuile est ANNONCÉE : les deux dans le '
+      'même test, sinon le défaut passe',
+      (tester) async {
+        final poignee = tester.ensureSemantics();
+        var invocations = 0;
+        await monterTuile(
+          tester,
+          estEchue: false,
+          description: 'revue annuelle',
+          intention: () => invocations++,
+        );
+
+        // `ExcludeSemantics` supprime la sémantique de TOUS ses descendants :
+        // placer l’annonce DEDANS rendrait la tuile fonctionnelle et NON
+        // ANNONCÉE — le geste marcherait, AC-9 tomberait, et ⛔ rien d’autre
+        // ne le verrait. L’assertion de geste SEULE serait donc verte.
+        await tester.tap(find.byType(EcheanceTile));
+        await tester.pump();
+        expect(invocations, 1);
+        expect(
+          find.bySemanticsLabel('6 heures, revue annuelle'),
+          findsOneWidget,
+        );
+        expect(boutonsDeLArbre(), 1);
+        poignee.dispose();
+      },
+    );
+
+    test('🔴 les deux `hint` sont DISTINCTS, non vides, et ⛔ aucun ne nomme le '
+        'geste POINTEUR', () {
+      // ⛔ Un `hint` dit CE QUE ÇA FAIT, jamais COMMENT ON LE FAIT : il
+      // n’existe AUCUNE action sémantique de double appui, donc « double
+      // appui pour retirer » serait FAUX pour celui qui l’entend — une AT
+      // active par sa propre convention, en UNE fois (ADR-013 §3).
+      expect(EcheanceTile.hintRevelation, isNotEmpty);
+      expect(EcheanceTile.hintRetrait, isNotEmpty);
+      expect(
+        EcheanceTile.hintRetrait,
+        isNot(EcheanceTile.hintRevelation),
+        reason: 'deux hints identiques annonceraient le mauvais effet',
+      );
+      for (final hint in [
+        EcheanceTile.hintRevelation,
+        EcheanceTile.hintRetrait,
+      ]) {
+        expect(
+          hint.toLowerCase(),
+          allOf(
+            isNot(contains('appui')),
+            isNot(contains('tap')),
+            isNot(contains('clic')),
+            isNot(contains('seconde')),
+          ),
+          reason: 'ni le GESTE ni la DURÉE ne s’écrivent dans un hint',
+        );
+      }
+    });
   });
 }
