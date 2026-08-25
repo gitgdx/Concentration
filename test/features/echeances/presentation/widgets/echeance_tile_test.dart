@@ -19,12 +19,16 @@ import '../../../../support/rendu_couleur.dart';
 /// (`QA-M4`). Un AC dont le comportement est supprimable sans rougeur n'est pas
 /// *couvert* par un test, il en est seulement *accompagné*.
 void main() {
-  RemainingTime temps(double progression, {int nombre = 6}) => RemainingTime(
+  RemainingTime temps(
+    double progression, {
+    int nombre = 6,
+    bool estEchue = false,
+  }) => RemainingTime(
     unite: TimeUnit.heures,
     nombreAffiche: nombre,
     progression: progression,
-    estEchue: false,
-    libelleAccessibilite: '$nombre heures',
+    estEchue: estEchue,
+    libelleAccessibilite: estEchue ? 'échéance atteinte' : '$nombre heures',
   );
 
   Widget hote(Widget enfant, {double cote = 220}) => MaterialApp(
@@ -167,4 +171,167 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 🔴 AC-1 d'US-01.4 (T6) — LE NOMBRE : PLUS GROS, CENTRÉ, ⛔ SUR LES
+  // `ACTIVE` SEULEMENT.
+  //
+  // ⛔ TROIS PIÈGES MESURÉS, et chacun a son assertion :
+  //   R-7 — `BoxFit.scaleDown` RE-RÉDUIT quand la cellule est petite ⇒ la
+  //     taille RENDUE à 9 tuiles peut être IDENTIQUE à celle d'US-01.1 ⇒
+  //     l'assertion de grandeur porte sur le `fontSize` du `TextStyle`,
+  //     ⛔ JAMAIS sur la taille peinte.
+  //   R-8 — le token agrandi sur une ÉCHUE pousserait sa description hors de
+  //     la tuile ⇒ contrôle négatif OBLIGATOIRE sur l'échue.
+  //   G-7 — `BoxFit.contain` ferait dépendre la taille du glyphe du NOMBRE DE
+  //     CHIFFRES ⇒ un test comparant 9 et 10 doit ROUGIR. Celui-là, lui, se
+  //     mesure sur la taille PEINTE : c'est la seule qui le voit.
+  // ───────────────────────────────────────────────────────────────────────
+  group('AC-1 (US-01.4) — le nombre en cadran sur les ACTIVE', () {
+    /// Le `fontSize` **du style effectivement porté par le nombre** dans
+    /// l'arbre — ⛔ pas la constante du thème relue à côté, qui rendrait
+    /// l'assertion tautologique.
+    double tailleDuNombre(WidgetTester tester, int nombre) => tester
+        .widget<Text>(
+          find.descendant(
+            of: find.byType(EcheanceTile),
+            matching: find.text('$nombre'),
+          ),
+        )
+        .style!
+        .fontSize!;
+
+    Future<void> monter(
+      WidgetTester tester, {
+      required bool estEchue,
+      int nombre = 6,
+      String description = '',
+      double cote = 220,
+    }) => tester.pumpWidget(
+      hote(
+        EcheanceTile(
+          temps: temps(0.5, nombre: nombre, estEchue: estEchue),
+          description: description,
+        ),
+        cote: cote,
+      ),
+    );
+
+    testWidgets(
+      '🔴 la taille du nombre d’une ACTIVE est STRICTEMENT SUPÉRIEURE à celle '
+      'd’une ÉCHUE — la relation, pas le chiffre',
+      (tester) async {
+        await monter(tester, estEchue: false);
+        final active = tailleDuNombre(tester, 6);
+        await monter(tester, estEchue: true, nombre: 0);
+        final echue = tailleDuNombre(tester, 0);
+
+        expect(
+          active,
+          greaterThan(echue),
+          reason:
+              'AC-1 « Nominal » fixe la RELATION (« token dédié strictement '
+              'supérieur à celui d’US-01.1 »), et l’échue conserve celui '
+              'd’US-01.1 (R-8) — mesuré : active $active, échue $echue',
+        );
+        // ⛔ Et l’échue garde EXACTEMENT le style d’US-01.1 : le grossissement
+        // ⛔ ne fuit pas d’un côté à l’autre par une valeur intermédiaire.
+        expect(echue, ConcentrationTheme.tailleNombreEchue);
+      },
+    );
+
+    testWidgets('🔴 sur une ACTIVE le nombre est centré HORIZONTALEMENT et '
+        'VERTICALEMENT — mesuré sur le rendu', (tester) async {
+      // ⛔ Sans description : la colonne n’a plus qu’un enfant, donc « centré
+      // dans la tuile » devient une grandeur OBSERVABLE. Avec une
+      // description, l’`Expanded` ne couvre qu’une partie de la tuile et
+      // l’assertion serait fausse pour une raison qui n’est pas le défaut.
+      await monter(tester, estEchue: false);
+      final nombre = tester.getRect(find.text('6'));
+      final tuile = tester.getRect(find.byType(EcheanceTile));
+
+      expect(
+        nombre.center.dx,
+        closeTo(tuile.center.dx, 0.5),
+        reason: 'le rendu d’US-01.1 était en HAUT À GAUCHE',
+      );
+      expect(nombre.center.dy, closeTo(tuile.center.dy, 0.5));
+
+      // Le localisateur du défaut : les DEUX alignements, un par axe. La
+      // grandeur ci-dessus est ce qui PROUVE ; ceci dit OÙ corriger.
+      expect(
+        tester.widget<FittedBox>(find.byType(FittedBox)).alignment,
+        Alignment.center,
+      );
+      expect(
+        tester
+            .widget<Column>(
+              find.descendant(
+                of: find.byType(EcheanceTile),
+                matching: find.byType(Column),
+              ),
+            )
+            .crossAxisAlignment,
+        CrossAxisAlignment.center,
+      );
+    });
+
+    testWidgets(
+      '🔴 CONTRÔLE NÉGATIF — sur une ÉCHUE le nombre reste en HAUT À GAUCHE '
+      '(R-8)',
+      (tester) async {
+        await monter(tester, estEchue: true, nombre: 0);
+        final nombre = tester.getRect(find.text('0'));
+        final tuile = tester.getRect(find.byType(EcheanceTile));
+
+        expect(
+          nombre.center.dx,
+          lessThan(tuile.center.dx),
+          reason:
+              'centrer une échue pousserait sa description — qu’elle CONSERVE '
+              'affichée (verdict clarify nº 1) — hors de la tuile',
+        );
+        expect(nombre.center.dy, lessThan(tuile.center.dy));
+      },
+    );
+
+    testWidgets(
+      '🔴 la taille PEINTE ne dépend PAS du nombre de chiffres — le mutant '
+      'BoxFit.contain',
+      (tester) async {
+        // 🔴 CE QUE CE TEST TUE, et rien d’autre ne le verrait : `contain`
+        // AGRANDIT jusqu’à remplir la boîte ⇒ « 9 » (1 chiffre) deviendrait
+        // plus GRAND que « 10 » (2 chiffres), donc au rafraîchissement le
+        // chiffre CHANGERAIT DE TAILLE sous les yeux du pratiquant, et 9
+        // tuiles porteraient 9 tailles différentes.
+        // ⚠️ La cellule est GRANDE exprès : `scaleDown` ne doit PAS entrer en
+        // jeu, sinon les deux seraient réduits et le test ne mesurerait rien.
+        await monter(tester, estEchue: false, nombre: 9);
+        final hauteurNeuf = tester.getRect(find.text('9')).height;
+        final largeurNeuf = tester.getRect(find.text('9')).width;
+        await monter(tester, estEchue: false, nombre: 10);
+        final hauteurDix = tester.getRect(find.text('10')).height;
+        final largeurDix = tester.getRect(find.text('10')).width;
+
+        // ⛔ CONTRÔLE POSITIF : les deux nombres portent bien un nombre de
+        // chiffres DIFFÉRENT, et cela se VOIT sur la largeur peinte — sans
+        // quoi l’égalité des hauteurs serait vraie quoi qu’il arrive.
+        expect(
+          largeurDix,
+          greaterThan(largeurNeuf),
+          reason:
+              'contrôle positif : deux chiffres occupent plus de largeur '
+              'qu’un seul — mesuré : 9 → $largeurNeuf, 10 → $largeurDix',
+        );
+
+        expect(
+          hauteurDix,
+          closeTo(hauteurNeuf, 0.5),
+          reason:
+              'la taille du glyphe doit venir du TOKEN, jamais du nombre de '
+              'chiffres — mesuré : 9 → $hauteurNeuf, 10 → $hauteurDix',
+        );
+      },
+    );
+  });
 }

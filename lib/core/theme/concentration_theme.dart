@@ -25,15 +25,57 @@ class ConcentrationTheme {
   static const String policeNombre = 'JetBrains Mono';
   static const String policeTexte = 'Inter';
 
+  /// Taille du nombre sur une tuile **`ACTIVE`** — **valeur du design system**
+  /// *(Design UX d'US-01.4 §7.1, inscrite dans `DESIGN_SYSTEM.md` par T16)*.
+  ///
+  /// 🔴 **POURQUOI CETTE VALEUR EST NOMMÉE ICI, et ce n'est pas un rangement**
+  /// *(§G-8)* : elle vivait en **littéral, à l'intérieur d'un `TextStyle`**, et
+  /// la table §Typographie de `DESIGN_SYSTEM.md` — qui se déclare **source
+  /// unique** — ⛔ **ne donnait AUCUNE valeur** ⇒ **la retouche d'AC-1 se
+  /// faisait à l'aveugle.**
+  ///
+  /// ⛔ **Ne pas dépasser 64 sans rejouer le calcul du Design UX §7.1** : à
+  /// 4 tuiles sur 320 dp la boîte de contenu vaut **110 dp** et un nombre à
+  /// **3 chiffres** *(le nombre d'années n'est pas borné)* mesure **≈ 115 dp**
+  /// à 64 contre **≈ 130 dp** à 72 ⇒ **72 déclencherait `scaleDown` dans un cas
+  /// courant**.
+  static const double tailleNombre = 64;
+
+  /// Taille du nombre sur une tuile **`ÉCHUE`** — ⛔ **celle d'US-01.1,
+  /// INCHANGÉE**, et c'est une décision, pas un reste.
+  ///
+  /// 🔴 **R-8** : l'échue **conserve sa description affichée en permanence**
+  /// *(verdict clarify nº 1 : son « 0 » n'a rien à dire, la description est ce
+  /// qui l'identifie)*. Lui appliquer le token agrandi **pousserait sa
+  /// description hors de la tuile** ⇒ ⛔ **le nombre agrandi et le centrage sont
+  /// réservés aux `ACTIVE`.**
+  static const double tailleNombreEchue = 48;
+
   /// Style du **nombre nu** : élément dominant, chiffres à chasse fixe.
+  ///
+  /// ⚠️ **La `FontFeature.tabularFigures()` est CONSERVÉE** — et ce qu'elle
+  /// garantit exactement : *deux nombres du **même** nombre de chiffres
+  /// occupent la même largeur*. ⛔ Elle ne garantit **rien** quand le nombre de
+  /// chiffres change ; ce que la mise en page doit à `FittedBox` est une autre
+  /// propriété *(Design UX §11.3)*.
   static const TextStyle styleNombre = TextStyle(
     fontFamily: policeNombre,
     fontFamilyFallback: ['monospace'],
-    fontSize: 48,
+    fontSize: tailleNombre,
     fontWeight: FontWeight.w700,
     height: 1,
     fontFeatures: [FontFeature.tabularFigures()],
   );
+
+  /// Le style du nombre **selon l'état de la tuile** — ⛔ **deux branches, et
+  /// une seule ferait tomber l'un des deux côtés d'AC-1** *(R-8)*.
+  ///
+  /// ⛔ **Le style échu DÉRIVE du style actif** *(`copyWith`)* : deux
+  /// `TextStyle` écrits côte à côte dériveraient sur la police, la graisse ou
+  /// la fonction tabulaire — **seule la taille change**, et c'est visible ici.
+  static TextStyle styleNombrePour({required bool estEchue}) => estEchue
+      ? styleNombre.copyWith(fontSize: tailleNombreEchue)
+      : styleNombre;
 
   /// Description en soutien discret — jamais concurrente du nombre.
   static const TextStyle styleDescription = TextStyle(

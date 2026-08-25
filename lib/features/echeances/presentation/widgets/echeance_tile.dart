@@ -40,7 +40,16 @@ class EcheanceTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              // 🔴 AC-1 (T6) — LE CADRAN CONTRE L'ÉTIQUETTE, et ⛔ sur les
+              // `ACTIVE` SEULEMENT (R-8). Une échue conserve sa description
+              // affichée sous son « 0 » : la centrer et grossir son nombre
+              // pousserait cette description hors de la tuile.
+              // ⛔ Les DEUX alignements comptent : celui-ci place le nombre sur
+              // l'axe HORIZONTAL, celui du `FittedBox` sur le VERTICAL. En
+              // changer un seul laisse le nombre à moitié en haut à gauche.
+              crossAxisAlignment: temps.estEchue
+                  ? CrossAxisAlignment.start
+                  : CrossAxisAlignment.center,
               children: [
                 // Le nombre occupe la place disponible et se REDUIT s'il le faut :
                 // AC-3 « Limite » exige que 9 tuiles restent embrassables d'un
@@ -48,13 +57,22 @@ class EcheanceTile extends StatelessWidget {
                 // cellule. Un `Text` nu débordait à 9 tuiles — mesuré par T12a.
                 Expanded(
                   child: FittedBox(
+                    // ⛔ `BoxFit.contain` est INTERDIT (§G-7) : il AGRANDIT
+                    // jusqu'à remplir, donc la taille du glyphe dépendrait du
+                    // NOMBRE DE CHIFFRES — au rafraîchissement, `10 → 9`
+                    // doublerait le chiffre sous les yeux du pratiquant, et
+                    // 9 tuiles porteraient 9 tailles différentes.
+                    // ✅ La taille s'augmente dans le TOKEN ; `scaleDown` reste
+                    // le FILET qui a fermé le débordement à 9 tuiles.
                     fit: BoxFit.scaleDown,
-                    alignment: Alignment.topLeft,
+                    alignment: temps.estEchue
+                        ? Alignment.topLeft
+                        : Alignment.center,
                     child: Text(
                       '${temps.nombreAffiche}',
-                      style: ConcentrationTheme.styleNombre.copyWith(
-                        color: avant,
-                      ),
+                      style: ConcentrationTheme.styleNombrePour(
+                        estEchue: temps.estEchue,
+                      ).copyWith(color: avant),
                     ),
                   ),
                 ),
