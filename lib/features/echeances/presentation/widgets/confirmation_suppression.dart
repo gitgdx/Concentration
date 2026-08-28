@@ -4,8 +4,8 @@ import '../../../../core/theme/concentration_tokens.dart';
 import '../../../../core/theme/rgb_extension.dart';
 import '../../domain/echeance.dart';
 import '../echeances_notifier.dart';
-import 'formulaire_echeance.dart';
 import 'ligne_echeance.dart';
+import 'message_ecriture.dart';
 
 /// Confirmation de suppression — composant **C-7**, et **la SEULE modale du
 /// produit** (T9, AC-7).
@@ -83,7 +83,8 @@ class _ConfirmationSuppressionState extends State<ConfirmationSuppression> {
               color: ConcentrationTokens.texteSurFond.couleur,
             ),
           ),
-          if (_echec != null) MessageValidation(texte: _echec!),
+          if (_echec != null)
+            MessageEcriture(ton: TonMessage.surfaceDeSaisie, texte: _echec!),
         ],
       ),
       actions: [

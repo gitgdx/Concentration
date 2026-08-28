@@ -100,6 +100,28 @@ class ConcentrationTheme {
   /// RNF-03, AC-8 « Erreur »)*.
   static const Curve courbeDisparition = Curves.easeIn;
 
+  /// Typographie du message d'écriture (Design UX §5.1, §7 — `tailleMessage`).
+  ///
+  /// ⚖️ **Elle REMONTE ici, et le motif est mesuré** : la table §7 la note
+  /// *« remonte — aujourd'hui **en dur** dans `formulaire_echeance.dart` »*.
+  /// Elle y vivait à **un** exemplaire pour **un** ton ; le hub en introduit un
+  /// second *(§5.1)*, et écrire `14/w500` **deux fois** ferait dériver la règle
+  /// — *« deux copies d'un motif dérivent, vérifié trois fois sur ce corpus »*.
+  ///
+  /// ⛔ **La COULEUR n'est PAS ici** : c'est le seul paramètre que le `ton`
+  /// change *(§5.1 — « la COULEUR, et rien d'autre »)*. Un style porteur d'une
+  /// couleur par défaut ferait de l'un des deux tons un **cas particulier**, et
+  /// le ton oublié rendrait la mauvaise couleur **sans qu'aucune assertion ne
+  /// puisse le voir** — la couleur est donc **toujours** apposée par appel.
+  static const double tailleMessage = 14;
+
+  /// Style du message, ⛔ **sans couleur** — voir [tailleMessage].
+  static const TextStyle styleMessage = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: tailleMessage,
+    fontWeight: FontWeight.w500,
+  );
+
   static ThemeData get sombre {
     final fond = ConcentrationTokens.fondApp.couleur;
     final texte = ConcentrationTokens.texteSurFond.couleur;

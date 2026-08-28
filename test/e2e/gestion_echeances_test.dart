@@ -17,6 +17,7 @@ import 'package:concentration/features/echeances/presentation/widgets/ligne_eche
 import 'package:concentration/features/echeances/presentation/widgets/echeance_tile.dart';
 import 'package:concentration/features/echeances/presentation/widgets/empty_echeances_placeholder.dart';
 import 'package:concentration/features/hub/presentation/hub_page.dart';
+import 'package:concentration/features/echeances/presentation/widgets/message_ecriture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -192,7 +193,7 @@ void main() {
         findsOneWidget,
       );
       // ⛔ ni erreur technique, ni couleur d'urgence.
-      expect(find.byType(MessageValidation), findsNothing);
+      expect(find.byType(MessageEcriture), findsNothing);
       for (final interdit in ['Exception', 'Error', 'errno', 'échec']) {
         expect(find.textContaining(interdit), findsNothing);
       }
@@ -268,7 +269,7 @@ void main() {
     await enregistrer(tester);
 
     expect(find.byType(FormulaireEcheance), findsOneWidget);
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('description'), findsWidgets);
     // ⛔ « aucune création partielle » s'asserte SUR LES OCTETS.
     expect(harnais.octets(), isNull);
@@ -288,7 +289,7 @@ void main() {
     );
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('description'), findsWidgets);
     expect(harnais.octets(), isNull);
   });
@@ -359,7 +360,7 @@ void main() {
     await saisir(tester, description: 'Description valide', date: '');
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('date'), findsWidgets);
     // ⛔ Aucune date INVENTÉE.
     expect(harnais.octets(), isNull);
@@ -402,7 +403,7 @@ void main() {
     );
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(
       find.textContaining('doit être dans le futur'),
       findsWidgets,
@@ -640,7 +641,7 @@ void main() {
       await saisir(tester, description: '');
       await enregistrer(tester);
 
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // L'échéance conserve description ET date — LES OCTETS D'ORIGINE.
       expect(harnais.octets(), octetsOrigine);
     },
@@ -1196,13 +1197,13 @@ void main() {
 
       // Le message de validation est lui aussi ANNONCÉ (`liveRegion`).
       await enregistrer(tester);
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // ⛔ Aucune sélection PAR POSITION : on cherche, parmi les `Semantics` de
       // la surface du message, ceux qui déclarent `liveRegion`.
       final annonces = tester
           .widgetList<Semantics>(
             find.descendant(
-              of: find.byType(MessageValidation),
+              of: find.byType(MessageEcriture),
               matching: find.byType(Semantics),
             ),
           )
@@ -1228,7 +1229,7 @@ void main() {
       );
       await enregistrer(tester);
 
-      final message = find.byType(MessageValidation);
+      final message = find.byType(MessageEcriture);
       expect(message, findsOneWidget);
       // Il utilise la couleur d'ERREUR du design system et reste lisible.
       final texte = tester.widget<Text>(
@@ -1329,7 +1330,7 @@ void main() {
     await reglerEcritures(tester);
 
     // Un message SOBRE indique que l'enregistrement n'a pas eu lieu.
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('pas été enregistrée'), findsOneWidget);
     // ⛔ Aucune échéance listée ni sur la grille — AUCUNE mise à jour optimiste.
     expect(find.byType(LigneEcheance), findsNothing);

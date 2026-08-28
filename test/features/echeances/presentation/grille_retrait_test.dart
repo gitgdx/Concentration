@@ -7,10 +7,11 @@ import 'package:concentration/features/echeances/domain/echeance.dart';
 import 'package:concentration/features/echeances/domain/validation_echeance.dart';
 import 'package:concentration/features/echeances/presentation/echeances_grid.dart';
 import 'package:concentration/features/echeances/presentation/widgets/echeance_tile.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../../support/gestes_tuile.dart';
 
 /// Le retrait d'une échue : **l'écriture d'abord, l'animation ensuite** (T10 —
 /// AC-8, AC-11 « Erreur »).
@@ -43,26 +44,14 @@ void main() {
   Finder tuile(String id) => find.byKey(ValueKey(id));
   final enveloppe = find.byKey(EcheancesGrid.cleDisparition);
 
-  /// Le **double appui**, tel que le corpus l'exerce déjà
-  /// (`echeance_tile_test.dart`) — ⛔ jamais deux `tap()` nus : le premier
-  /// appui doit être séparé du second d'au moins `kDoubleTapMinTime`.
-  ///
-  /// ⛔ **Aucun `pump` après le second appui** : c'est l'appelant qui décide,
-  /// parce que l'instant *« juste après le geste, avant toute frame »* est
-  /// précisément ce que le contrôle de **M-14** observe.
-  Future<void> doubleAppui(WidgetTester tester, String id) async {
-    final centre = tester.getRect(tuile(id)).center;
-    await tester.tapAt(centre);
-    await tester.pump(kDoubleTapMinTime + grain);
-    await tester.tapAt(centre);
-  }
-
-  /// ⚠️ Le reconnaisseur de double appui laisse un minuteur de
-  /// `kDoubleTapTimeout` en attente : sans cette avance, le démontage échoue
-  /// sur `!timersPending`. ⛔ **Ce n'est pas un défaut du produit**, c'est la
-  /// mécanique du reconnaisseur — le corpus le documente déjà (T8).
-  Future<void> purgerLeReconnaisseur(WidgetTester tester) =>
-      tester.pump(kDoubleTapTimeout + grain);
+  /// ⚖️ **Le double appui et la purge du reconnaisseur ont ÉTÉ EXTRAITS vers
+  /// `test/support/gestes_tuile.dart` (T19), EN UN SEUL EXEMPLAIRE** : T19 en
+  /// avait besoin sur une autre surface, et recopier un geste dont la mécanique
+  /// est subtile aurait dérivé **en silence** — un double appui mal séparé est
+  /// reçu comme **deux appuis simples**, donc le test observerait la
+  /// **révélation** au lieu du **retrait**, sans rougir pour la bonne raison.
+  Future<void> doubleAppuiSur(WidgetTester tester, String id) =>
+      doubleAppui(tester, tuile(id));
 
   double opacite(WidgetTester tester) =>
       tester.widget<FadeTransition>(enveloppe).opacity.value;
@@ -92,7 +81,7 @@ void main() {
         );
         expect(tuile('a'), findsOneWidget);
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
 
         expect(ecriture.appels, <String>['a'], reason: 'AC-4 : le geste écrit');
@@ -149,7 +138,7 @@ void main() {
         final ecriture = _Ecriture();
         await tester.pumpWidget(_hote([echue('a')], ecriture, maintenant));
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         // ⛔ AUCUN `pump` : pas une seule frame n'a été produite depuis le
         // geste. Si l'écriture était `await`ée APRÈS l'animation (M-14), cette
         // liste serait VIDE.
@@ -174,7 +163,7 @@ void main() {
         final ecriture = _Ecriture();
         await tester.pumpWidget(_hote([echue('a')], ecriture, maintenant));
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         // Démontage IMMÉDIAT : le pratiquant quitte l'écran dans la seconde.
         await tester.pumpWidget(const MaterialApp(home: SizedBox()));
         await tester.pump(duree * 4);
@@ -210,7 +199,7 @@ void main() {
           ),
         );
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
 
         expect(
@@ -256,7 +245,7 @@ void main() {
               cle: ValueKey('mode-$reduites'),
             ),
           );
-          await doubleAppui(tester, 'a');
+          await doubleAppuiSur(tester, 'a');
           await tester.pump();
           await tester.pump(duree + grain);
           await purgerLeReconnaisseur(tester);
@@ -286,7 +275,7 @@ void main() {
         );
         await tester.pumpWidget(_hote([echue('a')], ecriture, maintenant));
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         expect(ecriture.appels, <String>['a']);
         expect(
@@ -316,7 +305,7 @@ void main() {
         final ecriture = _Ecriture(differee: true);
         await tester.pumpWidget(_hote([echue('a')], ecriture, maintenant));
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         expect(ecriture.appels, <String>['a'], reason: 'l’écriture est LANCÉE');
         expect(
@@ -355,13 +344,13 @@ void main() {
           _hote([echue('a'), echue('b', 'passeport')], ecriture, maintenant),
         );
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         expect(enveloppe, findsOneWidget);
 
         // …au beau milieu de l'animation, l'AUTRE tuile est double-appuyée.
         await tester.pump(duree ~/ 3);
-        await doubleAppui(tester, 'b');
+        await doubleAppuiSur(tester, 'b');
         await tester.pump();
 
         expect(
@@ -397,9 +386,9 @@ void main() {
           _hote([echue('a'), echue('b', 'passeport')], ecriture, maintenant),
         );
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
-        await doubleAppui(tester, 'b');
+        await doubleAppuiSur(tester, 'b');
         await tester.pump();
 
         expect(ecriture.appels, <String>['a']);
@@ -433,7 +422,7 @@ void main() {
           _hote([echue('a')], ecriture, maintenant, recharge: false),
         );
 
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         // La frame d'entrée est passée, et l'issue n'est toujours pas connue.
         expect(enveloppe, findsNothing);
@@ -469,7 +458,7 @@ void main() {
         await tester.tap(tuile('b'));
         await tester.pump();
         // … et une animation EN COURS (contrôleur de T10).
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         await tester.pump(duree ~/ 3);
         expect(enveloppe, findsOneWidget);
@@ -509,7 +498,7 @@ void main() {
         await tester.pumpWidget(_hote(liste, _Ecriture(), maintenant));
         // 5 tuiles ⇒ 3 colonnes, 4 tuiles ⇒ 2 : la recomposition est MAXIMALE,
         // donc une animation de recomposition serait maximalement visible.
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
         await tester.pump(duree + grain);
         final apresRetrait = tester.getTopLeft(tuile('e'));
@@ -583,7 +572,7 @@ void main() {
       '1 → échelleDisparition, ⛔ jamais l’inverse',
       (tester) async {
         await tester.pumpWidget(_hote([echue('a')], _Ecriture(), maintenant));
-        await doubleAppui(tester, 'a');
+        await doubleAppuiSur(tester, 'a');
         await tester.pump();
 
         const fraction = 0.25;

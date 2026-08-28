@@ -8,6 +8,7 @@ import 'package:concentration/features/echeances/presentation/echeances_notifier
 import 'package:concentration/features/echeances/presentation/widgets/confirmation_suppression.dart';
 import 'package:concentration/features/echeances/presentation/widgets/formulaire_echeance.dart';
 import 'package:concentration/features/echeances/presentation/widgets/ligne_echeance.dart';
+import 'package:concentration/features/echeances/presentation/widgets/message_ecriture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -141,7 +142,7 @@ void main() {
       await tester.tap(find.text('Enregistrer'));
       await tester.pumpAndSettle();
 
-      final message = find.byType(MessageValidation);
+      final message = find.byType(MessageEcriture);
       expect(message, findsOneWidget, reason: '⛔ un refus n’est jamais muet');
       // ⛔ Jamais la couleur seule : le SIGNE est obligatoire (SC 1.4.1).
       expect(find.textContaining('⚠'), findsOneWidget);
@@ -187,7 +188,7 @@ void main() {
       await tester.tap(find.text('Enregistrer'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       expect(find.textContaining('25:00'), findsWidgets);
       expect(
         find.text("Sans heure, l'échéance est fixée à 23:59."),
@@ -237,7 +238,7 @@ void main() {
       expect(notifier.echeances, hasLength(9));
       await monter(tester, FormulaireEcheance(notifier: notifier));
 
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       expect(find.textContaining('9'), findsWidgets);
       // 🔴 ⛔ AUCUNE BARRIÈRE MUETTE : « Enregistrer » reste ACTIVABLE, sinon
       // « je TENTE de créer une dixième » devient inobservable.
@@ -356,7 +357,7 @@ void main() {
       expect(find.text('Jamais ecrite'), findsOneWidget);
       expect(find.text('15/03/${maintenant.year + 1}'), findsOneWidget);
       // Le message est ancré AU PIED DE L'ACTION, ⛔ aucun champ n'est fautif.
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // ⛔ Aucune trace technique, aucun code d'erreur.
       for (final interdit in ['Exception', 'errno', '.json', 'OS Error']) {
         expect(find.textContaining(interdit), findsNothing);
@@ -504,7 +505,7 @@ void main() {
       // ⛔ Fermer, c'est dire « c'est fait » — et l'utilisateur retrouverait
       // une liste qui A L'AIR NORMALE.
       expect(find.byType(ConfirmationSuppression), findsOneWidget);
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // ⛔ Le corps est INCHANGÉ : la question reste posée, rien n'a été fait.
       expect(find.textContaining('irréversible'), findsOneWidget);
       expect(harnais.octets(), avant);

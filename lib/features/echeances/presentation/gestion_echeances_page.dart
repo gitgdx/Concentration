@@ -9,6 +9,7 @@ import 'echeances_notifier.dart';
 import 'widgets/confirmation_suppression.dart';
 import 'widgets/formulaire_echeance.dart';
 import 'widgets/ligne_echeance.dart';
+import 'widgets/message_ecriture.dart';
 
 /// Page de gestion (T10) — **une ROUTE, ⛔ pas un onglet**, et elle ne porte
 /// **PAS la barre basse**.
@@ -113,7 +114,10 @@ class GestionEcheancesPage extends StatelessWidget {
         context: context,
         builder: (_) => AlertDialog(
           backgroundColor: ConcentrationTokens.surfaceElevee.couleur,
-          content: MessageValidation(texte: refus.message),
+          content: MessageEcriture(
+            ton: TonMessage.surfaceDeSaisie,
+            texte: refus.message,
+          ),
           actions: [
             TextButton(
               autofocus: true,
@@ -251,7 +255,11 @@ class _AffordanceAjout extends StatelessWidget {
                   label: const Text('Ajouter une échéance'),
                 ),
         ),
-        if (limite != null) MessageValidation(texte: limite.message),
+        if (limite != null)
+          MessageEcriture(
+            ton: TonMessage.surfaceDeSaisie,
+            texte: limite.message,
+          ),
       ],
     );
   }

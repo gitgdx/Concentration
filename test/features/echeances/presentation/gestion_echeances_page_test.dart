@@ -11,6 +11,7 @@ import 'package:concentration/features/echeances/presentation/gestion_echeances_
 import 'package:concentration/features/echeances/presentation/widgets/confirmation_suppression.dart';
 import 'package:concentration/features/echeances/presentation/widgets/formulaire_echeance.dart';
 import 'package:concentration/features/echeances/presentation/widgets/ligne_echeance.dart';
+import 'package:concentration/features/echeances/presentation/widgets/message_ecriture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -97,7 +98,7 @@ void main() {
         findsOneWidget,
       );
       // ⛔ Ni erreur technique, ni écran nu, ni couleur d'urgence.
-      expect(find.byType(MessageValidation), findsNothing);
+      expect(find.byType(MessageEcriture), findsNothing);
       for (final interdit in ['Exception', 'Error', 'null', 'échec']) {
         expect(find.textContaining(interdit), findsNothing);
       }
@@ -207,7 +208,7 @@ void main() {
       await ouvrir(tester);
       expect(find.byType(OutlinedButton), findsOneWidget);
       expect(find.byType(FilledButton), findsNothing);
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       expect(find.textContaining('9'), findsWidgets);
       expect(find.textContaining('supprimer'), findsWidgets);
       // ⛔ Le message NE PROMET PAS un geste inexistant avant US-01.4.
@@ -239,7 +240,7 @@ void main() {
       await ouvrir(tester);
       expect(find.byType(FilledButton), findsOneWidget);
       expect(find.byType(OutlinedButton), findsNothing);
-      expect(find.byType(MessageValidation), findsNothing);
+      expect(find.byType(MessageEcriture), findsNothing);
     });
   });
 
@@ -294,7 +295,7 @@ void main() {
       // ⛔ CONTRÔLE POSITIF D'ABORD : sans lui, « le message annonce » serait
       // vrai sur une page qui n'affiche aucun message.
       expect(notifier.presentes, hasLength(9));
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       expect(
         annonceDuGeste(),
         findsWidgets,
@@ -311,7 +312,7 @@ void main() {
         await ouvrir(tester);
 
         expect(notifier.presentes, hasLength(9));
-        expect(find.byType(MessageValidation), findsOneWidget);
+        expect(find.byType(MessageEcriture), findsOneWidget);
         expect(
           annonceDuGeste(),
           findsNothing,
@@ -342,7 +343,7 @@ void main() {
       expect(notifier.presentes, hasLength(8));
       expect(find.byType(FilledButton), findsOneWidget);
       expect(find.byType(OutlinedButton), findsNothing);
-      expect(find.byType(MessageValidation), findsNothing);
+      expect(find.byType(MessageEcriture), findsNothing);
     });
   });
 

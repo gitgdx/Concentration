@@ -6,6 +6,7 @@ import '../../domain/echeance.dart';
 import '../../domain/validation_echeance.dart';
 import '../echeances_notifier.dart';
 import 'ligne_echeance.dart';
+import 'message_ecriture.dart';
 
 /// Formulaire de **création ET d'édition** — ⛔ **un seul widget, deux titres**
 /// (T9).
@@ -136,7 +137,10 @@ class _FormulaireEcheanceState extends State<FormulaireEcheance> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_refus?.champ == ChampEcheance.formulaire)
-                MessageValidation(texte: _refus!.message),
+                MessageEcriture(
+                  ton: TonMessage.surfaceDeSaisie,
+                  texte: _refus!.message,
+                ),
               _Champ(
                 libelle: 'Description (obligatoire)',
                 aide:
@@ -174,7 +178,10 @@ class _FormulaireEcheanceState extends State<FormulaireEcheance> {
               // sur CE QUI A ÉCHOUÉ — ici l'action, pas un champ : la saisie
               // n'est PAS fautive.
               if (_refus?.champ == ChampEcheance.action)
-                MessageValidation(texte: _refus!.message),
+                MessageEcriture(
+                  ton: TonMessage.surfaceDeSaisie,
+                  texte: _refus!.message,
+                ),
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -275,7 +282,8 @@ class _Champ extends StatelessWidget {
               ),
             ),
           ),
-          if (message != null) MessageValidation(texte: message!),
+          if (message != null)
+            MessageEcriture(ton: TonMessage.surfaceDeSaisie, texte: message!),
           Text(
             aide,
             style: TextStyle(
@@ -285,43 +293,6 @@ class _Champ extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Composant **C-5** — message de validation ou d'échec, **en un seul
-/// exemplaire**.
-///
-/// ⚖️ **Déviation nommée** : le tableau des fichiers n'en prévoyait pas, mais
-/// **trois surfaces le consomment** — le formulaire, la page de gestion *(le
-/// message de la limite de 9)* et le dialogue de confirmation. Le dupliquer
-/// aurait fait **trois copies d'un composant**, et deux copies dérivent.
-///
-/// ⛔ Il ne **rédige** rien : son texte vient du domaine, en un seul exemplaire.
-/// Le signe ⚠ est **obligatoire** : `erreur`, `moduleActif` et
-/// `texteSecondaire` ont une luminance **quasi identique** (1,00:1), donc la
-/// teinte **ne peut rien porter seule** (SC 1.4.1).
-class MessageValidation extends StatelessWidget {
-  const MessageValidation({required this.texte, super.key});
-
-  final String texte;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Semantics(
-        liveRegion: true,
-        child: Text(
-          '⚠ $texte',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: ConcentrationTokens.erreur.couleur,
-          ),
-        ),
       ),
     );
   }
