@@ -87,7 +87,13 @@ class ConcentrationTokens {
   /// Période de rafraîchissement (RF-05 : au moins une fois par minute).
   static const Duration periodeRafraichissement = Duration(seconds: 30);
 
-  // ─── Tokens AJOUTÉS par US-01.4 (Design UX §7.1) — deux, pas un de plus.
+  // ─── Tokens AJOUTÉS par US-01.4 (Design UX §7.1 et §7.3).
+  // ⚖️ Cette ligne annonçait « deux, pas un de plus » jusqu'au 2026-08-27 :
+  //    elle est FAUSSE dès l'ajout des tokens de l'animation (T10), et le
+  //    décompte est RETIRÉ plutôt que mis à jour — un nombre dérivé écrit à
+  //    la main dans un commentaire ne se met pas à jour tout seul, et une
+  //    valeur fausse se retire (classe de défaut nº 1 du projet).
+  //    Le compte se LIT : grep -c "^  static const" sous cette ligne.
 
   /// Durée pendant laquelle la description remplace le nombre (AC-2).
   ///
@@ -112,4 +118,29 @@ class ConcentrationTokens {
   /// l'accessibilité donne de l'autre *(SC 1.4.4)* ⇒ **ratio de réduction
   /// maximal `11/13`, et rien de plus.**
   static const double plancherDescriptionRevelee = 11;
+
+  /// Durée de l'animation de disparition d'une échue retirée (Design UX §7.3).
+  ///
+  /// 🔴 **VALEUR CHIFFRÉE ET SES DEUX BORNES, ⛔ pas un goût** : en dessous
+  /// d'≈ 120 ms l'œil enregistre une **disparition sèche** *(l'animation
+  /// cesserait d'être le feedback qui remplace la modale)*, au-delà d'≈ 300 ms
+  /// elle **frictionne** le geste le plus fréquent du produit. ⛔ **Ne pas la
+  /// changer sans rejouer ce raisonnement.**
+  ///
+  /// ⛔ **Elle ne s'écrit NULLE PART ailleurs** : ni dans un widget, ni dans une
+  /// avance de test *(elles se **calculent** depuis ce token)*.
+  static const Duration dureeDisparition = Duration(milliseconds: 200);
+
+  /// Échelle finale de la tuile qui disparaît (Design UX §7.3).
+  ///
+  /// ⚖️ **Token AJOUTÉ, non prévu par la table §7 du Design UX — et le motif est
+  /// la règle du fichier lui-même** : *« aucune couleur ni dimension ne s'écrit
+  /// dans un widget »*. La valeur **est** donnée par §7.3 *(« échelle
+  /// 1 → 0,92 »)* ; l'écrire dans `echeances_grid.dart` en aurait fait le
+  /// **27ᵉ** nombre en dur de `lib/`. ➡️ **T16 doit l'inscrire dans
+  /// `DESIGN_SYSTEM.md` avec les deux autres.**
+  ///
+  /// ⛔ **AUCUN déplacement n'accompagne cette réduction** : un glissement
+  /// suggérerait *« ça va quelque part »*, or l'échéance **reste en gestion**.
+  static const double echelleDisparition = 0.92;
 }

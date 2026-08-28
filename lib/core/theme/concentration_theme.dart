@@ -84,6 +84,22 @@ class ConcentrationTheme {
     fontWeight: FontWeight.w400,
   );
 
+  /// Courbe de l'animation de disparition (Design UX §7.3).
+  ///
+  /// ⚖️ **ÉCART ASSUMÉ ET DÉJÀ ARBITRÉ — la table §7 du Design UX la nomme
+  /// « token », elle vit dans le THÈME.** C'est **exactement** l'arbitrage de
+  /// T6 pour `tailleNombre`, et le Design UX §7 le prévoit lui-même : *« si
+  /// c'est refusé, `courbeDisparition` vit dans le thème — ⛔ jamais dans un
+  /// widget »* *(J-4)*. **Motif mesuré** : `concentration_tokens.dart`
+  /// n'importe **aucune** bibliothèque Flutter, et `Curves` en exige une.
+  ///
+  /// 🔴 **ACCÉLÉRÉE, et le motif est une propriété du mouvement, pas un goût** :
+  /// une sortie **part**. Une courbe **décélérée** ferait **s'attarder** la
+  /// tuile — elle dirait *« je m'en vais… ou pas »*.
+  /// ⛔ **`elastic*` et `bounce*` sont INTERDITS** *(rebond, dépassement —
+  /// RNF-03, AC-8 « Erreur »)*.
+  static const Curve courbeDisparition = Curves.easeIn;
+
   static ThemeData get sombre {
     final fond = ConcentrationTokens.fondApp.couleur;
     final texte = ConcentrationTokens.texteSurFond.couleur;

@@ -47,8 +47,19 @@ class HubPage extends StatelessWidget {
       // et la création est refusée*.
       body: ListenableBuilder(
         listenable: notifier,
-        builder: (context, _) =>
-            EcheancesGrid(echeances: notifier.presentes, clock: clock),
+        builder: (context, _) => EcheancesGrid(
+          echeances: notifier.presentes,
+          clock: clock,
+          // ⛔ `null` EXPLICITEMENT, et c'est le précédent de T8 : le rappel de
+          // retrait est `required` pour qu'un appelant ne l'oublie pas, et
+          // nullable pour qu'il DISE qu'il n'y a rien à retirer.
+          // ⚖️ **À CE COMMIT (T10), le hub ne le branche PAS — DÉLIBÉRÉMENT** :
+          // le brancher ici livrerait un retrait dont l'ÉCHEC serait SILENCIEUX
+          // (le hub n'a aucune surface de message), c'est-à-dire AC-11 violé.
+          // La surface est **T19**, et elle branche le rappel dans le même
+          // commit qu'elle.
+          onRetirer: null,
+        ),
       ),
       bottomNavigationBar: _BarreModules(
         registre: registre,

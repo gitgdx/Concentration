@@ -25,7 +25,13 @@ void main() {
   Widget sous(List<Echeance> echeances) => MaterialApp(
     theme: ConcentrationTheme.sombre,
     home: Scaffold(
-      body: EcheancesGrid(echeances: echeances, clock: FakeClock(maintenant)),
+      body: EcheancesGrid(
+        echeances: echeances,
+        clock: FakeClock(maintenant),
+        // ⛔ `null` EXPLICITE : ces tests-là n'exercent AUCUN retrait, donc
+        // l'échue n'a rien à activer. Le retrait a son propre fichier.
+        onRetirer: null,
+      ),
     ),
   );
 
@@ -208,6 +214,7 @@ void main() {
                 ),
               ],
               clock: horloge,
+              onRetirer: null,
             ),
           ),
         ),
@@ -274,6 +281,7 @@ void main() {
           echeances: echeances,
           clock: horloge,
           calculateur: calculateur ?? const RemainingTimeCalculator(),
+          onRetirer: null,
         ),
       ),
     );
