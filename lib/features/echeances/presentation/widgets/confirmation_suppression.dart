@@ -67,7 +67,7 @@ class _ConfirmationSuppressionState extends State<ConfirmationSuppression> {
     return AlertDialog(
       backgroundColor: ConcentrationTokens.surfaceElevee.couleur,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ConcentrationTokens.rayonSurface),
         side: BorderSide(color: ConcentrationTokens.contour.couleur),
       ),
       title: const Text('Supprimer cette échéance ?'),

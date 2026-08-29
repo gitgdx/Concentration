@@ -143,4 +143,27 @@ class ConcentrationTokens {
   /// ⛔ **AUCUN déplacement n'accompagne cette réduction** : un glissement
   /// suggérerait *« ça va quelque part »*, or l'échéance **reste en gestion**.
   static const double echelleDisparition = 0.92;
+
+  /// Rayon des surfaces — **`DESIGN_SYSTEM.md` §Espacement, rayons le NOMME
+  /// déjà** *(« `rayonSurface 16` (cartes — **même valeur que la tuile**) »)*.
+  ///
+  /// ⚖️ **Il entre ici à T11 parce que T11 en a besoin PAR FORMULE**, et le
+  /// ramener à **un exemplaire** était un préalable : ⛔ **il était écrit à la
+  /// main dans TROIS fichiers** *(`echeance_tile`, `ligne_echeance`,
+  /// `confirmation_suppression`)* — *« une règle n'existe qu'en un seul
+  /// exemplaire ; deux copies dérivent, vérifié trois fois sur ce corpus »*.
+  static const double rayonSurface = 16;
+
+  /// Épaisseur d'**UN** liseré de l'anneau de focus (Design UX §6.1).
+  ///
+  /// 🔴 **UN SEUL token pour LES DEUX liserés** — le design l'exige
+  /// nommément : *« deux valeurs dériveraient »*. La largeur totale de
+  /// l'indicateur en vaut donc **le double**, soit **le double du minimum de
+  /// SC 2.4.11**, et c'est nécessaire : il faut **deux** bandes pour tenir les
+  /// deux côtés du contraste.
+  ///
+  /// ⛔ **Les rayons de l'anneau ne sont PAS des nombres**, ce sont des
+  /// **formules** sur [rayonSurface] *(§6.1)* : extérieur `+ épaisseur`,
+  /// jonction inchangé, intérieur `− épaisseur`.
+  static const double epaisseurAnneauFocus = 2;
 }

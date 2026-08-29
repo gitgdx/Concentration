@@ -88,7 +88,7 @@ class LigneEcheance extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: ConcentrationTokens.surfaceElevee.couleur,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(ConcentrationTokens.rayonSurface),
           // 🔴 SECONDE marque de l'état échu, à côté du MOT « Échéance
           // atteinte » — ⛔ l'état ne repose jamais sur la couleur seule.
           // ⚖️ **Écart nommé avec le wireframe** *(qui dessine un liseré

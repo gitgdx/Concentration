@@ -356,6 +356,17 @@ class _EcheancesGridState extends State<EcheancesGrid>
                 crossAxisCount: colonnes,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
+                // 🔴 **T11 — SANS CECI, L'ANNEAU DE FOCUS DES TUILES DE BORD
+                // SERAIT ROGNÉ.** Un `GridView` est une vue défilante : son
+                // `clipBehavior` vaut `Clip.hardEdge` par défaut, et il rogne
+                // donc **au bord du viewport**. Or le liseré extérieur de
+                // l'anneau est peint **HORS** de la tuile *(2 dp)*, et une
+                // tuile de bord est **à fleur** du viewport ⇒ son liseré
+                // tomberait, sur les quatre côtés de la grille.
+                // ✅ **Débordement SANS RISQUE, et c'est arithmétique** : le
+                // `Padding(all: 12)` juste au-dessus laisse **12 dp** autour du
+                // viewport, contre **2 dp** d'empreinte ⇒ il reste 10 dp.
+                clipBehavior: Clip.none,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [for (final e in bornees) _tuile(e)],
               ),

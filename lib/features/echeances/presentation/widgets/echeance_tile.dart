@@ -11,7 +11,7 @@ import '../../domain/remaining_time.dart';
 /// ⛔ **Le nombre est NU** : aucune unité, aucune fraction, aucun signe (RF-01).
 /// L'unité n'existe que dans [RemainingTime.libelleAccessibilite], porté par
 /// `Semantics` — c'est le seul endroit où elle devient un mot (AC-8).
-class EcheanceTile extends StatelessWidget {
+class EcheanceTile extends StatefulWidget {
   const EcheanceTile({
     required this.temps,
     required this.description,
@@ -55,6 +55,17 @@ class EcheanceTile extends StatelessWidget {
   /// a produit le faux vert.
   static const Key cleFond = Key('echeance-tile-fond');
 
+  /// Les deux liserés de l'anneau de focus, **désignés par leur identité** —
+  /// même motif que [cleFond] : T11 ajoute **deux** boîtes décorées sous la
+  /// tuile, et c'est **exactement** le cas que `NB-7` décrivait.
+  ///
+  /// ⚖️ **Le déclencheur de NB-7 est ICI, et il a été MESURÉ à T8** : l'enveloppe
+  /// interactive insère **ZÉRO** `DecoratedBox` ⇒ ce que `C-4` annonçait est
+  /// vérifié — la dépendance *« T7 avant T8 »* était juste, mais sa **nécessité**
+  /// se situe à **T11**.
+  static const Key cleAnneauExterieur = Key('echeance-tile-anneau-exterieur');
+  static const Key cleAnneauInterieur = Key('echeance-tile-anneau-interieur');
+
   final RemainingTime temps;
   final String description;
 
@@ -84,7 +95,42 @@ class EcheanceTile extends StatelessWidget {
   final TemporalGradient gradient;
 
   @override
+  State<EcheanceTile> createState() => _EcheanceTileState();
+}
+
+/// 🔴 **La tuile est `Stateful` DEPUIS T11, et pour UN SEUL état : la MISE EN
+/// ÉVIDENCE DU FOCUS.**
+///
+/// ⚖️ **PÉRIMÉ-2026-08-28 sur un point, et un seul** : la documentation de
+/// [EcheanceTile.revele] dit *« la tuile reste une fonction pure de ses
+/// entrées »*. **C'était vrai jusqu'à T11, c'est faux depuis** — elle porte
+/// désormais `_focusVisible`. ⛔ **La phrase n'est pas repeinte** : *on date, on
+/// ne repeint pas*. **Ce qu'elle protégeait demeure** : l'état de **révélation**
+/// vit toujours dans `_EcheancesGridState`, en un exemplaire, et la grille peut
+/// reconstruire la tuile à chaque tic sans rien lui faire perdre — un `State`
+/// **survit** à la reconstruction du parent.
+///
+/// 🔴 **POURQUOI ICI ET PAS DANS LA GRILLE, et le motif est mesurable** :
+/// `onShowFocusHighlight` est un rappel **du détecteur**, donc par tuile. Le
+/// hisser dans la grille exigerait un **canal supplémentaire** que le design ne
+/// demande pas, **et** reconstruirait **les neuf tuiles** à chaque déplacement
+/// du focus, là où un `setState` local n'en reconstruit **qu'une**.
+///
+/// ⛔ **Aucun minuteur, aucun contrôleur** ⇒ aucun `dispose` à tenir.
+class _EcheanceTileState extends State<EcheanceTile> {
+  /// ⛔ **`false` par défaut, et la valeur ne se devine pas** : l'anneau est
+  /// peint **SEULEMENT** quand le framework annonce une mise en évidence de
+  /// focus *(traversée clavier / AT)*, ⛔ **jamais au contact d'un doigt**
+  /// *(Design UX §6.2 règle 2)*.
+  bool _focusVisible = false;
+
+  @override
   Widget build(BuildContext context) {
+    final temps = widget.temps;
+    final description = widget.description;
+    final intention = widget.intention;
+    final revele = widget.revele;
+    final gradient = widget.gradient;
     final fond = gradient.backgroundFor(temps.progression);
     // foregroundFor ÉCHOUE BRUYAMMENT si aucun token n'atteint le seuil : c'est
     // voulu (ADR-003 §5), un dégradé illisible est un défaut de tokens.
@@ -98,10 +144,10 @@ class EcheanceTile extends StatelessWidget {
         revele && !temps.estEchue && description.isNotEmpty;
 
     final rendu = DecoratedBox(
-      key: cleFond,
+      key: EcheanceTile.cleFond,
       decoration: BoxDecoration(
         color: fond.couleur,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ConcentrationTokens.rayonSurface),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -217,6 +263,23 @@ class EcheanceTile extends StatelessWidget {
     // `splashColor` ferait ENCODER L'INTERACTION PAR LA COULEUR (RF-04 rompu,
     // mutant M-13). Un `GestureDetector` nu n'apporte aucune ondulation.
     return FocusableActionDetector(
+      // 🔴 **L'ANNEAU N'APPARAÎT QUE POUR LA MISE EN ÉVIDENCE DU FOCUS**
+      // *(traversée clavier / AT)*, ⛔ **jamais au contact d'un doigt**
+      // *(Design UX §6.2 règle 2)*. **Motif** : AC-10 « Erreur » exige que tout
+      // retour visuel d'appui soit NEUTRE, et un liseré `moduleActif` —
+      // l'accent orange du produit — qui s'allumerait sous le doigt serait un
+      // **retour d'appui coloré** sur la surface où la couleur ⛔ n'encode
+      // **que** la proximité temporelle.
+      // ⚠️ **Aucune clause d'AC ne couvre exactement cela** *(AC-10 « Erreur »
+      // parle de la COULEUR DE FOND)* ⇒ c'est une décision de design, et elle
+      // demande **une assertion**, pas un AC.
+      // ⛔ `onFocusChange` serait FAUX ICI : il s'allume aussi sur un focus
+      // pris **au doigt**. `onShowFocusHighlight` est le seul rappel qui dise
+      // « le framework MET EN ÉVIDENCE ce focus ».
+      onShowFocusHighlight: (visible) {
+        if (visible == _focusVisible) return;
+        setState(() => _focusVisible = visible);
+      },
       actions: <Type, Action<Intent>>{
         ActivateIntent: CallbackAction<ActivateIntent>(
           onInvoke: (_) {
@@ -240,7 +303,9 @@ class EcheanceTile extends StatelessWidget {
         label: temps.libelleAccessibilite,
         button: true,
         onTap: activer,
-        hint: temps.estEchue ? hintRetrait : hintRevelation,
+        hint: temps.estEchue
+            ? EcheanceTile.hintRetrait
+            : EcheanceTile.hintRevelation,
         child: ExcludeSemantics(
           // `excludeFromSemantics` en plus de l'exclusion ci-dessus : le
           // détecteur ne crée AUCUN second nœud annoncé (mesuré :
@@ -253,7 +318,7 @@ class EcheanceTile extends StatelessWidget {
             // double appui — ⛔ invisibles à tout scénario fonctionnel.
             onTap: temps.estEchue ? null : activer,
             onDoubleTap: temps.estEchue ? activer : null,
-            child: rendu,
+            child: _AnneauFocus(visible: _focusVisible, child: rendu),
           ),
         ),
       ),
@@ -336,4 +401,106 @@ class _DescriptionRevelee extends StatelessWidget {
       style: style,
     ),
   );
+}
+
+/// L'**anneau de focus BICOLORE** (Design UX §6.1, `U-3`, risque `R-4`).
+///
+/// 🔴 **POURQUOI BICOLORE — et ce n'est PAS un goût, c'est un calcul sur 101
+/// points** : ⛔ **aucune couleur plate ne tient les deux côtés**. `moduleActif`
+/// rend **1,36:1** sur le dégradé *(**101/101** points sous 3:1)*, le blanc
+/// **2,31:1**, et le noir est **indistinguable** de `fondApp`. La seule
+/// combinaison de tokens **existants** qui tienne est bicolore : intérieur
+/// `fondApp` *(4,53 → 8,02:1 selon le point du dégradé)*, extérieur
+/// `moduleActif` *(10,89:1 sur `fondApp`)*, séparabilité entre les deux
+/// **10,89:1**.
+///
+/// 🔴 **LE LISERÉ INTÉRIEUR SE PEINT, il ne se DEVINE pas** *(§6.2 règle 1)*.
+/// Un anneau `moduleActif` posé **avec un décalage** laisserait apparaître **la
+/// peinture du parent** dans l'écart — c'est-à-dire `fondApp`, **par
+/// coïncidence**, parce que le hub est sombre. Le contraste serait alors une
+/// **propriété du parent, pas une décision**, et il tomberait le jour où la
+/// tuile serait posée ailleurs.
+///
+/// ⛔ **L'ANNEAU NE PREND AUCUNE PLACE DE MISE EN PAGE.** Le liseré extérieur
+/// est peint **HORS** de la tuile par un `Positioned` à décalage **négatif**,
+/// sous un `Stack(clipBehavior: Clip.none)`. **Motif de sûreté, et c'est le même
+/// qu'à T19** : un anneau qui occuperait de la place ferait **refluer la
+/// grille** à chaque déplacement du focus — donc **déplacerait les tuiles sous
+/// le doigt**.
+///
+/// ⛔ **Le focus ne change RIEN D'AUTRE** *(§6.2 règle 3)* : ni la couleur de
+/// fond, ni la taille du nombre, ni le contenu — [child] est rendu **tel quel**.
+class _AnneauFocus extends StatelessWidget {
+  const _AnneauFocus({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  /// ⛔ **Les rayons sont des FORMULES, jamais des nombres** *(§6.1)* : deux
+  /// littéraux dériveraient du jour où `rayonSurface` bougerait.
+  static const double _epaisseur = ConcentrationTokens.epaisseurAnneauFocus;
+  static const double _rayonExterieur =
+      ConcentrationTokens.rayonSurface + _epaisseur;
+  static const double _rayonJonction = ConcentrationTokens.rayonSurface;
+
+  @override
+  Widget build(BuildContext context) {
+    // ⛔ Hors mise en évidence, l'anneau n'existe pas dans l'arbre : « il n'est
+    // pas peint » est donc ASSERTABLE, et non pas déduit d'une opacité.
+    if (!visible) return child;
+
+    return Stack(
+      // ⛔ INDISPENSABLE : sans lui, le liseré extérieur — qui est HORS des
+      // bornes — serait rogné.
+      clipBehavior: Clip.none,
+      children: [
+        // Liseré EXTÉRIEUR : `moduleActif`, HORS de la tuile.
+        // ⚖️ L'empreinte est de `_epaisseur` dp au-delà du bord, contre **12 dp**
+        // d'espacement entre tuiles **[LU]** ⇒ il reste 10 dp jusqu'à la
+        // voisine : ⛔ aucun chevauchement.
+        Positioned(
+          left: -_epaisseur,
+          top: -_epaisseur,
+          right: -_epaisseur,
+          bottom: -_epaisseur,
+          child: DecoratedBox(
+            key: EcheanceTile.cleAnneauExterieur,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: ConcentrationTokens.moduleActif.couleur,
+                width: _epaisseur,
+              ),
+              borderRadius: BorderRadius.circular(_rayonExterieur),
+            ),
+          ),
+        ),
+        child,
+        // Liseré INTÉRIEUR : `fondApp`, PEINT SUR la tuile, **contigu** à
+        // l'extérieur *(décalage 0 — un écart y ferait apparaître une troisième
+        // couleur non calculée)*.
+        // ⚖️ **UN `IgnorePointer` A ÉTÉ RETIRÉ ICI, ET LA MESURE L'A EXIGÉ.**
+        // Je l'avais mis « pour que l'anneau n'intercepte pas l'appui ». Le
+        // mutant `M-w` *(`ignoring: false`)* a laissé **les 13 tests VERTS** —
+        // et c'est **juste** : le `GestureDetector` est un **ANCÊTRE** de
+        // l'anneau, donc un descendant qui répond au test de contact
+        // ⛔ **n'empêche pas** l'ancêtre de recevoir le pointeur.
+        // ⇒ c'était une **barrière qui ne peut pas échouer**, la classe de
+        // défaut que ce projet refuse depuis US-00.5 : *« un contrôle qui ne
+        // peut pas rougir est nul »*. Elle est donc **retirée**, ⛔ pas
+        // documentée comme utile.
+        Positioned.fill(
+          child: DecoratedBox(
+            key: EcheanceTile.cleAnneauInterieur,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: ConcentrationTokens.fondApp.couleur,
+                width: _epaisseur,
+              ),
+              borderRadius: BorderRadius.circular(_rayonJonction),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -82,6 +82,67 @@ void main() {
     );
   });
 
+  group('T11 — le liseré INTÉRIEUR de l’anneau de focus (SC 1.4.11)', () {
+    // 🔴 **L'UNIQUE assertion de contraste que T11 ajoute, et elle s'écrit ICI**
+    // *(Design UX §6.3)* : tous les autres couples dont l'anneau a besoin
+    // existent déjà dans `contraste_tokens_test.dart` — `moduleActif / fondApp`,
+    // `fondApp / moduleActif`, `texteSurFond / fondApp`,
+    // `texteSecondaire / surfaceElevee`.
+    //
+    // ⛔ **Ce couple-ci n'est PAS un couple de tokens** : c'est `fondApp` contre
+    // **le dégradé**, donc contre 101 fonds différents. Il doit donc vivre là où
+    // la boucle sur 101 points EXISTE DÉJÀ — ⛔ **jamais en recopiant la boucle
+    // ailleurs**, *deux copies d'une règle dérivent*.
+    test(
+      '🔴 `fondApp` tient 3:1 contre les 101 points du dégradé — c’est ce qui '
+      'rend l’anneau BICOLORE nécessaire, et ⛔ pas un goût',
+      () {
+        final interieur = ConcentrationTokens.fondApp;
+        var pire = double.infinity;
+        var sousLeSeuil = 0;
+        for (var i = 0; i <= 100; i++) {
+          final c = interieur.contrasteAvec(gradient.backgroundFor(i / 100));
+          if (c < pire) pire = c;
+          if (c < 3.0) sousLeSeuil++;
+        }
+        // ⛔ Le seuil n'est PAS recopié d'un document : 3:1 est celui de
+        // SC 1.4.11 pour un composant non textuel, et le nombre de points sous
+        // le seuil est un DÉCOMPTE, pas une estimation.
+        expect(
+          sousLeSeuil,
+          0,
+          reason:
+              '$sousLeSeuil/101 points sous 3:1 — le liseré intérieur cesserait '
+              'd’être visible sur une partie du dégradé',
+        );
+        expect(
+          pire,
+          greaterThanOrEqualTo(3.0),
+          reason: 'pire contraste ${pire.toStringAsFixed(2)}:1 sur 101 points',
+        );
+        // 🔴 **CONTRÔLE NÉGATIF — sans lui, l'assertion ci-dessus ne dirait pas
+        // POURQUOI l'anneau est bicolore.** `moduleActif` seul, la couleur
+        // « évidente » pour un indicateur de focus, ÉCHOUE sur **tous** les
+        // points : c'est la mesure qui a écarté la couleur plate.
+        final exterieur = ConcentrationTokens.moduleActif;
+        var echecsCouleurPlate = 0;
+        for (var i = 0; i <= 100; i++) {
+          if (exterieur.contrasteAvec(gradient.backgroundFor(i / 100)) < 3.0) {
+            echecsCouleurPlate++;
+          }
+        }
+        expect(
+          echecsCouleurPlate,
+          101,
+          reason:
+              '`moduleActif` posé SEUL contre le dégradé doit échouer sur les '
+              '101 points — sinon une couleur plate suffirait et la géométrie '
+              'bicolore serait une complication gratuite',
+        );
+      },
+    );
+  });
+
   group('monotonie perceptuelle', () {
     test(
       'L est EXACTEMENT monotone dans l’interpolation (contrat du moteur)',
