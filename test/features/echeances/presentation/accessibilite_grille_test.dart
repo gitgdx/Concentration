@@ -511,8 +511,8 @@ void main() {
     );
 
     testWidgets(
-      '🔴 ×1,6 — LA TUILE DÉBORDE, et la CIBLE TACTILE TIENT QUAND MÊME '
-      '(défaut de RENDU, ⛔ pas de géométrie) — refermé par T13',
+      '✅ ×1,6 — LE DÉBORDEMENT MESURÉ PAR T11 EST REFERMÉ PAR T13, et la '
+      'cible tactile tient toujours',
       (tester) async {
         tester.platformDispatcher.textScaleFactorTestValue = 1.6;
         addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -527,22 +527,23 @@ void main() {
         await tester.pumpWidget(hote(jeu(9), largeur: 320));
         FlutterError.onError = precedent;
 
-        // ⚠️ Ces assertions PASSENT aujourd'hui et DEVRONT ROUGIR quand T13
-        // retirera la description au repos. C'est voulu : elles forcent la
-        // conversation au lieu de laisser le défaut se refermer en silence.
+        // ⚖️ **CETTE ASSERTION A ÉTÉ RETOURNÉE LE 2026-08-29, ET C'ÉTAIT
+        // ANNONCÉ.** Écrite par T11, elle CONSTATAIT un défaut réel — à
+        // 9 tuiles / 320 dp la tuile débordait dès ×1,6 — et disait « devra
+        // rougir quand T13 retirera la description au repos ».
+        // ✅ **T13 est arrivée, elle a rougi, le défaut est refermé.** La cause
+        // avait été mesurée DANS LES DEUX SENS : sans description, aucun
+        // débordement même à ×3,0.
+        // ⛔ Le test n'est PAS supprimé : il garde le cas le plus étroit du
+        // produit sous surveillance, du bon côté cette fois — et un décompte à
+        // ZÉRO est une assertion plus forte qu'une absence d'exception.
         expect(
-          erreurs.length,
-          9,
+          erreurs,
+          isEmpty,
           reason:
-              'BORNE DATÉE 2026-08-28 : UNE par tuile, ⛔ pas une seule fois',
-        );
-        expect(
-          erreurs.every((d) => d.exceptionAsString().contains('overflowed')),
-          isTrue,
-          reason:
-              'le débordement est RÉEL et visible à partir de ×1,6 ; T13 le '
-              'referme en bornant la description aux ÉCHUES (mesuré : sans '
-              'description, aucun débordement même à ×3,0)',
+              'T13 borne la description aux ÉCHUES ⇒ plus aucun débordement ; '
+              '⛔ toute réapparition ici serait une RÉGRESSION du cas le plus '
+              'étroit du produit (9 tuiles, 320 dp, ×1,6)',
         );
 
         // ✅ Et ce que T11 doit garantir TIENT : la cible reste ≥ 48 dp.

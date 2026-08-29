@@ -199,11 +199,25 @@ class _EcheanceTileState extends State<EcheanceTile> {
               ),
             // ⛔ La description n'est JAMAIS rendue deux fois : révélée, elle
             // vit dans la boîte du nombre et nulle part ailleurs.
-            // ⚠️ Le masquage de cette description AU REPOS sur une `ACTIVE`
-            // (AC-1 « Erreur ») arrive avec **T13**, dans le MÊME commit que
-            // l'étape Gherkin d'US-01.1 et son assertion appariée — ⛔ le
-            // dissocier rendrait le corpus faux à ce commit.
-            if (description.isNotEmpty && !revelationVisible)
+            //
+            // ✅ **T13 (2026-08-29) — LA DESCRIPTION AU REPOS EST BORNÉE AUX
+            // `ÉCHUE`** *(AC-1 « Erreur », Design UX §4.1 : une `ACTIVE` porte
+            // le **nombre SEUL, centré**)*. Une `ACTIVE` ne la montre plus qu'à
+            // la **révélation**, à la place du nombre.
+            //
+            // 🔴 **ET CE N'EST PAS QU'UNE QUESTION DE MAQUETTE : ce commit
+            // REFERME UN DÉBORDEMENT MESURÉ PAR T11.** À **9 tuiles / 320 dp**,
+            // la tuile débordait **dès ×1,6** *(9 exceptions, une par tuile)* ;
+            // ⛔ à 4 tuiles, à 390 dp ou à ×1,5, aucun débordement ; et **SANS
+            // description, aucun débordement même à ×3,0** — c'est **cette
+            // mesure-là** qui désignait la cause, et donc le remède.
+            //
+            // ⛔ Le `!revelationVisible` a disparu et ⛔ ce n'est pas un oubli :
+            // `revelationVisible` exige `!temps.estEchue`, donc il est **faux
+            // par construction** ici. Le garder aurait été une condition qui ⛔
+            // **ne peut jamais être fausse** — la barrière muette que ce projet
+            // refuse.
+            if (temps.estEchue && description.isNotEmpty)
               Text(
                 description,
                 maxLines: 2,

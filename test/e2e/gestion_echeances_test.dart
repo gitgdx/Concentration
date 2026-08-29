@@ -164,6 +164,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// ⚖️ **T13 (2026-08-29) — LE CANAL DE LA DESCRIPTION SUR LA GRILLE.**
+  /// Une tuile `ACTIVE` ne **PEINT** plus sa description au repos *(AC-1
+  /// « Erreur » d'US-01.4)* : sur le **hub**, elle se lit dans le **libellé
+  /// d'accessibilité**. ⛔ Sur la **page de GESTION**, rien ne change — la
+  /// description y est bien peinte par `LigneEcheance`.
+  /// ⛔ **PAS `.first`** : `FocusableActionDetector` insère son propre
+  /// `Semantics` **sans libellé** (mesuré à T8).
+  String libellesDeLaGrille(WidgetTester tester) => tester
+      .widgetList<Semantics>(find.byType(Semantics))
+      .map((w) => w.properties.label)
+      .whereType<String>()
+      .join(' | ');
+
   testWidgets('Ouverture de la page de gestion depuis le hub', (tester) async {
     poser([ech('a', const Duration(days: 90), 'Convention')]);
     await ouvrirApplication(tester);
@@ -328,7 +341,8 @@ void main() {
     // Le `trim` est vérifié SUR LA VALEUR PERSISTÉE, ⛔ pas sur le champ.
     expect(persistees().single.description, 'Convention annuelle');
     await revenir(tester);
-    expect(find.text('Convention annuelle'), findsWidgets);
+    // ⚖️ T13 : sur le HUB, la description vit dans le libellé.
+    expect(libellesDeLaGrille(tester), contains('Convention annuelle'));
   });
 
   testWidgets('Une échéance saisie sans heure est enregistrée à 23h59', (
@@ -565,7 +579,7 @@ void main() {
     (tester) async {
       poser([ech('a', const Duration(days: 10), 'Avant')]);
       await ouvrirApplication(tester);
-      expect(find.text('Avant'), findsWidgets);
+      expect(libellesDeLaGrille(tester), contains('Avant'));
       await ouvrirGestion(tester);
 
       await tester.tap(find.byIcon(Icons.edit));
@@ -577,14 +591,11 @@ void main() {
       await revenir(tester);
       // ⛔ SANS `pumpWidget` supplémentaire : un remontage masquerait l'absence
       // de notification (C-6).
-      expect(
-        find.descendant(
-          of: find.byType(EcheanceTile),
-          matching: find.text('Apres'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Avant'), findsNothing);
+      final libelles = libellesDeLaGrille(tester);
+      expect(libelles, contains('Apres'));
+      // ⛔ Et l'ANCIENNE valeur a bien disparu — sur le canal où elle vivait,
+      // sinon l'assertion serait vraie PAR ACCIDENT depuis T13.
+      expect(libelles, isNot(contains('Avant')));
     },
   );
 
@@ -923,8 +934,9 @@ void main() {
       expect(find.byType(HubPage), findsOneWidget);
       expect(tester.takeException(), isNull);
       expect(find.byType(EcheanceTile), findsNWidgets(2));
-      expect(find.text('Valide un'), findsOneWidget);
-      expect(find.text('illisible'), findsNothing);
+      final libellesOk = libellesDeLaGrille(tester);
+      expect(libellesOk, contains('Valide un'));
+      expect(libellesOk, isNot(contains('illisible')));
     },
   );
 
@@ -1070,14 +1082,17 @@ void main() {
       await ouvrirApplication(tester);
 
       expect(find.byType(EcheanceTile), findsNWidgets(2));
-      expect(find.text('Saisie par le pratiquant'), findsOneWidget);
+      final libellesGrille = libellesDeLaGrille(tester);
+      expect(libellesGrille, contains('Saisie par le pratiquant'));
       // 🔴 Une assertion doit ÉCHOUER si une échéance d'EXEMPLE apparaît : les
       // descriptions du jeu d'exemple sont NOMMÉES, ⛔ pas devinées.
+      // ⚖️ T13 : sur le canal du LIBELLÉ — l'assertion visuelle serait
+      // désormais vraie sans rien prouver.
       for (final exemple in EcheancesExemple.depuis(horloge)) {
         if (exemple.description.isEmpty) continue;
         expect(
-          find.text(exemple.description),
-          findsNothing,
+          libellesGrille,
+          isNot(contains(exemple.description)),
           reason: '⛔ « ${exemple.description} » vient du jeu d’EXEMPLE',
         );
       }

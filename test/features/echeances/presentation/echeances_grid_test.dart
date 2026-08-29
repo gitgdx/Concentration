@@ -301,6 +301,7 @@ void main() {
       required String nombre,
       required String description,
       required bool revelee,
+      bool estEchue = false,
     }) {
       expect(
         find.text(nombre),
@@ -309,9 +310,27 @@ void main() {
             ? 'révélée : le nombre est ABSENT, la description a SA boîte'
             : 'au repos : le nombre est de retour',
       );
-      // ⚠️ Vraie dans les deux états AUJOURD'HUI — conservée comme contrôle
-      // que le texte n'est jamais PERDU, ⛔ jamais comme preuve de révélation.
-      expect(find.text(description), findsOneWidget);
+      // ⛔ **PÉRIMÉ-2026-08-29 (T13)** : cette assertion portait
+      //   `expect(find.text(description), findsOneWidget);`
+      // avec le commentaire *« Vraie dans les deux états AUJOURD'HUI »*.
+      // **C'était vrai jusqu'au 2026-08-28, c'est FAUX depuis** : une `ACTIVE`
+      // AU REPOS porte le **nombre SEUL** et ⛔ ne peint plus sa description
+      // *(AC-1 « Erreur », et c'est ce qui referme le débordement mesuré par
+      // T11 à ×1,6)*. ⛔ On date, on ne repeint pas.
+      //
+      // ✅ **L'attente devient DÉPENDANTE DE L'ÉTAT, et c'est un GAIN** :
+      // l'ancienne forme était vraie partout, donc elle ⛔ **ne distinguait
+      // rien** ; celle-ci rougit si la description apparaît là où elle ne doit
+      // pas, **et** si elle disparaît là où elle doit être.
+      expect(
+        find.text(description),
+        revelee || estEchue ? findsOneWidget : findsNothing,
+        reason: revelee
+            ? 'révélée : la description occupe la boîte du nombre'
+            : estEchue
+            ? 'une ÉCHUE peint sa description EN PERMANENCE'
+            : 'au repos, une ACTIVE porte le nombre SEUL (T13)',
+      );
     }
 
     test('🔴 GARDE DU PHASAGE — la fenêtre est STRICTEMENT plus courte que la '
@@ -482,7 +501,12 @@ void main() {
 
         await tester.tap(tuile('a'));
         await tester.pump(kDoubleTapTimeout + grain);
-        verifier(nombre: '0', description: 'revue annuelle', revelee: false);
+        verifier(
+          nombre: '0',
+          description: 'revue annuelle',
+          revelee: false,
+          estEchue: true,
+        );
       },
     );
 

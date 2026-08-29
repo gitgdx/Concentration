@@ -59,6 +59,17 @@ void main() {
     return notifier;
   }
 
+  /// ⚖️ **T13 — LE CANAL A CHANGÉ, ⛔ PAS LA CLAUSE.** Une tuile `ACTIVE` ne
+  /// PEINT plus sa description au repos : les contrôles de ce fichier lisent
+  /// donc le **libellé d'accessibilité**, qui la porte toujours.
+  /// ⛔ **PAS `.first`** : `FocusableActionDetector` insère son propre
+  /// `Semantics` **sans libellé** (mesuré à T8).
+  List<String> libellesDesTuiles(WidgetTester tester) => tester
+      .widgetList<Semantics>(find.byType(Semantics))
+      .map((w) => w.properties.label)
+      .whereType<String>()
+      .toList();
+
   testWidgets('🔴 une échéance RETIRÉE n’a AUCUNE tuile sur la grille du hub', (
     tester,
   ) async {
@@ -71,8 +82,9 @@ void main() {
       hasLength(3),
       reason: 'les TROIS échéances sont bien chargées depuis le disque',
     );
-    expect(find.text('Presente une'), findsOneWidget);
-    expect(find.text('Presente deux'), findsOneWidget);
+    final libelles = libellesDesTuiles(tester).join(' | ');
+    expect(libelles, contains('Presente une'));
+    expect(libelles, contains('Presente deux'));
 
     // 🔴 LE MUTANT QUE CETTE ASSERTION TUE : `notifier.echeances` à la place
     // de `notifier.presentes` dans `hub_page.dart`. Il a SURVÉCU aux 431
@@ -82,10 +94,18 @@ void main() {
       findsNWidgets(2),
       reason: '⛔ 3 tuiles ⇒ la grille lit la liste NON filtrée',
     );
+    // ⛔ **SUR LES DEUX CANAUX**, et c'est T13 qui l'impose : depuis qu'une
+    // `ACTIVE` ne peint plus sa description, l'assertion visuelle seule serait
+    // vraie **par accident** et ne tuerait plus le mutant qu'elle vise.
     expect(
       find.text('Retiree de la grille'),
       findsNothing,
-      reason: 'la description de la retirée ne doit apparaître NULLE PART',
+      reason: 'la description de la retirée n’est PEINTE nulle part',
+    );
+    expect(
+      libelles,
+      isNot(contains('Retiree de la grille')),
+      reason: 'et elle n’est ANNONCÉE nulle part non plus',
     );
   });
 

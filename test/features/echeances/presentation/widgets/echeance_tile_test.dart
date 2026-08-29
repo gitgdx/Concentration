@@ -117,10 +117,16 @@ void main() {
   testWidgets(
     'AC-3 « Nominal » — la tuile PORTE la description de son échéance',
     (tester) async {
+      // ⚖️ **T13 (2026-08-29) — L'ASSERTION EST BORNÉE, ⛔ PAS RETIRÉE.**
+      // Une **`ÉCHUE`** peint toujours sa description sous son « 0 » ; une
+      // **`ACTIVE`** porte le **nombre SEUL** et ne la peint plus au repos
+      // *(AC-1 « Erreur » d'US-01.4)*. Le motif d'origine de ce test **reste
+      // valable** : le corpus ne vérifiait que le cas vide, et la description
+      // était supprimable sans rougeur *(mutant `QA-M4`)*.
       await tester.pumpWidget(
         hote(
           EcheanceTile(
-            temps: temps(0.5),
+            temps: temps(1, estEchue: true),
             description: 'Visite médicale',
             intention: () {},
           ),
@@ -133,8 +139,52 @@ void main() {
         ),
         findsOneWidget,
         reason:
-            'le corpus vérifiait le cas VIDE et jamais le cas peuplé : la '
-            'description était supprimable sans faire rougir un test',
+            'une ÉCHUE PEINT sa description : le corpus vérifiait le cas VIDE '
+            'et jamais le cas peuplé, et la description était supprimable sans '
+            'faire rougir un test',
+      );
+
+      // 🔴 **CONTRÔLE APPARIÉ — c'est lui qui porte la BORNE de T13** : la
+      // MÊME description, sur une **`ACTIVE`**, ⛔ n'est PAS peinte…
+      await tester.pumpWidget(
+        hote(
+          EcheanceTile(
+            // ⛔ Le suffixe n'est PAS décoratif : en production le libellé
+            // PORTE la description (`suffixe = ', ${echeance.description}'`,
+            // mesuré dans `remaining_time_calculator.dart`). L'omettre ici
+            // rendrait l'assertion de canal ci-dessous **inobservable**.
+            temps: temps(0.5, suffixeLibelle: ', Visite médicale'),
+            description: 'Visite médicale',
+            intention: () {},
+          ),
+        ),
+      );
+      expect(
+        find.descendant(
+          of: find.byType(EcheanceTile),
+          matching: find.text('Visite médicale'),
+        ),
+        findsNothing,
+        reason:
+            'une ACTIVE porte le nombre SEUL (Design UX §4.1), et la '
+            'description au repos faisait DÉBORDER la tuile dès ×1,6 à '
+            '9 tuiles sur 320 dp — mesuré par T11',
+      );
+      // …⛔ **et elle n'est pas PERDUE pour autant** : elle reste portée par le
+      // libellé d'accessibilité, seul canal qui la rendait utile à une AT.
+      // Sans cette moitié, T13 aurait l'air d'un simple retrait.
+      expect(
+        tester
+            .widgetList<Semantics>(
+              find.descendant(
+                of: find.byType(EcheanceTile),
+                matching: find.byType(Semantics),
+              ),
+            )
+            .firstWhere((w) => w.properties.label != null)
+            .properties
+            .label,
+        contains('Visite médicale'),
       );
     },
   );
@@ -882,9 +932,19 @@ void main() {
       '🔴 révélée — le nombre est ABSENT et la description occupe SA boîte, '
       'centrée sur les DEUX axes',
       (tester) async {
+        // ⚖️ **T13 — L'ANCRE CHANGE, ET ELLE DEVIENT PLUS DIRECTE.** Ce test
+        // comparait la position révélée à celle de la description **AU REPOS**,
+        // qui n'existe plus sur une `ACTIVE`. La propriété à prouver est
+        // *« la description prend LA PLACE DU NOMBRE »* : on mesure donc
+        // contre **le nombre**, ⛔ pas contre un rendu disparu.
         await monter(tester, revele: false);
-        final auRepos = tester.getRect(find.text('revue annuelle')).center;
         expect(find.text('6'), findsOneWidget);
+        final boiteDuNombre = tester.getRect(find.text('6')).center;
+        expect(
+          find.text('revue annuelle'),
+          findsNothing,
+          reason: 'au repos, une ACTIVE porte le nombre SEUL (T13)',
+        );
 
         await monter(tester, revele: true);
         expect(
@@ -900,14 +960,14 @@ void main() {
         final tuile = tester.getRect(find.byType(EcheanceTile));
         expect(revelee.dx, closeTo(tuile.center.dx, 1));
         expect(revelee.dy, closeTo(tuile.center.dy, 1));
-        // Assertion de GRANDEUR — c'est elle qui prouve le DÉPLACEMENT : au
-        // repos la description est en BAS de la tuile.
+        // Assertion de GRANDEUR — c'est elle qui prouve que la description
+        // occupe **la boîte du nombre**, et ⛔ pas une place à elle.
         expect(
-          revelee.dy,
-          lessThan(auRepos.dy),
+          (revelee.dy - boiteDuNombre.dy).abs(),
+          lessThan(1),
           reason:
-              'mesuré : révélée $revelee, au repos $auRepos — même boîte que '
-              'le nombre, ⛔ pas la ligne du bas',
+              'mesuré : révélée $revelee, nombre au repos $boiteDuNombre — '
+              'MÊME boîte, ⛔ pas la ligne du bas',
         );
       },
     );
@@ -916,11 +976,23 @@ void main() {
       '⛔ la description révélée n’est PAS bornée à `maxLines: 2` — c’est la '
       'valeur du rendu DE REPOS d’US-01.1',
       (tester) async {
-        await monter(tester, revele: false);
+        // ⚖️ **T13 — LE CONTRÔLE POSITIF DÉMÉNAGE SUR L'`ÉCHUE`**, seul rendu
+        // DE REPOS qui peigne encore une description. ⛔ Il n'est pas
+        // supprimé : sans lui, « la révélation n'est pas bornée » serait vrai
+        // même si PLUS RIEN n'était borné nulle part.
+        await tester.pumpWidget(
+          hote(
+            EcheanceTile(
+              temps: temps(1, estEchue: true),
+              description: 'revue annuelle',
+              intention: () {},
+            ),
+          ),
+        );
         expect(
           tester.widget<Text>(find.text('revue annuelle')).maxLines,
           2,
-          reason: 'contrôle positif : le rendu de repos, lui, borne à 2',
+          reason: 'contrôle positif : le rendu de repos d’une ÉCHUE borne à 2',
         );
 
         await monter(tester, revele: true);
