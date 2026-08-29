@@ -47,6 +47,28 @@ String heureLisible(DateTime d) =>
 /// **entière** par le `Semantics` — ce pour quoi elle a été écrite — et la
 /// carte, elle, n'affiche que le nombre et l'unité.
 class LigneEcheance extends StatelessWidget {
+  /// 🔴 **T12 (AC-7) — LA DISTINCTION « sur la grille / retirée » EST UN MOT.**
+  ///
+  /// ⛔ **Jamais la couleur seule** *(A-26, SC 1.4.1)* : `erreur`,
+  /// `moduleActif` et `texteSecondaire` sont à **1,00:1 ENTRE EUX** — mesuré —
+  /// donc une teinte ⛔ **ne distinguerait rien**. ⛔ Ni le liseré de 2 dp, qui
+  /// porte **déjà** l'état *« échue »*.
+  ///
+  /// 🔴 **LES DEUX ÉTATS PORTENT UN MOT, et ⛔ pas « un mot / rien »** : une
+  /// distinction par **absence** serait faible à l'œil et **MUETTE à l'oreille**
+  /// pour la ligne non marquée.
+  ///
+  /// ✅ **Annoncé PAR CONSTRUCTION** : c'est un `Text` visible, donc il est dans
+  /// l'arbre sémantique. ⛔ **PAS dans `libelleAccessibilite`** *(chaîne du
+  /// DOMAINE, interdite de retouche — les mutants `X-2`/`X-3` en dépendent)*,
+  /// ⛔ **ni dans un `tooltip` seul** *(mesuré en US-01.2 : `Tooltip` renseigne
+  /// `SemanticsProperties.tooltip`, ⛔ **pas** le `label`)*.
+  ///
+  /// ⛔ **Les constantes existent pour que les tests les LISENT** — une chaîne
+  /// recopiée dans une assertion est la classe de défaut nº 1 du projet.
+  static const String marqueSurLaGrille = 'sur la grille';
+  static const String marqueRetiree = 'retirée de la grille';
+
   const LigneEcheance({
     required this.echeance,
     required this.clock,
@@ -67,8 +89,13 @@ class LigneEcheance extends StatelessWidget {
     final temps = calculateur.calculer(clock: clock, echeance: echeance);
     // ⛔ « Échéance atteinte » est un MOT, pas une teinte : l'état échu ne peut
     // pas reposer sur la couleur seule (SC 1.4.1, §6.4).
+    // ⚖️ **T12 — le MOT de l'état de grille s'ajoute SUR LES ÉCHUES SEULEMENT**
+    // *(AC-7)*. Une ACTIVE est toujours sur la grille : le lui écrire serait du
+    // bruit sur la ligne la plus fréquente, et ⛔ AC-7 ne parle que du groupe
+    // des échues.
     final tempsRestant = temps.estEchue
-        ? 'Échéance atteinte'
+        ? 'Échéance atteinte · '
+              '${echeance.retiree ? marqueRetiree : marqueSurLaGrille}'
         : '${temps.nombreAffiche} ${temps.unite.libelle(temps.nombreAffiche)}';
     // AC-8 « Erreur » : une description VIDE ne masque pas la carte — la date
     // monte en ligne de titre. ⛔ Jamais une ligne de titre vide.

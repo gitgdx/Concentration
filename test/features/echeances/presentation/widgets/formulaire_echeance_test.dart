@@ -578,7 +578,12 @@ void main() {
         ),
       );
       // ⛔ Jamais la couleur seule : l'état échu porte un MOT.
-      expect(find.text('Échéance atteinte'), findsOneWidget);
+      // ⚖️ **T12 (2026-08-29) — LE TEXTE S'EST ENRICHI, LA CLAUSE EST INTACTE.**
+      // La 3ᵉ ligne d'une échue porte désormais « Échéance atteinte · <MARQUE> »
+      // *(AC-7)*. ⛔ `find.text` exige une égalité EXACTE : l'assertion devient
+      // un `textContaining`, ce qui **conserve** ce qu'elle prouvait — que le mot
+      // est là, et qu'il n'est ⛔ pas une teinte.
+      expect(find.textContaining('Échéance atteinte'), findsOneWidget);
       final boite = tester.widget<Container>(
         find.byKey(const ValueKey('ligne-e')),
       );
