@@ -217,7 +217,30 @@ Fonctionnalité: Gestes sur la tuile — révélation de la description et retra
     Et aucune description n'est révélée à la place de son nombre
     Et rien n'est écrit dans le stockage local
 
-  Scénario: Un appui prolongé sur une tuile ne produit aucun effet
+  # ─── ⚖️ TITRE AMENDÉ ET BORNÉ LE 2026-09-08 (@PO) — 2ᵉ occurrence du MÊME défaut, dans le MÊME
+  # fichier et le même jour : les DEUX clauses sont INCHANGÉES, seul le TITRE l'est.
+  #   PÉRIMÉ-2026-09-08 : « Un appui prolongé sur une tuile ne produit aucun effet »
+  # ⛔ Ancienne formulation conservée ci-dessus en LITTÉRAL, jamais barrée (`~~texte~~` est
+  #   invisible à `grep`).
+  # 🔴 MOTIF MESURÉ — sonde jetable jouée puis SUPPRIMÉE, suppression VÉRIFIÉE (patron ADR-010,
+  #   leçon de T10) : `EcheancesGrid` montée avec UNE SEULE tuile ACTIVE portant une description,
+  #   `tester.longPress`, un `pump` ⇒
+  #     `SONDE|description_avant=false|description_apres=true|nombre_apres=false`
+  #   ⇒ un appui PROLONGÉ sur une ACTIVE RÉVÈLE la description, et le NOMBRE DISPARAÎT.
+  #   `TapGestureRecognizer` gagne l'arène au relâchement, et `onTap` est NON NUL sur une ACTIVE
+  #   (`onTap: temps.estEchue ? null : activer`) : c'est le MÊME chemin que l'appui simple d'AC-2.
+  # ✅ PAS UN FAUX VERT NON PLUS : les deux clauses portent sur le RETRAIT et l'ÉCRITURE — les deux
+  #   tuiles restent, rien n'est écrit — et le test apparié n'a JAMAIS prétendu qu'aucune révélation
+  #   n'avait lieu (il asserte les octets INCHANGÉS). SEUL LE TITRE MENTAIT.
+  # ⚖️ ⛔ CE CAS N'EST PAS CELUI DU DOUBLE APPUI CI-DESSUS, ET LA DIFFÉRENCE COMPTE : là, la clause
+  #   EXISTAIT et son libellé était trop ABSOLU (défaut de LIBELLÉ) ; ici la clause MANQUAIT —
+  #   AC-4 « Erreur » ne scopait l'appui prolongé qu'aux tuiles ÉCHUE, donc AUCUN AC ne disait ce
+  #   qu'un appui long fait sur une ACTIVE, alors que ce titre l'affirmait. LACUNE DE SPÉCIFICATION
+  #   (famille d'U-4 en US-01.2 et d'AC-11 ici), ⛔ JAMAIS rangeable dans les « clauses non
+  #   mesurables » : elle était mesurable — la sonde vient de la mesurer — c'est la DÉCISION qui
+  #   manquait. Tranchée le 2026-09-08 dans AC-4 « Erreur » : la révélation sur appui long est
+  #   ACCEPTÉE, ⛔ pas corrigée, et son motif est qu'un appui LENT ne doit pas être puni.
+  Scénario: Un appui prolongé ne retire aucune tuile et n'écrit rien
     Étant donné qu'une échéance active et une échéance échue sont affichées
     Quand j'appuie longuement sur chacune des deux tuiles
     Alors les deux tuiles sont toujours affichées

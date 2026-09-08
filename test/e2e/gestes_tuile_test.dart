@@ -765,15 +765,58 @@ void main() {
     },
   );
 
-  testWidgets('Un appui prolongé sur une tuile ne produit aucun effet', (
+  testWidgets("Un appui prolongé ne retire aucune tuile et n'écrit rien", (
     tester,
   ) async {
-    poser([echue('a', 'revue annuelle'), ech('b', const Duration(hours: 6))]);
+    // ⛔ Deux descriptions DISTINCTES : avec la valeur par défaut, `b` portait
+    // la même que `a` et un `find.text` aurait été AMBIGU.
+    poser([
+      echue('a', 'revue annuelle'),
+      ech('b', const Duration(hours: 6), 'passeport'),
+    ]);
     await ouvrirApplication(tester);
     final avant = harnais.octets();
 
     for (final id in ['a', 'b']) {
       await tester.longPress(tuile(id));
+      await tester.pump();
+
+      // 🔴 GARDE ⓶ — LACUNE NOMMÉE PAR @PO LE 2026-09-08 : l'absence
+      // d'animation de disparition n'était assertée QUE pour le double appui,
+      // alors que l'énoncé en vigueur l'exige pour les DEUX gestes.
+      expect(
+        enveloppe,
+        findsNothing,
+        reason:
+            '⛔ un appui prolongé ne joue AUCUNE animation de disparition, à '
+            'AUCUN instant',
+      );
+
+      if (id == 'b') {
+        // 🔴 GARDE ⓵ — LA RÉVÉLATION PAR APPUI PROLONGÉ SUR UNE `ACTIVE` EST
+        // **ACCEPTÉE**, et c'est un `Won't` MOTIVÉ de @PO (2026-09-08) : la
+        // rendre inerte exigerait un reconnaisseur qui **mange** l'appui, ce
+        // qui **punirait l'appui LENT** — un pratiquant à la dextérité réduite
+        // ou tremblante dépasse la fenêtre de l'appui bref **sans l'avoir
+        // voulu**, et perdrait la description dont il a le plus besoin.
+        //
+        // ⛔ **ELLE ÉTAIT DÉCLARÉE ET SURVEILLÉE PAR RIEN** : un changement
+        // futur la rendant inerte ⛔ **ne faisait rougir aucun test**. Mesurée
+        // par sonde jetable *(`description_apres=true`, `nombre_apres=false`)*,
+        // elle est désormais **GARDÉE** — un retour en arrière devra être une
+        // DÉCISION, ⛔ pas un accident.
+        expect(
+          dansLaTuile('b', find.text('passeport')),
+          findsOneWidget,
+          reason: 'l’appui prolongé RÉVÈLE la description sur une ACTIVE',
+        );
+        expect(
+          dansLaTuile('b', find.text('6')),
+          findsNothing,
+          reason: '…et le nombre disparaît — À LA PLACE, ⛔ pas à côté',
+        );
+      }
+
       await reglerEcritures(tester);
       await tester.pumpAndSettle();
     }
