@@ -70,8 +70,92 @@ développés) ; partage social ; widgets d'écran d'accueil OS ; tri manuel des 
 | 2 | **Divergence d'endpoint bleu** : le PRD propose `#3D7DD8` comme bleu d'imminence ; la maquette utilise `#005ab3` (`temporal-gradient-4`, secondary-container) — teinte plus sombre/saturée. | Rendu final et contraste du nombre sur fond bleu différents des cibles produit. | Fixer une couleur d'endpoint unique dans le Design System (source d'autorité `docs/design/DESIGN_SYSTEM.md`) après test de contraste WCAG AA ; tracer la décision. |
 | 3 | **Structure du hub PRD ↔ maquette** : RF-20 décrit un hub à 3 entrées (Échéances active + Respiration/Concentration grisées) ; la maquette fait de la grille Échéances le canvas d'accueil et place les modules futurs comme **icônes de barre de nav basse**, non grisées (`.ghost-entry` inutilisée). | Ambiguïté sur l'emplacement et l'état grisé des modules futurs. | AC US-01.1 formulés au niveau comportemental (visible + grisé + non-cliquable) ; placement délégué à @UXDesigner (résolution clarify #4). |
 | 4 | **Frontières exactes du moteur de temps restant** : comportement à un seuil d'unité exact, bascule jours → heures à 24 h, changements d'heure été/hiver, mois calendaires de longueurs différentes (PRD §6). | Nombre affiché incohérent aux transitions (cœur de l'exercice). | US-01.1 embarque le calcul (ceil + unité adaptative) ; certification calendaire fine rattachable à une US ultérieure sans changer le contrat d'affichage (résolution clarify #1). |
-| 5 | **Double-tap accidentel** (RF-06 §6.6) : geste de disparition d'une tuile échue potentiellement déclenché par erreur. | Perte de visibilité d'une échéance ; frustration. | ⛔ **PÉRIMÉ-2026-08-03 : cette cellule portait « Rattaché à US-01.2 » — faux depuis le découpage arbitré.** ⚖️ **Rattaché à US-01.4** *(RF-06 y est déplacé)*. ✅ **Mitigation TRANCHÉE le 2026-08-03** *(clarify nº 1 et nº 2 d'US-01.2, recommandations @PO retenues)* : le geste est **NON DESTRUCTIF** — l'échéance reste consultable en gestion à l'état « échu » — donc **le feedback est l'ANIMATION de disparition, ⛔ sans modale de confirmation** *(une modale friction­nerait le geste le plus fréquent au profit d'un acte sans conséquence, contre « zéro friction »)*. ⚠️ **US-01.2 livre l'état échu et sa persistance** ; **US-01.4 livre le geste**. |
+| 5 | **Double-tap accidentel** (RF-06 §6.6) : geste de disparition d'une tuile échue potentiellement déclenché par erreur. | Perte de visibilité d'une échéance ; frustration. | ⛔ **PÉRIMÉ-2026-08-03 : cette cellule portait « Rattaché à US-01.2 » — faux depuis le découpage arbitré.** ⚖️ **Rattaché à US-01.4** *(RF-06 y est déplacé)*. ✅ **Mitigation TRANCHÉE le 2026-08-03** *(clarify nº 1 et nº 2 d'US-01.2, recommandations @PO retenues)* : le geste est **NON DESTRUCTIF** — l'échéance reste consultable en gestion à l'état « échu » — donc **le feedback est l'ANIMATION de disparition, ⛔ sans modale de confirmation** *(une modale friction­nerait le geste le plus fréquent au profit d'un acte sans conséquence, contre « zéro friction »)*. ⛔ **PÉRIMÉ-2026-09-08 SUR LE MOTIF DE CETTE PARENTHÈSE, ET SUR LUI SEUL — la DÉCISION n'est PAS touchée.** *« un acte sans conséquence »* est **RÉFUTÉ par la mesure** : le retrait est **IRRÉVERSIBLE** *(aucun « annuler », aucun désarchivage — **Won't** d'US-01.4 — et `refusEditionEchue` **refuse la modification d'une échue** ⇒ la seule action offerte sur une retirée par erreur est **SUPPRIMER**, l'acte destructif)*. Et *« le geste le plus fréquent »* est une affirmation de **FRÉQUENCE JAMAIS MESURÉE** *(aucune donnée d'usage n'existe au projet)*. ✅ **« sans modale » reste EN VIGUEUR, implémenté et ASSERTÉ** *(scénario « Le retrait ne demande aucune confirmation »)* — c'est son **motif** qui a vieilli, **exactement comme le §*Conséquences* d'ADR-009** : on **nomme le constat**, ⛔ **on ne repeint pas la décision**. ⚖️ **VERDICT DATÉ — juste SOUS cette table** *(**T18** d'US-01.4, **2026-09-08**)* : **mitigation TENUE DANS SA LETTRE**, risque ⛔ **NON CLOS**, **borne NM-11 DÉCLARÉE**. ⚠️ **US-01.2 livre l'état échu et sa persistance** ; **US-01.4 livre le geste**. |
 | 6 | **Langue & nommage des maquettes** : Hub en `lang="fr"`, gestion en `lang="en"` (« days left ») ; nom de code « Sobriety » dans les `<title>`. | Incohérence de langue produit. | Uniformiser en français ; nombre nu sans unité sur les tuiles (règle produit #7) ; à confirmer pour la page de gestion. |
+
+### ⚖️ Risque nº 5 — VERDICT DATÉ du **2026-09-08** *(tâche **T18** d'US-01.4)*
+
+> 🎯 **VERDICT : la mitigation arbitrée le 2026-08-03 est TENUE DANS SA LETTRE et ASSERTÉE PAR DES
+> TESTS VERTS ; le RISQUE, lui, est ⛔ NON CLOS — la borne NM-11 est DÉCLARÉE.**
+>
+> ⛔ **Un arbitrage ne lève jamais un critère** *(précédent du critère **27** d'US-00.7, précédent de
+> **RNF-02** sur US-01.1)* ⇒ ⛔ **ce verdict ne coche aucune case et n'en autorise aucune.**
+>
+> 🔬 **La coupure est nette, et elle passe entre les DEUX moitiés du risque tel qu'il est écrit
+> ci-dessus.** Sa moitié **IMPACT** *(« perte de visibilité d'une échéance »)* est **mitigée, mesurée
+> et bornée**. Sa moitié **PROBABILITÉ** *(« potentiellement déclenché par erreur »)* n'est **PAS
+> mesurée du tout** : ⛔ **aucun doigt n'a jamais produit ce geste** — ce qui est exercé est un geste
+> **SYNTHÉTISÉ**, aux bornes **lues dans le SDK**.
+
+**① CE QUI EST MESURÉ — commandes REJOUÉES le 2026-09-08, ⛔ aucun chiffre recopié à la main**
+
+| Fait | Commande | Sortie |
+|---|---|---|
+| **Un seul geste POINTEUR par tuile** ⇒ ⛔ **aucune tuile ne porte les deux appuis** — `onTap: temps.estEchue ? null : activer` et `onDoubleTap: temps.estEchue ? activer : null` *(`lib/features/echeances/presentation/widgets/echeance_tile.dart`)* | `flutter test test/features/echeances/presentation/widgets/echeance_tile_test.dart test/features/echeances/presentation/grille_retrait_test.dart test/e2e/gestes_tuile_test.dart` | **`All tests passed!` — 85 tests**, dont `T-P4 « ACTIVE »` *(`onTap` seul, `onDoubleTap` **null**)* et `T-P4 « ÉCHUE »` *(`onDoubleTap` seul, `onTap` **null**, `pointeurs hasLength(1)`)* |
+| **Le geste ne détruit RIEN, et la conservation se LIT dans deux sources distinctes** : `retirer()` écrit `e.avec(retiree: true)` · la **grille** lit `presentes` *(`where((e) => !e.retiree)`)* · la **page de gestion** lit `notifier.echeances`, soit **TOUTES** | même exécution | scénarios **« L'échéance retirée reste consultable dans la page de gestion »** et **« Une échéance retirée ne revient pas sur la grille après réouverture »** — **verts** |
+| **L'état de grille est LISIBLE par un MOT, dans les DEUX sens** — `'retirée de la grille'` / `'sur la grille'`, **texte PEINT** *(donc annoncé par construction)*, ⛔ **jamais une teinte** | même exécution | scénario **« Le signalement d'une échue ne repose pas sur la couleur seule »** — **vert** |
+| **Un retrait qui ne peut pas s'écrire ANNONCE, laisse la tuile à sa place et ⛔ ne joue AUCUNE animation** *(AC-11 d'US-01.4)* ⇒ **l'affiché ÉGALE le disque** | même exécution | **4 scénarios verts** *(annonce · aucune animation · compte toujours dans la limite de 9 · réessai qui aboutit)* |
+| 🔬 **SONDE JETABLE HORS DÉPÔT** *(patron ADR-010 — **0 ligne de `lib/`, 0 ligne de `test/`**)* : que produit un double appui **MAL SÉPARÉ** sur la tuile qui porte le retrait ? | sonde exécutée par `flutter test`, bornes **LUES** dans le SDK | `kDoubleTapMinTime=0:00:00.040000` `kDoubleTapTimeout=0:00:00.300000` · **`A_trop_rapproche retraits=0`** *(deux appuis à 5 ms)* · **`B_trop_espace retraits=0`** *(au-delà de 300 ms)* · témoin positif **`C_bien_separe retraits=1`** |
+| ⛔ **AUCUN appareil connecté le 2026-09-08** ⇒ la moitié PROBABILITÉ est **inatteignable aujourd'hui** | `adb devices` *(chemin absolu du SDK — `adb` n'est pas dans le `PATH`)* | `List of devices attached` **suivi d'AUCUNE ligne** |
+
+**② CE QUI N'EST PAS MESURÉ — et c'est exactement la borne NM-11, qui reste OUVERTE**
+
+* **Le TAUX de déclenchement accidentel.** Le geste exercé est **synthétisé** : ⛔ **ni un doigt, ni un
+  mé-appui, ni un utilisateur pressé, ni un écran physique.** L'application n'a tourné sur un appareil
+  qu'**une seule fois** *(SM T580, 2026-08-21)*, **avant** cette US — et `adb devices` rend une **liste
+  vide** aujourd'hui.
+* **La géométrie réelle de la cible** *(borne **NM-13**)*, qui gouverne la probabilité d'un mé-appui.
+  ⚠️ **Elle ne sera que PARTIELLEMENT levable sur un SM T580** : ses tuiles font **plusieurs centaines
+  de dp**, alors que le cas critique est un **petit téléphone à 320 dp**.
+* **La fréquence du geste**, invoquée par le motif du 2026-08-03 *(« le geste le plus fréquent »)* :
+  ⛔ **aucune donnée d'usage n'existe au projet.**
+
+**③ 🔴 CE QUE LA MESURE A RÉFUTÉ — trois affirmations, dont DEUX portaient sur ce risque même**
+
+* ⓵ **« Un acte sans conséquence » est FAUX : le retrait est IRRÉVERSIBLE.** **Mesuré** : les seules
+  occurrences d'« Annuler » dans `lib/` sont la **confirmation de suppression** et le **formulaire**
+  ⇒ ⛔ **aucun « annuler » du retrait** ; le **désarchivage** est un **Won't** d'US-01.4 ; et
+  `ValidationEcheance.refusEditionEchue` rend un refus pour **toute** échue — *« Une échéance échue se
+  consulte ou se supprime, elle ne se modifie pas. »* ⇒ **une retirée est échue par construction**,
+  donc ⛔ **elle n'est ni remettable sur la grille, ni modifiable**. ➡️ **La seule action offerte après
+  un retrait accidentel est SUPPRIMER**, c'est-à-dire **l'acte destructif que la mitigation opposait
+  au geste**. ✅ **Ce qui EST vrai** : l'impact énoncé *(« perte de visibilité »)* est rendu
+  **LISIBLE** *(un MOT en gestion)* — ⛔ **jamais RÉVERSIBLE**. **« Retrouvable » ≠ « annulable ».**
+* ⓶ **Le double appui ne protège QU'UN canal sur QUATRE.** **Mesuré par un test vert du dépôt
+  lui-même** *(« UNE intention, QUATRE canaux »)* : sur une **ÉCHUE**, `Entrée`, `Espace` et l'action
+  sémantique `tap` d'une AT déclenchent le retrait en **UNE SEULE** activation *(le compteur passe de
+  1 à 4 sans aucun second appui)*. ⚠️ **L'asymétrie est NOMMÉE et ASSUMÉE par ADR-013 §3** *(ACCEPTÉ,
+  donc **immuable** — ⛔ non édité ici)*, mais son motif — *« qui n'a pas d'équivalent au clavier »* —
+  est un **jugement, pas une mesure**. ✅ **Atténuation réelle et mesurée, sur le canal de l'AT
+  SEULEMENT** : le `hint` **dit l'effet AVANT l'activation** — *« Retire l'échéance de la grille, sans
+  la supprimer »* ; ⛔ **rien d'équivalent au clavier, rien au doigt**. ➡️ **Conséquence pour l'énoncé
+  du risque ci-dessus** : il dit *« double-tap »*, or **la surface de retrait est plus large que le
+  geste qui la nomme**.
+* ⓷ ⚠️ **Un mode de défaillance annoncé comme indiscernable ne l'est PAS — et le corpus de test
+  l'affirme à tort.** L'en-tête de `test/support/gestes_tuile.dart` dit qu'un double appui **mal
+  séparé** ferait que *« le test observerait la **révélation** au lieu du **retrait**, sans jamais
+  rougir pour la bonne raison »*. **RÉFUTÉ par la sonde** : sur la tuile où ce geste vit — une
+  **ÉCHUE** — `onTap` vaut **`null`** et la révélation exige `!temps.estEchue` ⇒ un geste mal séparé
+  produit **`retraits=0` et RIEN d'autre**, donc le test **rougit sur l'absence de retrait**.
+  ⛔ **Ce point sort du périmètre de cette table** *(fichier de `test/`)* : porté par @Architect au
+  Story File d'US-01.4.
+
+**④ CE QU'IL FAUDRAIT POUR LEVER LA BORNE — nommé, ⛔ pas une intention**
+
+* **Moitié PROBABILITÉ** — un **appareil réel** *(**US-01.3**)* **puis** une **observation d'usage** :
+  ⛔ **aucune campagne de ce type n'existe au projet**, et ⛔ **NM-11 n'a AUCUN instrument de sortie**,
+  contrairement à **RNF-02** qui dispose de `reports/US-01.1/rnf02_exit_criterion.py` — lequel
+  **refuse de conclure** faute de cible *(`exit 2`)* plutôt que de rendre un faux vert. ➡️ **La lacune
+  est donc NOMMÉE : il manque à NM-11 son équivalent exécutable.**
+* **Moitié IMPACT** — rendre le retrait **réversible** *(un « remettre sur la grille » en gestion)*.
+  ⛔ **Ce n'est pas une décision d'architecture** : c'est **rouvrir un Won't** *(§Hors périmètre
+  d'US-01.4 : « aucun désarchivage »)*, donc un **arbitrage @ProductOwner**, avec **son AC et son
+  scénario** — ⛔ jamais un ajout silencieux.
+
+**⑤ ⛔ CE QUE CE VERDICT NE FAIT PAS** — il ne coche **aucun** critère de clôture de cet EPIC · il ne
+modifie **aucun AC** · il ne touche **aucun ADR** *(**ADR-012**, **ADR-013**, **ADR-014** sont
+**ACCEPTÉS** donc **IMMUABLES**)* · il ne rouvre **pas** l'arbitrage humain « **sans modale** » du
+2026-08-03 · et il **ne lève pas NM-11**, qui reste à son état d'origine dans le Story File d'US-01.4.
 
 ## 🎯 Challenge PO : La couleur doit-elle encoder la proximité du changement, ou la grandeur du nombre ?
 
