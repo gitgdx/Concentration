@@ -61,6 +61,27 @@ COUPLES: tuple[tuple[str, str], ...] = (
         'tests/features/US-01.2-gestion-echeances.feature',
         'test/e2e/gestion_echeances_test.dart',
     ),
+    # US-01.4 — ⛔ ENREGISTRE EN DERNIER (T15), MEME MOTIF que ci-dessus, et il
+    # a ete VERIFIE et non suppose : tant que test/e2e/gestes_tuile_test.dart
+    # n'existait pas, l'inscrire aurait rendu le job REQUIS rouge sur
+    # « FICHIER DE TESTS ABSENT ».
+    #
+    # 🔴 DEUX DEFAUTS MESURES A T14, ET C'EST CE COUPLE QUI LES AURAIT REVELES
+    # EN ROUGE. Une sonde important CES MOTIFS-CI (⛔ pas les siens) les a
+    # trouves AVANT l'inscription — elle est publiee comme critere executable,
+    # reports/US-01.4/preverif_titres_criterion.py :
+    #   1. MOTIF_TEST ne capte que le PREMIER litteral d'un testWidgets(), donc
+    #      ONZE titres ecrits en litteraux ADJACENTS — que Dart concatene mais
+    #      que ce script ne voit pas — etaient autant de « scenario sans test ».
+    #      ⇒ un titre doit tenir en UN SEUL litteral, et ce n'est ecrit nulle
+    #      part. ⚠️ A PORTER A /audit-methodo : la docstring de MOTIF_TEST dit
+    #      gerer le report du titre a la ligne SUIVANTE, ⛔ pas la CONCATENATION.
+    #   2. une vraie erreur de transcription d'un titre, trouvee par la MACHINE
+    #      et non par relecture.
+    (
+        'tests/features/US-01.4-gestes-tuile.feature',
+        'test/e2e/gestes_tuile_test.dart',
+    ),
 )
 
 MOTIF_SCENARIO = re.compile(r'^[ \t]*(?:Scénario|Scenario|Plan du scénario|Scenario Outline)'
