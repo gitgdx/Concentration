@@ -68,6 +68,7 @@ void main() {
   const fenetre = ConcentrationTokens.fenetreRevelation;
   const dureeAnim = ConcentrationTokens.dureeDisparition;
   const grain = Duration(milliseconds: 10);
+
   const codec = EcheanceDocumentCodec();
 
   late MagasinTemporaire harnais;
@@ -212,11 +213,7 @@ void main() {
   /// `jusqua` sort dès que l'effet est là.
   Future<void> retirer(WidgetTester tester, String id) async {
     await doubleAppuiSur(tester, id);
-    await reglerEcritures(
-      tester,
-      jusqua: () => !tester.any(tuile(id)),
-      tours: 200,
-    );
+    await reglerEcritures(tester, jusqua: () => !tester.any(tuile(id)));
     await purgerLeReconnaisseur(tester);
     await tester.pumpAndSettle();
   }
@@ -1423,7 +1420,6 @@ void main() {
       await reglerEcritures(
         tester,
         jusqua: () => messageAffiche(tester) != null,
-        tours: 200,
       );
       await purgerLeReconnaisseur(tester);
       await tester.pumpAndSettle();
@@ -1487,7 +1483,6 @@ void main() {
       await reglerEcritures(
         tester,
         jusqua: () => messageAffiche(tester) != null,
-        tours: 200,
       );
       await purgerLeReconnaisseur(tester);
       await tester.pumpAndSettle();
@@ -1512,7 +1507,6 @@ void main() {
       await reglerEcritures(
         tester,
         jusqua: () => messageAffiche(tester) != null,
-        tours: 200,
       );
       await purgerLeReconnaisseur(tester);
       await tester.pumpAndSettle();
@@ -1539,11 +1533,7 @@ void main() {
     harnais.bloquerEcriture();
 
     await doubleAppuiSur(tester, 'a');
-    await reglerEcritures(
-      tester,
-      jusqua: () => messageAffiche(tester) != null,
-      tours: 200,
-    );
+    await reglerEcritures(tester, jusqua: () => messageAffiche(tester) != null);
     await purgerLeReconnaisseur(tester);
     await tester.pumpAndSettle();
     expect(tuile('a'), findsOneWidget, reason: 'le retrait n’a PAS eu lieu');

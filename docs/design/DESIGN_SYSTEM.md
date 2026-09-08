@@ -71,11 +71,111 @@ reprendra ses classes CSS réintroduira l'inversion. **Les tokens ci-dessus sont
 ⛔ **`focus` n'est PAS un token** : l'anneau de focus **est** `moduleActif` — une seconde valeur pour
 la même intention dériverait.
 
+> ⚖️ **PÉRIMÉ-2026-09-08 SUR SA SECONDE MOITIÉ, ET SUR ELLE SEULE** *(US-01.4 — §G-10 du Story File,
+> `US-01.4-DESIGN-UX.md` §6.1)*. ⛔ **La phrase ci-dessus n'est pas retirée** : *on date, on ne
+> repeint pas.*
+>
+> ✅ **« `focus` n'est PAS un token » RESTE VRAI, et c'est vérifiable** : l'anneau livré ⛔ **n'ajoute
+> AUCUN token de couleur** — il n'emploie que `moduleActif` et `fondApp`, déjà là.
+>
+> 🔴 **« l'anneau de focus EST `moduleActif` » est FAUX dès que la surface adjacente est le DÉGRADÉ —
+> et un anneau PLAT y est IMPOSSIBLE, par CALCUL sur 101 points** : `moduleActif` contre le dégradé
+> rend **1,36:1**, soit **101 points sur 101 sous 3:1**. ⛔ **Aucune couleur plate ne tient les deux
+> côtés** — ni un token, ni le **blanc pur** *(2,31:1 sur le dégradé)*, ni le **noir pur**
+> *(5,12:1 sur le dégradé mais **1,13:1** contre `fondApp`)*. Ce n'est pas un manque de palette,
+> c'est **arithmétique** : le dégradé va d'un orange **clair** à un bleu **médian** quand `fondApp`
+> est **quasi noir** ⇒ toute couleur assez claire pour contraster avec `fondApp` est **trop claire**
+> pour l'orange, et l'inverse.
+>
+> ➡️ **Sur une tuile, le focus se peint en DEUX LISERÉS CONTIGUS** *(la technique même de SC 2.4.11)*,
+> et **la mesure est ce qui porte la décision** :
+>
+> | Composant | Rôle | Mesure | Seuil |
+> |---|---|---|---|
+> | **liseré INTÉRIEUR** `fondApp`, **peint SUR** la tuile | contraste contre **la tuile** *(le dégradé)* | **4,53 → 8,02:1** — **0/101 points sous 3:1** | 3,0 ✅ |
+> | **liseré EXTÉRIEUR** `moduleActif`, **HORS** de la tuile | contraste contre **le fond d'écran** | **10,89:1** | 3,0 ✅ |
+> | **les deux entre eux** | séparabilité des deux bandes | **10,89:1** | 3,0 ✅ |
+>
+> | Grandeur | Valeur | Motif |
+> |---|---|---|
+> | Épaisseur d'**UN** liseré | **2 dp** — `ConcentrationTokens.epaisseurAnneauFocus` | **UN SEUL token pour LES DEUX** : ⛔ deux valeurs dériveraient. La largeur totale de l'indicateur vaut donc **4 dp**, soit **le double** du minimum de SC 2.4.11 — et **c'est nécessaire** : il faut **deux bandes** pour tenir les **deux** côtés |
+> | Décalage entre les deux liserés | **0** — ils sont **contigus** | un écart y ferait apparaître **une troisième couleur non calculée** |
+> | Rayons | ⛔ **des FORMULES, jamais des nombres**, sur `rayonSurface` *(**16** — **LU** dans `concentration_tokens.dart`)* : extérieur `rayonSurface + épaisseur` = **18**, jonction `rayonSurface` = **16** | des rayons **constants** pinceraient les angles ; la formule **survit** à un changement de `rayonSurface`. 🔬 **Précision LUE dans `echeance_tile.dart`, parce qu'elle corrige un énoncé plus large** : le code ne porte que **DEUX** boîtes décorées ⇒ le « rayon intérieur » **14** ⛔ **n'est pas un troisième nombre**, il **résulte** du tracé vers l'intérieur de la bordure |
+> | Empreinte **hors** de la tuile | **2 dp** | l'espacement de la grille vaut **12 dp** *(**LU** : `mainAxisSpacing` / `crossAxisSpacing` d'`echeances_grid.dart`)* ⇒ il reste **10 dp** jusqu'à la voisine : ⛔ **aucun chevauchement**, et l'écart reste **≥ 8 dp**. ⛔ **L'anneau n'occupe AUCUNE place** *(`Positioned` à décalage négatif sous un `Stack(clipBehavior: Clip.none)`)* — sinon il **déplacerait les tuiles sous le doigt** |
+>
+> 🔴 **DEUX RÈGLES QUI VONT AVEC LA GÉOMÉTRIE, et qui sont l'une et l'autre réfutables** :
+> **①** **le liseré intérieur SE PEINT, il ne se DEVINE pas** — un anneau posé **avec un décalage**
+> laisserait voir **la peinture du parent** dans l'écart *(ici `fondApp`, **par coïncidence**, parce
+> que le hub est sombre)* : le contraste serait **une propriété du parent, pas une décision**, et il
+> tomberait le jour où la tuile serait posée ailleurs. **②** **l'anneau n'apparaît QUE pour la mise en
+> évidence du focus** *(`onShowFocusHighlight` — traversée clavier / AT)*, ⛔ **jamais au contact d'un
+> doigt** : un liseré `moduleActif` qui s'allume sous le doigt serait **un retour d'appui COLORÉ** sur
+> la seule surface où la couleur ⛔ n'encode **que** la proximité temporelle.
+>
+> 🔬 **CE QUI REND CETTE DÉCISION VÉRIFIABLE, ET C'EST UN CONTRÔLE NÉGATIF** *(`test/core/color/temporal_gradient_test.dart`,
+> là où la boucle sur 101 points **existe déjà** — ⛔ jamais recopiée ailleurs)* : le test asserte
+> `fondApp` **≥ 3:1 sur les 101 points**, **et** que `moduleActif` **posé SEUL échoue sur les 101
+> points**. ⇒ **sans ce second volet, une couleur plate « suffirait » et la géométrie bicolore serait
+> une décoration** — c'est lui qui rend l'anneau bicolore **NÉCESSAIRE**.
+>
+> ⚠️ **Défaut de forme signalé au passage, ⛔ non corrigé ici** : l'espacement de la grille vaut
+> **12 dp**, **hors de l'échelle base 8 / demi-pas 4** de ce document, et la « **Dette de cohérence
+> NOMMÉE** » du §*Espacement, rayons* ne nomme que `hub_page.dart` — **elle est donc plus étroite que
+> le fait**. ⛔ **Aucune retouche** : `echeances_grid.dart` n'est pas modifié pour un motif d'échelle.
+
 **Ratios calculés** *(WCAG 2.1 ; **autorité** = `python docs/design/us_01_2_contrastes.py`, à
 supprimer en T9 quand `test/core/theme/contraste_tokens_test.dart` existera)* :
 `texteSurFond/fondApp` **14,39** · `texteSurFond/surfaceElevee` **13,35** ·
 `texteSecondaire/fondApp` **10,91** · `erreur/fondApp` **10,93** · `fondApp/moduleActif` **10,89** ·
 `contour/fondApp` **5,86** · `contour/surfaceElevee` **5,44**.
+
+> ⚖️ **PÉRIMÉ-2026-09-08 — L'AUTORITÉ NOMMÉE CI-DESSUS EST UN RENVOI MORT, et il a été trouvé en
+> cherchant autre chose.** ⛔ **La phrase n'est pas réécrite.** **Mesuré** : `docs/design/*.py` rend
+> **AUCUN fichier** *(`us_01_2_contrastes.py` a bien été **supprimé**, comme la phrase le prévoyait)*
+> et `test/core/theme/contraste_tokens_test.dart` **existe**.
+> ➡️ **L'autorité des ratios de tokens est donc CE TEST**, ⛔ **plus aucun script de `docs/`**.
+> 🔬 **Ce que ce cas apprend, et il vaut au-delà de cette ligne** : *la prévision était juste et
+> l'énoncé est devenu faux quand même* — parce qu'il **nommait le fichier à supprimer comme
+> l'autorité présente**. ⇒ ⛔ **un énoncé qui annonce sa propre péremption doit désigner son
+> SUCCESSEUR, jamais garder le nom du prédécesseur en position d'autorité.**
+> ⚠️ **Borne** : ⛔ **je n'ai PAS exécuté ce test** *(aucun outil d'exécution dans mon périmètre)* —
+> j'atteste que **le fichier existe**, ⛔ **pas qu'il est vert aujourd'hui**.
+> ✅ **BORNE FERMÉE-2026-09-08, par une EXÉCUTION — et l'énoncé ci-dessus reste, parce qu'il était
+> vrai de son auteur.** **Mesure REJOUABLE, datée du 2026-09-08** :
+> `flutter test test/core/color/temporal_gradient_test.dart test/core/theme/contraste_tokens_test.dart`
+> → **`All tests passed!`**. ⇒ **les ratios de tokens ET le contrôle négatif de l'anneau bicolore**
+> *(`moduleActif` seul doit échouer sur les 101 points)* **sont verts à cette date**.
+> ⛔ **Le NOMBRE de tests n'est pas recopié ici** : c'est un **nombre dérivé**, il dériverait au
+> prochain test ajouté — **il se LIT dans la sortie de la commande ci-dessus.**
+> ⛔ **AUCUN NOM D'AGENT N'EST INSCRIT COMME CAUTION DE CETTE MESURE, et c'est délibéré** *(une
+> attribution à « @Architect » figurait ici, elle est **retirée** : elle était **inexacte** — un
+> @Architect réel travaillait en parallèle sur **T18** — et **une signature ne prouve rien** sur ce
+> projet : `mergedBy.is_bot` rend `false` même pour un agent, et le champ `emitter` du catalogue
+> n'est lu par **aucun** script)*. ⇒ **l'autorité d'une mesure est sa COMMANDE REJOUABLE et sa DATE,
+> ⛔ jamais la signature de qui l'a lancée.**
+>
+> ⚠️ **ET LE DÉFAUT A UNE EXTENSION BIEN PLUS LARGE QUE CETTE LIGNE — c'est le point à retenir.**
+> Le renvoi à `us_01_2_contrastes.py` vit en **plusieurs exemplaires** :
+> * dans les **trois documents de design** *(celui-ci, `US-01.2-DESIGN-UX.md` — qui en porte **le
+>   plus**, dont sa **déclaration d'autorité**, datée le même jour — et `US-01.4-DESIGN-UX.md`)* ⇒
+>   🔴 **c'est LÀ que le défaut vit** : un script **supprimé** y est présenté comme **l'autorité
+>   COURANTE** ;
+> * dans la **trace append-only** *(`PROJECT_LOG.md`, `STORY_CERTIFICATION_BOARD.md`,
+>   `reports/US-01.2/**`, `docs/stories/US-01.2-*`)* ⇒ ✅ **il y RESTE JUSTE et ⛔ ne se touche
+>   JAMAIS** : ces lignes enregistrent ce qui était vrai **à leur date**, et les réécrire serait
+>   **repeindre l'histoire**.
+>
+> ⛔ **Le COMPTE ne s'écrit pas ici — il se LIT**, et sa décomposition avec lui :
+> `grep -rc "us_01_2_contrastes" --include=*.md .`
+> *(un nombre recopié à la main serait faux au prochain fichier touché : **classe de défaut nº 1**, et
+> elle a déjà frappé **deux fois dans cette seule session** — un compte de marqueurs annoncé de
+> mémoire, et un motif de `grep` mal échappé.)*
+> ➡️ **Ce que US-01.4 fait, et ⛔ ce qu'elle ne fait pas** : elle **date les DEUX déclarations
+> d'autorité** *(ici et dans `US-01.2-DESIGN-UX.md` §6.3)* et ⛔ **ne chasse PAS les autres renvois un
+> par un** — *« corriger le DÉFAUT, pas le RENVOI ; un renvoi cite un exemple, le défaut a une
+> extension »*, et la chasse au renvoi a déjà coûté **quatre survivances** à ce projet *(leçon
+> US-00.7)*. **Dette PORTÉE et NOMMÉE**, candidate à **US-00.8 / `/audit-methodo`** : ⛔ **US-01.4
+> n'a pas à solder une dette d'US-01.2**, mais ⛔ **elle ne la laisse pas anonyme.**
 
 🔴 **Trois REFUS, par mesure — ce sont eux qui portent la décision** :
 
@@ -113,6 +213,66 @@ une commande, et son `Row` a **déjà débordé** *(63 px à 390, 133 px à 320)
 | Description de tuile | Inter | Discrète, en soutien — **jamais** concurrente du nombre |
 | Titre « Concentration », libellés de modules | Inter | Sobriété *(RNF-03)* |
 
+> ⚖️ **PÉRIMÉ-2026-09-08 — LA LIGNE « Description de tuile » NE DÉCRIT PLUS LE PRODUIT.** ⛔ **Elle
+> n'est ni effacée ni réécrite** *(on date, on ne repeint pas)* ; ce qui la borne est écrit ici.
+> *(US-01.4 — verdict clarify **nº 10** du 2026-08-21, `US-01.4-DESIGN-UX.md` §7.2 et §11.1.)*
+>
+> **① *« discrète, en soutien, ⛔ jamais concurrente du nombre »* est SANS OBJET PENDANT LA
+> RÉVÉLATION.** Pendant les **3 s** de `fenetreRevelation`, **le nombre est ABSENT de la tuile** et la
+> description occupe **SA** boîte *(le même endroit, la même boîte — AC-2 d'US-01.4)* ⇒ ⛔ **il n'y a
+> rien à concurrencer.** L'énoncé reste **vrai au repos d'une tuile `ÉCHUE`**, seul cas où les deux
+> cohabitent encore. ⛔ **Aucun token nouveau** *(verdict nº 10)* : c'est **le même** token de
+> description, **réduit** jusqu'au plancher, puis **ellipsé** *(valeurs ci-dessous)*.
+>
+> **② CE QUI EST VRAI DEPUIS T13 (2026-08-29), et qui se LIT dans le code** *(`echeance_tile.dart` :
+> la description au repos est peinte sous `if (temps.estEchue && description.isNotEmpty)`)* :
+> * une tuile **`ACTIVE`** ⛔ **ne peint PLUS sa description au repos** — elle porte **le NOMBRE SEUL,
+>   centré**. Sa description **vit dans le libellé d'accessibilité** *(**LU** :
+>   `remaining_time_calculator.dart` y compose le suffixe `', <description>'`)* et **ne réapparaît à
+>   l'écran qu'à la révélation, à la place du nombre** ;
+> * une tuile **`ÉCHUE`** **CONSERVE la sienne EN PERMANENCE**, sous son « 0 », **alignée à gauche**
+>   *(verdict clarify nº 1 : « son « 0 » n'a rien à dire, **la description est ce qui l'identifie** »)*.
+>
+> 🔬 **Et ce n'est pas une préférence de maquette : le retrait de la description au repos a REFERMÉ un
+> débordement MESURÉ** — à **9 tuiles / 320 dp** la tuile débordait **dès ×1,6** *(une exception par
+> tuile)* ; ⛔ **aucun débordement à 4 tuiles, à 390 dp, ni à ×1,5** ; et **sans description, aucun
+> débordement même à ×3,0**. **C'est cette mesure qui a désigné la cause, donc le remède.**
+
+### Valeurs de typographie — **AJOUTÉES le 2026-09-08** *(US-01.4, §G-8)*
+
+> 🔴 **POURQUOI CETTE TABLE EXISTE : elle referme un DÉFAUT, ⛔ elle ne range pas.** Ce document se
+> déclare **autorité sur les VALEURS** *(en-tête)* et `concentration_tokens.dart` écrit *« Ce fichier
+> n'est pas l'autorité : `DESIGN_SYSTEM.md` l'est »* — or la table §Typographie ⛔ **ne donnait AUCUNE
+> valeur** jusqu'à aujourd'hui ⇒ **la retouche de la taille du nombre *(AC-1 d'US-01.4)* se faisait à
+> l'aveugle.** ⛔ **Les nombres ci-dessous sont LUS dans le code**, jamais recopiés d'un document.
+
+| Rôle | Valeur | Projection en Dart | Ce qui la borne |
+|---|---|---|---|
+| **Nombre d'une tuile `ACTIVE`** | **64** *(w700, `height: 1`)* | `ConcentrationTheme.tailleNombre` | ⛔ **ne pas dépasser 64 sans rejouer le calcul ci-dessous** |
+| **Nombre d'une tuile `ÉCHUE`** | **48** — ⛔ **celle d'US-01.1, INCHANGÉE** | `ConcentrationTheme.tailleNombreEchue` | 🔴 **C'est une DÉCISION, pas un reste** : l'échue garde **sa description sous son « 0 »** ⇒ un nombre agrandi **la pousserait hors de la tuile**. ⇒ **le nombre agrandi ET le centrage sont réservés aux `ACTIVE`** |
+| **Description de tuile** *(repos d'une échue, et révélation)* | **13** *(w400)* | `ConcentrationTheme.styleDescription` | ⛔ **aucun second token de description** *(verdict nº 10 — deux tokens dériveraient)* |
+| **Plancher de la description RÉVÉLÉE** | **11** | `ConcentrationTokens.plancherDescriptionRevelee` | 🔴 Le plancher **EFFECTIF** est **`11 × échelle utilisateur`** *(**22** à ×2,0)* ⇒ **ratio de réduction maximal `11/13`** : ⛔ **la réduction porte sur la taille de DESIGN, JAMAIS sur le facteur d'échelle** — un ajustement qui « ferait rentrer » le texte en annulant le réglage système **reprendrait d'une main ce que l'accessibilité donne de l'autre** *(SC 1.4.4)*. Au-delà : **ellipse**, et le texte complet reste **en gestion** et dans le **libellé d'accessibilité**, où ⛔ aucune troncature n'a lieu |
+| **Message d'écriture** | **14 / w500** | `ConcentrationTheme.tailleMessage` | ⛔ **la COULEUR n'est PAS dans le style** : elle est apposée **par appel** *(c'est le seul paramètre que le ton change)* |
+
+🔴 **LA BORNE DES 64 EST UN CALCUL, ⛔ PAS UN GOÛT — et le produit la porte déjà** *(docstring de
+`tailleNombre`)* : à **4 tuiles sur 320 dp**, la boîte de contenu vaut **110 dp** ; un nombre à
+**3 chiffres** *(⛔ le nombre d'années **n'est pas borné**)* mesure **≈ 115 dp à 64** contre
+**≈ 130 dp à 72** **[ESTIMATION : 0,6 em par chiffre en chasse fixe]** ⇒ **72 déclencherait
+`scaleDown` dans un cas courant**, quand **64 le laisse au bord**.
+⇒ **la taille s'augmente dans le TOKEN**, et `BoxFit.scaleDown` **reste le FILET** *(c'est lui qui a
+fermé le débordement à 9 tuiles)*. ⛔ **`BoxFit.contain` est INTERDIT** : il **agrandit** aussi, donc
+la taille du glyphe dépendrait du **nombre de chiffres** et `10 → 9` **doublerait** le chiffre au
+rafraîchissement — **9 tuiles porteraient 9 tailles différentes**.
+
+🔬 **PRÉCISION DATÉE-2026-09-08 SUR LES CHIFFRES TABULAIRES, parce que la formulation de la 1ʳᵉ ligne
+de la table promet plus que la mécanique ne donne** *(et c'est vrai **depuis US-01.1** — ⛔ ce n'est
+pas un défaut d'US-01.4)* : `FontFeature.tabularFigures()` garantit que **deux nombres du MÊME nombre
+de chiffres occupent la même largeur** ; ⛔ **elle ne garantit RIEN quand le nombre de chiffres
+CHANGE** — `FittedBox(scaleDown)` réduit alors le glyphe, donc **la taille rendue varie** au passage
+`10 → 9`. **Ce que la phrase protège réellement est la MISE EN PAGE** *(la boîte, elle, ne bouge
+pas)*, ⛔ **pas la taille du glyphe**. Et ⛔ **aucun token ne pourrait supprimer cette variation** :
+3 chiffres sont possibles, et aucune taille ne les fait tous tenir.
+
 ⛔ **L'unité ne s'écrit JAMAIS en pixels** *(RF-01)* : ni suffixe, ni exposant, ni fraction, ni signe.
 Elle n'existe **que** dans le `semanticLabel` d'accessibilité.
 ⚠️ **Tailles de police système respectées** : le nombre doit rester lisible **et la tuile ne doit pas
@@ -130,6 +290,33 @@ casser** quand l'utilisateur agrandit la police du système *(AC-8)*.
 ⛔ **Aucun état « chargement »** : les données sont **injectées en mémoire** au périmètre d'US-01.1 — un
 spinner serait un mensonge d'interface. ⛔ **Aucun état « erreur » visible** : une donnée illisible est
 **ignorée silencieusement**, le hub reste debout *(AC-1/AC-3 « Erreur »)*.
+
+> ⚖️ **PÉRIMÉ-2026-09-08 SUR DEUX POINTS *(US-01.4)*, et ils sont datés ici parce que le DÉFAUT a une
+> EXTENSION** : la même modification de produit *(T13)* rend faux **un énoncé de §Typographie ET une
+> cellule de cette table** — *« corriger le défaut, pas le renvoi »*. ⛔ **Rien n'est réécrit.**
+>
+> **① « Tuile d'échéance — **rempli** *(nombre + description)* »** ne décrit plus qu'un cas :
+> une tuile **`ACTIVE`** porte **le nombre SEUL** *(voir §Typographie, amendement daté)*. **Les
+> QUATRE états de rendu** sont désormais : **repos actif** *(nombre seul, centré)* · **révélé**
+> *(description **à la place** du nombre, 3 s)* · **actif sans description** *(nombre seul, ⛔ **et
+> aucune enveloppe interactive** : rien à révéler ⇒ **la tuile est nommée mais NON activable**, ⛔
+> jamais un gestionnaire vide)* · **échue** *(« 0 » + description **en permanence**, alignés à
+> gauche)*. **Un SEUL geste pointeur par tuile** *(appui simple sur une `ACTIVE`, double appui sur une
+> `ÉCHUE`)* et **un anneau de focus bicolore**.
+> ⛔ **La marque « sur la grille » / « retirée de la grille » n'est PAS sur la tuile** *(**LU** :
+> elle vit dans la **carte de gestion**, `LigneEcheance`)* — et c'est **un MOT dans le texte
+> visible**, ⛔ jamais une couleur, ⛔ jamais un `tooltip` seul.
+>
+> **② « ⛔ Aucun état « erreur » visible »** reste vrai **pour son objet** *(une donnée illisible est
+> **toujours** ignorée en silence)* et **il est FAUX comme énoncé général depuis US-01.4** : le hub
+> porte désormais une **zone de message**, **montée en permanence** *(sa hauteur est **réservée**, ⛔
+> pour que l'apparition d'un message **ne décale JAMAIS les tuiles**)*, `liveRegion`, ⛔ **jamais
+> fugace** *(⛔ pas de `SnackBar`)*, qui dit **qu'un retrait n'a pas eu lieu**.
+> ⚖️ **ET SA COULEUR EST UN ARBITRAGE, pas un oubli** *(**LU** dans `hub_page.dart`)* : ⛔ **AUCUNE
+> couleur d'erreur sur le hub** — le ton y est `texteSurFond`, ⛔ **pas `erreur`** — parce que
+> l'interdiction du rouge d'US-01.1 porte sur *« les tuiles **et l'ambiance de pratique** »*, **et le
+> hub EST l'ambiance de pratique**. ⇒ **le message porte un MOT et une FORME** *(le glyphe ⚠)*, ⛔
+> **jamais une couleur seule** *(règle permanente : trois tokens à **1,00:1** entre eux)*.
 
 ### Composants **AJOUTÉS le 2026-08-06** *(US-01.2 — anatomie complète dans [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md))*
 
@@ -170,6 +357,22 @@ indicateur de progression signifierait que la composition a quitté `main()`.
 │                 ○ Concentration│   (non-interactifs)
 └─────────────────────────────┘
 ```
+
+> ⚖️ **PÉRIMÉ-2026-09-08 *(US-01.4, T13)* — ⛔ le wireframe n'est PAS redessiné** *(on date, on ne
+> repeint pas ; un schéma repeint efface la trace de ce qu'on croyait)*. **Ce qui est faux, tuile par
+> tuile — et il y a DEUX erreurs de sens OPPOSÉ, ce que « la description a bougé » ne dirait pas** :
+> * **`3 / projet` et `9 / impôts`** *(actives **avec** description)* ⇒ 🔴 **FAUX** : une tuile
+>   `ACTIVE` porte **le nombre SEUL, centré**. La légende *« description discrète dessous »* est donc
+>   **fausse pour ces deux-là**, et sa description ne vit plus qu'au **libellé d'accessibilité**, puis
+>   **à la place du nombre** pendant la révélation ;
+> * **`0`** *(échue, dessinée **sans** description)* ⇒ 🔴 **FAUX DANS L'AUTRE SENS, et c'est
+>   l'erreur qu'on ne cherchait pas** : une **`ÉCHUE` CONSERVE sa description en permanence** ⇒ **il
+>   en MANQUE une** sous ce « 0 ». *(La note *« « 0 » = état à zéro, EN TÊTE »*, elle, **reste
+>   vraie**.)* ;
+> * **`12`** *(active, dessinée sans description)* ⇒ ✅ **conforme à la règle actuelle** — ⚠️ **par
+>   coïncidence**, ⛔ pas parce que ce schéma l'avait prévu.
+> ➡️ **Rendus à jour** : [`US-01.4-DESIGN-UX.md`](US-01.4-DESIGN-UX.md) §3.2 à §3.6 *(dont la **zone de
+> message** du hub, **absente** de ce schéma)*.
 
 ```
 ┌─────────────────────────────┐   État VIDE (AC-9)
@@ -213,6 +416,41 @@ d'appui**, aucune ondulation.
   ✅ **ÉCHUE-2026-08-06 : l'exigence est DUE et elle est servie.** *(La ligne ci-dessus reste vraie à sa
   date — on date, on ne repeint pas.)* US-01.2 introduit **cinq surfaces interactives**, donc
   **15 exigences chiffrées** *(A-1 → A-15)* dans [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md), §7.
+  ✅ **COMPLÉTÉ-2026-09-08 *(US-01.4)*, et la borne du complément de 2026-08-06 doit être lue** : les
+  15 exigences d'US-01.2 servent **ses cinq surfaces**, ⛔ **jamais la TUILE**, qui devient ici le
+  **premier élément interactif de la grille** ⇒ **clavier, focus visible et cible tactile sont dus
+  pour la tuile**, et sont chiffrés en **A-16 → A-26** dans
+  [`US-01.4-DESIGN-UX.md`](US-01.4-DESIGN-UX.md) §8. **La géométrie de l'anneau est au §Surfaces
+  interactives ci-dessus** *(elle ⛔ **n'est pas** celle d'A-7 — voir son amendement daté)*.
+
+### ⚖️ Registre des écarts WCAG déclarés — **CRÉÉ le 2026-09-08** *(US-01.4)*
+
+> 🔴 **POURQUOI CE REGISTRE EXISTE, et c'est un défaut de ce document qu'il referme.** Ce fichier
+> affirme « **WCAG AA** » *(titre du §Accessibilité, RNF-06)* et ⛔ **ne tenait AUCUN registre
+> d'écarts** ⇒ **l'affirmation était plus large que la mesure**, et laissée telle quelle elle
+> devenait **une entrée réfutée par le corpus qu'elle résume**. ➡️ **Toute lecture de « WCAG AA » dans
+> ce document se fait AVEC ce registre.**
+>
+> ⛔ **RÈGLES DE TENUE — elles font partie du registre, pas de son introduction** :
+> * une entrée ⛔ **ne migre JAMAIS vers les bornes `NM-*`** — *« on ne sait pas mesurer »* **n'est
+>   pas** *« on ne se conforme pas »* : confondre les deux transforme un **écart assumé** en
+>   **lacune d'instrument**, et le fait disparaître ;
+> * une entrée se **ferme** par une **mesure** ou une **décision datée**, ⛔ **jamais par
+>   suppression** — et sa ligne **reste** *(on date, on ne repeint pas)* ;
+> * ⛔ **il n'est écrit NULLE PART qu'une entrée de ce registre est CONFORME** — un écart déclaré
+>   **est** une non-conformité assumée, et l'écrire autrement serait le blanchir ;
+> * une entrée nomme **ce qu'il faudrait pour la LEVER** : sans cette colonne, un écart n'a **aucun
+>   critère de sortie** et se transmet indéfiniment.
+
+| # | Critère WCAG | Niveau | Surface concernée | Ce qui s'en écarte *(mesuré / lu)* | Motif de l'écart | Déclaré le | **Ce qu'il faudrait pour le LEVER** |
+|---|---|---|---|---|---|---|---|
+| **É-1** | **SC 2.2.1 « Timing Adjustable »** | **A** — ⚠️ **donc INCLUS dans AA** | **révélation de la description** sur une tuile `ACTIVE` *(US-01.4, AC-2)* | La description est remplacée par le nombre au bout de **3 s** *(`ConcentrationTokens.fenetreRevelation` — **LU**)*. Ce délai ⛔ **n'est ni désactivable, ni ajustable, ni prolongeable** : il n'existe **aucune page de réglages** *(« Réglages » est **inerte** depuis US-01.2)*. Le geste est **ré-appuyable sans limite** *(la fenêtre redémarre)*, et ⛔ **le ré-appui n'est AUCUNE des exceptions littérales du SC** | **Décision humaine du 2026-08-21** *(gate clarify, option (a) : 3 s + ré-appui illimité)*. **Ce que le produit tient malgré l'écart** : ⛔ rien n'est **définitivement perdu** *(le texte complet est en gestion et dans le libellé d'accessibilité)*, et la fenêtre ⛔ **n'est ni interrompue ni prolongée** par le rafraîchissement de la grille *(AC-2 « Limite »)*. **Ce que l'écart achète** : la grille **reste l'exercice** — un affichage permanent la dissoudrait en liste de libellés. ➡️ **Décision et motif COMPLETS** : [Story File d'US-01.4](../stories/US-01.4-gestes-tuile.md) §⚖️ *Écart déclaré à WCAG 2.2.1* — ⚠️ **cette cellule le RÉSUME, elle ne le remplace pas** *(et c'est le 3ᵉ exemplaire de cette entrée : ⛔ **le registre est l'INDEX, le Story File porte la décision**)* | **2026-08-21** *(inscrit ici le **2026-09-08**)* | **Une durée réglable** *(⇒ activer « Réglages », classé **Could (V2)**)*, **ou** une option *« la description reste jusqu'au prochain appui »* *(⇒ elle **dissoudrait** le SC au lieu de le satisfaire, et **contredit la lettre** de la décision du 2026-08-21)*. ⛔ **Aucune des deux voies n'est ouverte au MVP** — l'écart est donc **ouvert, et il reste ouvert** |
+
+⛔ **Ce que ce registre n'est PAS** : il ⛔ **ne contient aucune borne de mesure** *(celles-là sont les
+`NM-*` des Story Files : **NM-12** « l'annonce réelle d'un lecteur d'écran », **NM-13** « le focus
+**vu** »)*, et ⛔ **aucun contraste** — les contrastes de ce document sont **calculés**, donc ils sont
+soit **tenus**, soit **des refus documentés** *(voir les trois refus du §Palette)*, ⛔ jamais des
+écarts.
 
 ### Exigences chiffrées des surfaces interactives — **2026-08-06** *(US-01.2)*
 
@@ -229,6 +467,38 @@ d'appui**, aucune ondulation.
 | **Nom d'une action de liste** | contient **la description de l'échéance** *(9 boutons « Modifier » sont 9 boutons indistinguables)* | SC 2.4.6 |
 | **Jamais la couleur seule** | tout état porte **un mot ou une forme** | SC 1.4.1 — **rendu obligatoire ici par la mesure** *(3 tokens à 1,00:1 entre eux)* |
 | **Mouvement** | **0** animation en US-01.2 *(RF-06 est **US-01.4**)* | SC 2.2.2, 2.3.1 |
+
+> ⚖️ **PÉRIMÉ-2026-09-08 — DEUX LIGNES DE LA TABLE CI-DESSUS.** ⛔ **Aucune n'est réécrite.**
+>
+> **① « Focus visible — anneau 2 dp, décalage 2 dp, `moduleActif`, ≥ 3:1 contre les deux surfaces
+> adjacentes » est FAUSSE SUR UN FOND EN DÉGRADÉ** *(US-01.4, §G-10)*. Elle **reste vraie pour les
+> cinq surfaces d'US-01.2**, dont les fonds sont **FIXES** *(`fondApp`, `surfaceElevee`)*.
+> **Mesuré** : `moduleActif` contre le dégradé rend **1,36:1**, **101/101 points sous 3:1** ⇒ sur une
+> tuile, **l'anneau est BICOLORE**, **décalage 0**, bande intérieure **PEINTE**
+> *(géométrie, mesures et contrôle négatif : §Surfaces interactives ci-dessus)*.
+> ⚠️ **Et le défaut de forme mérite d'être nommé, il n'est pas anecdotique** : **cette exigence
+> existait en DEUX exemplaires** — cette ligne **et** **A-7** de
+> [`US-01.2-DESIGN-UX.md`](US-01.2-DESIGN-UX.md) §7 — donc **il a fallu la dater DEUX FOIS**. *« Une
+> règle n'existe qu'en un seul exemplaire ; deux copies dérivent. »* ➡️ **La géométrie de l'anneau
+> n'est écrite QU'À UN endroit** *(§Surfaces interactives)*, et les deux lignes y **renvoient**.
+>
+> **② « Mouvement : 0 animation en US-01.2 (RF-06 est US-01.4) » est ÉCHUE PAR SA PROPRE PRÉVISION** :
+> ⛔ **elle n'a pas été réfutée, elle avait daté son terme** — et **l'animation arrive ici**. Elle
+> reste **exacte pour US-01.2**. **Exigence chiffrée, valeurs LUES dans le code** :
+
+| Grandeur | Valeur | Projection en Dart | Motif — ⛔ aucun n'est un goût |
+|---|---|---|---|
+| **Objet animé** | **la disparition d'une échue RETIRÉE**, et **rien d'autre** | `EcheancesGrid` | 🔴 **L'animation est FONCTIONNELLE : elle REMPLACE la modale** *(arbitrage du 2026-08-03 — le geste n'est pas destructif, une modale frictionnerait le geste le plus fréquent au profit d'un acte sans conséquence)*. ⇒ **une seule** animation dans **tout le produit** |
+| **Durée** | **200 ms** | `ConcentrationTokens.dureeDisparition` | **Deux bornes, pas une préférence** : en dessous d'**≈ 120 ms** l'œil enregistre une **disparition sèche** *(l'animation cesserait d'être le feedback)* ; au-delà d'**≈ 300 ms** elle **frictionne** le geste le plus fréquent. ⛔ **Ne pas la changer sans rejouer ce raisonnement** |
+| **Courbe** | **ACCÉLÉRÉE** *(`Curves.easeIn`)* | `ConcentrationTheme.courbeDisparition` — ⚖️ **dans le THÈME, pas dans les tokens** *(motif mesuré : `concentration_tokens.dart` n'importe **aucune** bibliothèque Flutter, et `Curves` en exige une)* | **une sortie PART.** Une courbe **décélérée** ferait **s'attarder** la tuile — elle dirait *« je m'en vais… ou pas »*. ⛔ **`elastic*` et `bounce*` sont INTERDITS** *(rebond, dépassement — RNF-03)* |
+| **Propriétés animées** | **opacité 1 → 0** **et** **échelle 1 → 0,92** | `ConcentrationTokens.echelleDisparition` | ⛔ **AUCUN déplacement, aucune rotation, aucun clignotement** : un glissement suggérerait *« ça va quelque part »*, or l'échéance **reste en gestion** |
+| **Recomposition de la grille** | ⛔ **SÈCHE, jamais animée** | — | passer de 5 à 4 tuiles fait passer la grille de 3 à 2 colonnes : **animer cela** ferait bouger **les tuiles voisines**, donc **la surface sous le doigt** |
+| **« Animations réduites »** | **durée NULLE**, et ⛔ **AUCUNE enveloppe d'animation montée, À AUCUN INSTANT** | `MediaQuery.disableAnimationsOf` ⇒ `Duration.zero` | 🔴 **MESURÉ à T14, et la nuance est tout l'enjeu** : *« départ immédiat »* veut dire ⛔ **aucune enveloppe**, ⛔ **pas « une animation très courte »** — l'enveloppe n'est montée **que** si le contrôleur a **effectivement démarré** *(`isAnimating`)*, ce qui rend **« aucune animation ne se joue » OBSERVABLE** au lieu d'être déduit d'une opacité |
+| 🔴 **ORDRE — c'est une EXIGENCE, pas un détail d'implémentation** | **l'écriture ABOUTIT d'abord, l'animation ENSUITE** | — | ⛔ **Un retrait dont l'écriture ÉCHOUE ne joue AUCUNE animation** *(la tuile est à sa place, avec son nombre et sa couleur ; c'est le **message** qui informe)*. ⛔ **Aucune mise à jour optimiste**, et ⛔ **l'animation n'est JAMAIS la condition du résultat** : aucune attente d'animation sur le chemin d'écriture — sinon un retrait **sans** animation serait un **retrait perdu** |
+
+> ⚠️ **Ce que cette exigence NE lève PAS** : la **fluidité perçue** *(NM-3)* et le **déclenchement
+> accidentel réel** *(NM-11)* — ⛔ elles exigent **un appareil** et **un doigt**, et ⛔ **aucune
+> assertion de ce document ne les remplace**.
 
 ⚠️ **Bornes non levées, rappelées** : **NM-6** *(l'annonce **réelle** d'un lecteur d'écran)* et **NM-7**
 *(l'**œil**, et le rendu réel à grande police)* — elles ne se lèveront qu'avec **US-01.3**.
@@ -248,6 +518,16 @@ d'afficher des **chaînes anglaises** faute de `flutter_localizations` *(que l'A
 d'ajouter)*. ⇒ **les sélecteurs natifs sont écartés au profit de champs de saisie**
 *(`JJ/MM/AAAA`, `hh:mm`)*. **Arbitrage recommandé, non tranché par @UXDesigner** :
 [`US-01.2-DESIGN-UX.md` §9.2 et §11.5](US-01.2-DESIGN-UX.md).
+
+**Complément 2026-09-08 *(US-01.4)*** : ⛔ **aucun équivalent clair** pour les tokens de cette US —
+**même motif**, ⛔ inchangé. 🔴 **Mais l'anneau de focus bicolore rend ce point PLUS RIGIDE qu'avant,
+et il faut le dire avant que quelqu'un ne le découvre** : la **bande intérieure de l'anneau EST
+`fondApp`**, c'est-à-dire **la couleur du mode sombre**, et son contraste est calculé **contre le
+dégradé**. ⇒ **un mode clair ne se contenterait pas de nouveaux tokens : il obligerait à REJOUER le
+calcul de l'anneau sur 101 points**, et rien ne garantit qu'une couleur claire y tiendrait les deux
+côtés *(c'est exactement ce qui échoue aujourd'hui pour `moduleActif`)*. ⛔ **À inscrire au jour où un
+mode clair sera demandé, pas avant** — et ⛔ **ce n'est PAS une raison de refuser un mode clair** :
+c'est le **coût** à connaître.
 
 ---
 

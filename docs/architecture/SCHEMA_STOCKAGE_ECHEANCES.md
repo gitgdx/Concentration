@@ -19,6 +19,28 @@
 > elle est **retirée** et remplacée par **la commande qui la produit** *(défaut ⑤ du `CLAUDE.md` :
 > « une valeur fausse se retire, jamais ne se met à jour »)*.
 
+> ⚖️ **AMENDÉ le 2026-09-08 — @DataEngineer, tâche T16 d'US-01.4** *(branche
+> `feat/US-01.4-gestes-tuile`, phase de **développement**)*.
+>
+> 🔴 **CE QUI DISTINGUE CET AMENDEMENT DU PRÉCÉDENT, ET C'EST TOUT SON OBJET** : celui du **2026-08-24**
+> a été écrit **avant qu'une ligne de `v3` n'existe** *(il le disait lui-même, §7-9 et §7-12 : « aucune
+> ligne de `v3` n'est écrite, aucun test n'existe »)*. **Celui-ci est écrit APRÈS le code**, et il en
+> **rejoue les instruments** : ⛔ **plus une seule prescription neuve**, ⛔ **aucune décision rouverte** —
+> **uniquement des énoncés que la mesure a CONFIRMÉS, et QUATRE qu'elle a RÉFUTÉS.**
+>
+> **Les quatre réfutations, parce que ce sont elles qui coûtent** : ⓵ *« le module conforme contient **ZÉRO
+> occurrence** du mot `retiree` »* — **le module livré en porte 5** *(toutes en commentaires ; 0 dans le
+> code)* ⇒ **la commande publiée rend 5, pas 0** · ⓶ la **réfutation greppable de `F-1`/`D-6`**
+> *(`grep -n "retiree" …` ⇒ « un seul test de type »)* **ne peut PAS voir ce qu'elle annonce** : le test de
+> type porte sur la variable **`brut`**, ⛔ **aucune ligne ne contient les deux mots** · ⓷ **la table du
+> §1 affirme que « l'étape porte son numéro ET son intention »** — l'étape `v2 ⇄ v3` **ne porte son nom
+> `ajout_cle_retiree_optionnelle` NULLE PART dans `lib/`** · ⓸ **deux valeurs `= 2` écrites à la main**
+> *(§4 Idempotence, §5)* **ont vieilli exactement comme la table des versions l'avait prévu.**
+>
+> ⛔ **On DATE, on ne repeint pas** : chaque énoncé dépassé **reste visible**, marqué **`PÉRIMÉ-2026-09-08`
+> en LITTÉRAL** — ⛔ **jamais barré** *(`~~texte~~` est invisible à un balayage de corpus ; c'est la leçon
+> d'US-00.7, et ⚠️ **le §1 de ce document l'enfreint encore**, voir la note du §1)*.
+
 > Produit par **@DataEngineer** le **2026-08-06** — branche de design `data_design` d'US-01.2
 > *(track FULL, `parallel_design`)*. Il **instancie** [ADR-009](../adr/ADR-009-stockage-local-document-json-versionne.md)
 > *(le mécanisme est **déjà décidé** : document JSON unique, versionné, écrit atomiquement — ⛔ il n'est
@@ -56,7 +78,7 @@ touchée : c'est un **constat de son §Conséquences** qui a vieilli avant d'avo
 | **Tables au pluriel** | ✅ **Appliquée** | La collection est `echeances` *(pluriel)*, l'entrée est au singulier |
 | **3NF — traquer la redondance** | ✅ **Appliquée, et c'est la contrainte la plus structurante** | **Aucun fait dérivable n'est stocké** : ni `estEchue`, ni `RemainingTime`, ni `createdAt`, ni `dirty`, ~~ni `deletedAt`~~ ⛔ **PÉRIMÉ-2026-08-24 pour ce seul dernier terme, voir sous la table** *(I-7, confirmé par ADR-009)*. L'état `ÉCHUE` est **dérivé de `(dateEcheance, Clock)`** ⇒ **redondance nulle par construction**. ⛔ Stocker `estEchue` le rendrait **faux à la seconde suivante** |
 | **Index (B-Tree, plein texte)** | ⛔ **Sans objet, et interdit** | **Aucun AC n'annonce recherche ni filtrage** ; **AC-10 « Limite » interdit explicitement** index, pagination, recherche et chargement différé. Volume : **≤ 9 présentes** + historique. Lecture et écriture **du document entier**. ⚖️ **RECONDUIT-2026-08-24 malgré une apparence contraire** : **AC-7 d'US-01.4** *(signaler en gestion les échues **encore présentes**)* **ressemble** à un cas de filtrage, mais son propre volet « Limite » écrit ⛔ *« aucun filtre, aucune recherche, aucun troisième groupe »* ⇒ c'est une **partition d'une liste déjà entièrement en mémoire**, ⛔ pas une requête. **Aucun index n'est créé, et il serait interdit** |
-| **Migrations nommées descriptivement** | ✅ **Appliquée** | L'étape porte son numéro **et** son intention : `v1 → v2 : date_utc_vers_date_civile` |
+| **Migrations nommées descriptivement** | ✅ **Appliquée** | L'étape porte son numéro **et** son intention : `v1 → v2 : date_utc_vers_date_civile` — ⛔ **PÉRIMÉ-2026-09-08 sur la PORTÉE de « l'étape porte son intention », voir la note sous la table** |
 | **DDL et migration de données séparés** | ⚠️ **Sans objet ici, et il faut le dire** | Un document JSON **n'a pas de DDL** : il n'existe **que** la migration de données. La séparation prescrite par mon rôle **n'a rien à séparer** — ⛔ ne pas la cocher pour autant |
 
 ### 🔴 AMENDEMENT DATÉ-2026-08-24 — la ligne 3NF portait un motif **TROP LARGE**, et c'est un défaut
@@ -84,6 +106,51 @@ nommément**. **Restent interdits dans l'entité, sans un mot de changement** : 
 `version` — **et `retireeLe`**, parce qu'**aucun AC ne demande la date du retrait** ⇒ l'ajouter **serait**
 la modélisation spéculative qu'`I-7` refuse. **Un booléen est le plus petit domaine qui satisfait AC-4 et
 AC-5 d'US-01.4.**
+
+#### ✅ CONFIRMÉ-2026-09-08 sur le CODE LIVRÉ — le motif 3NF ne s'applique toujours pas, et c'est désormais vérifiable
+
+⛔ **`retiree` n'est PAS DÉRIVABLE**, et ce n'est plus un raisonnement : le code **le dit et l'isole**.
+`lib/features/echeances/domain/echeance_etat.dart` porte les **deux** prédicats côte à côte —
+`estEchue(echeance, instant)`, qui **prend un instant** parce qu'il **dérive de l'horloge**, et
+`presentesSurLaGrille(echeances)`, qui ⛔ **n'en prend AUCUN** *(son propre commentaire : « lui en passer
+un serait suggérer que le temps peut retirer une tuile »)*. ⇒ **la seule cause d'absence est un GESTE**, et
+**rien dans les données ne permet de le recalculer**. ⇒ **aucune redondance**, **3NF respectée**.
+
+⚠️ **DÉFAUT DE FORME DANS L'AMENDEMENT DU 2026-08-24, nommé et non corrigé en douce** : la ligne 3NF de la
+table ci-dessus marque son terme dépassé par **`~~ni deletedAt~~`**, c'est-à-dire **par un barré**. ⛔ **La
+convention du projet l'interdit** — *« un texte barré est invisible à `grep`, le marqueur doit être
+LITTÉRAL sur la ligne »* *(leçon d'US-00.7, `reports/US-00.7/corpus_sweep.md`)*. **Ici le dégât est
+LIMITÉ** *(un `PÉRIMÉ-2026-08-24` littéral suit sur la même ligne, donc un balayage le trouve)*, mais
+⛔ **le barré est du corpus et il fera précédent** : c'est **la 2ᵉ occurrence** du motif dans ce dossier
+*(la 1ʳᵉ est `~~**I-5**~~` dans [`MODELE_ECHEANCE.md`](MODELE_ECHEANCE.md))*. ⛔ **Il n'est PAS retiré
+ici** — retirer un marquage serait repeindre. **Il est NOMMÉ, daté, et porté à `/audit-methodo`.**
+
+#### ⛔ PÉRIMÉ-2026-09-08 — « l'étape porte son numéro ET son intention » : vrai pour `v1 ⇄ v2`, **FAUX pour `v2 ⇄ v3`**
+
+**Mesuré, ⛔ pas relu** : le nom `ajout_cle_retiree_optionnelle` **n'existe nulle part dans `lib/`**.
+
+```
+grep -rn "ajout_cle_retiree_optionnelle" lib/ test/   -> (vide)          # LE fait qui compte
+grep -n  "date_utc_vers_date_civile" lib/features/echeances/data/echeance_schema_migrations.dart
+                                                      -> 44:  // v1 → v2 : `date_utc_vers_date_civile`.
+```
+
+⚠️ **UN DÉCOMPTE A ÉTÉ RETIRÉ DE CE BLOC AVANT MÊME D'ÊTRE PUBLIÉ, et il faut dire pourquoi** : j'y avais
+écrit *« `grep -rn … docs/` → **1 ligne** »*. **Le paragraphe que vous lisez a rendu ce nombre FAUX en
+étant écrit** — il cite lui-même le nom **quatre fois**. ⇒ ⛔ **la valeur est RETIRÉE, pas « mise à
+jour »** *(« une valeur mise à jour périme au cycle suivant »)*. **C'est la 3ᵉ occurrence documentée dans
+ce projet du même mécanisme** : *un correctif qui s'explique produit MÉCANIQUEMENT des occurrences de ce
+qu'il corrige* *(`reports/US-00.5/tension_structurelle.md`)*. **Le seul énoncé stable est celui dont la
+sortie attendue est un REFUS** : ⛔ **`lib/` et `test/` ne portent pas ce nom.**
+
+⇒ **le nommage descriptif d'une étape est, dans ce projet, une convention PUREMENT DOCUMENTAIRE portée par
+un COMMENTAIRE** — il n'existe **aucun identifiant de code** qui la porte, et ⛔ **aucun contrôle ne peut
+donc la vérifier**. Pour `v1 ⇄ v2` le commentaire porte le nom ; pour `v2 ⇄ v3` il porte **une phrase de
+prose** *(« la clé d'entrée `retiree` devient RECONNUE de la grammaire »)*. **La convention est donc
+respectée par UNE étape sur DEUX.**
+⛔ **Je ne corrige pas le commentaire** : `lib/` est **hors du périmètre de T16**, et *un correctif
+d'une ligne fait dériver la mesure de qui le lit*. ➡️ **Porté comme écart NOMMÉ** — le remède serait un nom
+en **un seul exemplaire** *(une constante lue par le doc et par le code)*, ⛔ pas une deuxième copie.
 
 ## 2 · La forme persistée — diagramme et grammaire
 
@@ -176,6 +243,35 @@ comportement est **identique aujourd'hui**, donc ⛔ **aucun test ne rougit** ; 
 revue**, ⛔ pas une assertion. **Réfutation greppable** : `grep -n "retiree" lib/**/echeance*.dart` doit
 montrer **un seul** test de type, et il doit être **dans `echeance.dart`**.
 
+> 🔴 **PÉRIMÉ-2026-09-08 — CETTE COMMANDE NE PEUT PAS VOIR CE QU'ELLE ANNONCE, et le fond, lui, est
+> VRAI.** ⛔ **Ce n'est pas un détail de syntaxe : c'est un contrôle de revue qui rendrait « conforme »
+> quel que soit le code.**
+>
+> **Mesuré le 2026-09-08** : dans le code livré, le test de type porte sur la variable **`brut`**
+> *(`final brut = donnee['retiree']; … if (brut is! bool) return null;`)* ⇒ ⛔ **aucune ligne ne contient
+> À LA FOIS `retiree` et le test de type.** La commande publiée rend **34 lignes**, dont **zéro** ne porte
+> un test de type. ⇒ **un relecteur qui l'exécute ne peut ni confirmer ni réfuter `F-1`.**
+>
+> ✅ **La commande qui FONCTIONNE, et sa sortie exacte** — ⛔ le nombre se **lit**, il n'est pas recopié
+> depuis ce texte :
+>
+> ```
+> grep -rn "is! bool" lib/ --include=*.dart
+> lib/features/echeances/domain/echeance.dart:105:      if (brut is! bool) return null;
+> ```
+>
+> ⇒ **`F-1` est CONFIRMÉE par la mesure** : il y a **exactement un** test de type booléen dans tout
+> `lib/`, **et il est dans `echeance.dart`**, à la frontière de l'entité. ⚠️ **La borne du contrôle
+> reste entière** : le mutant *« ajouter le même test dans `_reconnaitre` »* a le **même comportement**
+> ⇒ ⛔ **aucun test ne rougirait**. La commande ci-dessus rendrait **deux** lignes — **c'est là toute la
+> valeur du contrôle, et c'est pourquoi il doit être EXÉCUTABLE.**
+>
+> 🔬 **La leçon dépasse cette ligne** : *« ne jamais désigner une assertion par ce qu'on croit qu'elle
+> contient »*. Le contrôle cherchait le **nom du champ** ; la propriété à vérifier porte sur le **test de
+> type**. **Deuxième occurrence du même piège dans ce document** *(l'autre est au §4 : la revue de la
+> migration par le nom `retiree`)*, et les deux ont la même cause — **le nom du champ n'apparaît pas là où
+> vit la règle.**
+
 **F-2 · 🔴 `null` est une valeur PRÉSENTE et NON booléenne ⇒ RÉSIDU.** ⛔ **Ce n'est pas une subtilité
 gratuite** : `"retiree":null` est du JSON parfaitement valide, et la forme la plus naturelle à écrire —
 `donnee['retiree'] ?? false` — le confond avec **une clé absente**. ⇒ la présence se teste par
@@ -260,7 +356,43 @@ parse("2026-11-15T23:59:00Z") -> 2026-11-15T23:59:00.000Z isUtc=true forme canon
 | **v0** | *(aucun fichier)* | Installation neuve — **état vide réellement atteignable** *(AC-13 « Erreur »)* | — |
 | **v1** | `dateEcheance` = **instant ISO-8601 canonique marqué UTC** `AAAA-MM-JJThh:mm:00.000Z` | **Format lisible, jamais distribué** | Ce que prescrivait la note **I-5**, en vigueur jusqu'au 2026-08-02 |
 | **v2** | `dateEcheance` = **date-heure CIVILE** `AAAA-MM-JJThh:mm` | ⛔ **PÉRIMÉ-2026-08-24 : cette cellule portait « ✅ `versionCourante` »** — elle l'a été jusqu'au 2026-08-24. **La valeur est RETIRÉE, pas mise à jour** *(défaut ⑤)* ; elle se **LIT** dans le module *(commande au §2)* | Arbitrage humain du 2026-08-03 *(AC-14, promu **Must**)* |
-| **v3** *(⚖️ **ajoutée le 2026-08-24**)* | **une clé d'entrée reconnue de plus** : `retiree`, **optionnelle**, **booléenne**, **écrite seulement si `true`**. ⛔ **`dateEcheance` est INCHANGÉE** | **Deuxième migration réelle du projet** ; la **première** dont la transformation de données est **VIDE** | [ADR-012](../adr/ADR-012-etat-echue-retiree-persistance-migration-v3.md), US-01.4 *(AC-4, AC-5)* |
+| **v3** *(⚖️ **ajoutée le 2026-08-24**)* | **une clé d'entrée reconnue de plus** : `retiree`, **optionnelle**, **booléenne**, **écrite seulement si `true`**. ⛔ **`dateEcheance` est INCHANGÉE** | **Deuxième migration réelle du projet** ; la **première** dont la transformation de données est **VIDE** — ✅ **EXÉCUTÉE-2026-09-08 sur le module RÉEL**, voir la note sous la table. ⛔ **Aucune valeur de version n'est écrite dans cette cellule** *(défaut ⑤)* | [ADR-012](../adr/ADR-012-etat-echue-retiree-persistance-migration-v3.md), US-01.4 *(AC-4, AC-5)* |
+
+✅ **AJOUT DATÉ-2026-09-08 (T16) — la table ci-dessus cesse d'être une PRESCRIPTION : `v3` EXISTE dans le
+code et son couple est EXÉCUTÉ.** ⛔ **Transcription de sortie, jamais une affirmation** *(rejoué le
+2026-09-08, Dart 3.12.2, Europe/Paris)* :
+
+```
+$ python reports/US-01.4/migration_v3_guard_criterion.py
+CONTEXTE|dart=3.12.2|versionCourante=3|etapes=[2, 3]
+ASSERTION|B1_up_identite_sur_les_entrees|OK|      ASSERTION|B5_false_laisse_verbatim_par_le_down|OK|
+ASSERTION|B2_aller_retour_v2_v3_v2|OK|            ASSERTION|B6_up_n_ajoute_aucune_cle|OK|
+ASSERTION|B3_aller_retour_v3_v2_v3|OK|            ASSERTION|B7_cle_inconnue_et_residu_survivent|OK|
+ASSERTION|B4_true_survit_au_down|OK|              ASSERTION|B8_chaine_v1_v3_v1|OK|
+VERDICT|OK|                                       -> exit 0
+```
+
+🔴 **La ligne `CONTEXTE` est le seul endroit de ce document où la version courante et la liste des étapes
+apparaissent, et elles y sont LUES par le script, ⛔ pas écrites par moi** — c'est le remède au défaut ⑤
+appliqué à la lettre : *le résultat se lit, il ne se recopie pas.*
+
+**Les deux autres transcriptions, et ce qu'elles établissent** :
+
+| Commande | Sortie | Ce qu'elle établit |
+|---|---|---|
+| `… migration_v3_guard_criterion.py --selftest` | **exit 0** — *« la garde sait rougir, et sur les bonnes assertions »* ; **8 assertions tuées par au moins un mutant** | ⛔ La garde **n'est pas décorative** : chacune de ses 8 assertions est **réfutable** |
+| `… migration_v3_guard_criterion.py --croise` | **exit 0** — **`M1` à `M4` : « 8/8 VERTES » sur le critère d'US-01.2** ; **`M6` : « 1 rouge : A1 » sur lui, « 8/8 VERTES » sur la garde** | 🔴 **Les deux instruments ne sont redondants DANS AUCUN DES DEUX SENS** ⇒ **on garde les DEUX** |
+| `python reports/US-01.2/migration_roundtrip_criterion.py` | **exit 0** — `A1`…`A8` toutes `OK`, `git diff` **VIDE** sur `reports/` | **Non-régression du couple `v1 ⇄ v2`**, instrument **bit-à-bit inchangé** — *« c'est le fait de ne pas l'avoir touché qui rendait sa mesure croyable »* |
+
+🔬 **CE QUE L'INVERSIBILITÉ DE CE COUPLE A DEMANDÉ, ET QUI N'ÉTAIT PAS DEVINABLE** : `up` et `down` sont
+**tous deux `Map<String, Object?>.from(d)`** — **l'identité**. ⇒ ⛔ **ce qui restait à prouver n'était pas
+l'exactitude d'un calcul, mais QUE PERSONNE N'A TOUCHÉ AUX ENTRÉES.** ⚠️ **Et il a fallu DEUX fonctions
+distinctes pour une seule identité**, pour une raison de **langage, mesurée** : les **tear-offs** d'une
+fonction de premier niveau sont **canonicalisés** dans une liste `const` ⇒ `EtapeMigration(3, _identite,
+_identite)` rend **`identical(up, down)` vrai** et fait **ROUGIR `A1_contrat_couple`**. ⛔ **Le code livré
+porte donc `_v2VersV3` ET `_v3VersV2`, deux déclarations, même corps** — et c'est **le mutant `M6`**, que
+⛔ **la garde ne voit pas** et que **seul le critère d'US-01.2 tue**.
+
 
 ⚠️ **`v1` n'est l'héritage de personne** *(ADR-009 §Conséquences)* : **aucun utilisateur n'a jamais détenu
 de document `v1`**. Sa valeur est de faire **transformer de la donnée** à la première migration du projet,
@@ -378,11 +510,45 @@ la donnée **réellement détenue par des utilisateurs**.
 
 🔬 **Un fait mesuré qui doit atteindre la revue et la QA, parce qu'il rend un réflexe INUTILE** : le module
 de migrations conforme contient **ZÉRO occurrence du mot `retiree`**
-*(`grep -c retiree lib/features/echeances/data/echeance_schema_migrations.dart` → **0**)*. **L'étape est
+*(`grep -c retiree lib/features/echeances/data/echeance_schema_migrations.dart` → **0**)*
+⛔ **PÉRIMÉ-2026-09-08 : CETTE COMMANDE REND 5, ET LA CONCLUSION RESTE VRAIE — voir l'encadré sous cette
+puce.** **L'étape est
 l'identité, donc elle ne nomme pas ce qu'elle transporte.** ⇒ ⛔ **cette migration ne peut pas être
 revue en cherchant le nom du champ** ; **la seule chose qui établit sa correction est la campagne du §8,
 avec sa graine.** *(Corollaire : `dart analyze` sur ce module rend **« No issues found! »** y compris sur
 les quatre variantes destructrices — **aucun lint ne voit une perte de donnée**.)*
+
+> 🔴 **PÉRIMÉ-2026-09-08 SUR LE CHIFFRE, ⛔ PAS SUR L'INSTRUCTION DE REVUE — et l'écart est instructif,
+> donc les DEUX sont conservés.** Cet énoncé a été écrit le **2026-08-24 à la clôture du design**, quand
+> le module ne portait **encore aucune ligne de `v3`** ; **le commit de T3, le même jour à 17:26, l'a rendu
+> faux.** ⛔ **C'est la classe de défaut nº 1 du projet** — *un nombre écrit à la main à côté d'une
+> commande, jamais relu dans sa sortie* — **et il a vécu un seul jour.**
+>
+> **Ce qui est mesuré le 2026-09-08, et les deux commandes sont à exécuter, pas à croire** :
+>
+> ```
+> grep -c "retiree" lib/features/echeances/data/echeance_schema_migrations.dart
+> 5
+> grep -n "retiree" lib/features/echeances/data/echeance_schema_migrations.dart | grep -v "^[0-9]*: *//"
+> (vide)
+> ```
+>
+> ⇒ **l'énoncé exact est** : ⛔ **ZÉRO occurrence dans le CODE EXÉCUTABLE**, **cinq** dans les
+> **commentaires de documentation** — ⛔ **désignés par la commande ci-dessus et JAMAIS par leurs numéros
+> de ligne** *(« un numéro glisse en silence, et la couverture cesse de couvrir sans qu'aucun outil ne le
+> signale » — leçon d'US-00.7)*. Ces cinq lignes **expliquent précisément ce que l'étape NE fait pas.**
+>
+> ✅ **L'INSTRUCTION DE REVUE, ELLE, EST RENFORCÉE ET NON AFFAIBLIE** : ⛔ **cette migration ne peut pas
+> être revue en cherchant le nom du champ** — et désormais **pour deux raisons au lieu d'une**. ⓵ Le code
+> ne le nomme pas *(l'étape est l'identité)*. ⓶ 🔴 **La commande naïve rend maintenant CINQ lignes de
+> PROSE RASSURANTE** — *« AUCUNE ENTRÉE N'EST TOUCHÉE »*, *« clé CONSERVÉE »* — ⇒ **un relecteur pressé y
+> lirait une confirmation.** ⚠️ **C'est pire qu'un silence** : les **quatre mutants destructeurs `M1` →
+> `M4` sont DÉRIVÉS de ce module et conservent donc ces cinq commentaires** ⇒ ⛔ **le grep rend
+> exactement la même chose sur la forme conforme et sur les formes qui détruisent la donnée.**
+>
+> ⇒ **Le seul contrôle qui distingue** est la campagne du §9 : `--selftest` *(**exit 0**, les 8 assertions
+> tuées par au moins un mutant)* et `--croise` *(la matrice)*. **Rejoués le 2026-09-08 : exit 0 tous les
+> deux.** *(⛔ Et l'énoncé sur `dart analyze` **tient** : « No issues found! » sur les **sept** sources.)*
 
 ### Idempotence et unicité d'exécution *(AC-12 « Nominal », R-6)*
 
@@ -390,11 +556,28 @@ Après un `up` réussi, le document réécrit **porte `schemaVersion = 2`** ⇒ 
 **plus rien à migrer**. ⛔ **Vérifié par une assertion, pas par relecture du code** : le critère refuse un
 `migrer` qui **ne réécrit pas la version** *(mutant `M3`)*.
 
+⛔ **PÉRIMÉ-2026-09-08 pour la VALEUR `2`, et pour elle SEULE** — **la propriété et son assertion sont
+intactes.** C'est **exactement le défaut ⑤** *(un nombre dérivé écrit à la main)*, et **la table des
+versions de ce même § l'avait prévu** en retirant la même valeur le 2026-08-24. ⇒ ⛔ **la valeur est
+RETIRÉE, pas mise à jour** : le document réécrit porte **`versionCourante`**, qui se **LIT** par
+`grep -n "^const int versionCourante" lib/features/echeances/data/echeance_schema_migrations.dart`.
+**Le code ne contient d'ailleurs aucun littéral** : `migrer` écrit `doc['schemaVersion'] = cible`, et
+`cible` **vaut `versionCourante` par défaut** — ⇒ **la propriété est vraie pour TOUTE version future, ⛔ pas
+seulement pour celle du jour.**
+
+⚠️ **COLLISION DE NOMS RELEVÉE-2026-09-08, ⛔ pas corrigée ici** : le `M3` cité juste au-dessus est
+**`M3_version_non_reecrite`** du critère d'**US-01.2**, tandis que le **`M-3`** du §9.2 est
+**`M3_up_ecrit_false_partout`** de la garde `v3`. **Deux mutants sans rapport, deux instruments, le même
+étiquetage court.** ⛔ **Renommer un mutant changerait la sortie d'un instrument dont l'immobilité est
+elle-même une preuve** *(« c'est le fait de ne pas l'avoir touché qui rendait sa mesure croyable »)* ⇒
+**l'écart est NOMMÉ, et la règle de lecture est : un `M<n>` ne se lit JAMAIS sans l'instrument qui le
+porte.** ➡️ Porté à `/audit-methodo`.
+
 ## 5 · Corruption, absence, version inconnue, version future
 
 | Cas sur le disque | Comportement **exigé** | ⛔ Interdit | Couverture |
 |---|---|---|---|
-| **Aucun fichier** *(v0)* | État vide sobre ; le premier enregistrement crée le document en `v2` | — | AC-13 « Erreur » — scénario |
+| **Aucun fichier** *(v0)* | État vide sobre ; le premier enregistrement crée le document en `v2` — ⛔ **PÉRIMÉ-2026-09-08 pour la VALEUR `v2`** *(défaut ⑤, 2ᵉ occurrence dans ce document)* : **le code n'écrit aucun littéral**, il appelle `codec.documentNeuf(versionCourante)` *(mesuré : `lib/features/echeances/data/echeance_document_repository.dart`, **deux** appelants)*. ⇒ la valeur est **RETIRÉE, pas mise à jour** ; elle se **LIT** dans le module | — | AC-13 « Erreur » — scénario |
 | **Fichier vide / JSON invalide / racine non-objet** | `rename` vers `echeances.json.illisible-<horodatage>` **avant** toute écriture neuve, puis **état vide** | ⛔ **Jamais un `delete`**, jamais une réparation | AC-11 « Limite » — scénario |
 | **Entrée non conforme** *(non-objet, `id` absent/vide/non-`String`, date non canonique)* | **Résidu** : ignorée à l'affichage, **ré-émise verbatim à sa place** à chaque écriture | ⛔ Ni réécrite, ni normalisée, ni supprimée | AC-11 « Erreur » — scénario · **R-2** |
 | **`id` en double** | ⚠️ **La première occurrence est reconnue ; les suivantes sont des résidus** *(conservées, non affichées)* | ⛔ Ne pas afficher deux entrées de même `id` *(les `Key` de widgets entreraient en collision)* · ⛔ ne pas supprimer le doublon | 🔴 **Aucun AC, aucun scénario** — voir §7 |
@@ -458,6 +641,25 @@ illicite **disparaît aussi de la page de GESTION**, pas seulement de la grille 
 perdu**, et **rien ne le dit à l'utilisateur**. ➡️ **Entrée de jointure nº 2 pour @UXDesigner / @PO.**
 
 ## 7 · ⛔ Ce que ce design N'ATTESTE PAS
+
+> ⚖️ **RELEVÉ DATÉ-2026-09-08 (T16) — QUATRE bornes de ce § ont changé d'état, et ⛔ AUCUNE n'est
+> effacée.** Elles sont **conservées telles quelles**, parce que *« un lecteur d'audit doit pouvoir
+> constater ce qui était prescrit avant de lire ce qui a été fait »*. **Ce qui est LEVÉ, mesuré** :
+>
+> | Item | Ce qu'il annonçait | État LU le 2026-09-08 |
+> |---|---|---|
+> | **1** | *« le patron n'a PAS été joué sur `lib/` — parce que `lib/` n'existe pas »* | ⛔ **PÉRIMÉ** : `python reports/US-01.2/migration_roundtrip_criterion.py` rend **exit 0 contre le module RÉEL**, `A1`…`A8` toutes `OK`. ⚠️ **Le critère d'entrée transféré par EPIC_00 est donc satisfait** — **je le CONSTATE, je ne le CLÔTURE pas** *(la clôture d'un risque d'EPIC n'est pas de mon périmètre)* |
+> | **2** *(note interne)* | *« `COUPLES` ne contient qu'US-01.1 ⇒ US-01.2 n'est sous AUCUN contrôle de correspondance »* | ⛔ **PÉRIMÉ** : `python scripts/check_gherkin_mapping.py` rend **exit 0** sur **TROIS** couples *(US-01.1, US-01.2 **et** US-01.4)*. ✅ **C'était `T15`, et elle est passée en DERNIER — comme prescrit** |
+> | **9** | *« la campagne n'existera qu'au commit de T3 ; `versionCourante` vaut encore la valeur d'US-01.2, aucune ligne de `v3` n'est écrite, aucun test n'existe »* | ⛔ **PÉRIMÉ sur ses QUATRE membres** : la garde rend **exit 0** *(elle rendait **exit 1** avant T3)*, et la campagne **vit aussi dans `flutter test`** — `test/features/echeances/data/echeance_migration_v3_test.dart` |
+> | **12** | *« aucun fichier de `lib/` ni de `test/` n'a été touché par cette branche de design »* | ⛔ **PÉRIMÉ pour le DOCUMENT, ✅ TOUJOURS VRAI pour la branche de DESIGN** : le design n'a rien touché *(c'était la règle de `parallel_design`)* ; **le développement, lui, a livré T1 → T15.** ⚠️ **Et cet amendement-ci ne touche rien non plus** : `git diff -- lib/ reports/` **VIDE** *(vérifié)* |
+>
+> ⛔ **CE QUE CE RELEVÉ NE LÈVE PAS, et il faut le lire aussi** : les items **3** *(aucun mode « lecture
+> seule » face à un document de version future)*, **4** *(**NM-8** — le vrai répertoire de documents de
+> l'appareil)*, **5** *(**NM-5** — aucune bascule d'heure OBSERVÉE)*, **6** *(divergence dev/prod : le web
+> **ne persiste RIEN**, et `flutter build web --release` reste **VERT** en produisant une application sans
+> stockage)*, **7** *(⛔ **ces critères ne sont PAS des gates CI** — ils exigent le SDK Dart, et chacun
+> l'imprime lui-même)*, **8**, **10** et **11** **DEMEURENT INCHANGÉS**. ⚠️ **L'item 11 est même le seul
+> à avoir été MESURÉ SANS ÊTRE LEVÉ** — voir `D-8` au §10.
 
 1. 🔴 **Le patron aller-retour n'a PAS été joué sur `lib/` — parce que `lib/` n'existe pas.** T2 → T7
    sont à @Developer et **aucune ligne du module de migration n'est écrite à ce jour**. Ce qui a été
@@ -680,6 +882,23 @@ option `--commit`**)*.
 ⛔ **Je n'émets aucun événement depuis cette branche de design** *(@Architect tient la trace)*, et ⛔ **aucun
 événement du catalogue n'est détourné** pour porter cet amendement documentaire.
 
+> ✅ **CONSTAT DATÉ-2026-09-08 — L'ÉVÉNEMENT A BIEN ÉTÉ ÉMIS, ET LA PRÉDICTION DE CE § EST VÉRIFIÉE DANS
+> LES DEUX SENS.** **LU dans la trace**, ⛔ pas de mémoire :
+> `grep -c EVT_MIGRATION_SCRIPT_READY docs/trace/US-01.4/events.jsonl` → **1**, horodaté
+> **`2026-08-24T18:56:50+02:00`**, `agent` = **`data-engineer`**.
+>
+> 🔴 **ET IL N'EXISTE QUE PARCE QU'UNE TÂCHE LE RÉCLAMAIT.** Son propre `rationale` le dit :
+> *« Émis par architect POUR LE COMPTE de data-engineer, dont l'emitter est déclaré mais qu'AUCUNE phase de
+> `WORKFLOW.yaml` ne rappelle après `development_start` : sans cette émission l'événement n'aurait JAMAIS
+> existé. »* ⇒ **le défaut ② du `CLAUDE.md` est CONFIRMÉ PAR L'EXPÉRIENCE, ⛔ pas seulement prédit** — et
+> il a été **payé par un contournement**, non par un correctif. **La dette reste ENTIÈRE** :
+> `/audit-methodo`.
+>
+> ⚠️ **DEUX BORNES QUE CETTE ÉMISSION NE LÈVE PAS.** ⓵ **`emitter` n'est lu par AUCUN script** ⇒ que
+> l'événement soit émis « pour le compte de » quelqu'un est **purement déclaratif**. ⓶ **`NB-6` demeure** :
+> `trace_append.py` n'a **aucune option `--commit`** ⇒ **rien ne rattache cet événement à un état du
+> code**. La mitigation *(le SHA dans le champ libre)* est une **convention NON ENFORCÉE**.
+
 ---
 
 ## 10 · ⚖️ **AJOUTÉ le 2026-08-24** — les entrées que je porte à la JOINTURE *(Integration Lock, @Architect)*
@@ -694,13 +913,70 @@ option `--commit`**)*.
 |---|---|---|---|
 | **D-1** | `retiree` **optionnel, booléen, écrit seulement si `true`** ; **absence ⇒ présente** | ✅ **COUVERTE** — AC-4 et AC-5 d'US-01.4, avec scénarios | — |
 | **D-2** | `up` et `down` **identité sur les entrées, DANS LES DEUX SENS** ; aucune information de retrait détruite | ✅ **COUVERTE** — AC-5 « Nominal » *(durabilité)* et **AC-12 « Erreur » d'US-01.2** *(US en aval)* | — |
-| **D-3** | `retiree` **hors domaine** ⇒ **résidu** *(entrée entière, verbatim, non affichée)* | ⚖️ **ARBITRÉE voie (b)** — contrat interne, **test unitaire DÉCLARÉ** *(précédent : `id` en double, version future, 2026-08-06)* | ⛔ **Pas de scénario Gherkin** *(T15)* |
-| **D-4** | 🔴 **`retiree: null` ⇒ résidu** — la présence se teste par `containsKey`, ⛔ jamais par la nullité *(**F-2**)* | 🔴 **ORPHELINE** — **aucun AC, aucun scénario, et le Story File ne la nomme même pas.** Voie (b) **proposée**, ⛔ pas encore arbitrée | **@Architect** : l'inscrire au périmètre de T2 · **@ProductOwner** s'il la juge visible |
-| **D-5** | La clé **conserve sa position** dans l'entrée à la ré-émission *(**F-3**)* | 🔴 **ORPHELINE** — **aucun AC**. Elle protège une **garantie écrite du codec**, ⛔ pas un AC | **@Architect** : une assertion dans T2 |
-| **D-6** | Le refus de la valeur hors domaine vit **en UN seul exemplaire**, à `depuisDonnee` *(**F-1**)* | ⚠️ **NON ASSERTABLE** — les deux implémentations ont le **même comportement** ⇒ **contrôle de REVUE**, ⛔ pas un test | **@CodeReviewer** : `grep -n "retiree" lib/**/echeance*.dart` ⇒ **un seul** test de type |
+| **D-3** | `retiree` **hors domaine** ⇒ **résidu** *(entrée entière, verbatim, non affichée)* | ⚖️ **ARBITRÉE voie (b)** — contrat interne, **test unitaire DÉCLARÉ** *(précédent : `id` en double, version future, 2026-08-06)* | ⛔ **Pas de scénario Gherkin** *(T15)* — ⛔ **PÉRIMÉ-2026-09-08, voir la note sous la table** |
+| **D-4** | 🔴 **`retiree: null` ⇒ résidu** — la présence se teste par `containsKey`, ⛔ jamais par la nullité *(**F-2**)* | 🔴 **ORPHELINE** — **aucun AC, aucun scénario, et le Story File ne la nomme même pas.** Voie (b) **proposée**, ⛔ pas encore arbitrée | **@Architect** : l'inscrire au périmètre de T2 · **@ProductOwner** s'il la juge visible — ⛔ **PÉRIMÉ-2026-09-08, voir la note sous la table** |
+| **D-5** | La clé **conserve sa position** dans l'entrée à la ré-émission *(**F-3**)* | 🔴 **ORPHELINE** — **aucun AC**. Elle protège une **garantie écrite du codec**, ⛔ pas un AC | **@Architect** : une assertion dans T2 — ⛔ **PÉRIMÉ-2026-09-08, voir la note sous la table** |
+| **D-6** | Le refus de la valeur hors domaine vit **en UN seul exemplaire**, à `depuisDonnee` *(**F-1**)* | ⚠️ **NON ASSERTABLE** — les deux implémentations ont le **même comportement** ⇒ **contrôle de REVUE**, ⛔ pas un test | **@CodeReviewer** : `grep -n "retiree" lib/**/echeance*.dart` ⇒ **un seul** test de type — ⛔ **PÉRIMÉ-2026-09-08, voir la note sous la table** |
 | **D-7** | 🔴 **Une entrée à `retiree` illicite disparaît AUSSI de la page de gestion** — aucun octet perdu, **et rien ne le dit à l'utilisateur** | 🔴 **SANS SURFACE** — c'est la règle de résidu **existante**, appliquée sans exception ; ⛔ **aucun AC de cette US ne l'observe** | **@UXDesigner + @ProductOwner** : ⚠️ **exactement la classe de trou d'US-01.2** *(« une règle de @Data sans surface »)*. **Je ne conçois aucune surface** |
-| **D-8** | **L'historique n'a aucun plafond** et **le document entier est réécrit à chaque écriture** *(≈ 140 octets par retirée ; 10 000 ⇒ ≈ 1,42 Mo)* | 🔴 **ORPHELINE** — **aucun AC ne borne la taille du document**, et **US-01.4 est le premier mécanisme qui accumule de la donnée invisible** | **@ProductOwner** : borner ou **assumer par écrit**. ⛔ **Une purge serait une perte silencieuse** *(clarify nº 10 d'US-01.2)* |
+| **D-8** | **L'historique n'a aucun plafond** et **le document entier est réécrit à chaque écriture** *(≈ 140 octets par retirée ; 10 000 ⇒ ≈ 1,42 Mo)* | 🔴 **ORPHELINE** — **aucun AC ne borne la taille du document**, et **US-01.4 est le premier mécanisme qui accumule de la donnée invisible** | **@ProductOwner** : borner ou **assumer par écrit**. ⛔ **Une purge serait une perte silencieuse** *(clarify nº 10 d'US-01.2)* — ⛔ **PÉRIMÉ-2026-09-08, voir la note sous la table** |
 | **D-9** | La bascule `v2 → v3` a lieu **au CHARGEMENT**, avant tout geste ⇒ **un binaire antérieur voit un hub vide sans explication** | ⚖️ **ARBITRÉE** — 2026-08-06, voie (b), **compromis assumé** | — *(⚠️ **personne n'a mesuré ce que vaut cette expérience**)* |
+
+### ⚖️ NOTE DATÉE-2026-09-08 (T16) — où en sont les NEUF entrées, ⛔ mesuré et non déclaré
+
+⛔ **Les statuts de la table ci-dessus sont ceux du 2026-08-24 et ne sont PAS repeints.** Cinq ont changé.
+
+| # | Statut au 2026-08-24 | État LU le 2026-09-08 | Comment il se relit |
+|---|---|---|---|
+| **D-3** | ⚖️ arbitrée voie (b), test **DÉCLARÉ** | ✅ **TEST ÉCRIT**, aux **deux** frontières | `grep -rn "HORS DOMAINE" test/features/echeances/` ⇒ **2** fichiers : `domain/echeance_retiree_test.dart` *(« l'ENTRÉE ENTIÈRE est un RÉSIDU »)* et `data/echeance_codec_retiree_test.dart` |
+| **D-4** | 🔴 **ORPHELINE**, voie (b) *« pas encore arbitrée »* | ✅ **ARBITRÉE — voie (b), 2026-08-24**, et **TEST ÉCRIT** ⇒ ⛔ **plus orpheline.** **Contrat interne, AUCUN AC** *(motif : c'est une **LECTURE** d'ADR-012 §3, pas une règle neuve — un 2ᵉ exemplaire dériverait)* | `grep -rn "D-4" test/` ⇒ **2** tests, un de chaque côté de la frontière |
+| **D-5** | 🔴 **ORPHELINE**, *« aucun AC »* | ✅ **COUVERTE PAR UN TEST**, et le statut *« aucun AC »* **reste vrai et voulu** *(elle protège une garantie du **codec**)* | `grep -n "F-3 / D-5" test/features/echeances/data/echeance_codec_retiree_test.dart` ⇒ un **groupe** dont *« une entrée retirée INCHANGÉE se réécrit OCTET POUR OCTET »* |
+| **D-6** | ⚠️ **NON ASSERTABLE** ⇒ contrôle de **REVUE** | ⚠️ **TOUJOURS non assertable** *(les deux implémentations ont le même comportement)*, ⛔ **mais sa COMMANDE était FAUSSE** | ✅ **La commande juste** : `grep -rn "is! bool" lib/ --include=*.dart` ⇒ **une seule** ligne, **dans `echeance.dart`**. ⛔ **L'ancienne cherchait `retiree` et ne pouvait rien voir** — détail au §2 bis |
+| **D-8** | 🔴 **ORPHELINE** — *« ≈ 140 octets par retirée ; 10 000 ⇒ ≈ 1,42 Mo »* | ⚖️ **ARBITRÉE le 2026-08-24 — « MESURER D'ABORD, BORNER ENSUITE »** ⇒ ⛔ **aucun plafond, aucune purge, aucun AC** ; la lacune est **NOMMÉE** et son **instrument livré**. **La croissance reste NON BORNÉE, assumée** | Encadré ci-dessous |
+| **D-1 · D-2 · D-7 · D-9** | *(couvertes / arbitrées / sans surface)* | ⚠️ **INCHANGÉES.** **`D-7` reste SANS SURFACE** : une entrée à `retiree` illicite disparaît **aussi de la gestion**, **aucun AC ne l'observe**, et **rien ne le dit à l'utilisateur** | ⛔ **Ne pas sur-lire l'existence de la surface de message du hub** *(T19)* : elle sert **AC-11**, ⛔ **pas `D-7`** |
+
+#### 🔴 D-8 — la mesure a DÉPLACÉ le risque, et ⛔ elle ne l'a pas levé
+
+**Instrument** : `python reports/US-01.4/cout_ecriture_atomique_criterion.py --hote`. Il traverse le
+**chemin d'écriture de PRODUCTION** — `DocumentStoreFichier.ecrire`, donc `.tmp` + `flush: true` +
+`rename` — sur un **vrai disque**. ⛔ **Aucun chiffre ci-dessous n'est écrit à la main : ils sont
+transcrits d'une sortie.** *(Rejoué le 2026-09-08.)*
+
+| N retirées | octets du document | `octets_par_retiree` | `facteur_taille` |
+|---|---|---|---|
+| 0 | `1167` | — | — |
+| 100 | `15267` | `141.0` | `13.1` |
+| 1 000 | `142167` | `141.0` | `121.8` |
+| 10 000 | `1411167` *(**≈ 1,41 Mo**)* | `141.0` | `1209.2` |
+
+⇒ **`141,0` octets par retirée est CONSTANT sur trois ordres de grandeur** *(la vérification interne
+`V2_cout_par_retiree_constant` le tient, et elle **sait rougir** : le mutant
+`T2_entrees_de_taille_variable` la tue)*.
+⛔ **PÉRIMÉ-2026-09-08 pour l'estimation « ≈ 140 octets ; ≈ 1,42 Mo »** de la table ci-dessus : elle
+venait du mode `--parc`, qui **modélise** le marquage. **La valeur du CHEMIN DE PRODUCTION est `141,0` et
+`1 411 167` octets** ⇒ ⛔ **la valeur estimée est RETIRÉE, pas « corrigée »**, et **c'est la commande qui
+fait foi.**
+
+🔬 **CE QUE LA MESURE A ÉTABLI ET QUI CHANGE LA QUESTION** : le coût d'une écriture atomique est **dominé
+par un terme FIXE** *(le `flush` + le `rename`)*, ⛔ **pas par la taille** — la taille est multipliée par
+**1209** et la durée par **moins de 3**. ⇒ 🔴 **le risque de `D-8` porte sur la TAILLE, PAS ENCORE SUR LA
+LATENCE.**
+
+⚠️ **ET LE CHIFFRE DU FACTEUR DE DURÉE NE SE RECOPIE PAS — je l'ai réfuté moi-même en le rejouant.**
+**Deux exécutions successives, le même jour, sur la même machine** : `facteur_duree` = **`1.02 / 1.16 /
+2.68`** au second relevé, mais **`0.03 / 0.03 / 0.09`** au premier — **parce que sa référence `n=0` était
+une valeur aberrante à froid** *(`us_median=546982` contre `15362`)*. ⇒ ⛔ **`facteur_duree` est un RAPPORT
+À UNE RÉFÉRENCE FRAGILE : il ne doit JAMAIS être cité comme une constante.** **Ce qui est stable** : les
+**octets** *(identiques aux deux relevés, au bit près)* et le **rapport d'ORDRE** *(facteur de durée ≪
+facteur de taille)*. ⛔ **La conclusion survit aux deux relevés ; le nombre, non.**
+
+⛔ **CE QUE `D-8` N'ATTESTE TOUJOURS PAS, et c'est le motif entier de l'arbitrage** : le mode par défaut
+du critère rend **`exit 1`** et **dit platement pourquoi**. **Transcription** :
+`FAIT-1|lib_connait_la_cle=True` ✅ *(cette condition **est levée** — elle valait `False` au design)* ·
+`FAIT-2|depot=aucun|repertoire=reports/US-01.4/cout_appareil` 🔴 ·
+`FAIT-3|appareils_visibles=3|android_physiques=0`. ⇒ ⛔ **AUCUNE mesure sur APPAREIL n'est déposée**, et
+*« une écriture sur la mémoire d'un appareil Android de 2016 n'a aucune raison d'avoir le même coût qu'un
+disque de poste de travail »*. ⛔ **`--hote` ne répond donc PAS à la question de `D-8`** — il en **borne la
+moitié**.
 
 **Ce dont J'AI BESOIN de la branche UX et qui me manque au 2026-08-24** — ⛔ **et je ne l'invente pas** :
 
@@ -729,3 +1005,16 @@ option `--commit`**)*.
 T16, T17 · §A-2, §A-3, §G-15, §G-16)* ·
 [`MIGRATIONS.md`](MIGRATIONS.md) **§1, §2, §3, §4 et §6 amendés le même jour** *(la graine du patron, le
 second sens de l'aller-retour, les deux fonctions distinctes, la transformation vide)*.
+**Ajoutées le 2026-09-08 (T16)** — ⛔ **des INSTRUMENTS et du CODE, ⛔ aucune décision nouvelle** :
+[`reports/US-01.4/migration_v3_guard_criterion.py`](../../reports/US-01.4/migration_v3_guard_criterion.py)
+*(la garde du couple `v2 ⇄ v3` — modes par défaut, `--selftest`, `--croise`, `--parc`)* ·
+[`reports/US-01.4/cout_ecriture_atomique_criterion.py`](../../reports/US-01.4/cout_ecriture_atomique_criterion.py)
+*(l'instrument de `D-8` — modes par défaut, `--hote`, `--selftest`, `--appareil`)* ·
+`lib/features/echeances/data/echeance_schema_migrations.dart` *(le couple `v2 ⇄ v3`)* ·
+`lib/features/echeances/domain/echeance.dart` *(la frontière **F-1** / **D-4**)* ·
+`lib/features/echeances/data/echeance_document_codec.dart` *(l'émission conditionnelle et **F-3**)* ·
+`lib/features/echeances/domain/echeance_etat.dart` *(le prédicat `estEchue` et le filtre `presentesSurLaGrille`,
+chacun en **UN seul exemplaire**)* ·
+`test/features/echeances/data/echeance_migration_v3_test.dart` *(la garde **dans un gate requis**)* ·
+`test/features/echeances/domain/echeance_retiree_test.dart` et
+`test/features/echeances/data/echeance_codec_retiree_test.dart` *(**D-3**, **D-4**, **D-5**)*.
