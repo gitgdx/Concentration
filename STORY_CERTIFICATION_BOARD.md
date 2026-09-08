@@ -1787,6 +1787,29 @@
     d'audit** *(qui portaient déjà sur `173fb62` — **NB-6**)*. ⇒ **qui certifiera US-01.1 après US-01.3
     devra RE-AUDITER *et* RE-QA.** Le coût du report grandit ; il reste inférieur à celui d'un `🚀 OUI`
     fabriqué. Une **ligne de DoD** exige que cette péremption soit **transmise**.
+  - 🔴 **TRANSMISSION-2026-09-08 (US-01.4, ligne de DoD) — ET LA PÉREMPTION EST PLUS LARGE QUE LA
+    CASE QUI L'EXIGE : elle atteint AUSSI US-01.2.** La case ne nomme qu'US-01.1 ; **la mesure dit
+    deux.** ⛔ **À lire avant tout `/certify`, et surtout avant de rafraîchir un visa.**
+    - **US-01.1** — US-01.4 a amendé **l'étape de son `.feature`** *(T13, marqueur littéral
+      `PÉRIMÉ-2026-08-29` dans `tests/features/US-01.1-affichage-hub-grille.feature`)*, avec son
+      **assertion appariée BORNÉE et non supprimée** *(les mutants `X-2`/`X-3` restent morts, et
+      `M-aa` le prouve : couper la description du libellé fait rougir **8 tests**)*, et touché
+      **`test/e2e/hub_echeances_test.dart`**. ⇒ **son `🧪 PASS` et ses visas d'audit sont périmés
+      UNE SECONDE FOIS**, pour un motif **neuf**.
+    - 🆕 **US-01.2 — MÊME RAISONNEMENT, ET IL N'ÉTAIT ÉCRIT NULLE PART.** US-01.4 a modifié
+      **19 fichiers de `lib/`** *(+1661 insertions)*, dont le cœur d'US-01.2 :
+      `gestion_echeances_page.dart`, `formulaire_echeance.dart`, `confirmation_suppression.dart`,
+      `echeance_document_codec.dart`, `echeance_document_repository.dart`,
+      `echeances_notifier.dart`, `validation_echeance.dart` — **et ses tests** :
+      `test/e2e/gestion_echeances_test.dart` *(+89)*, `gestion_echeances_page_test.dart` *(+113)*,
+      `formulaire_echeance_test.dart` *(+18)*. ⇒ ⛔ **le `🧪 PASS` d'US-01.2 et ses visas d'audit
+      sont PÉRIMÉS eux aussi.** **Le compte se LIT** :
+      `git diff --stat origin/main...HEAD -- lib/ test/`.
+    - ⚠️ **CE QUE CELA N'EST PAS** : ⛔ **aucune régression** — les **562 tests** passent et
+      `run_gates --all` rend **5 gates verts**. Un test **modifié** n'est pas un test **cassé** ; ce
+      qui périme, c'est **le périmètre sur lequel un verdict a porté**, et **NB-6** dit qu'aucune
+      machine ne peut le signaler. ➡️ **C'est donc écrit ici, à la main, et c'est exactement la
+      faiblesse que NB-6 nomme.**
 - ⛔ **PÉRIMÉ-2026-08-06 — sa 1ʳᵉ mention est tombée** *(l'événement a été émis le 2026-08-05 ; voir la
   puce suivante)*. Ligne **conservée** : on date, on ne repeint pas.
   **⏳ Reste dû** : `EVT_ARCHI_VALIDATED` *(validation technique tracée)*, Design **Data** et Design **UX**

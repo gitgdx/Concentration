@@ -187,7 +187,23 @@ Fonctionnalité: Gestes sur la tuile — révélation de la description et retra
     Alors l'échéance est listée dans le groupe des échues
     Et sa description, sa date et son heure sont inchangées
 
-  Scénario: Un double appui sur une tuile active ne produit aucun effet
+  # ─── ⚖️ TITRE AMENDÉ ET BORNÉ LE 2026-09-08 (@PO) — le scénario, ses TROIS clauses et l'AC qu'il
+  # sert (AC-4 « Erreur », 1ʳᵉ phrase) sont INCHANGÉS : seul le TITRE l'est.
+  #   PÉRIMÉ-2026-09-08 : « Un double appui sur une tuile active ne produit aucun effet »
+  # ⛔ Ancienne formulation conservée ci-dessus en LITTÉRAL, jamais barrée — `~~texte~~` est
+  #   invisible à `grep` (leçon d'US-00.7).
+  # 🔴 MOTIF MESURÉ, ⛔ pas relu — sonde jetable hors dépôt (patron ADR-010), rejouée :
+  #   `ACTIVE_double_appui activations=2`. Sur une tuile ACTIVE, un double appui est reçu comme DEUX
+  #   APPUIS SIMPLES (`echeance_tile.dart` porte `onTap: temps.estEchue ? null : activer`, donc
+  #   CHAQUE appui appelle `activer`) ⇒ l'effet est DEUX RÉVÉLATIONS, la fenêtre de 3 s redémarrant
+  #   au second appui (AC-2 « Limite »). « Aucun effet » affirmait PLUS que le produit ne fait.
+  # ✅ POURQUOI CE N'ÉTAIT PAS UN FAUX VERT : les trois clauses portent toutes sur le RETRAIT et
+  #   l'ÉCRITURE — la tuile reste, aucune animation, rien d'écrit — elles étaient et restent VRAIES,
+  #   et le test apparié les borne déjà (octets identiques, `retiree` faux). SEUL LE TITRE MENTAIT,
+  #   comme le `.feature` d'US-01.1 était « plus absolu que l'AC qu'il servait » (amendé pareil, T13).
+  # ⚠️ AUCUN GATE NE POUVAIT LE VOIR : `check_gherkin_mapping.py` compare des TITRES, pas de la
+  #   sémantique — il l'imprime lui-même. Laissé tel quel, ce faux survivait à la certification.
+  Scénario: Un double appui sur une tuile active ne retire rien et n'écrit rien
     Étant donné qu'une échéance active est affichée
     Quand je double-appuie sur sa tuile
     Alors la tuile est toujours affichée

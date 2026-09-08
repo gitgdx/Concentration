@@ -725,24 +725,25 @@ void main() {
     expect(relue.dateEcheance, heureEchue);
   });
 
-  testWidgets('Un double appui sur une tuile active ne produit aucun effet', (
-    tester,
-  ) async {
-    poser([ech('a', const Duration(hours: 6), 'revue annuelle')]);
-    await ouvrirApplication(tester);
-    final avant = harnais.octets();
+  testWidgets(
+    "Un double appui sur une tuile active ne retire rien et n'écrit rien",
+    (tester) async {
+      poser([ech('a', const Duration(hours: 6), 'revue annuelle')]);
+      await ouvrirApplication(tester);
+      final avant = harnais.octets();
 
-    await doubleAppuiSur(tester, 'a');
-    await reglerEcritures(tester);
-    await purgerLeReconnaisseur(tester);
-    await tester.pumpAndSettle();
+      await doubleAppuiSur(tester, 'a');
+      await reglerEcritures(tester);
+      await purgerLeReconnaisseur(tester);
+      await tester.pumpAndSettle();
 
-    expect(tuile('a'), findsOneWidget);
-    expect(enveloppe, findsNothing, reason: '⛔ aucune animation');
-    // RIEN n'est écrit — assertion sur les OCTETS, bit à bit.
-    expect(harnais.octets(), avant);
-    expect(persistee('a').retiree, isFalse);
-  });
+      expect(tuile('a'), findsOneWidget);
+      expect(enveloppe, findsNothing, reason: '⛔ aucune animation');
+      // RIEN n'est écrit — assertion sur les OCTETS, bit à bit.
+      expect(harnais.octets(), avant);
+      expect(persistee('a').retiree, isFalse);
+    },
+  );
 
   testWidgets(
     'Un appui simple sur une tuile échue ne retire rien et ne révèle rien',

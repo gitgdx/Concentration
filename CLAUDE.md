@@ -66,7 +66,19 @@ faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint p
 
 > 🔒 **US-01.4 : LA PHASE DE DESIGN EST CLOSE (2026-08-24) — `EVT_DESIGN_COMPLETED` émis, @Developer est
 > déverrouillé.** SCB : `✅ @PO · ✅ @Data · ✅ @UX`, phase **`development_start`**, **track FULL**.
-> **4 commits** *(`0f35ab8`, `e909a73`, `086e68f`, `05067b1`)*. **Trois ADR acceptés donc IMMUABLES** :
+> **4 commits** *(`0f35ab8`, `e909a73`, `086e68f`, `05067b1`)* — ⛔ **PÉRIMÉ-2026-09-08 : la branche en
+> porte 26**, et **les 20 tâches sur 20 du Story File sont FAITES** *(T0 → T19, marquage vérifié par
+> commande)*. Le compte se **LIT** : `git rev-list --count origin/main..HEAD`, ⛔ **il ne se recopie
+> pas** — c'est le **défaut nº 1** du projet, et cette ligne en était une occurrence.
+> ⚠️ **LE DÉFAUT ③ EST ACTIF, 3ᵉ OCCURRENCE, ET IL EST MESURÉ** : la cellule de phase du SCB affiche
+> toujours **`development_start`** avec **`⏳ @Dev`**, le **dernier événement tracé** est
+> `EVT_MIGRATION_SCRIPT_READY` du **2026-08-24** — et `check_scb_compliance.py` rend **« conforme »**.
+> ⛔ **Aucun outil ne croise la cellule de phase avec la trace**, et l'écart vaut ici **20 tâches et
+> 6 commits**. ➡️ **`/audit-methodo`.** ⚖️ **La cellule n'est PAS corrigée ici, et c'est délibéré** :
+> elle n'avance que par **`EVT_CODE_READY`**, dont les **consommateurs** sont `code-reviewer` et
+> `cyber-security` ⇒ l'émettre **ouvre les audits**, et ⛔ **aucun événement du catalogue ne permet de
+> l'éteindre**. **Décision humaine.**
+> **Trois ADR acceptés donc IMMUABLES** :
 > **ADR-012** *(état `ÉCHUE RETIRÉE` persisté, migration `v2 ⇄ v3`)* · **ADR-013** *(état d'interaction de
 > la grille, observabilité et accessibilité des gestes)* · **ADR-014** *(enveloppe interactive
 > **conditionnelle**, où vit l'état du message du hub)*. **Compteurs LUS par commande** — ⛔ jamais écrits
@@ -110,6 +122,16 @@ faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint p
 > peut PAS être revue en cherchant le nom du champ** · et `dart analyze` rend **`No issues found!`** sur
 > les **sept** sources, **mutants destructeurs compris**.
 >
+> ⛔ **PÉRIMÉ-2026-09-08 SUR UN POINT CHIFFRÉ, ET C'EST UNE INSTRUCTION DE REVUE — donc à ne pas
+> appliquer à la lettre.** *« **ZÉRO** occurrence du mot `retiree` »* est **FAUX** : `grep -c "retiree"
+> lib/features/echeances/data/echeance_schema_migrations.dart` rend **5** *(relevé par @DataEngineer à
+> T16, **revérifié** par la session)*. ✅ **MAIS LA CONCLUSION EN SORT RENFORCÉE, PAS AFFAIBLIE** : les
+> **cinq** occurrences sont de la **PROSE DE COMMENTAIRE**, ⛔ **aucune n'est du code** ⇒ chercher le nom
+> du champ ne trouve que du **commentaire rassurant**, **identique sur la forme conforme ET sur les
+> quatre mutants destructeurs**. ➡️ **La règle à retenir est donc : ⛔ cette migration ne se revoit pas
+> par `grep` sur le nom du champ — et un `grep` qui rend 5 lignes ne doit pas être lu comme une
+> couverture.** *(On date, on ne repeint pas : le chiffre faux reste, pour qu'on sache lequel corriger.)*
+>
 > ⚖️ **DEUX ARBITRAGES HUMAINS DU 2026-08-24, tous deux nés de la jointure** : **`D-4`** *(`retiree: null`
 > est une valeur **présente** et non booléenne, donc un **RÉSIDU** — la présence se teste par
 > **`containsKey`**, ⛔ **jamais** par la nullité)* → **voie (b)**, contrat interne, ⛔ aucun AC, **motif :
@@ -120,6 +142,16 @@ faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint p
 > l'écriture atomique est **dominé par un terme FIXE** *(flush + rename)* — taille **×1209** ⇒ durée
 > **×1,39 à ×2,71** seulement ⇒ ⛔ **le risque porte sur la TAILLE, pas encore sur la LATENCE**.
 > **141,0 octets par retirée**, **LU** et non estimé *(≈1,41 Mo à 10 000)*.
+>
+> ⛔ **PÉRIMÉ-2026-09-08 SUR LE NOMBRE, ⛔ PAS SUR LA CONCLUSION.** Le facteur de durée **n'est PAS
+> REPRODUCTIBLE** *(rejoué par @DataEngineer à T16)* : **`1,02 / 1,16 / 2,68`** au 2ᵉ relevé contre
+> **`0,03 / 0,03 / 0,09`** au 1ᵉʳ, parce que sa **référence `n=0` est une valeur ABERRANTE À FROID**
+> *(`us_median` **546 982** contre **15 362**)*. ⇒ ✅ **« le terme FIXE domine, le risque porte sur la
+> TAILLE » SURVIT aux deux relevés** ; ⛔ **« ×1,39 à ×2,71 » NON** — c'est un **rapport à relire**,
+> jamais une constante. ✅ **`141,0` octets par retirée est CONFIRMÉ** *(**1 411 167** octets à
+> n = 10 000, sur le chemin de **PRODUCTION**)*. ⚠️ **Et ce qui reste NON MESURÉ est la question même de
+> `D-8`** : `--appareil` rend **`android_physiques=0`** ⇒ ⛔ **le coût d'une écriture atomique de 1,41 Mo
+> sur un appareil RÉEL n'a jamais été mesuré.**
 >
 > ⛔ **CE QUE LA CLÔTURE DU DESIGN N'ATTESTE PAS** : **0 ligne de `lib/`** · **aucun écran vu** · les
 > scénarios sont **ni exécutés ni sous le contrôle de correspondance** *(le couple n'est pas dans
