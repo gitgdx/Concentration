@@ -10,6 +10,10 @@ Voir [`docs/governance/STACK_PROFILE.md`](docs/governance/STACK_PROFILE.md) (dé
 choisi à l'initialisation) : langages, frameworks, ORM/migrations, commandes de build/lint/test.
 **Qualité (gates CI bloquants, `ci.yml`)** : seuils et commandes définis dans `factory.config.json`
 (`adapter.components.*.gates`), exécutés via `python scripts/run_gates.py`.
+**Comment ce produit est testé** : [`docs/qa/STRATEGIE_DE_TEST.md`](docs/qa/STRATEGIE_DE_TEST.md)
+— la carte des instruments *(couverture, mutation, Gherkin, critères de sortie exécutables)* et,
+pour chacun, ⛔ **ce qu'il ne mesure pas**. ⛔ **Il ne fixe aucun seuil** *(exemplaire unique :
+`factory.config.json`)* et ⛔ **ne remplace pas `STACK_PROFILE.md` §Developer** pour les normes.
 
 ## Règles dures (enforced)
 
