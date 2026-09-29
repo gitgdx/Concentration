@@ -1,5 +1,6 @@
 import 'package:concentration/core/time/clock.dart';
 import 'package:concentration/features/echeances/domain/echeance.dart';
+import 'package:concentration/features/echeances/domain/echeance_etat.dart';
 import 'package:concentration/features/echeances/domain/validation_echeance.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -219,6 +220,132 @@ void main() {
         expect(r.estAcceptee, isTrue);
       },
     );
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 🔴 AC-6 « Erreur » d'US-01.4 (T5) — LE MESSAGE EST CONDITIONNEL.
+    //
+    // ⛔ LES DEUX CÔTÉS DE LA BORNE, jamais un seul : « sans le second, un
+    // message unique satisferait la règle » (cellule T5 du Story File). Le
+    // mutant qui compte n'est pas « pas de variante » — c'est la variante
+    // INVERSÉE, et seule une assertion DIRECTIONNELLE la tue.
+    //
+    // ⛔ Aucun de ces textes n'est recopié ici (Design UX §10) : les
+    // assertions portent sur des PROPRIÉTÉS du message — la phrase de la
+    // limite PARTAGÉE, l'annonce du geste, son absence de l'autre côté.
+    // ─────────────────────────────────────────────────────────────────────
+    group('AC-6 « Erreur » — les deux variantes du message de la limite', () {
+      // Le geste est nommé par son SEUL canal pointeur ; c'est la propriété
+      // même que le scénario asserte (« le message annonce le retrait d'une
+      // échue »). ⛔ Le mot n'est pas choisi ici : il est LU dans le message.
+      bool annonceLeGeste(String m) => m.toLowerCase().contains('double appui');
+
+      String messageAvecEchue() =>
+          validation.refusDeLimite(presentes(8, echues: 1))!.message;
+      String messageSansEchue() =>
+          validation.refusDeLimite(presentes(9))!.message;
+
+      test('avec une échue sur la grille, le message ANNONCE le retrait', () {
+        final m = messageAvecEchue();
+        expect(
+          annonceLeGeste(m),
+          isTrue,
+          reason:
+              'c’est le SEUL endroit du produit qui enseigne le geste : sans '
+              'lui, « faire disparaître » reste invisible à qui atteint la '
+              'limite (RF-15 amputé)',
+        );
+        expect(
+          m.toLowerCase(),
+          contains('sans la supprimer'),
+          reason:
+              'le message doit dire l’INNOCUITÉ du geste, sinon le pratiquant '
+              'croit qu’on lui propose de détruire',
+        );
+        expect(
+          m.toLowerCase(),
+          contains('supprimer'),
+          reason: 'la suppression reste une issue, elle ne disparaît pas',
+        );
+      });
+
+      test('sans échue sur la grille, le message N’ANNONCE PAS le retrait', () {
+        final m = messageSansEchue();
+        expect(
+          annonceLeGeste(m),
+          isFalse,
+          reason:
+              '⛔ JAMAIS un geste indisponible : à 9 actives, aucune tuile ne '
+              'peut être retirée — l’annoncer serait la faute qu’US-01.2 a '
+              'explicitement refusée, commise dans l’autre sens',
+        );
+        expect(m.toLowerCase(), contains('supprimer une échéance'));
+      });
+
+      test('🔴 les deux variantes sont DISTINCTES — un message unique ne '
+          'satisferait PAS la règle', () {
+        expect(messageAvecEchue(), isNot(messageSansEchue()));
+      });
+
+      test('la PHRASE DE LA LIMITE est la même dans les deux variantes', () {
+        // 🔴 Ce que ce test tue : la variante neuve RÉÉCRIVANT l’énoncé de la
+        // limite (deux exemplaires de la même règle, qui dériveraient), et
+        // un « 9 » écrit à la main d’un seul côté.
+        String phraseDeLimite(String m) => m.split('. ').first;
+        expect(
+          phraseDeLimite(messageAvecEchue()),
+          phraseDeLimite(messageSansEchue()),
+        );
+        for (final m in [messageAvecEchue(), messageSansEchue()]) {
+          expect(
+            m,
+            contains('${ValidationEcheance.maxPresentesSurGrille}'),
+            reason:
+                'le « 9 » est INTERPOLÉ depuis la constante, des deux côtés',
+          );
+        }
+      });
+
+      test('🔴 une échue RETIRÉE ne déclenche PAS la variante du retrait', () {
+        // ⛔ LE PIÈGE : `retiree` ne change RIEN au prédicat « est échue »
+        // (`echeance_etat.dart` le dit : ÉCHUE et ÉCHUE RETIRÉE sont toutes
+        // deux échues). Si un appelant passait la liste COMPLÈTE, une échue
+        // retirée ferait annoncer un geste INDISPONIBLE — elle n’est plus sur
+        // la grille, on ne peut plus l’y retirer.
+        //
+        // ⇒ ce test fixe le CONTRAT : `refusDeLimite` reçoit les PRÉSENTES
+        // (C-7), et sur des présentes toutes actives il n’annonce rien.
+        final retiree = echeance(
+          'r0',
+          maintenant.subtract(const Duration(days: 1)),
+        ).avec(retiree: true);
+        expect(
+          estEchue(retiree, maintenant),
+          isTrue,
+          reason: 'contrôle positif : une RETIRÉE est bel et bien échue',
+        );
+        // ⛔ ET LE PENDANT, qui rend le piège MESURABLE : sur la liste
+        // COMPLÈTE — ce que faisaient DEUX appelants sur trois avant T5 — le
+        // geste EST annoncé. La protection n'est donc PAS dans ce prédicat :
+        // elle est dans le filtre `presentes` que l'appelant applique (C-7).
+        expect(
+          annonceLeGeste(
+            validation.refusDeLimite([...presentes(8), retiree])!.message,
+          ),
+          isTrue,
+          reason:
+              'un appelant qui passe la liste complète annonce un geste '
+              'INDISPONIBLE — c’est ce que les tests de surface interdisent',
+        );
+        // ⛔ Le MÊME jeu, passé au travers du filtre UNIQUE : il ne fait que
+        // 8 présentes ⇒ il n'y a même pas de refus, donc rien à annoncer.
+        expect(
+          validation.refusDeLimite(
+            presentesSurLaGrille([...presentes(8), retiree]),
+          ),
+          isNull,
+        );
+      });
+    });
   });
 
   group('AC-6 — édition, id conservé, et refus sur une échue', () {

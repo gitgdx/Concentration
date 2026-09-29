@@ -1,5 +1,6 @@
 import '../../../core/time/clock.dart';
 import 'echeance.dart';
+import 'echeance_etat.dart';
 import 'remaining_time.dart';
 import 'time_unit.dart';
 
@@ -22,7 +23,9 @@ class RemainingTimeCalculator {
         : ', ${echeance.description}';
 
     // T <= 0 : état d'affichage NORMAL, pas une erreur (AC-7).
-    if (!cible.isAfter(maintenant)) {
+    // ⛔ Le prédicat vit dans `echeance_etat.dart`, en UN SEUL exemplaire (T1) :
+    // la comparaison n'est plus écrite ici.
+    if (estEchue(echeance, maintenant)) {
       return RemainingTime(
         unite: TimeUnit.heures,
         nombreAffiche: 0,

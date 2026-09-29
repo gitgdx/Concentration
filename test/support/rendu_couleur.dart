@@ -34,28 +34,51 @@ double clarteDe(Color couleur) => Oklab.depuisRgb(rgbDe(couleur)).l;
 /// restait une étape Gherkin décorative : le test comparait une valeur
 /// **recalculée à côté**, jamais celle que la tuile rend.
 ///
-/// 🔴 **CORRECTIF NB-7 (US-01.2, T6) — assertion d'UNICITÉ avant sélection.**
-/// Cette fonction sélectionnait **par position** (`.first`, sans rien vérifier).
-/// Avec **deux `DecoratedBox` imbriquées**, elle lisait l'**extérieure** : la
-/// tuile pouvait rendre **toujours orange** avec **112 tests verts** — défaut
-/// **démontré**, pas supposé (sonde `reports/US-01.1/qa_delta_nb7_probe.py`).
-/// ⚠️ **US-01.2 rend le défaut IMMINENT** : ses cartes, champs et boutons
-/// introduisent des `Material`, `InkWell` et `Container`, qui en apportent
-/// **tous** une seconde. ⇒ le correctif **précède T9/T10/T11**, faute de quoi
-/// AC-5 d'US-01.1 tomberait **sans un seul rouge**.
+/// 🔴 **CORRECTIF NB-7, DEUXIÈME ÉTAT (US-01.4, T7) — LA BOÎTE SE DÉSIGNE PAR
+/// SON IDENTITÉ.** La sélection porte sur [EcheanceTile.cleFond], ⛔ **jamais
+/// sur un type ni sur une position**, et ⛔ **l'assertion d'unicité RESTE** —
+/// elle porte désormais sur la **clé**, ce qui la rend vraie *même* quand une
+/// seconde boîte décorée apparaît sous la tuile.
+///
+/// ⚖️ **PÉRIMÉ-2026-08-25 — l'état PRÉCÉDENT de cette documentation est
+/// conservé, et il était PLUS LARGE QUE LE FAIT** *(on date, on ne repeint
+/// pas)* : *« US-01.2 rend le défaut IMMINENT : ses cartes, champs et boutons
+/// introduisent des `Material`, `InkWell` et `Container`, qui en apportent tous
+/// une seconde. »*
+///
+/// 🔬 **CE QUI EST, MESURÉ dans les sources du SDK (Flutter 3.44.7)** :
+/// `grep -n "DecoratedBox"` dans `material/ink_well.dart` et
+/// `material/material.dart` ne rend que des **commentaires de documentation** ⇒
+/// ⛔ **ni `Material` ni `InkWell` n'en insèrent une**. **Le seul widget qui en
+/// INSÈRE réellement une est `Container` porteur d'une `decoration`**
+/// *(`widgets/container.dart`, deux sites)*, et `FocusableActionDetector` en
+/// insère **0** *(mesuré)*. ⇒ ⛔ **un `GestureDetector` seul n'ajoute rien**, et
+/// ⛔ **`find.byType` compare le type EXACT**, jamais une sous-classe.
+///
+/// ⚠️ **Le déclenchement ⛔ ne s'affirme donc pas — il se MESURE** : un anneau
+/// de focus fait d'un `Container(decoration:)` ou d'un `DecoratedBox` en ajoute
+/// une ; un anneau peint par un `CustomPaint`, une `FadeTransition` ou une
+/// `ScaleTransition` n'en ajoutent **aucune**. **Le juge est la sortie de
+/// `echeance_tile_test.dart`**, ⛔ pas ce commentaire.
+///
+/// 🔴 **Le défaut fermé ici est DÉMONTRÉ et REJOUÉ** *(sonde d'US-01.2, rendue
+/// exécutable par `rendu_couleur_test.dart`)* : avec deux boîtes décorées, un
+/// sélecteur en `.first` lisait l'**extérieure** ⇒ la tuile pouvait rendre
+/// **toujours orange** avec **112 tests verts**.
 Color fondDeLaTuile(WidgetTester tester, {Finder? tuile}) {
   final cible = tuile ?? find.byType(EcheanceTile).first;
   final boites = find.descendant(
     of: cible,
-    matching: find.byType(DecoratedBox),
+    matching: find.byKey(EcheanceTile.cleFond),
   );
   expect(
     boites,
     findsOneWidget,
     reason:
-        'NB-7 : plusieurs DecoratedBox sous la tuile ⇒ « .first » désignerait '
-        'la mauvaise, et la couleur observée ne serait plus celle qui est '
-        'peinte — un faux vert que rien d’autre ne verrait',
+        'NB-7 : la boîte du fond se désigne par SA CLÉ. Zéro ⇒ la clé a été '
+        'retirée du produit et l’observation ne porte plus sur rien ; '
+        'plusieurs ⇒ la cible est ambiguë et « la première » désignerait '
+        'peut-être la mauvaise — le faux vert que rien d’autre ne verrait',
   );
   final boite = tester.widget<DecoratedBox>(boites);
   return (boite.decoration as BoxDecoration).color!;

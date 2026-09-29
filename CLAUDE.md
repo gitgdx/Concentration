@@ -10,6 +10,10 @@ Voir [`docs/governance/STACK_PROFILE.md`](docs/governance/STACK_PROFILE.md) (dé
 choisi à l'initialisation) : langages, frameworks, ORM/migrations, commandes de build/lint/test.
 **Qualité (gates CI bloquants, `ci.yml`)** : seuils et commandes définis dans `factory.config.json`
 (`adapter.components.*.gates`), exécutés via `python scripts/run_gates.py`.
+**Comment ce produit est testé** : [`docs/qa/STRATEGIE_DE_TEST.md`](docs/qa/STRATEGIE_DE_TEST.md)
+— la carte des instruments *(couverture, mutation, Gherkin, critères de sortie exécutables)* et,
+pour chacun, ⛔ **ce qu'il ne mesure pas**. ⛔ **Il ne fixe aucun seuil** *(exemplaire unique :
+`factory.config.json`)* et ⛔ **ne remplace pas `STACK_PROFILE.md` §Developer** pour les normes.
 
 ## Règles dures (enforced)
 
@@ -49,10 +53,134 @@ conformité SCB. Lire ensuite le Story File de l'US concernée si applicable.
 
 ## État courant du projet *(maintenu par @Architect)*
 
-**Chantier actif** : **US-01.2 — Gestion des échéances (CRUD).** Phase **`development_start`**, branche
-`feat/US-01.2-design`. ⛔ **Plus aucune US de fondations n'est ouverte.**
+**Chantier actif** : **US-01.4 — Gestes sur la tuile : révélation de la description et retrait d'une
+échue (RF-06).** Phase **`development_start`**, branche `feat/US-01.4-gestes-tuile` *(branchée sur
+`feat/US-01.2-design`, elle-même **fusionnée sur `main`** — PR #32, `MERGED` le 2026-08-19 par `gitgdx`)*.
+⛔ **Plus aucune US de fondations n'est ouverte.**
+*(⚖️ **PÉRIMÉ-2026-08-24** : cette ligne portait **« US-01.2 — Gestion des échéances (CRUD), phase
+`development_start`, branche `feat/US-01.2-design` »** — vrai jusqu'au 2026-08-18, **faux depuis** :
+US-01.2 est à **`🧪 PASS`, phase `prepare_deployment`, FUSIONNÉE**, et US-01.4 a été créée le 2026-08-21.
+⛔ **La branche nommée était celle d'une US déjà fusionnée.** **On date, on ne repeint pas.**)*
 *(⚖️ **PÉRIMÉ-2026-08-06** : cette ligne portait **« US-01.1 — le PRODUIT »** — vrai jusqu'au 2026-08-03,
 faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint pas.**)*
+
+> 🔒 **US-01.4 : LA PHASE DE DESIGN EST CLOSE (2026-08-24) — `EVT_DESIGN_COMPLETED` émis, @Developer est
+> déverrouillé.** SCB : `✅ @PO · ✅ @Data · ✅ @UX`, phase **`development_start`**, **track FULL**.
+> **4 commits** *(`0f35ab8`, `e909a73`, `086e68f`, `05067b1`)* — ⛔ **PÉRIMÉ-2026-09-08 : la branche en
+> porte 26**, et **les 20 tâches sur 20 du Story File sont FAITES** *(T0 → T19, marquage vérifié par
+> commande)*. Le compte se **LIT** : `git rev-list --count origin/main..HEAD`, ⛔ **il ne se recopie
+> pas** — c'est le **défaut nº 1** du projet, et cette ligne en était une occurrence.
+> ⚠️ **LE DÉFAUT ③ EST ACTIF, 3ᵉ OCCURRENCE, ET IL EST MESURÉ** : la cellule de phase du SCB affiche
+> toujours **`development_start`** avec **`⏳ @Dev`**, le **dernier événement tracé** est
+> `EVT_MIGRATION_SCRIPT_READY` du **2026-08-24** — et `check_scb_compliance.py` rend **« conforme »**.
+> ⛔ **Aucun outil ne croise la cellule de phase avec la trace**, et l'écart vaut ici **20 tâches et
+> 6 commits**. ➡️ **`/audit-methodo`.** ⚖️ **La cellule n'est PAS corrigée ici, et c'est délibéré** :
+> elle n'avance que par **`EVT_CODE_READY`**, dont les **consommateurs** sont `code-reviewer` et
+> `cyber-security` ⇒ l'émettre **ouvre les audits**, et ⛔ **aucun événement du catalogue ne permet de
+> l'éteindre**. **Décision humaine.**
+> **Trois ADR acceptés donc IMMUABLES** :
+> **ADR-012** *(état `ÉCHUE RETIRÉE` persisté, migration `v2 ⇄ v3`)* · **ADR-013** *(état d'interaction de
+> la grille, observabilité et accessibilité des gestes)* · **ADR-014** *(enveloppe interactive
+> **conditionnelle**, où vit l'état du message du hub)*. **Compteurs LUS par commande** — ⛔ jamais écrits
+> à la main *(défaut ⑤)* : `grep -c "^### AC-"`, `grep -c "^  Scénario: "`.
+>
+> 🔬 **L'ACQUIS DE MÉTHODE DE CE CYCLE PORTE SUR L'INTEGRATION LOCK, ET IL EST MESURÉ DEUX FOIS.**
+> US-01.2 avait trouvé **quatre** trous avec deux branches de design **en aveugle**. Cette fois **chacune
+> savait ce que faisait l'autre** — et la jointure a trouvé **SIX** trous et **refermé UN** point ouvert.
+> ⇒ ⛔ **L'étape n'est pas une formalité, et ce n'est plus une intuition : c'est le DEUXIÈME relevé
+> consécutif.** 🎓 **Et le cas `D-7` dit à quoi elle sert** : @UXDesigner a décidé « rien à afficher »
+> **sous une borne NOMMÉE** *(« tant que D-1 tient »)*, en disant **pourquoi elle compte** ; @DataEngineer
+> l'a **confirmée**. ➡️ **Une décision de SILENCE est recevable quand elle est RÉFUTABLE par l'autre
+> branche** — l'inverse exact du trou d'US-01.2, où ⛔ **personne n'avait posé la question.**
+>
+> 📌 **CINQ FAITS MESURÉS QUE @DEVELOPER DOIT AVOIR AVANT T1, et qu'il ne doit PAS re-découvrir** :
+> ⛔ **`T1` PASSE EN PREMIER DANS LE CODE** : le prédicat « est échue » vit déjà en **quatre exemplaires**
+> et l'US en demanderait deux de plus — le ramener à **un** ⛔ **avant** tout le reste, sans changer un
+> comportement. · ⛔ **`T7` AVANT `T8`** *(NB-7)*, mais **le déclenchement se MESURE** : `InkWell` et
+> `Material` ne mentionnent `DecoratedBox` que dans des **commentaires de documentation** — **seul un
+> `Container` porteur d'une `decoration`** en insère une, et `FocusableActionDetector` en insère **0**
+> *(mesuré)*. ⚠️ **Le commentaire de `rendu_couleur.dart` est donc PLUS LARGE que le fait.** · ⛔ **`T15`
+> EN DERNIER** : inscrire le couple dans `COUPLES` **avant** que `test/e2e/gestes_tuile_test.dart` existe
+> rendrait le **job requis ROUGE** *(`FICHIER DE TESTS ABSENT`)*. · ⛔ **PAS `BoxFit.contain`** pour le
+> nombre : la taille du glyphe dépendrait du **nombre de chiffres**, donc `10 → 9` **doublerait** le
+> chiffre au rafraîchissement. La taille passe **par le TOKEN**, `scaleDown` reste le filet. · ⚠️
+> **Cliquet à marge NULLE** ⇒ **tests livrés AVEC le code, dans le même commit que chaque tâche**, et
+> ⛔ **la valeur se LIT** dans `factory.config.json` → `adapter.components.app.coverage_ratchet.value`.
+>
+> 🔴 **LE RÉSULTAT LE PLUS LOURD DU CYCLE, ET IL EST EXÉCUTABLE** : **QUATRE mutants DESTRUCTEURS passent
+> le critère d'aller-retour d'US-01.2 avec 8 assertions sur 8 VERTES** *(sa graine ne porte aucune entrée
+> retirée)*, tandis que le mutant `M6` **n'est vu que par lui seul** ⇒ ⛔ **les deux instruments ne sont
+> pas redondants DANS LES DEUX SENS, on garde les DEUX.** ⚠️ **Et le mutant le plus dangereux est celui
+> qui a l'air le plus propre** : *« redescendre proprement en retirant la clé »* ferait tomber **AC-12
+> « Erreur » d'US-01.2**, une US **déjà validée**. Deux instruments livrés et **rejoués** :
+> `reports/US-01.4/migration_v3_guard_criterion.py` *(`--selftest` **0**, `--croise` **0**, défaut **1**)*
+> et `reports/US-01.4/cout_ecriture_atomique_criterion.py` *(`--selftest` **0**, défaut **1**)*.
+> ⛔ **Trois pièges de langage et de revue, mesurés** : les **tear-offs** d'une fonction de premier niveau
+> sont **canonicalisés** dans une liste `const` ⇒ `EtapeMigration(3, _identite, _identite)` rend
+> `identical(up, down)` **vrai** et fait rougir `A1` — **il faut DEUX fonctions distinctes, même pour une
+> identité** · le module conforme contient **ZÉRO occurrence du mot `retiree`** ⇒ ⛔ **cette migration ne
+> peut PAS être revue en cherchant le nom du champ** · et `dart analyze` rend **`No issues found!`** sur
+> les **sept** sources, **mutants destructeurs compris**.
+>
+> ⛔ **PÉRIMÉ-2026-09-08 SUR UN POINT CHIFFRÉ, ET C'EST UNE INSTRUCTION DE REVUE — donc à ne pas
+> appliquer à la lettre.** *« **ZÉRO** occurrence du mot `retiree` »* est **FAUX** : `grep -c "retiree"
+> lib/features/echeances/data/echeance_schema_migrations.dart` rend **5** *(relevé par @DataEngineer à
+> T16, **revérifié** par la session)*. ✅ **MAIS LA CONCLUSION EN SORT RENFORCÉE, PAS AFFAIBLIE** : les
+> **cinq** occurrences sont de la **PROSE DE COMMENTAIRE**, ⛔ **aucune n'est du code** ⇒ chercher le nom
+> du champ ne trouve que du **commentaire rassurant**, **identique sur la forme conforme ET sur les
+> quatre mutants destructeurs**. ➡️ **La règle à retenir est donc : ⛔ cette migration ne se revoit pas
+> par `grep` sur le nom du champ — et un `grep` qui rend 5 lignes ne doit pas être lu comme une
+> couverture.** *(On date, on ne repeint pas : le chiffre faux reste, pour qu'on sache lequel corriger.)*
+>
+> ⚖️ **DEUX ARBITRAGES HUMAINS DU 2026-08-24, tous deux nés de la jointure** : **`D-4`** *(`retiree: null`
+> est une valeur **présente** et non booléenne, donc un **RÉSIDU** — la présence se teste par
+> **`containsKey`**, ⛔ **jamais** par la nullité)* → **voie (b)**, contrat interne, ⛔ aucun AC, **motif :
+> ce n'est pas une règle nouvelle mais une LECTURE d'ADR-012 §3**, et un second exemplaire dériverait.
+> **`D-8`** *(historique **sans plafond**)* → **« MESURER D'ABORD, BORNER ENSUITE »** : ⛔ aucun plafond,
+> aucune purge *(une purge serait un acte **destructif** décidé **sans un seul chiffre**)*, la lacune est
+> **nommée** et son **instrument livré**. 🆕 **Et la mesure a déjà DÉPLACÉ le risque** : le coût de
+> l'écriture atomique est **dominé par un terme FIXE** *(flush + rename)* — taille **×1209** ⇒ durée
+> **×1,39 à ×2,71** seulement ⇒ ⛔ **le risque porte sur la TAILLE, pas encore sur la LATENCE**.
+> **141,0 octets par retirée**, **LU** et non estimé *(≈1,41 Mo à 10 000)*.
+>
+> ⛔ **PÉRIMÉ-2026-09-08 SUR LE NOMBRE, ⛔ PAS SUR LA CONCLUSION.** Le facteur de durée **n'est PAS
+> REPRODUCTIBLE** *(rejoué par @DataEngineer à T16)* : **`1,02 / 1,16 / 2,68`** au 2ᵉ relevé contre
+> **`0,03 / 0,03 / 0,09`** au 1ᵉʳ, parce que sa **référence `n=0` est une valeur ABERRANTE À FROID**
+> *(`us_median` **546 982** contre **15 362**)*. ⇒ ✅ **« le terme FIXE domine, le risque porte sur la
+> TAILLE » SURVIT aux deux relevés** ; ⛔ **« ×1,39 à ×2,71 » NON** — c'est un **rapport à relire**,
+> jamais une constante. ✅ **`141,0` octets par retirée est CONFIRMÉ** *(**1 411 167** octets à
+> n = 10 000, sur le chemin de **PRODUCTION**)*. ⚠️ **Et ce qui reste NON MESURÉ est la question même de
+> `D-8`** : `--appareil` rend **`android_physiques=0`** ⇒ ⛔ **le coût d'une écriture atomique de 1,41 Mo
+> sur un appareil RÉEL n'a jamais été mesuré.**
+>
+> ⛔ **CE QUE LA CLÔTURE DU DESIGN N'ATTESTE PAS** : **0 ligne de `lib/`** · **aucun écran vu** · les
+> scénarios sont **ni exécutés ni sous le contrôle de correspondance** *(le couple n'est pas dans
+> `COUPLES` — c'est **T15**, et le `--selftest` annonce lui-même **« 2 couples sous contrôle »**)* ·
+> **aucune ligne de `v3` n'existe** · **NM-3, NM-11, NM-12, NM-13** non levées — et ⚠️ **NM-13 ne sera
+> que PARTIELLEMENT levable sur un SM T580** *(ses tuiles font plusieurs centaines de dp ; le cas critique
+> est un **petit téléphone à 320 dp**)* · **la croissance de l'historique reste NON BORNÉE**, assumée.
+>
+> 🔴 **TROIS AFFIRMATIONS DE @ARCHITECT ONT ÉTÉ RÉFUTÉES PAR LA MESURE DANS CE SEUL CYCLE, deux par les
+> agents eux-mêmes — à lire comme un fait de méthode, pas comme une anecdote.** ⓵ *« Un SM T580 est
+> branché »* : `adb devices` rendait une **liste vide** — une mesure de **trois jours** transportée comme
+> un **fait présent**. ⓶ *« Le scénario du rafraîchissement est inobservable sans seam »* : **faux**, la
+> technique est le **PHASAGE de l'appui** ⇒ ⛔ **aucun seam introduit**, et **ADR-011 §5 en sort
+> RENFORCÉ**. ⓷ *« J-1 est exactement `SONDE-1` »* : c'est son **MIROIR** *(annoncé sans effet, au lieu
+> d'actionnable non annoncé)*, et ⛔ **la distinction CHANGE l'assertion à écrire** — le `T-P4` prescrit
+> par ADR-013 §2 serait **VERT sur le défaut**.
+>
+> 📌 **Renvoi mort à porter à `/audit-methodo`** : **`pattern 14` ne résout NULLE PART** — cité par
+> **ADR-013, un ADR ACCEPTÉ** *(donc non éditable)* et **deux fois** par le Design UX ;
+> `STACK_PROFILE.md` ne porte **aucune table numérotée de patterns** *(vérifié)*.
+
+> ⛔ **PÉRIMÉ-2026-08-24 — LE BLOC CI-DESSOUS DÉCRIT US-01.2 AU 6 AOÛT.** Il annonce
+> `development_start` et **3 visas** ; l'état réel est **`🧪 PASS`, phase `prepare_deployment`, 7 visas
+> sur 9, et la branche est FUSIONNÉE sur `main`** *(PR #32, `MERGED` le 2026-08-19 par `gitgdx`)*.
+> **Conservé parce qu'il porte les DEUX acquis de méthode de son cycle**, qui valent toujours.
+> ⚠️ **Et une leçon d'outil qui a coûté deux fois** : `gh pr list` **sans `--state`** ne montre que les PR
+> **OUVERTES**, donc une PR **fusionnée y est invisible** — « vide » ne veut **pas** dire « aucune PR ».
+> ✅ **Le contrôle juste mesure l'ÉTAT du dépôt, pas la paperasse** :
+> `git merge-base --is-ancestor <branche> origin/main` *(exit 0 = fusionnée)*.
 
 > 🔒 **US-01.2 : LA PHASE DE DESIGN EST CLOSE (2026-08-06) — `EVT_DESIGN_COMPLETED` émis, @Developer est
 > déverrouillé pour T1 → T15.** SCB : `✅ @PO · ✅ @Data · ✅ @UX`, phase **`development_start`**.
@@ -121,6 +249,22 @@ faux depuis que le plan d'EPIC_01 met US-01.2 en ①. **On date, on ne repeint p
 > de constructibilité** et **« PAS une plateforme cible produit »** *(RNF-08 vise iOS/Android)* — **Android
 > sans JDK**, **iOS non scaffoldé**, aucun keystore, aucun compte store. ➡️ **Ce n'est plus « rien à
 > déployer » mais « quelque chose à déployer et aucun moyen de le faire ».**
+> ⛔ **PÉRIMÉ-2026-08-21 SUR UN POINT, ET UN SEUL : « Android sans JDK » est FAUX depuis le 2026-08-21.**
+> **Mesuré** : `flutter doctor` rend **`[√] Android toolchain — Android SDK 36.0.0`** et **`No issues
+> found!`**. La cause n'était **pas** un JDK absent — Flutter **ne détectait pas Android Studio du tout**,
+> donc ne remontait pas jusqu'à son **JBR embarqué** *(OpenJDK **21.0.10**, `javac` présent)*. Remède, une
+> commande : `flutter config --jdk-dir "C:\Program Files\Android\Android Studio\jbr"`.
+> 🔬 **ET L'APPLICATION A TOURNÉ SUR UN APPAREIL RÉEL, pour la PREMIÈRE FOIS du projet** : `assembleDebug`
+> **exit 0**, `adb install` **Success**, `Displayed …MainActivity: +10s335ms`, **0 ligne `FATAL`**, sur un
+> **SM T580** *(Galaxy Tab A, Android 8.1, API 27 ; `minSdk = 24`)*. Une capture d'écran a été prise.
+> ⛔ **CE QUE CELA NE LÈVE PAS, et il ne faut pas sur-lire** : **iOS non scaffoldé**, **aucun keystore**,
+> **aucun build signé**, **aucune distribution interne**, **aucun compte store** — les quatre autres
+> membres de la phrase ci-dessus **restent vrais**. **Seul le premier item d'US-01.3 est levé**, et c'est
+> un **fait de MACHINE**, ⛔ **pas un livrable de la factory** : rien n'a été committé pour l'obtenir.
+> ⚠️ **Deux effets de bord du build, auto-acceptés sans demande** : **NDK 28.2.13676358** et **CMake
+> 3.22.1** installés, licences acceptées automatiquement *(ils viennent de `flutter.ndkVersion`)*. Et le
+> SDK Android porte des **doublons** `platform-tools-2` / `cmdline-tools/latest-2` : le build passe, mais
+> ⛔ **il n'est pas reproductible d'une machine à l'autre**.
 >
 > ⛔ **CE QUE `🧪 PASS` N'ATTESTE PAS** : **AC-1 « Limite » (RNF-02, « < 500 ms ») N'EST PAS COUVERT**
 > *(arbitrage humain, reporté à US-01.2 ; critère de levée exécutable livré —

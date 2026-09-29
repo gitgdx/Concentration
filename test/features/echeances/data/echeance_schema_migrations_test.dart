@@ -76,12 +76,26 @@ void main() {
     return null;
   }
 
-  final etape = etapesMigration.single;
+  // ⚖️ **ADAPTÉ-2024 → 2026-08-24 (T3 d'US-01.4)** : cette ligne était
+  // `etapesMigration.single`, ce qui n'était vrai que par ACCIDENT — il n'y
+  // avait alors qu'une étape. ⛔ Ce fichier est la garde du couple **v1 ⇄ v2** :
+  // son étape est désignée **par sa version**, jamais par sa position.
+  final etape = etapesMigration.firstWhere((e) => e.version == 2);
 
   group('ADR-005 §1 — contrat du couple', () {
     test('la version courante est atteinte par la dernière étape', () {
-      expect(versionCourante, 2);
-      expect(etapesMigration.map((e) => e.version).toList(), [versionCourante]);
+      // ⚖️ **ADAPTÉ le 2026-08-24 (T3 d'US-01.4)** : ce test portait
+      // `expect(versionCourante, 2)` et `[versionCourante]` — un **nombre
+      // dérivé écrit à la main** qui ⛔ **ne disait pas ce que le TITRE dit**, et
+      // une hypothèse d'**étape unique**. Il énonce désormais **exactement son
+      // titre**, sans aucun littéral. ⛔ La valeur de `versionCourante` et la
+      // contiguïté des étapes sont assertées **là où elles sont introduites**,
+      // dans `echeance_migration_v3_test.dart` — ⛔ pas en deux exemplaires.
+      expect(
+        etapesMigration.map((e) => e.version).toList().last,
+        versionCourante,
+      );
+      expect(etapesMigration, isNotEmpty);
     });
 
     test('⛔ un up SANS down est interdit : les deux diffèrent', () {
@@ -194,7 +208,8 @@ void main() {
 
     test('l’aller-retour COMPLET par `migrer` rend les octets d’origine', () {
       final haut = migrer(graine())!;
-      expect(lireVersion(haut), 2);
+      // ⛔ La version se LIT dans la constante, ⛔ jamais recopiée.
+      expect(lireVersion(haut), versionCourante);
       final bas = migrer(haut, cible: 1)!;
       expect(lireVersion(bas), 1);
       expect(jsonEncode(bas), jsonEncode(graine()));

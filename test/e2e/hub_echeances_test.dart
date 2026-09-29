@@ -240,14 +240,49 @@ void main() {
     // décorative — la description pouvait n'être JAMAIS rendue sans qu'un seul
     // test ne rougisse (mutant QA-M4). L'assertion est bornée à CHAQUE tuile,
     // par sa clé, donc elle vérifie aussi l'appariement description ↔ tuile.
+    //
+    // ⚖️ **T13 (2026-08-29) — L'ASSERTION EST DÉPLACÉE, ⛔ PAS SUPPRIMÉE**
+    // *(`P-2`)*. Une tuile **`ACTIVE`** porte désormais le **nombre SEUL** : sa
+    // description n'est plus **peinte** au repos *(AC-1 « Erreur »)*, mais elle
+    // **reste portée par le LIBELLÉ D'ACCESSIBILITÉ** — c'est-à-dire par le
+    // seul canal qui la rendait utile à un lecteur d'écran.
+    // 🔴 **La supprimer aurait ressuscité le mutant `QA-M4`** : l'appariement
+    // description ↔ tuile redeviendrait invisible, et une tuile pourrait porter
+    // la description d'une AUTRE sans qu'aucun test ne rougisse. C'est
+    // précisément ce que les mutants `X-2` / `X-3` interdisent.
+    // ⚠️ **L'assertion VISUELLE, elle, est CONSERVÉE pour les `ÉCHUE`** — voir
+    // le scénario dédié plus bas dans ce fichier.
     jeu.forEach((id, valeur) {
+      // ⛔ `getSemantics` exigerait `ensureSemantics()` ; le libellé DÉCLARÉ
+      // se lit sur le widget, sans dépendre d'un réglage global.
+      // ⛔ **PAS `.first`, et c'est un fait MESURÉ à T8** :
+      // `FocusableActionDetector` insère **son PROPRE `Semantics`**, sans
+      // libellé — le prendre rendrait `label == null` et l'assertion serait
+      // fausse pour une raison ÉTRANGÈRE à ce qu'elle observe.
+      final annonce = tester
+          .widgetList<Semantics>(
+            find.descendant(
+              of: find.byKey(ValueKey(id)),
+              matching: find.byType(Semantics),
+            ),
+          )
+          .firstWhere((s) => s.properties.label != null);
+      expect(
+        annonce.properties.label,
+        contains(valeur.$2),
+        reason:
+            'la tuile « $id » doit porter « ${valeur.$2} » DANS SON '
+            'LIBELLÉ (elle ne la peint plus au repos depuis T13)',
+      );
+      // ⛔ CONTRÔLE APPARIÉ — sans lui, l'assertion ci-dessus passerait avec
+      // un libellé qui contiendrait TOUTES les descriptions.
       expect(
         find.descendant(
           of: find.byKey(ValueKey(id)),
           matching: find.text(valeur.$2),
         ),
-        findsOneWidget,
-        reason: 'la tuile « $id » doit porter « ${valeur.$2} »',
+        findsNothing,
+        reason: 'et elle ne la PEINT plus : une ACTIVE porte le nombre SEUL',
       );
     });
   });

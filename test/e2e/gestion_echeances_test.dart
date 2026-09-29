@@ -17,6 +17,7 @@ import 'package:concentration/features/echeances/presentation/widgets/ligne_eche
 import 'package:concentration/features/echeances/presentation/widgets/echeance_tile.dart';
 import 'package:concentration/features/echeances/presentation/widgets/empty_echeances_placeholder.dart';
 import 'package:concentration/features/hub/presentation/hub_page.dart';
+import 'package:concentration/features/echeances/presentation/widgets/message_ecriture.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -163,6 +164,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// ⚖️ **T13 (2026-08-29) — LE CANAL DE LA DESCRIPTION SUR LA GRILLE.**
+  /// Une tuile `ACTIVE` ne **PEINT** plus sa description au repos *(AC-1
+  /// « Erreur » d'US-01.4)* : sur le **hub**, elle se lit dans le **libellé
+  /// d'accessibilité**. ⛔ Sur la **page de GESTION**, rien ne change — la
+  /// description y est bien peinte par `LigneEcheance`.
+  /// ⛔ **PAS `.first`** : `FocusableActionDetector` insère son propre
+  /// `Semantics` **sans libellé** (mesuré à T8).
+  String libellesDeLaGrille(WidgetTester tester) => tester
+      .widgetList<Semantics>(find.byType(Semantics))
+      .map((w) => w.properties.label)
+      .whereType<String>()
+      .join(' | ');
+
   testWidgets('Ouverture de la page de gestion depuis le hub', (tester) async {
     poser([ech('a', const Duration(days: 90), 'Convention')]);
     await ouvrirApplication(tester);
@@ -192,7 +206,7 @@ void main() {
         findsOneWidget,
       );
       // ⛔ ni erreur technique, ni couleur d'urgence.
-      expect(find.byType(MessageValidation), findsNothing);
+      expect(find.byType(MessageEcriture), findsNothing);
       for (final interdit in ['Exception', 'Error', 'errno', 'échec']) {
         expect(find.textContaining(interdit), findsNothing);
       }
@@ -268,7 +282,7 @@ void main() {
     await enregistrer(tester);
 
     expect(find.byType(FormulaireEcheance), findsOneWidget);
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('description'), findsWidgets);
     // ⛔ « aucune création partielle » s'asserte SUR LES OCTETS.
     expect(harnais.octets(), isNull);
@@ -288,7 +302,7 @@ void main() {
     );
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('description'), findsWidgets);
     expect(harnais.octets(), isNull);
   });
@@ -327,7 +341,8 @@ void main() {
     // Le `trim` est vérifié SUR LA VALEUR PERSISTÉE, ⛔ pas sur le champ.
     expect(persistees().single.description, 'Convention annuelle');
     await revenir(tester);
-    expect(find.text('Convention annuelle'), findsWidgets);
+    // ⚖️ T13 : sur le HUB, la description vit dans le libellé.
+    expect(libellesDeLaGrille(tester), contains('Convention annuelle'));
   });
 
   testWidgets('Une échéance saisie sans heure est enregistrée à 23h59', (
@@ -359,7 +374,7 @@ void main() {
     await saisir(tester, description: 'Description valide', date: '');
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('date'), findsWidgets);
     // ⛔ Aucune date INVENTÉE.
     expect(harnais.octets(), isNull);
@@ -402,7 +417,7 @@ void main() {
     );
     await enregistrer(tester);
 
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(
       find.textContaining('doit être dans le futur'),
       findsWidgets,
@@ -564,7 +579,7 @@ void main() {
     (tester) async {
       poser([ech('a', const Duration(days: 10), 'Avant')]);
       await ouvrirApplication(tester);
-      expect(find.text('Avant'), findsWidgets);
+      expect(libellesDeLaGrille(tester), contains('Avant'));
       await ouvrirGestion(tester);
 
       await tester.tap(find.byIcon(Icons.edit));
@@ -576,14 +591,11 @@ void main() {
       await revenir(tester);
       // ⛔ SANS `pumpWidget` supplémentaire : un remontage masquerait l'absence
       // de notification (C-6).
-      expect(
-        find.descendant(
-          of: find.byType(EcheanceTile),
-          matching: find.text('Apres'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Avant'), findsNothing);
+      final libelles = libellesDeLaGrille(tester);
+      expect(libelles, contains('Apres'));
+      // ⛔ Et l'ANCIENNE valeur a bien disparu — sur le canal où elle vivait,
+      // sinon l'assertion serait vraie PAR ACCIDENT depuis T13.
+      expect(libelles, isNot(contains('Avant')));
     },
   );
 
@@ -640,7 +652,7 @@ void main() {
       await saisir(tester, description: '');
       await enregistrer(tester);
 
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // L'échéance conserve description ET date — LES OCTETS D'ORIGINE.
       expect(harnais.octets(), octetsOrigine);
     },
@@ -752,7 +764,12 @@ void main() {
     poser([ech('e', const Duration(days: -3), 'Passeport')]);
     await ouvrirApplication(tester);
     await ouvrirGestion(tester);
-    expect(find.text('Échéance atteinte'), findsOneWidget);
+    // ⚖️ **T12 (2026-08-29) — LE TEXTE S'EST ENRICHI, LA CLAUSE EST INTACTE.**
+    // La 3ᵉ ligne d'une échue porte désormais « Échéance atteinte · <MARQUE> »
+    // *(AC-7)*. ⛔ `find.text` exige une égalité EXACTE : l'assertion devient
+    // un `textContaining`, ce qui **conserve** ce qu'elle prouvait — que le mot
+    // est là, et qu'il n'est ⛔ pas une teinte.
+    expect(find.textContaining('Échéance atteinte'), findsOneWidget);
 
     await supprimerPremiere(tester);
 
@@ -922,16 +939,27 @@ void main() {
       expect(find.byType(HubPage), findsOneWidget);
       expect(tester.takeException(), isNull);
       expect(find.byType(EcheanceTile), findsNWidgets(2));
-      expect(find.text('Valide un'), findsOneWidget);
-      expect(find.text('illisible'), findsNothing);
+      final libellesOk = libellesDeLaGrille(tester);
+      expect(libellesOk, contains('Valide un'));
+      expect(libellesOk, isNot(contains('illisible')));
     },
   );
 
   testWidgets("Un enregistrement illisible n'est ni réécrit ni supprimé", (
     tester,
   ) async {
+    // ⚖️ **ADAPTÉ le 2026-08-24 (T3 d'US-01.4)** : ce document était posé à
+    // `"schemaVersion":2` — **la version courante À L'ÉPOQUE**, écrite à la
+    // main. Depuis le bump à `v3`, un document `v2` est une version
+    // **ANTÉRIEURE** ⇒ l'ouverture le **migre et le réécrit légitimement**, et
+    // l'assertion « octet pour octet inchangé » tombait pour une raison qui
+    // ⛔ **n'a rien à voir avec ce que ce scénario observe**.
+    // ⇒ la version est désormais **LUE** dans la constante, donc le document est
+    // **à la version courante** et l'assertion retrouve son objet EXACT :
+    // *un enregistrement illisible n'est ni réécrit ni supprimé*.
+    // ⛔ **L'assertion n'est PAS affaiblie** — elle porte toujours sur les octets.
     const document =
-        '{"schemaVersion":2,"echeances":['
+        '{"schemaVersion":$versionCourante,"echeances":['
         '{"id":"","description":"illisible","dateEcheance":"2027-04-01T09:00"}]}';
     harnais.poser(document);
     await ouvrirApplication(tester);
@@ -985,7 +1013,7 @@ void main() {
       await ouvrirApplication(tester);
 
       expect(persistees(), hasLength(3));
-      expect(harnais.octets(), contains('"schemaVersion":2'));
+      expect(harnais.octets(), contains('"schemaVersion":$versionCourante'));
       // La migration s'exécute UNE SEULE FOIS : à la relecture, le document
       // porte déjà la version courante, donc plus rien à migrer.
       final apresPremiere = harnais.octets();
@@ -1036,7 +1064,7 @@ void main() {
     harnais.poser(v1);
     // La migration MONTANTE a été exécutée : l'application s'ouvre.
     await ouvrirApplication(tester);
-    expect(lireVersion(codec.lireRacine(harnais.octets()!)!), 2);
+    expect(lireVersion(codec.lireRacine(harnais.octets()!)!), versionCourante);
 
     // La migration DESCENDANTE est exécutée, avec le code de production.
     final redescendu = migrer(codec.lireRacine(harnais.octets()!)!, cible: 1);
@@ -1059,14 +1087,17 @@ void main() {
       await ouvrirApplication(tester);
 
       expect(find.byType(EcheanceTile), findsNWidgets(2));
-      expect(find.text('Saisie par le pratiquant'), findsOneWidget);
+      final libellesGrille = libellesDeLaGrille(tester);
+      expect(libellesGrille, contains('Saisie par le pratiquant'));
       // 🔴 Une assertion doit ÉCHOUER si une échéance d'EXEMPLE apparaît : les
       // descriptions du jeu d'exemple sont NOMMÉES, ⛔ pas devinées.
+      // ⚖️ T13 : sur le canal du LIBELLÉ — l'assertion visuelle serait
+      // désormais vraie sans rien prouver.
       for (final exemple in EcheancesExemple.depuis(horloge)) {
         if (exemple.description.isEmpty) continue;
         expect(
-          find.text(exemple.description),
-          findsNothing,
+          libellesGrille,
+          isNot(contains(exemple.description)),
           reason: '⛔ « ${exemple.description} » vient du jeu d’EXEMPLE',
         );
       }
@@ -1186,13 +1217,13 @@ void main() {
 
       // Le message de validation est lui aussi ANNONCÉ (`liveRegion`).
       await enregistrer(tester);
-      expect(find.byType(MessageValidation), findsOneWidget);
+      expect(find.byType(MessageEcriture), findsOneWidget);
       // ⛔ Aucune sélection PAR POSITION : on cherche, parmi les `Semantics` de
       // la surface du message, ceux qui déclarent `liveRegion`.
       final annonces = tester
           .widgetList<Semantics>(
             find.descendant(
-              of: find.byType(MessageValidation),
+              of: find.byType(MessageEcriture),
               matching: find.byType(Semantics),
             ),
           )
@@ -1218,7 +1249,7 @@ void main() {
       );
       await enregistrer(tester);
 
-      final message = find.byType(MessageValidation);
+      final message = find.byType(MessageEcriture);
       expect(message, findsOneWidget);
       // Il utilise la couleur d'ERREUR du design system et reste lisible.
       final texte = tester.widget<Text>(
@@ -1319,7 +1350,7 @@ void main() {
     await reglerEcritures(tester);
 
     // Un message SOBRE indique que l'enregistrement n'a pas eu lieu.
-    expect(find.byType(MessageValidation), findsOneWidget);
+    expect(find.byType(MessageEcriture), findsOneWidget);
     expect(find.textContaining('pas été enregistrée'), findsOneWidget);
     // ⛔ Aucune échéance listée ni sur la grille — AUCUNE mise à jour optimiste.
     expect(find.byType(LigneEcheance), findsNothing);

@@ -4,10 +4,12 @@ import '../../../core/theme/concentration_tokens.dart';
 import '../../../core/theme/rgb_extension.dart';
 import '../../../core/time/clock.dart';
 import '../domain/echeance.dart';
+import '../domain/echeance_etat.dart';
 import 'echeances_notifier.dart';
 import 'widgets/confirmation_suppression.dart';
 import 'widgets/formulaire_echeance.dart';
 import 'widgets/ligne_echeance.dart';
+import 'widgets/message_ecriture.dart';
 
 /// Page de gestion (T10) — **une ROUTE, ⛔ pas un onglet**, et elle ne porte
 /// **PAS la barre basse**.
@@ -57,16 +59,18 @@ class GestionEcheancesPage extends StatelessWidget {
           builder: (context, _) {
             final maintenant = clock.now();
             // AC-8 « Nominal » — actives par date CROISSANTE (RF-07)...
+            // ⛔ Prédicat UNIQUE (T1) : les deux comparaisons qui vivaient
+            // ici sont désormais les deux faces du MÊME exemplaire.
             final actives =
                 notifier.echeances
-                    .where((e) => e.dateEcheance.isAfter(maintenant))
+                    .where((e) => !estEchue(e, maintenant))
                     .toList()
                   ..sort();
             // ...et échues de la plus RÉCEMMENT échue à la plus ancienne : la
             // consultation d'un historique va du récent vers l'ancien.
             final echues =
                 notifier.echeances
-                    .where((e) => !e.dateEcheance.isAfter(maintenant))
+                    .where((e) => estEchue(e, maintenant))
                     .toList()
                   ..sort((a, b) => b.compareTo(a));
 
@@ -110,7 +114,10 @@ class GestionEcheancesPage extends StatelessWidget {
         context: context,
         builder: (_) => AlertDialog(
           backgroundColor: ConcentrationTokens.surfaceElevee.couleur,
-          content: MessageValidation(texte: refus.message),
+          content: MessageEcriture(
+            ton: TonMessage.surfaceDeSaisie,
+            texte: refus.message,
+          ),
           actions: [
             TextButton(
               autofocus: true,
@@ -211,7 +218,12 @@ class _AffordanceAjout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final limite = notifier.validation.refusDeLimite(notifier.echeances);
+    // ⛔ `presentes`, ⛔ JAMAIS `echeances` (C-7, US-01.4 T5) : une échéance
+    // RETIRÉE n'occupe aucune des 9 places. Avec la liste complète, ce bouton
+    // annonçait la limite alors que 8 tuiles seulement étaient sur la grille,
+    // et `creer()` — qui lit bien `presentes` — acceptait la création : le
+    // symptôme exact que C-7 nomme, à l'envers.
+    final limite = notifier.validation.refusDeLimite(notifier.presentes);
     final disponible = limite == null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,7 +255,11 @@ class _AffordanceAjout extends StatelessWidget {
                   label: const Text('Ajouter une échéance'),
                 ),
         ),
-        if (limite != null) MessageValidation(texte: limite.message),
+        if (limite != null)
+          MessageEcriture(
+            ton: TonMessage.surfaceDeSaisie,
+            texte: limite.message,
+          ),
       ],
     );
   }

@@ -46,7 +46,19 @@ Fonctionnalité: Affichage du Hub de pratiques et de la grille d'échéances
     Étant donné que 4 échéances actives sont injectées
     Quand la grille d'échéances est affichée
     Alors exactement 4 tuiles sont affichées
-    Et chaque tuile porte la description de son échéance
+    # PÉRIMÉ-2026-08-29 (US-01.4, T13) — l'étape ci-dessous portait :
+    #   « Et chaque tuile porte la description de son échéance »
+    # Vrai jusqu'au 2026-08-28, FAUX depuis : une tuile ACTIVE porte le nombre
+    # SEUL (AC-1 « Erreur » d'US-01.4, Design UX §4.1), et sa description n'est
+    # plus PEINTE au repos — elle apparaît à la RÉVÉLATION, à la place du
+    # nombre. ⛔ On date, on ne repeint pas : le marqueur est LITTÉRAL, parce
+    # qu'un texte barré est invisible à grep.
+    # ⚠️ Ce n'est pas un retrait de garantie : la description reste portée par
+    # le LIBELLÉ D'ACCESSIBILITÉ de chaque tuile, et l'assertion appariée a été
+    # DÉPLACÉE là — jamais supprimée (mutants X-2 / X-3).
+    # 🔴 Et l'étape d'origine décrivait un défaut MESURÉ : à 9 tuiles sur
+    # 320 dp, la description au repos faisait DÉBORDER la tuile dès ×1,6.
+    Et chaque tuile porte la description de son échéance dans son libellé d'accessibilité
 
   Scénario: La tuile affiche un nombre nu, sans unité
     Étant donné qu'une échéance active est injectée

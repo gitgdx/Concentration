@@ -58,6 +58,7 @@ void main() {
                 body: EcheancesGrid(
                   echeances: neuf(),
                   clock: FakeClock(maintenant),
+                  onRetirer: null,
                 ),
               ),
       ),

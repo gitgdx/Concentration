@@ -135,6 +135,21 @@ class EcheanceDocumentRepository implements EcheanceRepository {
     (liste) => liste.where((e) => e.id != id).toList(),
   );
 
+  /// **C-8 — le MÊME chemin d'écriture que tout le reste**, avec **son propre
+  /// acte**. ⛔ Pas un second chemin *(`NB-B` a été ouvert exactement pour un
+  /// acte codé en dur)*, ⛔ pas de `remplacer` détourné.
+  ///
+  /// ⛔ **La mutation porte sur la liste DU DOCUMENT** : l'entité est relue
+  /// **ici**, donc ni la description ni la date de l'appelant n'entrent en jeu.
+  @override
+  Future<ResultatEcriture> retirer(String id) => _ecrire(
+    ActeEcriture.retrait,
+    (liste) => <Echeance>[
+      for (final e in liste)
+        if (e.id == id) e.avec(retiree: true) else e,
+    ],
+  );
+
   /// 🔴 **U-6 ① appliqué** : rend un **refus TYPÉ**, ⛔ jamais `void`, ⛔ jamais
   /// un `Future` tiré et oublié. C'est ce retour qui rend AC-17 observable ;
   /// sans lui, l'appelant **ne pourrait pas connaître l'issue** et devrait

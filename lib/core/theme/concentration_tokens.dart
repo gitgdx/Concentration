@@ -86,4 +86,84 @@ class ConcentrationTokens {
 
   /// Période de rafraîchissement (RF-05 : au moins une fois par minute).
   static const Duration periodeRafraichissement = Duration(seconds: 30);
+
+  // ─── Tokens AJOUTÉS par US-01.4 (Design UX §7.1 et §7.3).
+  // ⚖️ Cette ligne annonçait « deux, pas un de plus » jusqu'au 2026-08-27 :
+  //    elle est FAUSSE dès l'ajout des tokens de l'animation (T10), et le
+  //    décompte est RETIRÉ plutôt que mis à jour — un nombre dérivé écrit à
+  //    la main dans un commentaire ne se met pas à jour tout seul, et une
+  //    valeur fausse se retire (classe de défaut nº 1 du projet).
+  //    Le compte se LIT : grep -c "^  static const" sous cette ligne.
+
+  /// Durée pendant laquelle la description remplace le nombre (AC-2).
+  ///
+  /// ⛔ **Cette valeur ne s'écrit NULLE PART ailleurs** : ni dans un widget,
+  /// ni dans un `hint` *(« pendant 3 secondes » y serait une **copie** de ce
+  /// token — classe de défaut nº 1 — et il faudrait gérer le pluriel)*, ni
+  /// dans une avance de test *(elles se **calculent** depuis ce token et
+  /// depuis [periodeRafraichissement])*.
+  ///
+  /// ⚠️ **Elle est STRICTEMENT INFÉRIEURE à [periodeRafraichissement], et
+  /// c'est ce qui rend AC-2 « Limite » observable** *(un rafraîchissement peut
+  /// tomber PENDANT la fenêtre)*. La garde est **assertée par un test**,
+  /// ⛔ pas seulement écrite ici.
+  static const Duration fenetreRevelation = Duration(seconds: 3);
+
+  /// Plancher de taille de la **description révélée** (Design UX §7.2).
+  ///
+  /// 🔴 **La réduction porte sur la taille de DESIGN, ⛔ JAMAIS sur le facteur
+  /// d'échelle de l'utilisateur** : le plancher **effectif** est
+  /// `11 × échelle`, soit **22 à ×2,0**. Un ajustement qui « ferait rentrer »
+  /// le texte en annulant le réglage système reprendrait d'une main ce que
+  /// l'accessibilité donne de l'autre *(SC 1.4.4)* ⇒ **ratio de réduction
+  /// maximal `11/13`, et rien de plus.**
+  static const double plancherDescriptionRevelee = 11;
+
+  /// Durée de l'animation de disparition d'une échue retirée (Design UX §7.3).
+  ///
+  /// 🔴 **VALEUR CHIFFRÉE ET SES DEUX BORNES, ⛔ pas un goût** : en dessous
+  /// d'≈ 120 ms l'œil enregistre une **disparition sèche** *(l'animation
+  /// cesserait d'être le feedback qui remplace la modale)*, au-delà d'≈ 300 ms
+  /// elle **frictionne** le geste le plus fréquent du produit. ⛔ **Ne pas la
+  /// changer sans rejouer ce raisonnement.**
+  ///
+  /// ⛔ **Elle ne s'écrit NULLE PART ailleurs** : ni dans un widget, ni dans une
+  /// avance de test *(elles se **calculent** depuis ce token)*.
+  static const Duration dureeDisparition = Duration(milliseconds: 200);
+
+  /// Échelle finale de la tuile qui disparaît (Design UX §7.3).
+  ///
+  /// ⚖️ **Token AJOUTÉ, non prévu par la table §7 du Design UX — et le motif est
+  /// la règle du fichier lui-même** : *« aucune couleur ni dimension ne s'écrit
+  /// dans un widget »*. La valeur **est** donnée par §7.3 *(« échelle
+  /// 1 → 0,92 »)* ; l'écrire dans `echeances_grid.dart` en aurait fait le
+  /// **27ᵉ** nombre en dur de `lib/`. ➡️ **T16 doit l'inscrire dans
+  /// `DESIGN_SYSTEM.md` avec les deux autres.**
+  ///
+  /// ⛔ **AUCUN déplacement n'accompagne cette réduction** : un glissement
+  /// suggérerait *« ça va quelque part »*, or l'échéance **reste en gestion**.
+  static const double echelleDisparition = 0.92;
+
+  /// Rayon des surfaces — **`DESIGN_SYSTEM.md` §Espacement, rayons le NOMME
+  /// déjà** *(« `rayonSurface 16` (cartes — **même valeur que la tuile**) »)*.
+  ///
+  /// ⚖️ **Il entre ici à T11 parce que T11 en a besoin PAR FORMULE**, et le
+  /// ramener à **un exemplaire** était un préalable : ⛔ **il était écrit à la
+  /// main dans TROIS fichiers** *(`echeance_tile`, `ligne_echeance`,
+  /// `confirmation_suppression`)* — *« une règle n'existe qu'en un seul
+  /// exemplaire ; deux copies dérivent, vérifié trois fois sur ce corpus »*.
+  static const double rayonSurface = 16;
+
+  /// Épaisseur d'**UN** liseré de l'anneau de focus (Design UX §6.1).
+  ///
+  /// 🔴 **UN SEUL token pour LES DEUX liserés** — le design l'exige
+  /// nommément : *« deux valeurs dériveraient »*. La largeur totale de
+  /// l'indicateur en vaut donc **le double**, soit **le double du minimum de
+  /// SC 2.4.11**, et c'est nécessaire : il faut **deux** bandes pour tenir les
+  /// deux côtés du contraste.
+  ///
+  /// ⛔ **Les rayons de l'anneau ne sont PAS des nombres**, ce sont des
+  /// **formules** sur [rayonSurface] *(§6.1)* : extérieur `+ épaisseur`,
+  /// jonction inchangé, intérieur `− épaisseur`.
+  static const double epaisseurAnneauFocus = 2;
 }

@@ -127,7 +127,8 @@ void main() {
 
         expect(await depot.charger(), hasLength(3));
         expect(compteur.ecritures, 1, reason: 'la montée réécrit le document');
-        expect(harnais.octets(), contains('"schemaVersion":2'));
+        // ⛔ La version se LIT dans la constante (ADAPTÉ le 2026-08-24, T3).
+        expect(harnais.octets(), contains('"schemaVersion":$versionCourante'));
 
         // Une INSTANCE NEUVE, comme à la réouverture de l'application.
         final apres = MagasinCompteur(harnais.magasin);
@@ -641,7 +642,10 @@ void main() {
 
         await depot.charger();
         expect((await depot.supprimer('a')).estReussi, isTrue);
-        expect(harnais.octets(), '{"schemaVersion":2,"echeances":[]}');
+        expect(
+          harnais.octets(),
+          '{"schemaVersion":$versionCourante,"echeances":[]}',
+        );
       },
     );
 

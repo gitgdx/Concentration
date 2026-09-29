@@ -31,7 +31,7 @@ class EtapeMigration {
 /// ⚠️ **`v2`, et le `.feature` l'impose** : ses scénarios d'AC-12 exigent une
 /// *« version antérieure **contenant 3 échéances** »*, or `v0` = **aucun
 /// fichier**. Il faut donc au moins deux versions **porteuses de données**.
-const int versionCourante = 2;
+const int versionCourante = 3;
 
 /// 🔴 **DÉVIATION ASSUMÉE D'ADR-005 §1, reprise du §4 du schéma de stockage** :
 /// **il n'existe AUCUNE étape `v0 → v1`.** Pour un magasin document, `v0` est
@@ -43,6 +43,9 @@ const int versionCourante = 2;
 const List<EtapeMigration> etapesMigration = <EtapeMigration>[
   // v1 → v2 : `date_utc_vers_date_civile`.
   EtapeMigration(2, _v1VersV2, _v2VersV1),
+  // v2 → v3 : la clé d'entrée `retiree` devient RECONNUE de la grammaire.
+  // ⛔ **AUCUNE ENTRÉE N'EST TOUCHÉE, DANS AUCUN DES DEUX SENS** (ADR-012 §4).
+  EtapeMigration(3, _v2VersV3, _v3VersV2),
 ];
 
 /// `null` si le document ne porte pas d'entier `>= 1`.
@@ -183,3 +186,61 @@ String? civilVersInstant(String civil) {
   if (local == null) return null;
   return local.toUtc().toIso8601String();
 }
+
+/// `v2 → v3` : la grammaire du document gagne **une clé d'entrée reconnue**,
+/// `retiree` *(ADR-012 §2)*. ⛔ **AUCUNE ENTRÉE N'EST TOUCHÉE** — la clé est
+/// **optionnelle** et **aucune entrée n'est retirée en `v2`**, donc il n'y a
+/// **rien à convertir** : seul `schemaVersion` change, et c'est [migrer] qui
+/// l'écrit.
+///
+/// 🔴 **POURQUOI DEUX FONCTIONS, alors qu'une seule suffirait au comportement —
+/// et c'est une CONTRAINTE DE LANGAGE MESURÉE, ⛔ pas un style** : les
+/// **tear-offs** d'une fonction de premier niveau sont **canonicalisés** dans
+/// une liste `const`, donc `EtapeMigration(3, _identite, _identite)` rendrait
+/// `identical(up, down)` **vrai** et ferait **ROUGIR `A1_contrat_couple`** du
+/// critère `reports/US-01.2/migration_roundtrip_criterion.py`.
+/// ⇒ **il faut deux déclarations distinctes, même pour une identité.**
+///
+/// ⚠️ **ET C'EST LA BORNE DE CETTE ASSERTION, à ne pas sur-lire** : `A1` n'exige
+/// que `!identical(up, down)` ⇒ **deux fonctions distinctes suffisent, MÊME
+/// IDENTIQUES EN EFFET**. Elle ne prouve donc **rien** sur ce que le couple
+/// fait. Ce qui le prouve est le test unitaire de la garde, dont la graine
+/// **contient des entrées retirées** — ce que la graine du critère d'US-01.2
+/// ⛔ **n'a pas**.
+Map<String, Object?> _v2VersV3(Map<String, Object?> d) =>
+    Map<String, Object?>.from(d);
+
+/// `v3 → v2` : ⛔ **AUCUNE ENTRÉE N'EST TOUCHÉE NON PLUS**, et c'est **la
+/// décision**, pas une facilité *(ADR-012 §4)*.
+///
+/// Une entrée portant `retiree: true` est **laissée VERBATIM, clé CONSERVÉE** :
+/// en `v2`, *« toute autre clé est préservée verbatim »*, donc la clé y est
+/// **licite et inerte**. ⇒ `up ∘ down` est **l'identité sur les octets**, donc
+/// l'inversibilité est obtenue **PAR CONSTRUCTION** — ⛔ elle ne repose sur
+/// aucune vigilance, et **AC-12 « Erreur » d'US-01.2** *(une US EN AVAL, déjà
+/// validée)* **tient**.
+///
+/// ⛔ **DEUX FORMES INTERDITES, et la plus dangereuse est celle qui a l'air la
+/// plus PROPRE** :
+/// * un `down` qui **retire** la clé — *« redescendre proprement »* — **détruit**
+///   le retrait ⇒ AC-12 « Erreur » tombe. ⚠️ Et ⛔ **le critère d'US-01.2 ne le
+///   verrait PAS** : sa graine ne porte aucune clé `retiree` ;
+/// * un `up` qui écrit `retiree: false` **partout** : son `down` devrait alors
+///   **retirer** la clé, donc **détruire un `true` préexistant** — la forme
+///   « explicite partout » **FABRIQUE** le `down` destructif qu'on vient
+///   d'interdire.
+///
+/// ⚖️ **RECTIFICATION DATÉE-2026-08-24 — la cellule T3 du Story File
+/// prescrivait *« un `false` DISPARAÎT au `down` sans perte »* : c'est FAUX, et
+/// c'est le mutant `M2_down_nettoie_les_false`** *(il fait rougir `B2`, `B3` et
+/// `B5` de la garde `v3`)*. Le `down` laisse **`true` ET `false` VERBATIM**. Un
+/// `false` disparaît **à la ré-émission par le codec**, ⛔ **pas au `down`** :
+/// *ce n'est pas le même endroit*, et un `down` qui « sait nettoyer les
+/// `false` » sait retirer la clé — il retirera un `true` au premier remaniement.
+///
+/// ⚠️ **CE CHEMIN N'EST EMPRUNTÉ PAR AUCUN CHEMIN DE PRODUCTION** : [migrer]
+/// migre toujours **vers** [versionCourante]. Sa valeur est la **garantie
+/// exigée par ADR-005 §2** et **son test**. ⛔ **Le dire autrement serait une
+/// fiction.**
+Map<String, Object?> _v3VersV2(Map<String, Object?> d) =>
+    Map<String, Object?>.from(d);

@@ -254,10 +254,40 @@ Future<EcheancesNotifier> notifierCharge(
 /// n'écrivant RIEN** — exactement le faux vert qu'ADR-010 §1 existe pour
 /// interdire. ⚠️ Et il aurait été **indétectable** : l'écran, lui, se met bien
 /// à jour.
+/// 🔴 **LE DÉFAUT EST PASSÉ DE 40 À 200 LE 2026-09-08, ET C'EST UNE MESURE.**
+///
+/// **Ce que 40 a réellement produit**, en suite complète et jamais en isolement :
+/// `app.test` **rouge** sur *« la disparition passe par une animation »*
+/// (`Found 0 widgets with key 'echeances-grid-disparition'`), sur *« le retrait
+/// aboutit même quand les animations système sont réduites »* (`Found 1 widget
+/// with key 'a'`), puis — après un premier correctif **incomplet** — sur
+/// **`hub_message_ecriture_test.dart`** (AC-11 « Nominal » : `Expected: true`
+/// puis `Actual: <false>`). ⛔ **Aucun de ces rouges n'était l'instabilité
+/// intermittente du projet** : tous étaient cette fenêtre-ci, trop courte.
+///
+/// ⚠️ **ET LE CAS SANS [jusqua] EST LE PLUS DANGEREUX DES DEUX.** Une attente
+/// conditionnelle trop courte rend un **ROUGE**, donc elle se voit. Les tests
+/// « ⛔ rien ne doit se produire » n'ont **aucune** condition de sortie : une
+/// fenêtre trop courte y rend un **FAUX VERT**, en assertant *« rien n'est
+/// écrit »* alors que l'écriture **n'avait pas encore atterri**. ⇒ une clause de
+/// persistance qui ne prouve **rien**, et **invisible**.
+///
+/// 🔴 **POURQUOI LA VALEUR EST ICI, ET NULLE PART AILLEURS.** Le premier
+/// correctif de T14 a posé `tours: 200` **dans un fichier de test** — un
+/// **SECOND exemplaire** — pendant que **14 sites d'appel dans QUATRE autres
+/// fichiers** restaient à 40. **Deux exemplaires dérivent**, et celui resté bas
+/// a rougi au passage suivant. ⇒ ⛔ **aucun appelant ne repasse cette valeur** :
+/// *une règle n'existe qu'en un seul exemplaire*, vérifié quatre fois sur ce
+/// corpus, et cette ligne est le quatrième.
+///
+/// ⛔ **Le coût n'est PAS payé quand [jusqua] est fourni** : la boucle sort dès
+/// que l'effet est là. Il l'est en entier sur les appels sans condition — et
+/// **c'est le bon arbitrage** : quelques secondes contre une classe de faux
+/// verts.
 Future<void> reglerEcritures(
   WidgetTester tester, {
   bool Function()? jusqua,
-  int tours = 40,
+  int tours = 200,
 }) async {
   for (var i = 0; i < tours; i++) {
     await tester.pump();

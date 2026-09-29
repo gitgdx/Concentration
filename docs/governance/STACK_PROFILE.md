@@ -19,6 +19,14 @@
 
 ## §Developer
 
+> 🧪 **Les normes de test sont ici ; la CARTE des instruments qui les appliquent est dans
+> [`docs/qa/STRATEGIE_DE_TEST.md`](../qa/STRATEGIE_DE_TEST.md)** — pour chaque instrument, ce
+> qu'il mesure et ⛔ **ce qu'il ne mesure pas**. Ce document ne crée **aucune** règle et ne fixe
+> **aucun** seuil *(les seuils vivent dans `factory.config.json`, les normes dans ce §Developer)*.
+> ⚠️ **Son §12 relève trois écarts mesurés entre le corpus et la réalité, dont un dans la puce
+> ci-dessous** — signalés, ⛔ **délibérément non corrigés là-bas** : corriger un renvoi n'est pas
+> corriger le défaut.
+
 - Un nouvel écran/widget à logique conditionnelle = un test dédié dans `test/` (miroir de `lib/`
   au fil de la croissance du projet — pour l'instant `test/widget_test.dart` teste
   `lib/main.dart`). Utiliser `flutter_test` (`testWidgets`, `WidgetTester`) — pas de mock du
