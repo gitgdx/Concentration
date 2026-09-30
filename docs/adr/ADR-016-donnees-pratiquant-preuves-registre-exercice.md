@@ -1,7 +1,8 @@
 # ADR-016 : Les échéances du pratiquant restent HORS des preuves publiques ; natures du registre fermées ; relevés sous clé ; mode d'exercice nommé
 
 - **Date** : 2026-09-30
-- **Statut** : **Proposé** *(2026-09-30 — @Architect, à l'Integration Lock d'US-01.3. ⛔ **Il ne passe pas
+- **Statut** : **Accepté** *(2026-09-30 — @Architect, **à la clôture de l'Integration Lock** d'US-01.3, pratique d'ADR-014. Conditions levées : **Q-L1 (a)** et **Q-L2 (a)** ; **Q-L4 (b)** ne touche pas cet ADR. Vérifié avant acceptation : le jeu de codes dont dépendent §3 et §4 est **égal** des deux côtés, **par script** (60 = 60, exit 0). ⚠️ **Un ADR accepté est IMMUABLE.**)*
+  - *(⛔ PÉRIMÉ-2026-09-30 — forme antérieure, conservée :)* **Proposé** *(2026-09-30 — @Architect, à l'Integration Lock d'US-01.3. ⛔ **Il ne passe pas
   `Accepté` avant la réponse humaine à Q-L1** *(§1 en dépend entièrement)* **et à Q-L2** *(§7)* — Story
   File d'US-01.3, §Integration Lock.)* *(⛔ PÉRIMÉ-2026-09-30 : **Q-L1 et Q-L2 TRANCHÉES par l'humain en (a)** — les deux conditions sont levées ; l'acceptation a lieu **à la clôture du lock**, suspendue à Q-L4, qui ne touche pas cet ADR.)*
 - **US associée** : US-01.3 (Chaîne de déploiement mobile réelle — Android), EPIC_01, track FULL
@@ -66,7 +67,7 @@ Sans lui, un APK signé par une **autre** clé est refusé **par la chaîne** *(
 ligne `build`)* et le refus **de l'appareil** n'est **jamais** observé. Le mode d'exercice : **option
 explicite**, **confirmation saisie**, ne lève **que** `artefact_non_consigne` et `certificat_non_release` ;
 exige un `versionCode` **supérieur** au registre *(sinon l'essai prouverait un refus de version)* ; consigne
-un `refus` `exercice: true`, `origine: appareil`. 🆕 *(L-4, 2026-09-30)* **Avant l'essai**, l'application installée doit être **signée par la clé de release** *(sinon l'essai n'essaie rien)*. **Si l'appareil ACCEPTE** l'APK : `staging_echec`, cause `exercice_accepte_par_appareil`, et ⛔ **la clé jetable n'est PAS détruite** — elle est devenue **la seule** qui permette une mise à jour du paquet. ⇒ ⛔ **la clé jetable n'est détruite qu'après un refus CONSTATÉ.** ⛔ Il ne lève **aucun** autre contrôle et n'existe **que**
+un `refus` `exercice: true`, `origine: appareil`. 🆕 *(L-4, 2026-09-30)* **Avant l'essai**, l'application installée doit être **signée par la clé de release** *(sinon l'essai n'essaie rien)*. 🔒 *(clôture du lock)* **Et** l'APK d'exercice doit porter un certificat **DIFFÉRENT** du certificat de release *(sinon ce n'est pas « une autre clé », AC-7 « Erreur »)* — le mode d'exercice lève `certificat_non_release`, il ⛔ n'en autorise **pas** l'inverse. **Si l'appareil ACCEPTE** l'APK : `staging_echec`, cause `exercice_accepte_par_appareil`, et ⛔ **la clé jetable n'est PAS détruite** — elle est devenue **la seule** qui permette une mise à jour du paquet. ⇒ ⛔ **la clé jetable n'est détruite qu'après un refus CONSTATÉ.** ⛔ Il ne lève **aucun** autre contrôle et n'existe **que**
 pour cet essai.
 
 ### §5 — L'éligibilité à la production est FIXÉE au staging, et re-vérifiée à la déclaration

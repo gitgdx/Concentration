@@ -273,7 +273,7 @@ en `production` : c'est un `refus`, `etape: production`, cause `aucune_us_deploy
 **`desinstallation_unique`** — `paquet` (constante `com.concentration.concentration`), `appareil`,
 `installationRemplacee` (objet : `certEstDebug` **vrai**, `versionCodeLu`), `constatContenu` (Q8 :
 `aucune_echeance_a_conserver` \| `echeances_relevees_hors_depot`), `confirmation` (constante
-`saisie_humaine`). 🆕 *(R-J2, 2026-09-30)* `nombreEcheancesConstatees` : entier `≥ 0`, **déclaré** par
+`saisie_humaine`). 🔒 *(Integration Lock, clôture du 2026-09-30, **Q-L4 (b)** — amendement de @Architect, précédent de M-50)* `sauvegardeGoogleDebug` : `aucune_trouvee` \| `supprimee` \| `conservee_suppression_appareil_entier`, avec `attestation` (constante `declarative`) — ⛔ **aucun identifiant de compte, aucun nom d'appareil, aucune date de sauvegarde** ; la valeur `conservee_suppression_appareil_entier` **oblige** la preuve de toute production ultérieure à porter la borne *« une copie des données de développement du 2026-08-21 peut subsister sur le compte Google de l'humain — RNF-07 possiblement enfreint AVANT US-01.3 »*, ⛔ jamais « RNF-07 tenu ». ⛔ **Ce n'est PAS une cause** : `causes` ne le porte jamais. 🆕 *(R-J2, 2026-09-30)* `nombreEcheancesConstatees` : entier `≥ 0`, **déclaré** par
 l'humain au constat de Q8, ⛔ **jamais le contenu**. Seule règle de cohérence vérifiée :
 `constatContenu = echeances_relevees_hors_depot` ⇒ `nombreEcheancesConstatees ≥ 1`. ⛔ L'inverse n'est
 **pas** exigé : une installation peut porter des échéances **que l'humain ne souhaite pas conserver**
@@ -810,7 +810,7 @@ sur l'appareil* (J-3 ⓵ ⓶). La CI **refuse** l'un de ces codes s'il apparaît
 | `desinstallation_deja_faite` | désinstallation | 1 | déplacé ici le 2026-09-30 (§6.2) |
 | `desinstallation_apres_release` | désinstallation | 1 | 🆕 **code UX retenu** (écart E-1 de l'UX) : une release est consignée et **aucune** désinstallation n'a eu lieu ; ce n'est **pas** une « seconde » désinstallation, donc un code distinct |
 | `certificat_installe_illisible` | désinstallation (constat Q8) | 2 | UX M-20 ; ⛔ rien n'est désinstallé |
-| `sauvegarde_debug_non_supprimee` | désinstallation (constat Q-L3) | 1 | 🆕 **code UX retenu** (écart E-2 de l'UX) ; voir §10.3 |
+| `sauvegarde_debug_non_supprimee` | désinstallation (constat Q-L3) | **—** *(note, sans verdict)* *(🔒 clôture du lock, Q-L4 (b) — ⛔ PÉRIMÉ-2026-09-30 : cette cellule portait `1`)* | 🆕 **code UX retenu** (écart E-2 de l'UX) ; 🔒 *(Q-L4 (b))* il n'est plus qu'**la clé du texte de la note M-49** ; le fait est porté par le **champ** `desinstallation_unique.sauvegardeGoogleDebug` (§1.4), ⛔ jamais par `causes` ; voir §10.3 |
 | `confirmation_non_reconnue` | saisie | 1 | UX M-26 |
 | `confirmation_non_interactive` | saisie | 1 | UX M-27 |
 | `validation_d_une_repetition` | saisie (validation) | 1 | 🆕 *(J-7)* INV-17 |
@@ -969,6 +969,8 @@ l'appareil du pratiquant versionnée (point P-5).
 | `desinstallation_deja_faite` | passe de consigné à **non consigné** | §6.2, §6.2 bis |
 
 ### 10.3 · Q-L3 : ⛔ AUCUNE trace dans le registre, sous une borne nommée
+
+> 🔒 **⛔ PÉRIMÉ-2026-09-30 — SILENCE RÉFUTÉ à la clôture de l'Integration Lock, et c'est sa BORNE qui tombe.** La borne ci-dessous disait *« tant que la seule chose qui en dépend est le refus de SAISIE »*. Or **Q-L4 (b)** supprime ce refus et en fait une **note**, et deux choses dépendent désormais du fait : la **variante « copie peut subsister »** de l'écran de destruction (UX §6.1.2) et la **borne RNF-07** qu'une preuve de production doit porter. ⇒ le fait entre au registre par un **champ** de `desinstallation_unique` (§1.4), **déclaratif**, sans identifiant de compte. ⚖️ **L'argument C2 ne tient plus contre lui** : la borne elle-même est publiée dans le Story File par décision humaine ; le champ n'en publie **rien de plus**. Texte d'origine conservé, non repeint.
 
 **Décision** : la recherche et la suppression de l'éventuelle sauvegarde Google de l'installation debug,
 et l'attestation qui les suit, **n'écrivent aucune ligne et aucun champ** dans le registre. L'attestation
