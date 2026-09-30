@@ -3,7 +3,9 @@
 - **Date** : 2026-09-29
 - **Statut** : **Proposé** *(2026-09-29 — @Architect. ⛔ **Il ne peut PAS passer `Accepté` tant que
   les points A-3 et A-4 du Story File ne sont pas arbitrés** : ce texte contredit aujourd'hui la
-  **lettre** de l'Art. 6 et de l'Art. 4 de la Constitution, §Conséquences.)*
+  **lettre** de l'Art. 6 et de l'Art. 4 de la Constitution, §Conséquences.)* *(Mis à jour le
+  **2026-09-30** par @Architect — statut toujours `Proposé`, donc éditable : **A-1** et **A-2** sont
+  **arbitrés par l'humain**, §Décision 12 et 13 ajoutés.)*
 - **US associée** : US-01.3 (Chaîne de déploiement mobile réelle — Android), EPIC_01, track FULL
 - **Remplace** : **rien.** ⛔ Aucun ADR accepté n'est modifié. ADR-001 §4 et `STACK_PROFILE.md`
   §DevOps décrivaient une séquence *« Play Console / TestFlight »* : ce sont des **constats et
@@ -120,7 +122,7 @@
 
 - **`docs/deploiement/registre.jsonl`** : une ligne par **constat** *(`build`, `staging`, `staging_echec`,
   `validation`, `production`, `refus`)*, portant commit, versionCode, empreinte d'APK, empreinte de
-  certificat, appareil *(modèle, API, identifiant — §Conséquences, point A-2)*, versions de la chaîne
+  certificat, appareil *(modèle, API, **empreinte** du numéro de série — §13 ; ⛔ jamais sa valeur)*, versions de la chaîne
   d'outils, horodatage. **Preuves détaillées** *(journaux capturés, sorties d'outils)* sous
   `docs/deploiement/preuves/`. ⛔ **Il vit hors de `reports/US-XX/`** parce qu'**un déploiement vaut
   pour plusieurs US** *(verdict Q5)*.
@@ -201,6 +203,34 @@ sur la **pire** *(verdict Q12)* · cible **Android seule** *(H-1)* · message JD
 **nommé** dans la sortie · mesure sur le paquet **`.profile`** *(§1 — sans quoi F-2 s'appliquerait)*, avec
 **9 échéances saisies dans CE paquet**, et borne écrite **« profil ≠ release »** *(verdict Q13)*.
 
+### §12 — Sauvegardes du système : elles restent LOCALES, et sur API 27 il n'y en a AUCUNE *(arbitrage humain A-1 du 2026-09-30, AC-13)*
+
+- **Règle** *(neutre de plateforme, R-SAUV, Story File AC-13)* : aucune donnée de l'utilisateur ne part
+  vers un **nuage** par la sauvegarde du système ; une sauvegarde **locale** reste admise **seulement si
+  la plateforme la distingue** du nuage.
+- **Android API ≤ 30 — dont le SM T580 (API 27)** : ⛔ **aucune distinction n'existe** — `allowBackup` et
+  `fullBackupContent` valent **indistinctement** pour le nuage, le transfert d'appareil à appareil et
+  `adb backup` ; `requireFlags` *(API 28+/29+)* et `dataExtractionRules` *(API 31+)* **n'existent pas**.
+  ⇒ **`android:allowBackup="false"`** : **aucune** sauvegarde du système, local compris. ⚠️
+  **DOCUMENTATION, ⛔ non mesuré.**
+- **Android API ≥ 31** *(hors appareil de référence)* : règles d'extraction excluant **tout** de la
+  section **nuage** ; le transfert d'appareil à appareil, **local**, reste admis *(`allowBackup="false"`
+  ne le coupe plus pour une cible ≥ 31)*.
+- **Vérifié SUR L'ARTEFACT** *(manifeste fusionné)*, jamais sur la source seule ; la **branche** appliquée
+  est écrite dans la preuve.
+- ⛔ **iOS** : transfert **BT-1** *(H-1)* — rien ici ne vaut pour iOS.
+
+### §13 — Identification de l'appareil : une EMPREINTE à clé, jamais la valeur *(arbitrage humain A-2 du 2026-09-30)*
+
+- **Empreinte = HMAC-SHA-256(clé d'empreinte locale, numéro de série), tronquée à 16 caractères
+  hexadécimaux.** La clé d'empreinte est un **secret aléatoire local, hors dépôt**, sauvegardé avec la
+  clé de release.
+- ⛔ **SHA-256 sans clé refusé** : un numéro de série est court et structuré ⇒ **retrouvable par
+  énumération**. ⚠️ **C'est une PSEUDONYMISATION, ⛔ PAS une anonymisation.**
+- Perte de la clé d'empreinte ⇒ **rupture de continuité consignée**, ⛔ pas une perte de données.
+- Le contrôle de secrets refuse un numéro de série **en clair** : **par la forme** en CI *(qui ignore la
+  valeur)*, **par la valeur** sur la machine de l'humain.
+
 ## Alternatives considérées
 
 | Alternative | Pourquoi écartée |
@@ -214,6 +244,8 @@ sur la **pire** *(verdict Q12)* · cible **Android seule** *(H-1)* · message JD
 | **Gate Android DANS le job requis existant `📱 App`** *(précédent d'actionlint)* | N'aurait exigé **aucune** modification de la protection distante — ⚖️ mais le verdict humain Q4 demande un **status check requis** propre ; un job séparé garde la constructibilité Android **lisible à part** et n'impose pas un JDK au job `app`. ⛔ Non retenu, ⛔ non re-litigé |
 | **Registre sous `reports/US-01.3/`** | Un déploiement vaut pour **plusieurs** US *(Q5)* : le registre survit à l'US qui l'a créé |
 | **Second instrument RNF-02** | Second lecteur du seuil ⇒ second exemplaire de la règle |
+| **`fullBackupContent` excluant tout, `allowBackup` laissé à `true`** *(§12)* | Sur API 27, effet **équivalent** sur les données mais laisse le mécanisme **ouvert** à une dépendance qui ajouterait un fichier ; `allowBackup="false"` ferme **par construction** |
+| **Empreinte = SHA-256 sans clé** *(§13)* | Réversible par énumération |
 | **Mesurer RNF-02 sur l'artefact release** | La trace de démarrage exige le mode profil *(lu dans l'instrument)* ; ⚠️ la non-disponibilité en release est un **fait transmis, non vérifié** — Q13 l'a rendu sans objet |
 
 ## Conséquences
@@ -243,13 +275,19 @@ prouvée **à chaque PR** *(jusque-là, seul le repli web l'était)*.
 - ⚠️ **Identifiant d'appareil dans un dépôt PUBLIC** *(point A-2)* : AC-1 exige le **numéro de série**
   dans chaque preuve ; le publier expose un identifiant matériel de l'appareil personnel de l'humain.
   Recommandation : une **empreinte** du numéro de série *(comparable, non réversible en pratique)* —
-  **décision @ProductOwner / humain**.
+  **décision @ProductOwner / humain**. *(⛔ PÉRIMÉ-2026-09-30 : **ARBITRÉ** — recommandation retenue,
+  forme au §13. ⚠️ « non réversible en pratique » n'était vrai **qu'avec une clé** : sans clé,
+  l'énumération la renverse.)*
 - 🔴 **RNF-07 n'est pas tenu par l'absence de permission réseau seule** *(point A-1)* : le manifeste
   principal ne fixe pas `android:allowBackup` ⇒ **valeur par défaut `true`** ⇒ la **sauvegarde
   automatique Android** peut copier le répertoire de données *(qui contient le document d'ADR-009)* vers
   le compte du propriétaire de l'appareil. ⚠️ **Fait de DOCUMENTATION Android, ⛔ non mesuré sur le SM
   T580.** ⛔ **Non tranché ici** : `allowBackup=false` **renforce RNF-07** mais **supprime la seule
   voie de récupération** des échéances hors de l'application — c'est un **arbitrage produit**.
+  *(⛔ PÉRIMÉ-2026-09-30 : **ARBITRÉ** — « Les sauvegardes doivent rester locales » ⇒ AC-13, §12.
+  ⚠️ **Le coût nommé ci-dessus est désormais PAYÉ** : sur le SM T580 il n'existe **plus aucune** voie de
+  récupération hors de l'application — la clé de release est la **seule** chose qui protège les
+  échéances d'une désinstallation.)*
 - **NM-14** *(taux de crash)* et **NM-15** *(reproductibilité inter-machines)* **restent vraies**.
   ⛔ « 0 `FATAL` » **n'est jamais** un taux de crash.
 - ⛔ **RNF-08 reste PARTIELLEMENT OUVERT** *(H-1)* : tout ce qui précède **ne vaut que pour Android**.

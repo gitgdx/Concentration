@@ -26,6 +26,17 @@
 #    ⚠️ Beaucoup de ces scénarios portent sur un APPAREIL : leur mode d'exécution (fixtures rejouées
 #    en CI, preuve relevée sur appareil) est une décision de @Architect — Story File, gate clarify.
 #    (⛔ PÉRIMÉ-2026-09-29 : décision prise, voir le STATUT ci-dessus.)
+#
+# ⚖️ ARBITRAGES HUMAINS DU 2026-09-30 (points A-1, A-2, A-5 du gate analyze), intégrés par @ProductOwner :
+#   A-1 — « Les sauvegardes doivent rester locales » : AC-13 CRÉÉ, ses scénarios sont EN FIN DE FICHIER.
+#     Règle NEUTRE vis-à-vis de la plateforme (R-SAUV) ; seule l'instanciation ANDROID est ici.
+#     ⛔ iOS reste HORS PÉRIMÈTRE : transfert BT-1, aucun scénario n'affirme la règle tenue sur iOS.
+#     Les deux scénarios de sa Limite s'excluent SELON LA PLATEFORME — ce n'est pas une contradiction.
+#   A-2 — seule une EMPREINTE du numéro de série de l'appareil est publiée, jamais sa valeur (donnée C2,
+#     dépôt public) : un scénario AC-1 ajouté, une étape ajoutée au premier scénario (titre inchangé).
+#   A-5 — instanciation du verdict Q16 : la production est construite depuis un commit ancêtre de
+#     origin/main ; deux scénarios AC-9 ajoutés (les deux côtés de la règle).
+#   ⛔ Aucun numéro de série, aucune empreinte, aucun nom de compte n'est écrit dans ce fichier.
 
 Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, installer et vérifier une release Android
 
@@ -39,6 +50,14 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Quand le déploiement est évalué
     Alors le déploiement est déclaré réussi
     Et la preuve nomme l'appareil, la version, le commit et l'empreinte de l'artefact
+    Et l'appareil y est identifié par l'empreinte de son numéro de série
+
+  # AC-1 « Nominal » — ajouté par @ProductOwner le 2026-09-30, arbitrage humain A-2.
+  Scénario: Le numéro de série de l'appareil n'apparaît jamais en clair dans une preuve
+    Étant donné qu'une preuve de déploiement a été produite sur l'appareil de référence
+    Quand les fichiers versionnés du dépôt sont parcourus
+    Alors le numéro de série de l'appareil n'y figure en clair nulle part
+    Et deux preuves du même appareil portent la même empreinte de numéro de série
 
   Scénario: Un artefact auquel manque une seule condition n'est pas déclaré déployé
     Étant donné qu'un artefact de release remplit toutes les conditions sauf le smoke test
@@ -211,6 +230,20 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Alors la déclaration de production est refusée
     Et l'échec de staging est consigné
 
+  # AC-9 « Erreur » et « Nominal » — ajoutés par @ProductOwner le 2026-09-30 (A-5, instanciation de Q16).
+  Scénario: Un artefact construit depuis un commit absent de la branche principale est refusé en production
+    Étant donné qu'un artefact de release a réussi son staging
+    Et qu'il est construit depuis un commit qui n'est pas ancêtre de la branche principale distante
+    Quand la production de cet artefact est demandée
+    Alors la déclaration de production est refusée
+    Et la cause nommée est le commit absent de la branche principale
+
+  Scénario: Un staging peut porter un artefact construit depuis une branche non fusionnée
+    Étant donné qu'un artefact de release est construit depuis le commit d'une branche non fusionnée
+    Quand son staging est demandé sur l'appareil de référence
+    Alors le staging n'est pas refusé pour ce motif
+    Et la preuve de staging indique que cet artefact ne pourra pas être déclaré en production
+
   # AC-9 « Limite » — ajouté par @Architect le 2026-09-29, après le verdict humain Q5 (a).
   Scénario: Un même déploiement ne vaut que pour les US dont les visas portent sur le code déployé
     Étant donné qu'un artefact de production est construit depuis un commit qui contient le code de plusieurs US
@@ -288,3 +321,30 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Étant donné qu'un artefact de profil a servi à mesurer RNF-02
     Quand la production est déclarée
     Alors l'artefact déclaré n'est pas l'artefact de profil
+
+  # ── AC-13 : les sauvegardes restent locales (RNF-07, arbitrage humain A-1 du 2026-09-30) ───────
+  # Instanciation ANDROID de la règle R-SAUV. ⛔ iOS : transfert BT-1, hors de ce fichier.
+
+  Scénario: Les données de l'application sont exclues de la sauvegarde du système vers un nuage
+    Étant donné qu'un artefact de release Android est candidat à la production
+    Quand sa déclaration de sauvegarde est lue dans l'artefact
+    Alors toutes les données de l'utilisateur sont exclues de la sauvegarde automatique vers le nuage
+    Et cette lecture est consignée dans la preuve de déploiement
+
+  Scénario: Un artefact dont une donnée reste incluse dans la sauvegarde nuage est refusé en production
+    Étant donné qu'un artefact de release laisse un fichier de données inclus dans la sauvegarde vers le nuage
+    Quand son déploiement est évalué
+    Alors le déploiement est refusé
+    Et la cause nommée est la sauvegarde nuage non exclue
+
+  Scénario: Une sauvegarde qui reste sur l'appareil demeure admise quand la plateforme la distingue du nuage
+    Étant donné que la plateforme distingue une sauvegarde vers le nuage d'un transfert local
+    Et que l'artefact exclut les données de la seule sauvegarde vers le nuage
+    Quand son déploiement est évalué
+    Alors le déploiement n'est pas refusé pour ce motif
+
+  Scénario: Sans distinction possible entre nuage et transfert local aucune donnée ne sort par la sauvegarde
+    Étant donné que la plateforme ne distingue pas une sauvegarde vers le nuage d'un transfert local
+    Quand la déclaration de sauvegarde de l'artefact est lue
+    Alors les données de l'utilisateur sont exclues de tout mécanisme de sauvegarde du système
+    Et la preuve de déploiement indique qu'aucune sauvegarde locale n'est disponible
