@@ -1,11 +1,25 @@
 # ADR-015 : « Déployé » pour une application sans serveur — preuve sur l'appareil, signature LOCALE, identité d'application protégée
 
 - **Date** : 2026-09-29
-- **Statut** : **Proposé** *(2026-09-29 — @Architect. ⛔ **Il ne peut PAS passer `Accepté` tant que
-  les points A-3 et A-4 du Story File ne sont pas arbitrés** : ce texte contredit aujourd'hui la
-  **lettre** de l'Art. 6 et de l'Art. 4 de la Constitution, §Conséquences.)* *(Mis à jour le
-  **2026-09-30** par @Architect — statut toujours `Proposé`, donc éditable : **A-1** et **A-2** sont
-  **arbitrés par l'humain**, §Décision 12 et 13 ajoutés.)*
+- **Statut** : **Accepté** *(2026-09-30 — @Architect, à la **validation technique** d'US-01.3, **même
+  pratique qu'ADR-012 et ADR-013**, acceptés à celle d'US-01.4 *(commit `086e68f`, 2026-08-22)* ; ADR-014,
+  né **au** lock, y avait été accepté. **Après rejeu des sondes**, dans le scratchpad de session et hors
+  dépôt : ① `installApp` porte toujours `Uninstalling old version...` *(Flutter 3.44.7, lu)* ; ② l'option
+  `-P` de `flutter build` existe *(lue)* ; ③ gitleaks 8.30.1 + configuration du dépôt, fixtures
+  **factices** : keystore binaire **exit 0**, mot de passe faible **exit 0**, formes aléatoires **exit 1**
+  — **inchangé** ; ④ 🆕 **sonde de §10** : les fonctions de `check_gherkin_mapping.py` **lisent** des
+  titres `test("…")` dans un texte **Python**, apostrophe et report à la ligne compris — ⚠️ **et un appel
+  `latest("…")` est lu comme un TITRE** *(le motif n'a pas de frontière de mot)* ⇒ faux « test sans
+  scénario », **rouge et non vert** : côté sûr, contrainte ajoutée au §10. ⚠️ **Un ADR accepté est
+  IMMUABLE.**)*
+  - *(⛔ PÉRIMÉ-2026-09-30 — forme antérieure, conservée : « **Proposé** *(2026-09-29 — ⛔ **Il ne peut
+    PAS passer `Accepté` tant que les points A-3 et A-4 du Story File ne sont pas arbitrés** : ce texte
+    contredit aujourd'hui la **lettre** de l'Art. 6 et de l'Art. 4 de la Constitution)* ». **A-3 est
+    LEVÉ** : Constitution **1.3**, Art. 6 amendé, **PR #35 fusionnée par l'humain (`gitgdx`) le
+    2026-09-30 à 10:38:02Z, commit de fusion `67464d7`**. ⚖️ **La condition « et A-4 » était PLUS LARGE
+    QUE SON MOTIF** : cet ADR ne rend **pas** l'Art. 4 faux — c'est **l'application** de la protection à
+    **cinq** contextes *(§9 étape ④, tâche T13)* qui le ferait, et le §9 **impose** l'amendement **avant**
+    elle. ⇒ **A-4 borne T13, ⛔ pas l'acceptation.**)*
 - **US associée** : US-01.3 (Chaîne de déploiement mobile réelle — Android), EPIC_01, track FULL
 - **Remplace** : **rien.** ⛔ Aucun ADR accepté n'est modifié. ADR-001 §4 et `STACK_PROFILE.md`
   §DevOps décrivaient une séquence *« Play Console / TestFlight »* : ce sont des **constats et
@@ -191,6 +205,10 @@ le staging. ⛔ **Ce coût est assumé** et c'est pourquoi le smoke test ne peut
   motif de `scripts/check_gherkin_mapping.py` a été écrit pour Dart ; qu'il lise un fichier Python
   correctement est une **hypothèse**, à établir par sonde *(précédent : `reports/US-01.4/preverif_titres_criterion.py`)*.
   ⛔ **Le couple est inscrit dans `COUPLES` EN DERNIER** *(leçon T15 d'US-01.4)*.
+  🆕 *(2026-09-30, sonde rejouée avant acceptation)* **Hypothèse CONFIRMÉE sur le fond** : les fonctions
+  du script lisent un fichier Python, apostrophe et report à la ligne compris. **Contrainte imposée** :
+  ⛔ **aucun appel dont le nom se TERMINE par `test(`** *(ex. `latest(`)* dans le fichier de scénarios —
+  le motif, sans frontière de mot, le lirait comme un titre. La sonde **livrée** reste la tâche **T0**.
 - L'**exécution réelle** sur l'appareil de référence est une **preuve datée** dans le registre — ⛔ elle
   **n'est pas** un test de CI, et un test de CI vert **n'est pas** un déploiement.
 
@@ -268,10 +286,15 @@ prouvée **à chaque PR** *(jusque-là, seul le repli web l'était)*.
   variables d'environnement de la plateforme d'hébergement et les `.env` locaux jamais commités »* — un
   **keystore** est un **fichier**, et H-3 place les mots de passe dans **`key.properties`**. ⛔ **Cet ADR
   ne peut pas être accepté contre la Constitution** : amendement par **PR dédiée** *(clause de Révision)*,
-  ou mots de passe déplacés dans un `.env` local — **décision humaine**.
+  ou mots de passe déplacés dans un `.env` local — **décision humaine**. *(⛔ PÉRIMÉ-2026-09-30 : **LEVÉ**
+  — Constitution **1.3**, PR #35, fusion **`67464d7`** par l'humain. L'Art. 6 **nomme** désormais le
+  keystore et la clé d'empreinte **hors du dépôt** et `android/key.properties` **gitignoré**. ⚠️ **Il ne
+  crée AUCUN gate** : l'enforcement réel reste le **`.gitignore` seul** tant que **T2** et **T4** ne sont
+  pas faites, et « aucun agent ne les lit » est une obligation de **process, NON enforcée**.)*
 - 🔴 **Conflit avec la LETTRE de l'Art. 4** *(point A-4)* : son §*Enforcement* dit que `ci.yml` et
   `branch-naming.yml` portent *« les **quatre** contextes requis »* ⇒ **faux dès l'étape ④ du §9**.
-  Même traitement : **PR dédiée**, avant l'étape ④.
+  Même traitement : **PR dédiée**, avant l'étape ④. *(⚠️ 2026-09-30 : **toujours OUVERT** — il borne
+  **T13**, ⛔ pas l'acceptation de cet ADR.)*
 - ⚠️ **Identifiant d'appareil dans un dépôt PUBLIC** *(point A-2)* : AC-1 exige le **numéro de série**
   dans chaque preuve ; le publier expose un identifiant matériel de l'appareil personnel de l'humain.
   Recommandation : une **empreinte** du numéro de série *(comparable, non réversible en pratique)* —
