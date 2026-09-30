@@ -20,6 +20,32 @@
 
 > 🔒 **INTEGRATION LOCK du 2026-09-30 (@Architect) — ⛔ PÉRIMÉ-2026-09-30 sur les points qu'il tranche.** La jointure avec la branche UX a trouvé des trous que ce document ne pouvait pas voir seul *(Story File d'US-01.3, §Integration Lock, lignes `J-n`)*. **Là où ce document diverge d'une décision du lock, le lock prime** jusqu'à l'amendement daté de son propriétaire *(tâche **L-2**)*, ⛔ le texte ci-dessous n'est **pas repeint** par @Architect. Voir aussi [ADR-016](../adr/ADR-016-donnees-pratiquant-preuves-registre-exercice.md) *(Proposé)*.
 
+> ⚖️ **AMENDÉ le 2026-09-30 — @DataEngineer, tâche L-2 de l'Integration Lock** *(HEAD `fd6358e`)*. Cet
+> amendement **intègre** les décisions `J-n` du lock qui touchent ce document et **inscrit trois arbitrages
+> humains du 2026-09-30**. ⛔ **On date, on ne repeint pas** : chaque énoncé dépassé reste visible, marqué
+> `PÉRIMÉ-2026-09-30` **sur sa ligne**, et l'énoncé en vigueur est écrit à côté. Le détail consolidé est
+> au **§10**. Ce qui change, en bref :
+> - **Q-L1 (a), arbitrage humain** : le contenu des échéances est une donnée **C2, JAMAIS publiée**.
+>   Captures d'écran et journal complet restent **hors du dépôt**. La preuve versionnée ne porte que des
+>   comptes, une empreinte à clé et la ligne `FATAL` dont **le texte du message est remplacé** (§1.4
+>   `smoke`, §1.8, §5.2).
+> - **Q-L2 (a), arbitrage humain** : le périmètre de fraîcheur d'un visa est `lib/`, `android/`,
+>   `pubspec.*`. ⇒ **les visas d'US-01.1, US-01.2 et US-01.4 seront périmés par US-01.3** (INV-11, §8
+>   P-11).
+> - **Q-L3 (a), arbitrage humain** : en T15, l'humain cherche et supprime l'éventuelle sauvegarde Google
+>   de l'installation debug du 2026-08-21, puis atteste. ⛔ **Aucune trace dans le registre**, sous une
+>   borne nommée (§10.3).
+> - **Codes** : le vocabulaire du **registre** est la forme unique (J-1). Codes ajoutés
+>   (`artefact_non_consigne`, `aucune_us_deployable`, `validation_d_une_repetition`, et ceux que seule
+>   l'UX nommait), et codes **non consignés** listés à part (§6.2, §6.2 bis).
+> - **Champs** : `nombreEcheancesConstatees` (R-J2), `build.verdict` et `build.causes` (J-3).
+> - **Invariants** : **INV-17** (J-7) ; INV-5 et le contrôle au build (J-8) ; INV-9 (J-3).
+> - **Sens corrigés** : `hub_non_constate` (J-5), silence des refus de build (J-3), §4 (J-10).
+> - **Natures FERMÉES** (ADR-016 §3), **mode d'exercice** (ADR-016 §4), **domaine distinct** des
+>   empreintes de relevé (ADR-016 §2).
+>
+> ⚠️ **ADR-016 est `Proposé`** : tout ce qui ici en dépend est **conditionnel à son acceptation**.
+
 > 🔐 **AVERTISSEMENT DE CLASSIFICATION.** Ce design porte sur des données **C3 — secrètes** *(clé de
 > release, mots de passe, clé d'empreinte d'appareil)* et **C2 — confidentielles** *(numéro de série de
 > l'appareil personnel de l'humain et, point établi ici au §3.4, **le contenu des échéances du
@@ -130,11 +156,11 @@ un nom nouveau. Une grammaire **fermée** est la barrière principale contre la 
 ### 1.4 · Les natures, et ce que chacune porte
 
 Les six natures d'ADR-015 §5 sont conservées. **Quatre natures sont ajoutées**, chacune parce qu'un AC
-l'exige *(point P-1 pour @Architect : la liste d'ADR-015 §5 est-elle fermée ?)* :
+l'exige *(point P-1 pour @Architect : la liste d'ADR-015 §5 est-elle fermée ?)* : *(⛔ PÉRIMÉ-2026-09-30 sur la question entre parenthèses : **tranchée par ADR-016 §3** — la liste ci-dessous est **FERMÉE** ; toute nature nouvelle exige une nouvelle `schemaVersion` **ET** un nouvel ADR, §1.7)*
 
 | Nature | Issue (ADR-015 §6) | Consomme un `versionCode` ? | AC | Origine |
 |---|---|---|---|---|
-| `build` | `0` | non | AC-2, AC-3, AC-6, AC-12, AC-13 | ADR-015 §5 |
+| `build` | `0` *(⛔ PÉRIMÉ-2026-09-30 : `0` ou `1` — `verdict: refuse` pour un APK de release à défaut intrinsèque, J-3)* | non | AC-2, AC-3, AC-6, AC-12, AC-13 | ADR-015 §5 |
 | `staging` | `0` | **oui** | AC-1 ④ ⑤ ⑥, AC-7, AC-8, AC-9 | ADR-015 §5 |
 | `staging_echec` | `1` | **oui si `installation.tentee`** | AC-8 « Erreur », AC-9 « Erreur », AC-7 | ADR-015 §5 |
 | `validation` | déclaratif | non | AC-9 | ADR-015 §5 |
@@ -150,6 +176,21 @@ ou mot de passe faux, AC-3 « Erreur »). Décision de silence **sous une borne 
 n'exige de consigner un refus qui ne produit aucun artefact*. Leur preuve est **le code de sortie et le
 message** de `release_build.py`, et un refus sans artefact n'a rien à référencer. **Réfutable par l'UX**
 si l'opérateur a besoin de retrouver après coup un refus de build.
+*(⛔ PÉRIMÉ-2026-09-30 — **la borne ci-dessus était TROP ÉTROITE**, réfutée par l'UX au lock (**J-3**) :
+un APK signé par la clé de débogage, ou un APK de release porteur d'un défaut, est un refus de build
+**qui produit un artefact**.)*
+
+✅ **Borne en vigueur (J-3, 2026-09-30)** — trois cas, et chacun a son sort :
+
+| Cas au build | Artefact produit ? | Consigné ? | Motif |
+|---|---|---|---|
+| **⓵ Refus sans APK** : arbre modifié, commit non poussé, fichier de propriétés absent ou incomplet, keystore introuvable ou dans le dépôt, mot de passe faux, état distant illisible | non | ⛔ **non** | rien à référencer ; la preuve est le code de sortie et le message |
+| **⓶ APK signé par la clé de DÉBOGAGE** | oui | ⛔ **non** | ce n'est **pas** un artefact de release, et une ligne `build` à certificat de débogage rendrait le registre **invalide** (INV-7) |
+| **⓷ APK de RELEASE porteur d'un défaut intrinsèque** : permission réseau, donnée incluse dans la sauvegarde, `debuggable` | oui | ✅ **oui** : ligne `build` avec `verdict: refuse` et ses `causes` | c'est un **constat sur un artefact qui existe** ; **INV-9** le refuse ensuite à toute demande de staging |
+
+Le silence ne vaut donc **que pour ⓵ et ⓶**, sous la borne : *tant qu'aucun AC n'exige de retrouver
+après coup un refus qui ne laisse aucun artefact de release*. **Réfutable** comme avant. Les codes de ces
+refus existent quand même (§6.2 bis) : ils sont **affichés**, ⛔ **jamais écrits** dans le registre.
 
 #### Champs par nature
 
@@ -167,7 +208,9 @@ Les valeurs énumérées de `causes` sont listées au **§6.2** (un seul exempla
 | `mode` | `signee` | ⛔ le mode `aucune` (CI) **ne produit jamais** de ligne `build` |
 | `apkSha256` | 64 hex minuscules | SHA-256 **du fichier APK** (ADR-015 §3) |
 | `certSha256` | 64 hex minuscules | `apksigner verify --print-certs` ; **public** (AC-4 « Limite ») |
-| `certEstDebug` | booléen | comparaison au certificat de débogage (ADR-015 §2) ; ⛔ **le DN du certificat n'est jamais consigné** (§1.8) |
+| `certEstDebug` | booléen *(⛔ PÉRIMÉ-2026-09-30 : **toujours `false`** dans une ligne `build` — un APK à clé de débogage n'est pas consigné, J-3 ⓶)* | comparaison au certificat de débogage (ADR-015 §2) ; ⛔ **le DN du certificat n'est jamais consigné** (§1.8) |
+| 🆕 `verdict` *(J-3, 2026-09-30)* | `conforme` \| `refuse` | `refuse` si et seulement si `causes` est non vide |
+| 🆕 `causes` *(J-3, 2026-09-30)* | liste, sous-ensemble de `permission_reseau`, `sauvegarde_non_exclue`, `artefact_debuggable` | les défauts **intrinsèques** lus dans l'artefact ; ⛔ aucun autre code ici |
 | `debuggable` | booléen | manifeste fusionné |
 | `permissions` | liste de noms de permission, **triée** | `aapt2` ; ⛔ jamais filtrée avant consignation |
 | `sauvegarde` | objet : `allowBackup` (booléen), `minSdk`, `targetSdk` (entiers), `brancheAc13` (`sans_distinction` \| `avec_distinction`), `inclus` (liste de chemins **relatifs au répertoire de données**, attendue **vide**) | manifeste fusionné, `aapt2 dump xmltree` (T6) |
@@ -184,7 +227,7 @@ Les valeurs énumérées de `causes` sont listées au **§6.2** (un seul exempla
 | `installation` | objet : `tentee` (booléen), `commande` (constante `install -r`), `resultat` (`succes` ou le **code d'échec** rendu par l'appareil) | ⛔ jamais `-d`, jamais `uninstall` |
 | `versionCodeLu` | entier | lu **après** installation |
 | `empreinteRelue` | objet : `methode` (`base_apk_sha256` \| `repli_version_certificat`), `egale` (booléen) | ADR-015 §3, hypothèse **R-12, non mesurée** ; la méthode de repli **se dit** dans la ligne |
-| `smoke` | objet : `issue` (0/1/2), `lignesCapturees` (entier), `lignesFatal` (entier), `ligneFatalCitee` (chaîne **caviardée**, §5), `hub` : `constat` (booléen) et `methode` (`arbre_accessibilite` \| `constat_humain`) | ⚠️ `methode: constat_humain` est le **repli R-8** : il est **déclaratif** et la ligne le dit |
+| `smoke` | objet : `issue` (0/1/2), `lignesCapturees` (entier), `lignesFatal` (entier), `ligneFatalCitee` (chaîne **caviardée**, §5), `hub` : `constat` (booléen) et `methode` (`arbre_accessibilite` \| `constat_humain`) | ⚠️ `methode: constat_humain` est le **repli R-8** : il est **déclaratif** et la ligne le dit. 🆕 *(Q-L1 (a), arbitrage humain du 2026-09-30 ; ADR-016 §1)* **Forme exacte de `ligneFatalCitee`** : l'étiquette, le **type** d'exception et la **pile d'appels de l'application** sont gardés, et **le texte du message est remplacé** par le marqueur fixe `<MESSAGE-RETIRE>`. ⛔ Aucun caviardage « intelligent » qui chercherait une échéance dans le message : il ne peut pas être exhaustif. La ligne entière reste **locale** (console, relevé hors dépôt). 🆕 *(J-5)* **`hub.constat = false` avec `methode: arbre_accessibilite`** = hub **constaté ABSENT** ⇒ cause `hub_non_constate` (issue 1). « **Non constatable** » par machine n'est **pas** une cause : c'est `methode: constat_humain`, et la question passe à la validation (`HUB AFFICHE` / `HUB ABSENT`) |
 | `releveAvant`, `releveApres` | objet du §3.4 | ⛔ **jamais le contenu des échéances** |
 | `comparaisonReleve` | `identique` \| `different` \| `non_observable_releve_vide` \| `non_conclu` | §3.4 |
 | `eligibleProduction` | booléen | **vrai si et seulement si** le `commit` de l'artefact est ancêtre d'`origin/main` **au moment du staging**, après un `fetch` |
@@ -214,11 +257,27 @@ si le visa n'en porte pas), `fraicheur` (`fraiche` \| `perimee` \| `indeterminee
 autre clé n'a pas de ligne `build`)*, `artefact` (objet d'observations : `apkSha256`, `versionCode`,
 `applicationId`, `certSha256` ou `null` si non signé), `installation` (si `etape = installation`),
 `exercice` (booléen, **vrai seulement** pour l'essai délibéré de T15, point P-6).
+🆕 *(J-4, ADR-016 §4, 2026-09-30)* **Le mode d'exercice** : une **option explicite** de l'outil de
+déploiement, suivie d'une **confirmation saisie**. Il ne lève **que** deux contrôles,
+`artefact_non_consigne` et `certificat_non_release` ; ⛔ il n'en lève **aucun autre** (en particulier ni
+INV-5, ni INV-9, ni INV-14). Il **exige** un `versionCode` **supérieur** au plus grand numéro installé,
+faute de quoi l'essai prouverait un refus **de version** et non de signature. La ligne écrite est un
+`refus` avec `etape: installation`, `origine: appareil`, `exercice: true`, `buildRef` **absent**, et
+`installation.tentee = true` (⇒ **le numéro est consommé**, INV-5). Si l'appareil **accepte** l'APK au
+lieu de le refuser, ce n'est **pas** un exercice réussi : c'est un `staging_echec`, cause
+`exercice_accepte_par_appareil` (issue 1), et l'appareil fait maintenant tourner **un APK signé par une
+autre clé** — le pire cas, qui doit se voir.
+⛔ *(J-9, 2026-09-30)* Une production dont **aucune** attribution ne serait `deploye` n'est **pas** écrite
+en `production` : c'est un `refus`, `etape: production`, cause `aucune_us_deployable`.
 
 **`desinstallation_unique`** — `paquet` (constante `com.concentration.concentration`), `appareil`,
 `installationRemplacee` (objet : `certEstDebug` **vrai**, `versionCodeLu`), `constatContenu` (Q8 :
 `aucune_echeance_a_conserver` \| `echeances_relevees_hors_depot`), `confirmation` (constante
-`saisie_humaine`).
+`saisie_humaine`). 🆕 *(R-J2, 2026-09-30)* `nombreEcheancesConstatees` : entier `≥ 0`, **déclaré** par
+l'humain au constat de Q8, ⛔ **jamais le contenu**. Seule règle de cohérence vérifiée :
+`constatContenu = echeances_relevees_hors_depot` ⇒ `nombreEcheancesConstatees ≥ 1`. ⛔ L'inverse n'est
+**pas** exigé : une installation peut porter des échéances **que l'humain ne souhaite pas conserver**
+(`aucune_echeance_a_conserver` avec un nombre `≥ 1` est licite).
 
 **`rupture_empreinte`** — §2.4.
 
@@ -233,18 +292,19 @@ Colonne **Où** : `CI` = `check_registre.py` dans le job requis `governance` (T7
 | **INV-2** | `id` unique ; chaque `…Ref` désigne une ligne **antérieure** dans le fichier, de la **nature attendue** | CI | une référence vers une ligne postérieure · un `stagingRef` pointant vers un `staging_echec` |
 | **INV-3** | **Ordre** : l'ordre du fichier fait foi ; `ts` **non décroissant** ; `schemaVersion` **non décroissant** | CI | deux lignes interverties acceptées |
 | **INV-4** | **Ajout seul** : le registre de la base (`origin/main`) est un **préfixe, ligne pour ligne et octet pour octet**, du registre de la tête | CI | une ligne modifiée, supprimée ou insérée **avant** la fin acceptée |
-| **INV-5** | **`versionCode` strictement croissant sur TOUTES les installations tentées** : sur la suite, dans l'ordre du fichier, des lignes portant `installation.tentee = true` (**répétitions, échecs et essais compris**), chaque `versionCode` est **strictement supérieur** au précédent | CI | comparaison `≥` au lieu de `>` · les `staging_echec` exclus du calcul · un refus `avant_installation` compté *(il est `≤` par définition)* |
-| **INV-6** | 🆕 **Schéma de document non régressif** : le `schemaDocument` d'un artefact installé est **≥** celui de la dernière installation réussie. Sinon : `refus`, `etape: avant_installation`, cause `schema_regressif` | outil + CI | un artefact de `versionCode` supérieur mais de schéma inférieur installé *(point P-2 : **aucune clause d'AC ne porte cette règle**)* |
+| **INV-5** | **`versionCode` strictement croissant sur TOUTES les installations tentées** : sur la suite, dans l'ordre du fichier, des lignes portant `installation.tentee = true` (**répétitions, échecs et essais compris**), chaque `versionCode` est **strictement supérieur** au précédent. 🆕 *(J-8, 2026-09-30)* **Le contrôle au BUILD** (le `versionCode` de `pubspec.yaml` doit dépasser le registre) compare au **plus grand numéro INSTALLÉ**, lu comme ici : le plus grand `versionCode` des lignes à `installation.tentee = true` ; ⛔ **jamais** au plus grand numéro **construit** — sinon reconstruire le même commit (AC-2 « Limite », INV-8) serait refusé | CI | comparaison `≥` au lieu de `>` · les `staging_echec` exclus du calcul · un refus `avant_installation` compté *(il est `≤` par définition)* · une ligne `build` comptée dans le maximum *(mutant qui ferait refuser la seconde construction du même commit)* |
+| **INV-6** | 🆕 **Schéma de document non régressif** : le `schemaDocument` d'un artefact installé est **≥** celui de la dernière installation réussie. Sinon : `refus`, `etape: avant_installation`, cause `schema_regressif` | outil + CI | un artefact de `versionCode` supérieur mais de schéma inférieur installé *(point P-2 : **aucune clause d'AC ne porte cette règle**)* *(⛔ PÉRIMÉ-2026-09-30 sur la parenthèse : la règle est **portée par AC-6 « Erreur »**, phrase et scénario ajoutés par le lock, **J-12**)* |
 | **INV-7** | **Continuité du certificat de release** : toutes les lignes `build` portent **le même** `certSha256`, et `certEstDebug = false` | CI | une seconde clé de release acceptée · le certificat de débogage accepté |
 | **INV-8** | **Reproductibilité même machine** (AC-2 « Limite ») : deux `build` du **même `commit`** portent le même `versionCode` et le même `certSha256` *(⛔ `apkSha256` peut différer : Q6)* | CI | deux builds du même commit de versions différentes acceptés |
-| **INV-9** | **Refus au plus tôt des causes intrinsèques** : un artefact dont la ligne `build` porte une permission réseau, une donnée incluse dans la sauvegarde, `debuggable`, `certEstDebug`, ou un `applicationId` différent **n'est jamais installé** : sa demande de staging produit un `refus` `avant_installation` | outil + CI | une ligne `staging` dont le `build` porte `INTERNET` *(point P-3 : c'est **plus strict** que la lettre d'AC-12 et AC-13, qui disent « refusé en production »)* |
+| **INV-9** | **Refus au plus tôt des causes intrinsèques** : 🆕 *(J-3, 2026-09-30 : dit autrement, un artefact dont la ligne `build` porte `verdict: refuse` ; ses `causes` deviennent celles du `refus`)* un artefact dont la ligne `build` porte une permission réseau, une donnée incluse dans la sauvegarde, `debuggable`, `certEstDebug`, ou un `applicationId` différent **n'est jamais installé** : sa demande de staging produit un `refus` `avant_installation` | outil + CI | une ligne `staging` dont le `build` porte `INTERNET` *(point P-3 : c'est **plus strict** que la lettre d'AC-12 et AC-13, qui disent « refusé en production »)* |
 | **INV-10** | **Production** : ① `stagingRef` → un `staging` avec `eligibleProduction = true` · ② `validationRef` → une `validation` `valide` **du même staging** · ③ ordre du fichier `staging < validation < production` **et** `ts` dans le même ordre · ④ `apkSha256` re-mesuré = `apkSha256` du `build` du staging · ⑤ ⛔ **aucune ligne portant `installation.tentee = true` entre le staging et la production** (l'artefact déclaré est **celui qui tourne**) · ⑥ `ancetreOriginMain.resultat = true`, et la CI **re-vérifie** `git merge-base --is-ancestor <commit> origin/main` · ⑦ au plus **une** `production` par staging | outil + CI | empreinte comparée à la **dernière** ligne au lieu du staging · validation hors de l'intervalle · un second staging glissé entre staging et production · ascendance lue sur une branche locale |
-| **INV-11** | **Attribution** : `verdict = deploye` **si et seulement si** chaque visa requis est `fraiche`. **Fraîcheur par diff de contenu** : `git diff --name-only <commit du visa> <commit de production> -- <perimetreDiff>` est **vide**. ⛔ **Jamais par ascendance** : squash et rebase sont autorisés sur ce dépôt, et un commit de visa réécrit n'est **pas** ancêtre de `main` alors que son contenu peut être identique. Commit du visa absent (`null`) ou objet introuvable ⇒ `fraicheur: indeterminee` ⇒ `verdict: non_concluant` *(côté sûr : ni déployé, ni un refus du produit)* | outil + CI | un visa périmé accepté · une fraîcheur calculée par `merge-base` · un visa sans commit accepté |
+| **INV-11** | **Attribution** : `verdict = deploye` **si et seulement si** chaque visa requis est `fraiche`. **Fraîcheur par diff de contenu** : `git diff --name-only <commit du visa> <commit de production> -- <perimetreDiff>` est **vide**. ⚖️ *(Q-L2 (a), **arbitrage humain du 2026-09-30**)* `perimetreDiff` = **`lib/`, `android/`, `pubspec.*`** — ⇒ US-01.3 modifiant `android/`, **les visas d'US-01.1, US-01.2 et US-01.4 seront périmés** par son déploiement. ⛔ **Jamais par ascendance** : squash et rebase sont autorisés sur ce dépôt, et un commit de visa réécrit n'est **pas** ancêtre de `main` alors que son contenu peut être identique. Commit du visa absent (`null`) ou objet introuvable ⇒ `fraicheur: indeterminee` ⇒ `verdict: non_concluant` *(côté sûr : ni déployé, ni un refus du produit)* | outil + CI | un visa périmé accepté · une fraîcheur calculée par `merge-base` · un visa sans commit accepté |
 | **INV-12** | **Continuité de l'empreinte d'appareil** : §2.3 | CI | deux empreintes différentes sans `rupture_empreinte` entre elles |
 | **INV-13** | **Désinstallation unique** : **au plus une** ligne `desinstallation_unique` dans **tout** le registre, et elle **précède** toute ligne portant `installation.tentee = true` | CI | une seconde désinstallation acceptée · une désinstallation après la première release |
 | **INV-14** | 🆕 **Appareil synchrone avec le registre** : avant installation, `versionCodeAvant` lu sur l'appareil **égale** le `versionCode` de la dernière installation **réussie** du registre (ou le paquet est absent / porte le certificat de débogage, **seulement** avant la `desinstallation_unique`). Sinon : `non_concluant`, cause `registre_desynchronise` | outil | une installation faite hors de la chaîne (un `flutter run`, un `adb install` à la main, un défaut de l'outil après installation) **non détectée** |
 | **INV-15** | **Champs interdits** : §1.8 | CI | §1.8 |
 | **INV-16** | **Relevés** : `comparaisonReleve = identique` **si et seulement si** les deux empreintes de relevé sont égales **et** les comptes `total` et `retirees` sont égaux ; `non_observable_releve_vide` **si et seulement si** `releveAvant.total = 0` | CI | un `identique` sur deux empreintes différentes · un `identique` sur un relevé avant vide *(le vert par absence que Q10 refuse)* |
+| **INV-17** | 🆕 *(J-7, 2026-09-30 — l'UX l'emporte)* **Validation d'un staging éligible seulement** : `validation.stagingRef` désigne un `staging` d'`eligibleProduction = true`. Une demande de validation d'une **répétition** est refusée par l'outil, cause `validation_d_une_repetition`, ⛔ **non consignée** (refus de saisie, §6.2 bis) ; et la CI refuse toute ligne `validation` qui violerait la règle. Motif : une validation qui ne peut rien ouvrir est un **faux geste** | outil + CI | une `validation` d'un staging de branche acceptée |
 
 **Deux conséquences qui découlent des invariants, et qu'il ne faut pas coder une seconde fois** :
 
@@ -296,6 +356,9 @@ sens d'un champ) :
 5. son autotest porte **au moins une ligne de chaque version** parmi ses fixtures ;
 6. un invariant qui porte sur plusieurs lignes (INV-5, INV-10, INV-12) doit rester vrai **à travers**
    les versions. S'il ne peut pas l'être, le changement exige un **ADR**.
+7. 🆕 *(ADR-016 §3, 2026-09-30)* **une nature NOUVELLE exige une nouvelle `schemaVersion` ET un nouvel
+   ADR** : la liste des natures du §1.4 est **fermée**. Une clé ou une valeur énumérée nouvelle exige une
+   nouvelle `schemaVersion` (point 1) ; seule la nature exige en plus un ADR.
 
 **Pourquoi la convention d'ADR-005 ne s'applique pas telle quelle.** ADR-005 existe parce qu'un
 **stockage lu par l'application** doit être **transformé** d'une forme à l'autre, sans perte, dans les
@@ -325,8 +388,8 @@ PROJECT_LOG ni les rapports**, quelle que soit la clé sous laquelle elle serait
 | **Clé d'empreinte d'appareil** | C3 | — | ⛔ jamais lue par un agent |
 | **DN du certificat de release** (`CN=…, O=…`) | **C2 probable** : il porte souvent le **nom réel** de l'humain | `apksigner verify --print-certs` | ⛔ seul `certSha256` et le booléen `certEstDebug` sont consignés. ✅ Le DN **de débogage** (`CN=Android Debug`) est public et **peut** figurer dans une fixture |
 | **Chemin absolu** de la machine | C2 (il révèle le nom de session) **et** C3 (il désigne l'emplacement du keystore) | `local.properties` (`sdk.dir`), messages d'erreur, `flutter doctor -v` | chemins **relatifs au dépôt** seulement ; valeur de `preuve` contrainte (§1.3) |
-| **Contenu des échéances du pratiquant** (descriptions, dates) | 🆕 **C2** | relevé avant / après (§3.4), arbre d'accessibilité, **capture d'écran du hub** | §3.4 : seuls un **compte** et une **empreinte à clé** sont publiés ; point P-4 pour le repli R-8 |
-| **Journal non filtré** | C2 possible | `logcat` sans filtre de PID | capture **filtrée sur le PID** de l'application (ADR-015 §7) ; lignes citées **caviardées** |
+| **Contenu des échéances du pratiquant** (descriptions, dates) | 🆕 **C2** | relevé avant / après (§3.4), arbre d'accessibilité, **capture d'écran du hub** | §3.4 : seuls un **compte** et une **empreinte à clé** sont publiés ; point P-4 pour le repli R-8 *(⛔ PÉRIMÉ-2026-09-30 sur « point P-4 » : ⚖️ **Q-L1 (a), arbitrage humain** — donnée C2 **JAMAIS publiée** ; **captures d'écran hors du dépôt**, ADR-016 §1)* |
+| **Journal non filtré** | C2 possible | `logcat` sans filtre de PID | capture **filtrée sur le PID** de l'application (ADR-015 §7) ; lignes citées **caviardées** *(⚖️ Q-L1 (a), 2026-09-30 : le **journal complet**, même filtré, reste **HORS du dépôt** ; seule `smoke.ligneFatalCitee` est versionnée, **texte du message remplacé**, §1.4)* |
 
 **Pourquoi une grammaire fermée est la barrière principale** : presque toutes les valeurs du registre
 sont **typées** (hexadécimal de longueur fixe, entiers, énumérations). Une valeur interdite ne peut s'y
@@ -529,7 +592,11 @@ apparaît `retiree = false` des deux côtés : **l'égalité tient**, sans tolé
 - 🔴 **Pourquoi une clé, et pas un SHA-256 simple** : **même motif qu'ADR-015 §13**. Des descriptions
   d'échéances sont courtes et devinables (« Examen », « Rendu ») : un hachage sans clé se renverserait par
   essais. ⚠️ **C'est un usage NOUVEAU de la clé d'empreinte, qu'ADR-015 ne décide pas** : point **P-4**
-  pour @Architect et @CyberSecurity. L'alternative (une seconde clé locale) ajoute un secret à
+  pour @Architect et @CyberSecurity. *(⛔ PÉRIMÉ-2026-09-30 sur « qu'ADR-015 ne décide pas » : **décidé par
+  ADR-016 §2** (Proposé) — même clé, **domaine séparé** par le préfixe `concentration/releve/v1
+`, qui
+  contient `/` et un saut de ligne qu'aucun numéro de série ne contient. Le préfixe de ce §3.4 est
+  **identique** à celui d'ADR-016, vérifié à la lecture. Audit de @CyberSecurity maintenu.)* L'alternative (une seconde clé locale) ajoute un secret à
   sauvegarder ; l'autre alternative (ne publier que les comptes) rend INV-16 invérifiable par la CI.
 - `instantAppareil` : l'heure **de l'appareil** au relevé ; c'est elle que l'application utilise pour
   dériver « échue ».
@@ -558,6 +625,13 @@ d'accessibilité. Point **P-8**.
 - **Il n'existe plus aucune copie système** des échéances : ni sauvegarde vers le nuage, ni transfert
   d'appareil à appareil, ni `adb backup` (API 27, branche « sans distinction » d'AC-13 « Limite »).
   ⚠️ **Documentation, ⛔ non mesuré.**
+  *(⛔ PÉRIMÉ-2026-09-30 — **phrase FAUSSE pour l'installation debug du 2026-08-21**, réfutée par l'UX au
+  lock, **J-10** : construite **avant** `allowBackup="false"`, elle portait la valeur **par défaut `true`**,
+  donc une copie de ses données **a pu** partir vers le compte Google du propriétaire. ✅ **Énoncé en
+  vigueur** : aucune copie système ne sera faite **du paquet de release à partir de la première release** ;
+  ⛔ rien n'est affirmé sur ce qui a pu être copié **avant**. Texte opérateur adopté par le lock :
+  « **Ne comptez sur aucune sauvegarde** », ⛔ jamais « aucune sauvegarde n'existe ». Suite : **Q-L3**,
+  §10.3.)*
 - ⇒ **L'appareil détient la SEULE copie**, et chacun de ces événements est une **perte totale et
   définitive** : **perte de la clé de release** (aucune mise à jour possible, donc la seule issue est de
   désinstaller) · **désinstallation** · **effacement des données** de l'application · **réinitialisation**
@@ -622,7 +696,7 @@ plus exercé) et ⛔ jamais la remplacer par `XXX` (un parseur trop permissif pa
 | `apksigner verify --print-certs` | DN de release → `CN=FICTIF` ; empreintes SHA-256 / SHA-1 / MD5 → fictives | **DN de débogage** `CN=Android Debug` (public, nécessaire à AC-3 « Limite ») ; libellés |
 | `aapt2 dump badging` / `xmltree` | chemins absolus → `<DEPOT>/…`, `<SDK>/…` | nom de paquet, `versionCode`, `versionName`, permissions, `allowBackup`, `debuggable`, `minSdk`, `targetSdk` |
 | `dumpsys package com.concentration.concentration` | chemin d'installation `…-<suffixe aléatoire>==` → `…-FICTIF==` ; toute empreinte de signature → fictive | `versionCode`, `versionName`, `dataDir`, dates d'installation, drapeaux |
-| `logcat` filtré sur PID | chemins de la machine ; ⛔ toute ligne d'un **autre** processus dans une fixture est **synthétique** (les journaux système réels peuvent porter des comptes ou des réseaux) | niveau, étiquette, `FATAL EXCEPTION`, pile d'appels de l'application |
+| `logcat` filtré sur PID | chemins de la machine ; ⛔ toute ligne d'un **autre** processus dans une fixture est **synthétique** (les journaux système réels peuvent porter des comptes ou des réseaux) | niveau, étiquette, `FATAL EXCEPTION`, pile d'appels de l'application. 🆕 *(Q-L1 (a), 2026-09-30)* **Le texte du message d'exception est remplacé par `<MESSAGE-RETIRE>`** dans la fixture comme dans la preuve : c'est la **même** règle, ⛔ pas une seconde |
 | `uiautomator dump` | 🆕 **toute description et toute date d'échéance** → descriptions de la liste autorisée (`Fictif A`, `Fictif B`, …) et dates fictives **de même format** | structure des nœuds, classes, bornes, mots `sur la grille` / `retirée de la grille` |
 | `git` | rien : les SHA de commit sont **publics** ; ⚠️ mais une fixture de fraîcheur de visa emploie des SHA **fictifs** pour ne pas dépendre de l'historique | — |
 
@@ -664,6 +738,13 @@ série collé dans un champ de texte libre, ou dans une fixture d'un outil non l
 
 ### 6.2 · Les codes de cause *(un seul exemplaire ; valeurs de `causes`)*
 
+> ⚖️ **Lock J-1, 2026-09-30** : ce vocabulaire est la **forme unique** retenue pour la chaîne ; l'UX le
+> **lit**. Motif du lock : un code écrit dans un fichier en ajout seul ne se renomme jamais. Après T5, **le
+> code de `verdicts.py` est l'exemplaire** et ce tableau devient spécification. Ce tableau-ci ne liste que
+> les codes **consignés** (écrits dans `causes`) ; les codes **affichés mais jamais écrits** sont au
+> **§6.2 bis**. ⛔ Aucun total n'est écrit : l'ensemble se lit en extrayant la colonne « Code » des deux
+> tableaux.
+
 | Étape | Code | Issue | Ce dont l'UX a besoin pour l'expliquer (valeurs portées par la ligne) |
 |---|---|---|---|
 | appareil | `adb_introuvable` | 2 | ⛔ jamais « aucun appareil » (AC-11) |
@@ -673,6 +754,7 @@ série collé dans un champ de texte libre, ou dans une fixture d'un outil non l
 | appareil | `plusieurs_appareils_sans_cible` | 1 | — |
 | appareil | `emulateur` | 1 | — |
 | appareil | `appareil_non_reference` | 1 | empreinte vue ≠ empreinte de référence **sans** rupture consignée |
+| appareil | `cle_empreinte_introuvable` | 2 | 🆕 *(code UX, J-1, 2026-09-30)* la clé d'empreinte locale est absente : l'appareil **ne peut pas être identifié** sans publier son numéro de série ⇒ ligne `non_concluant` **sans** `appareil`. ⚠️ **Écart d'issue avec l'UX** (qui la range en `1`) : c'est un **prérequis local manquant**, de la même famille qu'`adb_introuvable`, donc « ne conclut pas » |
 | appareil | `registre_desynchronise` | 2 | `versionCodeAvant` lu sur l'appareil et dernier `versionCode` installé du registre (INV-14) : une installation a eu lieu **hors de la chaîne** |
 | avant installation | `version_non_superieure` | 1 | `versionCode` candidat **et** maximum consigné |
 | avant installation | `schema_regressif` | 1 | les deux `schemaDocument` |
@@ -683,12 +765,12 @@ série collé dans un champ de texte libre, ou dans une fixture d'un outil non l
 | avant installation | `sauvegarde_non_exclue` | 1 | les fichiers inclus ou `allowBackup` (AC-13 « Erreur ») ; ⛔ une exclusion **partielle** est ce refus |
 | avant installation | `artefact_debuggable` | 1 | — |
 | avant installation | `paquet_non_release` | 1 | l'`applicationId` lu (ex. suffixe `.profile`, AC-12 « Limite ») |
-| avant installation | `desinstallation_deja_faite` | 1 | toute demande d'une seconde désinstallation (INV-13) |
+| avant installation | `desinstallation_deja_faite` | 1 | toute demande d'une seconde désinstallation (INV-13) *(⛔ PÉRIMÉ-2026-09-30 sur la ligne : ce code **n'est pas consigné** — une demande de désinstallation refusée ne touche ni l'artefact ni l'appareil ; il passe au **§6.2 bis**, où il est **rejoint** par `desinstallation_apres_release` de l'UX)* |
 | installation | `signature_incompatible` | 1 | origine `appareil` ; ⛔ **l'application n'est pas désinstallée** (AC-7 « Erreur ») |
 | installation | `installation_refusee_autre` | 1 | le **code d'échec brut** rendu par l'appareil |
 | smoke test | `fatal` | 1 | la ligne `FATAL` **citée, caviardée** |
 | smoke test | `capture_vide` | 2 | ⛔ jamais « 0 `FATAL` » (AC-8 « Limite ») |
-| smoke test | `hub_non_constate` | 1 | la méthode de constat |
+| smoke test | `hub_non_constate` | 1 | la méthode de constat *(⛔ PÉRIMÉ-2026-09-30 : **deux sens possibles, un seul retenu**, J-5 — `hub_non_constate` = hub **constaté ABSENT**, par l'arbre d'accessibilité **ou** par la réponse `HUB ABSENT` de l'humain à la validation. « **Non constatable** par machine » n'est **pas** cette cause : c'est `smoke.hub.methode = constat_humain`, sans refus)* |
 | relevé | `releve_different` | 1 | les deux comptes ; ⛔ **jamais** le contenu |
 | relevé | `releve_incomplet` | 2 | 🆕 si l'outil sait établir que des cartes n'ont pas été vues (P-8) |
 | production | `staging_absent`, `staging_echoue` | 1 | — |
@@ -698,9 +780,45 @@ série collé dans un champ de texte libre, ou dans une fixture d'un outil non l
 | production | `artefact_plus_installe` | 1 | une installation a eu lieu **depuis** le staging (INV-10 ⑤) |
 | production | `version_lue_differente` | 1 | lu contre consigné |
 | production | `commit_absent_branche_principale` | 1 | le commit **et** le SHA d'`origin/main` observé (AC-9 « Erreur ») |
+| avant installation | `artefact_non_consigne` | 1 | 🆕 *(R-J3, 2026-09-30)* l'APK présenté n'a **aucune** ligne `build` au registre (empreinte d'APK inconnue). Levé **seulement** par le mode d'exercice (§1.4 `refus`). ⚠️ Un APK qui **a** une ligne `build` à `verdict: refuse` n'est **pas** ce cas : il est refusé par **ses** causes (INV-9) |
+| installation | `exercice_accepte_par_appareil` | 1 | 🆕 *(mode d'exercice, 2026-09-30)* l'appareil a **accepté** l'APK signé par une autre clé : l'essai d'AC-7 « Erreur » **échoue**, et l'appareil fait tourner cet APK. ⚠️ Ligne `staging_echec` ; le prochain passage rendra `registre_desynchronise`. **Message à concevoir par l'UX** |
+| production | `aucune_us_deployable` | 1 | 🆕 *(J-9, 2026-09-30)* aucune attribution de cette production ne serait `deploye` ; la liste des US et de leurs causes (souvent `visa_perime`) |
 | production | `origin_main_non_constate` | 2 | le `fetch` a échoué : ⛔ jamais une ascendance lue sur une copie locale |
 | attribution | `visa_perime` | 1 | le rôle, le commit du visa, **les chemins modifiés** |
 | attribution | `visa_sans_commit`, `visa_introuvable` | 2 | ⚠️ NB-6 : le commit d'un visa n'est porté que par un **champ libre** de la trace |
+
+### 6.2 bis · Codes AFFICHÉS mais JAMAIS consignés *(🆕 J-1, J-3, 2026-09-30)*
+
+Ces codes appartiennent au **même** jeu unique (J-1), et l'UX leur donne un message. ⛔ **Aucun n'est
+jamais écrit dans `causes`** : le refus a lieu **avant** qu'il existe un artefact de release à constater,
+ou il porte sur une **saisie** et ne change ni l'artefact ni l'appareil. **Borne du silence** : *tant
+qu'aucun AC n'exige de retrouver après coup un refus qui ne laisse ni artefact de release ni changement
+sur l'appareil* (J-3 ⓵ ⓶). La CI **refuse** l'un de ces codes s'il apparaît dans le registre.
+
+| Code | Étape | Issue *(affichée)* | Origine |
+|---|---|---|---|
+| `signature_proprietes_absentes` | build | 1 | UX M-01 |
+| `signature_propriete_manquante` | build | 1 | UX M-01b |
+| `signature_keystore_introuvable` | build | 1 | UX M-02 |
+| `signature_keystore_dans_le_depot` | build | 1 | UX M-02b |
+| `signature_mot_de_passe` | build | 1 | UX M-03 |
+| `arbre_modifie` | build | 1 | UX M-05 |
+| `commit_non_pousse` | build | 1 | UX M-06 |
+| `distant_illisible` | build | 2 | UX M-06b. ⚠️ **Voisin** d'`origin_main_non_constate` (consigné, staging et production) : même cause matérielle (le `fetch` échoue), étapes différentes. Deux codes gardés parce que le constat diffère (branche poussée contre `origin/main`) ; **à confirmer à L-4** |
+| `version_non_superieure` | build | 1 | **même code** que la cause consignée au staging ; au build il n'est **pas** consigné (J-8 : comparé au plus grand numéro **installé**) |
+| `certificat_debug` | build | 1 | **même code** que la cause consignée au staging ; au build il n'est **pas** consigné (J-3 ⓶) |
+| `desinstallation_deja_faite` | désinstallation | 1 | déplacé ici le 2026-09-30 (§6.2) |
+| `desinstallation_apres_release` | désinstallation | 1 | 🆕 **code UX retenu** (écart E-1 de l'UX) : une release est consignée et **aucune** désinstallation n'a eu lieu ; ce n'est **pas** une « seconde » désinstallation, donc un code distinct |
+| `certificat_installe_illisible` | désinstallation (constat Q8) | 2 | UX M-20 ; ⛔ rien n'est désinstallé |
+| `sauvegarde_debug_non_supprimee` | désinstallation (constat Q-L3) | 1 | 🆕 **code UX retenu** (écart E-2 de l'UX) ; voir §10.3 |
+| `confirmation_non_reconnue` | saisie | 1 | UX M-26 |
+| `confirmation_non_interactive` | saisie | 1 | UX M-27 |
+| `validation_d_une_repetition` | saisie (validation) | 1 | 🆕 *(J-7)* INV-17 |
+| `sauvegarde_incomplete` | attestation T1 | 1 | UX M-30 ; R-J4 : l'attestation vit dans un rapport de T1 |
+| `cible_paquet_de_release` | instrument RNF-02 | 3 | UX M-31 ; ⚠️ code de **l'instrument de QA** (T9, @QA_Tester), ⛔ **pas de la chaîne** : il est listé ici **seulement** pour que les deux ensembles de codes soient égaux ; le registre n'enregistre jamais le paquet `.profile` |
+
+⚠️ **Un code, deux étapes, deux sorts** : `version_non_superieure` et `certificat_debug` sont **affichés**
+au build et **consignés** au staging. C'est **un seul** code : ⛔ il ne faut pas lui donner deux noms.
 
 ### 6.3 · Les états que l'UX doit présenter, et comment les retrouver
 
@@ -714,7 +832,7 @@ série collé dans un champ de texte libre, ou dans une fixture d'un outil non l
 | **Branche d'AC-13** | `build.sauvegarde.brancheAc13 = sans_distinction` | « **aucune sauvegarde locale disponible** » (AC-13 « Limite »), ⛔ jamais « sauvegarde locale disponible » |
 | **Rupture d'empreinte consignée** | ligne `rupture_empreinte` | ancienne → nouvelle, cause, **attestation déclarative** ; les preuves de part et d'autre **ne se comparent plus** par l'empreinte |
 | **Unique désinstallation** | ligne `desinstallation_unique` ; son **absence** avant la première release | avant : c'est une étape **à confirmer**, précédée du constat Q8 ; après : ⛔ **plus jamais proposée** |
-| **Essai délibéré de refus** (T15, clé jetable) | `refus.exercice = true` | un refus **attendu** n'est pas un incident ; il consomme quand même un numéro de version |
+| **Essai délibéré de refus** (T15, clé jetable) | `refus.exercice = true` | un refus **attendu** n'est pas un incident ; il consomme quand même un numéro de version 🆕 *(J-4, 2026-09-30)* le mode est **nommé** et **confirmé par saisie** ; le **texte** du refus reste celui de la vraie vie, précédé de `Exercice : refus attendu`. Et son échec (`exercice_accepte_par_appareil`) doit se voir comme **le pire cas**, pas comme un exercice |
 | **Numéro de version consommé** | `installation.tentee = true` | le prochain artefact doit porter un numéro **supérieur**, même si ce staging a échoué |
 | **Déployé pour quelles US** | lignes `attribution` d'une même `productionRef` | une ligne **par US**, avec ses visas ; ⛔ une US sans ligne n'est **pas** déployée |
 
@@ -768,18 +886,18 @@ l'appareil du pratiquant versionnée (point P-5).
 
 | # | Point | Nature | Ce que je recommande |
 |---|---|---|---|
-| **P-1** | ADR-015 §5 liste **six** natures ; ce design en ajoute **quatre** (`non_concluant`, `attribution`, `desinstallation_unique`, `rupture_empreinte`), chacune exigée par un AC (§1.4) | lecture d'un ADR accepté | Si la liste du §5 est **exemplative**, rien à faire. Si elle est **fermée**, un ADR nouveau est requis. ⛔ Je ne tranche pas la lecture d'un ADR |
-| **P-2** | 🔴 **Schéma de document régressif** (INV-6) : un artefact de `versionCode` supérieur construit depuis une `versionCourante` inférieure viderait le hub sans écrire. **Aucune clause d'AC ne le porte** — le motif d'AC-6 « Erreur » en parle, sa clause non | **clause manquante** (défaut ⑥) | @ProductOwner l'ajoute (AC-6 « Erreur » ou AC-7 « Erreur ») avec son scénario ; en attendant, INV-6 est **spécifié** ici |
+| **P-1** | ADR-015 §5 liste **six** natures ; ce design en ajoute **quatre** (`non_concluant`, `attribution`, `desinstallation_unique`, `rupture_empreinte`), chacune exigée par un AC (§1.4) | lecture d'un ADR accepté | Si la liste du §5 est **exemplative**, rien à faire. Si elle est **fermée**, un ADR nouveau est requis. ⛔ Je ne tranche pas la lecture d'un ADR *(⛔ PÉRIMÉ-2026-09-30 : **tranché** — ADR-016 §3 **ferme** la liste, §1.4 et §1.7)* |
+| **P-2** | 🔴 **Schéma de document régressif** (INV-6) : un artefact de `versionCode` supérieur construit depuis une `versionCourante` inférieure viderait le hub sans écrire. **Aucune clause d'AC ne le porte** — le motif d'AC-6 « Erreur » en parle, sa clause non | **clause manquante** (défaut ⑥) | @ProductOwner l'ajoute (AC-6 « Erreur » ou AC-7 « Erreur ») avec son scénario ; en attendant, INV-6 est **spécifié** ici *(⛔ PÉRIMÉ-2026-09-30 : **porté** par AC-6 « Erreur » et son scénario, ajoutés par le lock, J-12 ; @ProductOwner peut réfuter)* |
 | **P-3** | INV-9 refuse **avant installation** ce qu'AC-12 et AC-13 disent refuser **en production** | écart de sévérité, du côté sûr | Motif : staging = appareil du pratiquant, **sans retour arrière** (ADR-015 §8) : installer un artefact qui ne pourra jamais être la production laisserait chez le pratiquant une version non conforme. À confirmer |
-| **P-4** | Empreinte des relevés sous la **clé d'empreinte d'appareil**, avec préfixe de domaine | usage nouveau d'un secret C3 | À auditer par @CyberSecurity. Alternatives au §3.4 |
-| **P-5** | 🔴 Le repli **R-8** d'ADR-015 §7 prévoit « **capture d'écran jointe** ». Sur l'appareil du pratiquant, une capture du hub **publie ses échéances** (C2) dans un dépôt public | conflit avec la classification | La capture reste **hors du dépôt**, ou est **caviardée** avant d'être versionnée ; la preuve dit seulement « constat humain ». ⛔ Aucune capture brute sous `docs/deploiement/preuves/`. À écrire dans T7 et le runbook |
-| **P-6** | T15 veut un APK signé par une **clé jetable** « refusé, sans désinstallation ». Pour que le refus observé soit **celui de l'appareil** (lettre d'AC-7 « Erreur »), la chaîne doit **ne pas** le refuser elle-même (INV-7 le ferait), et l'artefact doit porter un `versionCode` **supérieur** (sinon l'appareil ou la chaîne refuse **pour la version**, et l'essai prouve autre chose) | décision d'outillage | Un mode d'**exercice nommé** dans `release_deploy.py`, consigné `refus.exercice = true`, `origine: appareil` |
+| **P-4** | Empreinte des relevés sous la **clé d'empreinte d'appareil**, avec préfixe de domaine | usage nouveau d'un secret C3 | À auditer par @CyberSecurity. Alternatives au §3.4 *(⛔ PÉRIMÉ-2026-09-30 : **décidé** par ADR-016 §2, Proposé — même clé, domaine séparé ; audit @CyberSecurity maintenu)* |
+| **P-5** | 🔴 Le repli **R-8** d'ADR-015 §7 prévoit « **capture d'écran jointe** ». Sur l'appareil du pratiquant, une capture du hub **publie ses échéances** (C2) dans un dépôt public | conflit avec la classification | La capture reste **hors du dépôt**, ou est **caviardée** avant d'être versionnée ; la preuve dit seulement « constat humain ». ⛔ Aucune capture brute sous `docs/deploiement/preuves/`. À écrire dans T7 et le runbook *(⛔ PÉRIMÉ-2026-09-30 : **tranché** — ⚖️ Q-L1 (a), arbitrage humain ; ADR-016 §1 remplace la phrase d'ADR-015 §7 : la capture reste **HORS du dépôt**, ⛔ l'option « caviardée puis versionnée » est **écartée**)* |
+| **P-6** | T15 veut un APK signé par une **clé jetable** « refusé, sans désinstallation ». Pour que le refus observé soit **celui de l'appareil** (lettre d'AC-7 « Erreur »), la chaîne doit **ne pas** le refuser elle-même (INV-7 le ferait), et l'artefact doit porter un `versionCode` **supérieur** (sinon l'appareil ou la chaîne refuse **pour la version**, et l'essai prouve autre chose) | décision d'outillage | Un mode d'**exercice nommé** dans `release_deploy.py`, consigné `refus.exercice = true`, `origine: appareil` *(⛔ PÉRIMÉ-2026-09-30 : **décidé** — J-4, ADR-016 §4 ; forme au §1.4 `refus`)* |
 | **P-7** | `EVT_STAGING_DEPLOYED` exige `EVT_READY_FOR_DEPLOY` ⇒ les **répétitions** de T15, faites en développement, **ne peuvent pas** être tracées par cet événement | correspondance registre ↔ trace | Une ligne `staging` du registre **n'est pas** un `EVT_STAGING_DEPLOYED`. Seul le staging du candidat de production s'y relie, par l'`id` de sa ligne cité dans la preuve de l'événement |
 | **P-8** | Le relevé du §3.4 exige une **navigation** (donc distinct du smoke test) et sa **complétude** n'est pas établie | à mesurer à T7 | Le relevé lit l'arbre d'accessibilité **après** une navigation **par l'humain**. Si la complétude ne peut pas être établie, la preuve le dit (`releve_incomplet`, issue 2) |
 | **P-9** | INV-4 et INV-10 ⑥ exigent l'**historique complet** en CI | contrainte sur T7 / `ci.yml` | un clone **non superficiel** dans le job `governance` |
 | **P-10** | L'opérateur a besoin d'un **résumé** calculé du registre | besoin UX | un mode de lecture seule du contrôle de T7 ; forme à @Architect |
-| **P-11** | **Conséquence de la fraîcheur par diff de contenu** : un changement de `lib/`, `android/` ou `pubspec.*` **après** le visa d'une US rend ce visa **périmé**, même s'il ne touche pas le code de cette US. ⇒ **en pratique, seuls les visas pris sur l'arbre déployé sont frais** | conséquence à assumer | La règle est stricte **par choix** : une portée par US demanderait de savoir quels fichiers « appartiennent » à une US, ce qui dériverait. À confirmer ; c'est ce qui imposera le rafraîchissement des visas d'US-01.1, US-01.2 et US-01.4 |
-| **P-12** | **Éligibilité à la production** : ce design exige l'ascendance **au staging** (`eligibleProduction`) **et** à la déclaration. La lettre d'AC-9 « Nominal » ne demande que la déclaration. Cas où cela diffère : un staging de branche puis une fusion **par merge** qui rendrait ce commit ancêtre, **sans** reconstruction | écart, du côté sûr | Motif : AC-9 « Nominal » veut que la preuve de ce staging **dise** qu'il ne pourra pas être déclaré ; une production ultérieure rendrait fausse une ligne qu'on ne peut plus corriger (ajout seul). Et T15 écrit déjà que les répétitions ne deviennent **jamais** la production |
+| **P-11** | **Conséquence de la fraîcheur par diff de contenu** : un changement de `lib/`, `android/` ou `pubspec.*` **après** le visa d'une US rend ce visa **périmé**, même s'il ne touche pas le code de cette US. ⇒ **en pratique, seuls les visas pris sur l'arbre déployé sont frais** | conséquence à assumer | La règle est stricte **par choix** : une portée par US demanderait de savoir quels fichiers « appartiennent » à une US, ce qui dériverait. À confirmer ; c'est ce qui imposera le rafraîchissement des visas d'US-01.1, US-01.2 et US-01.4 *(⛔ PÉRIMÉ-2026-09-30 sur « À confirmer » : ⚖️ **Q-L2 (a), arbitrage humain** — périmètre `lib/`, `android/`, `pubspec.*` ; les visas d'US-01.1, US-01.2 **et** US-01.4 seront **périmés** par US-01.3)* |
+| **P-12** | **Éligibilité à la production** : ce design exige l'ascendance **au staging** (`eligibleProduction`) **et** à la déclaration. La lettre d'AC-9 « Nominal » ne demande que la déclaration. Cas où cela diffère : un staging de branche puis une fusion **par merge** qui rendrait ce commit ancêtre, **sans** reconstruction | écart, du côté sûr | Motif : AC-9 « Nominal » veut que la preuve de ce staging **dise** qu'il ne pourra pas être déclaré ; une production ultérieure rendrait fausse une ligne qu'on ne peut plus corriger (ajout seul). Et T15 écrit déjà que les répétitions ne deviennent **jamais** la production *(⛔ PÉRIMÉ-2026-09-30 sur « à confirmer » : **confirmé** par le lock, R-J1, et ADR-016 §5)* |
 | **P-13** | L'artefact candidat doit être **conservé localement** entre son staging et sa production (il n'est pas versionné) ; un nettoyage du répertoire de build entre les deux oblige à reconstruire, donc à **repasser le staging** | à écrire dans le runbook | le runbook le dit ; INV-10 ④ le refusera de toute façon |
 | **P-14** | Le parseur du relevé doit inverser `dateLisible` : il lui faut **la liste des mois en français**, qui vit dans `ligne_echeance.dart`. La recopier en Python en ferait un **second exemplaire** | règle d'unicité | le parseur **lit** la liste dans la source Dart (patron de l'instrument RNF-02, qui lit son seuil), ou un test d'égalité les lie |
 
@@ -792,26 +910,100 @@ l'appareil du pratiquant versionnée (point P-5).
 
 | Besoin UX | Réponse du registre |
 |---|---|
-| **B-1 / B-2** constat de l'installation existante et **remplacement unique**, « avec N » | ✅ `desinstallation_unique` (§1.4). ⚠️ Elle porte `constatContenu` (énumération), **pas** un nombre : ⇒ **à ajouter à la jointure** : `nombreEcheancesConstatees` (entier, **déclaré**, ⛔ jamais le contenu) |
+| **B-1 / B-2** constat de l'installation existante et **remplacement unique**, « avec N » | ✅ `desinstallation_unique` (§1.4). ⚠️ Elle porte `constatContenu` (énumération), **pas** un nombre : ⇒ **à ajouter à la jointure** : `nombreEcheancesConstatees` (entier, **déclaré**, ⛔ jamais le contenu) *(⛔ PÉRIMÉ-2026-09-30 : **ajouté**, R-J2, §1.4)* |
 | **B-3** rupture d'empreinte | ✅ `rupture_empreinte` (§2.4) — S-5 de l'UX est donc **vrai** |
 | **B-4** validation refusée **distincte** d'un `staging_echec` | ✅ `validation.decision = rejete` + `motif` borné ; la production la refuse par `validation_rejetee` |
 | **B-5** attestation de sauvegarde de la clé dans le registre ? | ⛔ **Non.** Décision **sous une borne nommée** : *tant que l'attestation ne conditionne aucun build* (le point P-11 de l'UX le constate). Ce n'est pas une observation d'artefact ni d'appareil, et la placer dans un fichier public rapprocherait la description du support d'une donnée **C3**. Elle vit dans un rapport d'US (T1). **Réfutable** si @ProductOwner fait d'elle une condition de build |
-| **M-24** « le staging n'accepte qu'un APK ayant une ligne `build` conforme » | ✅ `staging.buildRef` est **obligatoire**, l'empreinte re-mesurée doit égaler celle du `build` (§1.5, INV-10 ④ par analogie au staging) et **INV-9** refuse avant installation tout `build` non conforme. ⚠️ Un APK **sans** ligne `build` produit un `refus`, cause à ajouter à la jointure : `artefact_non_consigne` (le code `ARTEFACT-NON-CONSIGNE` de l'UX) |
+| **M-24** « le staging n'accepte qu'un APK ayant une ligne `build` conforme » | ✅ `staging.buildRef` est **obligatoire**, l'empreinte re-mesurée doit égaler celle du `build` (§1.5, INV-10 ④ par analogie au staging) et **INV-9** refuse avant installation tout `build` non conforme. ⚠️ Un APK **sans** ligne `build` produit un `refus`, cause à ajouter à la jointure : `artefact_non_consigne` (le code `ARTEFACT-NON-CONSIGNE` de l'UX) *(⛔ PÉRIMÉ-2026-09-30 : **ajouté**, R-J3, §6.2)* |
 | « Qu'est-ce qui **fixe** le certificat de référence ? » | le **premier** `build` du registre (INV-7) |
 | « L'appareil de référence : désigné par qui, et quand ? » | par la **première** ligne qui porte une empreinte (§2.3) — ⚠️ c'est donc **la première installation** qui le fixe, et l'humain doit s'assurer que c'est bien le SM T580 : la ligne porte le modèle |
 | **P-2 de l'UX** : une répétition peut-elle devenir la production après une fusion **par merge** ? | ⛔ **Non, dans ce design** : `eligibleProduction` est **fixé au staging** et exigé à la production (point **P-12**). ⇒ la phrase de l'UX *« ne pourra pas être déclaré en production »* est **vraie** sans la réserve « en l'état » — **sous réserve** de la confirmation de @Architect |
 | **P-4 de l'UX** : C2 dans les preuves (capture, ligne FATAL, relevé) | ✅ **même constat, trouvé des deux côtés** : capture → point **P-5** ; ligne FATAL → `smoke.ligneFatalCitee` est **caviardée** avant consignation (le terminal peut l'afficher entière, la preuve non) ; relevé → comptes + empreinte à clé (§3.4). S-4 de l'UX est donc **vrai** |
 | **P-6 de l'UX** : l'installation debug du 2026-08-21 avait `allowBackup` au défaut | ✅ **Retenu, et il corrige ma phrase du §4** : *« il n'existe plus aucune copie système »* vaut **pour le paquet de release à partir de la première release**, ⛔ **pas** pour ce que l'installation debug a pu copier **avant**. Non mesurable (NM-16) |
-| **P-9 de l'UX** : production où **aucune** US n'est déclarée | le registre sait le représenter (une `production` suivie d'attributions toutes `refuse` ou `non_concluant`). ⚠️ **À trancher à la jointure** : la ligne `production` doit-elle alors être **refusée** (proposition de l'UX), ou écrite avec une issue globale `1` ? Je penche pour **refuser** : une production qui ne vaut pour aucune US ne prouve rien d'AC-1 |
-| Codes de l'UX (`VERSION-NON-CROISSANTE`, …) et codes du registre (`version_non_superieure`, …) | ⚠️ **deux orthographes du même code dériveront** : à la jointure, **un seul** jeu de codes, et l'autre côté le **lit** |
+| **P-9 de l'UX** : production où **aucune** US n'est déclarée | le registre sait le représenter (une `production` suivie d'attributions toutes `refuse` ou `non_concluant`). ⚠️ **À trancher à la jointure** : la ligne `production` doit-elle alors être **refusée** (proposition de l'UX), ou écrite avec une issue globale `1` ? Je penche pour **refuser** : une production qui ne vaut pour aucune US ne prouve rien d'AC-1 *(⛔ PÉRIMÉ-2026-09-30 : **tranché** — refus, `aucune_us_deployable`, J-9)* |
+| Codes de l'UX (`VERSION-NON-CROISSANTE`, …) et codes du registre (`version_non_superieure`, …) | ⚠️ **deux orthographes du même code dériveront** : à la jointure, **un seul** jeu de codes, et l'autre côté le **lit** *(⛔ PÉRIMÉ-2026-09-30 : **tranché** — J-1, le jeu du registre est l'unique, §6.2 et §6.2 bis)* |
 
 **Ce qui manquerait au Story File** *(⛔ je ne l'écris pas)* :
 
-- **P-2** : une clause pour le schéma régressif (voir ci-dessus).
+- **P-2** : une clause pour le schéma régressif (voir ci-dessus). *(⛔ PÉRIMÉ-2026-09-30 : **fait par le lock**, J-12)*
 - **Scénario d'AC-7 « Nominal »** : il dit *« les mêmes échéances sont présentes avec leur **description**
   et leur **date** »*, alors que la clause exige aussi **l'état** *(actives, échues, retirées)*. ⇒ un test
   qui ne compare pas `retiree` **passerait le scénario** en violant la clause. Point pour @ProductOwner.
+  *(⛔ PÉRIMÉ-2026-09-30 : **fait par le lock**, J-11 — étape « et leur état » ajoutée, titre inchangé)*
 - **AC-11** ne nomme pas les états `unauthorized` et `offline` d'un appareil **vu mais inutilisable** ; je
   les range en « ne conclut pas » (§6.2).
 - La **classification C2 des échéances du pratiquant** n'est écrite nulle part dans le Story File ; elle
-  gouverne les relevés, les captures et les fixtures `uiautomator`.
+  gouverne les relevés, les captures et les fixtures `uiautomator`. *(⛔ PÉRIMÉ-2026-09-30 : **écrite**
+  — arbitrage humain Q-L1 (a), phrases ajoutées à AC-7 Nominal, AC-8 Nominal et AC-8 Erreur, et case de
+  DoD, lues dans le Story File)*
+
+---
+
+## 10 · Amendement L-2 de l'Integration Lock — consolidé *(2026-09-30)*
+
+### 10.1 · Arbitrages humains du 2026-09-30, inscrits tels qu'ils ont été transmis
+
+| # | Verdict | Où ce document le porte |
+|---|---|---|
+| **Q-L1** | **(a)** : le contenu des échéances est une donnée **C2, JAMAIS publiée**. Captures d'écran et journal complet restent **hors du dépôt**. La preuve versionnée ne porte que des **comptes**, une **empreinte à clé** et la ligne `FATAL` avec **le texte du message remplacé** | §1.4 `smoke.ligneFatalCitee` (marqueur `<MESSAGE-RETIRE>`), §1.8, §3.4, §5.2 |
+| **Q-L2** | **(a)** : le périmètre de fraîcheur est **`lib/`, `android/`, `pubspec.*`**. ⇒ **les visas d'US-01.1, US-01.2 et US-01.4 seront périmés par US-01.3** | INV-11, `attribution.perimetreDiff`, §8 P-11 |
+| **Q-L3** | **(a)** : en T15, l'humain **cherche et supprime** l'éventuelle sauvegarde Google de l'installation debug du 2026-08-21, puis fait une **attestation déclarative datée** | §10.3 |
+
+### 10.2 · Ce que L-2 a changé, tâche par tâche
+
+| Élément de L-2 | Changement | Où |
+|---|---|---|
+| `nombreEcheancesConstatees` (R-J2) | champ ajouté à `desinstallation_unique` | §1.4 |
+| `artefact_non_consigne` (R-J3), `aucune_us_deployable` (J-9) | codes consignés ajoutés | §6.2, §1.4 `refus` |
+| `validation_d_une_repetition` (J-7) | code **non consigné** (refus de saisie) | §6.2 bis |
+| Codes de build et de saisie (J-1, J-3) | listés au §6.2 bis, marqués **non consignés** ; la CI refuse leur présence dans le registre | §6.2 bis |
+| INV-17 (J-7) | ajouté | §1.5 |
+| Silence des refus de build (J-3) | borne corrigée : ⓵ sans APK et ⓶ APK à clé de débogage **non consignés** ; ⓷ APK de release à défaut **consigné** en `build` `verdict: refuse`, puis refusé par INV-9 ; champs `build.verdict` et `build.causes` | §1.4, INV-9 |
+| INV-5 et contrôle au build (J-8) | le contrôle au build compare au **plus grand numéro installé**, jamais construit | INV-5 |
+| `hub_non_constate` (J-5) | = hub **constaté absent** ; « non constatable » = `methode: constat_humain`, sans cause | §1.4 `smoke`, §6.2 |
+| Mode d'exercice (J-4, ADR-016 §4) | forme exacte ; code `exercice_accepte_par_appareil` pour l'essai qui échoue | §1.4 `refus`, §6.2, §6.3 |
+| §4 (J-10) | la phrase « aucune copie système » est **datée fausse** pour l'installation debug du 2026-08-21 | §4 |
+| Natures fermées (ADR-016 §3) | liste fermée ; nature nouvelle ⇒ `schemaVersion` + ADR | §1.4, §1.7 |
+| Domaine distinct des relevés (ADR-016 §2) | préfixe `concentration/releve/v1\n` inchangé, **identique** à celui d'ADR-016 | §3.4 |
+| Codes UX sans équivalent (écarts E-0b, E-1, E-2 de l'UX) | retenus : `desinstallation_apres_release`, `sauvegarde_debug_non_supprimee` (non consignés) ; `cle_empreinte_introuvable` **consigné** en `non_concluant` quand il survient pendant un staging ou une production ; `certificat_installe_illisible` non consigné | §6.2, §6.2 bis |
+| `desinstallation_deja_faite` | passe de consigné à **non consigné** | §6.2, §6.2 bis |
+
+### 10.3 · Q-L3 : ⛔ AUCUNE trace dans le registre, sous une borne nommée
+
+**Décision** : la recherche et la suppression de l'éventuelle sauvegarde Google de l'installation debug,
+et l'attestation qui les suit, **n'écrivent aucune ligne et aucun champ** dans le registre. L'attestation
+vit dans un **rapport de T15**, datée, **déclarative**, au même régime que l'attestation de sauvegarde de
+la clé (R-J4).
+
+**Borne** : *tant qu'aucun invariant du registre ne dépend de cette attestation, et que la seule chose
+qui en dépend est le refus de SAISIE non consigné de l'étape de désinstallation*
+(`sauvegarde_debug_non_supprimee`, §6.2 bis).
+
+**Pourquoi la borne compte** :
+- ce fait ne porte **ni sur l'artefact, ni sur l'appareil** tel que la chaîne l'observe : il porte sur le
+  **compte Google** de l'humain, qu'aucun outil de la chaîne ne lit et ne doit lire ;
+- une trace publique serait une information sur **ce compte** (C2), même réduite à un booléen ;
+- un champ déclaratif qu'aucun invariant ne vérifie serait **décoratif** : il ferait croire à un contrôle.
+
+**Ce que cette décision coûte, écrit pour ne pas être découvert** : l'ordre exigé par Q-L3 (**avant**
+l'unique désinstallation) n'est **pas vérifiable par machine** à partir du registre. Il ne l'est que par
+le refus de saisie de l'outil, qui n'est pas consigné, et par la date du rapport, qui est déclarative.
+
+**Ce qui la réfuterait** : @ProductOwner faisant de cette attestation une **condition** de la ligne
+`desinstallation_unique` (point P-15 de l'UX). Il faudrait alors un champ déclaratif sur cette ligne
+(par exemple `sauvegardeDebugTraitee`, sans aucune donnée du compte), donc une grammaire changée **avant**
+la première ligne — sans nouvelle `schemaVersion` tant qu'aucune ligne n'existe.
+
+### 10.4 · Écarts que je vois encore avec l'UX *(lecture de son §5 en cours d'amendement L-1, 2026-09-30)*
+
+| # | Écart | Proposition |
+|---|---|---|
+| **X-1** | **Issue de `cle_empreinte_introuvable`** : `1` côté UX, `2` ici | `2` : un prérequis local manquant, comme `adb_introuvable`. À trancher à L-4 |
+| **X-2** | **`distant_illisible`** (build) et **`origin_main_non_constate`** (staging, production) : même cause matérielle sous deux codes | garder les deux (le constat diffère) **ou** fusionner avant la première ligne ; à trancher à L-4, ⛔ pas après |
+| **X-3** | **`exercice_accepte_par_appareil`** est nouveau : l'UX n'a pas de message pour lui | L-1 |
+| **X-4** | **J-8** dit « plus grand numéro **INSTALLÉ** » ; INV-5 compte les installations **tentées** (un refus de l'appareil consomme un numéro) | lecture retenue : « installé » = « installation tentée ». Si le lock voulait « installation réussie », INV-5 changerait, et un numéro refusé par l'appareil **pourrait être réutilisé** ; je le déconseille |
+| **X-5** | **`cible_paquet_de_release`** est un code de l'instrument RNF-02, pas de la chaîne | listé au §6.2 bis **uniquement** pour l'égalité des ensembles ; à confirmer par @QA_Tester (T9) |
+| **X-6** | L'ensemble des codes **ne se compare pas encore** : le §5 de l'UX était en cours d'écriture pendant cette lecture | la comparaison par script de L-4 fait foi, ⛔ pas cette table |
+
+⛔ **Aucun total n'est écrit ici.** L'ensemble des codes de ce document se lit en extrayant la colonne
+« Code » du §6.2 et du §6.2 bis.

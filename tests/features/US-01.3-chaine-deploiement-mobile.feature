@@ -183,6 +183,14 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Alors les mêmes échéances sont présentes avec leur description, leur date et leur état
     # 🔒 Lock 2026-09-30 (J-11) : « et leur état » ajouté — la clause AC-7 Nominal l'exige ; ⛔ PÉRIMÉ-2026-09-30 : l'étape s'arrêtait à « leur date ».
 
+  # AC-7 « Nominal » — ajouté par @ProductOwner le 2026-09-30 (Q-L1 (a), instanciation, pas une règle nouvelle).
+  Scénario: Le relevé des échéances n'entre dans la preuve que sous forme de compte et d'empreinte
+    Étant donné qu'un relevé des échéances a été fait avant et après une mise à jour
+    Quand la preuve versionnée de cette mise à jour est lue
+    Alors elle porte le nombre d'échéances et une empreinte à clé de chaque relevé
+    Et elle ne contient aucune description ni aucune date d'échéance en clair
+    Et l'égalité avant et après est constatée sur les empreintes
+
   Scénario: Une mise à jour signée par une autre clé est refusée sans désinstaller l'application
     Étant donné qu'une release est installée sur l'appareil de référence
     Quand un artefact signé par une autre clé est installé par-dessus
@@ -203,11 +211,21 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Alors le hub de pratiques est affiché
     Et le journal du processus de l'application ne contient aucune ligne FATAL
 
+  # AC-8 « Nominal » — ajouté par @ProductOwner le 2026-09-30 (Q-L1 (a), instanciation, pas une règle nouvelle).
+  Scénario: La capture du hub reste hors du dépôt et la preuve ne porte que le constat
+    Étant donné qu'un smoke test a été mené sur l'appareil de référence
+    Quand sa preuve versionnée est lue
+    Alors elle porte le constat du hub affiché ou absent et la méthode de ce constat
+    Et elle ne contient ni image ni journal complet ni texte d'échéance
+
   Scénario: Une ligne FATAL du processus de l'application fait échouer le smoke test
     Étant donné que le journal du processus de l'application contient une ligne FATAL
     Quand le smoke test est évalué
     Alors le smoke test échoue
-    Et la ligne en cause est citée dans la preuve
+    Et la ligne en cause est citée dans la preuve avec le texte de son message remplacé
+    Et le type d'exception et la pile d'appels de l'application restent lisibles dans la preuve
+    # ⚖️ 2026-09-30 (Q-L1 (a)) : étapes amendées, titre INCHANGÉ. ⛔ PÉRIMÉ-2026-09-30 : l'étape
+    # portait « Et la ligne en cause est citée dans la preuve ».
 
   Scénario: Une capture de journal vide ne prouve pas l'absence de plantage
     Étant donné que la capture du journal de l'application ne contient aucune ligne
