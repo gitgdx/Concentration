@@ -3,7 +3,7 @@
 - **Date** : 2026-09-30
 - **Statut** : **Proposé** *(2026-09-30 — @Architect, à l'Integration Lock d'US-01.3. ⛔ **Il ne passe pas
   `Accepté` avant la réponse humaine à Q-L1** *(§1 en dépend entièrement)* **et à Q-L2** *(§7)* — Story
-  File d'US-01.3, §Integration Lock.)*
+  File d'US-01.3, §Integration Lock.)* *(⛔ PÉRIMÉ-2026-09-30 : **Q-L1 et Q-L2 TRANCHÉES par l'humain en (a)** — les deux conditions sont levées ; l'acceptation a lieu **à la clôture du lock**, suspendue à Q-L4, qui ne touche pas cet ADR.)*
 - **US associée** : US-01.3 (Chaîne de déploiement mobile réelle — Android), EPIC_01, track FULL
 - **Complète** : [ADR-015](ADR-015-deploiement-android-sans-serveur-signature-locale.md) *(Accepté,
   **non modifié**)*.
@@ -35,7 +35,7 @@ elle-même un APK signé par une autre clé.
 
 ## Décision
 
-### §1 — Le contenu des échéances est une donnée C2 et n'entre JAMAIS dans un fichier versionné *(⚠️ SOUS Q-L1)*
+### §1 — Le contenu des échéances est une donnée C2 et n'entre JAMAIS dans un fichier versionné *(⚖️ Q-L1 (a), arbitrage humain du 2026-09-30 — ⛔ PÉRIMÉ-2026-09-30 : « SOUS Q-L1 »)*
 
 - **Hors du dépôt**, au même statut que le keystore *(Art. 6, 1.3)* : les **captures d'écran**, le
   **journal complet** du processus de l'application, le **relevé en clair** des échéances.
@@ -66,7 +66,7 @@ Sans lui, un APK signé par une **autre** clé est refusé **par la chaîne** *(
 ligne `build`)* et le refus **de l'appareil** n'est **jamais** observé. Le mode d'exercice : **option
 explicite**, **confirmation saisie**, ne lève **que** `artefact_non_consigne` et `certificat_non_release` ;
 exige un `versionCode` **supérieur** au registre *(sinon l'essai prouverait un refus de version)* ; consigne
-un `refus` `exercice: true`, `origine: appareil`. ⛔ Il ne lève **aucun** autre contrôle et n'existe **que**
+un `refus` `exercice: true`, `origine: appareil`. 🆕 *(L-4, 2026-09-30)* **Avant l'essai**, l'application installée doit être **signée par la clé de release** *(sinon l'essai n'essaie rien)*. **Si l'appareil ACCEPTE** l'APK : `staging_echec`, cause `exercice_accepte_par_appareil`, et ⛔ **la clé jetable n'est PAS détruite** — elle est devenue **la seule** qui permette une mise à jour du paquet. ⇒ ⛔ **la clé jetable n'est détruite qu'après un refus CONSTATÉ.** ⛔ Il ne lève **aucun** autre contrôle et n'existe **que**
 pour cet essai.
 
 ### §5 — L'éligibilité à la production est FIXÉE au staging, et re-vérifiée à la déclaration
@@ -82,11 +82,11 @@ INV-9 *(réseau, sauvegarde, débogable)* et le schéma de document **non régre
 amendée au lock)* sont refusés **avant** toute installation : l'appareil de staging est **celui du
 pratiquant**, sans retour arrière *(ADR-015 §8)*.
 
-### §7 — Périmètre de fraîcheur d'un visa *(⚠️ SOUS Q-L2)*
+### §7 — Périmètre de fraîcheur d'un visa *(⚖️ Q-L2 (a), arbitrage humain du 2026-09-30 — ⛔ PÉRIMÉ-2026-09-30 : « SOUS Q-L2 »)*
 
 Un visa est **frais** si `git diff --name-only <commit du visa> <commit de production> -- <périmètre>` est
 vide ; ⛔ **jamais** par ascendance *(squash et rebase autorisés)*. **Périmètre proposé** : `lib/`,
-`android/`, `pubspec.*`.
+`android/`, `pubspec.*` — ⚖️ **retenu** *(Q-L2 (a))* : US-01.3 modifiant `android/`, **les visas d'US-01.1, US-01.2 et US-01.4 sont périmés** par elle.
 
 ## Alternatives considérées
 
