@@ -160,6 +160,14 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Alors le déploiement est refusé avant toute installation
     Et aucune installation forcée en rétrogradation n'est tentée
 
+  # AC-6 « Erreur » — ajouté par @Architect à l'Integration Lock du 2026-09-30 (J-12, schéma régressif).
+  Scénario: Un artefact dont le schéma de document régresse est refusé avant installation
+    Étant donné qu'un artefact de release porte un numéro de version supérieur au dernier installé
+    Et que son schéma de document est inférieur à celui de la dernière installation réussie
+    Quand son déploiement est demandé
+    Alors le déploiement est refusé avant toute installation
+    Et la cause nommée est le schéma de document régressif
+
   Scénario: La version installée sur l'appareil se relie au commit qui l'a produite
     Étant donné qu'un artefact de release est installé sur l'appareil de référence
     Quand la version installée est lue sur l'appareil
@@ -172,7 +180,8 @@ Fonctionnalité: Chaîne de déploiement mobile réelle — définir, produire, 
     Étant donné qu'une release est installée sur l'appareil de référence avec des échéances enregistrées
     Quand la release suivante est installée par-dessus
     Et que l'application est rouverte
-    Alors les mêmes échéances sont présentes avec leur description et leur date
+    Alors les mêmes échéances sont présentes avec leur description, leur date et leur état
+    # 🔒 Lock 2026-09-30 (J-11) : « et leur état » ajouté — la clause AC-7 Nominal l'exige ; ⛔ PÉRIMÉ-2026-09-30 : l'étape s'arrêtait à « leur date ».
 
   Scénario: Une mise à jour signée par une autre clé est refusée sans désinstaller l'application
     Étant donné qu'une release est installée sur l'appareil de référence

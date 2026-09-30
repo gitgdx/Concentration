@@ -18,6 +18,8 @@
 > document (ce qu'une mise à jour préserve) **lit** ces deux documents sans les recopier : elle **y
 > renvoie**.
 
+> 🔒 **INTEGRATION LOCK du 2026-09-30 (@Architect) — ⛔ PÉRIMÉ-2026-09-30 sur les points qu'il tranche.** La jointure avec la branche UX a trouvé des trous que ce document ne pouvait pas voir seul *(Story File d'US-01.3, §Integration Lock, lignes `J-n`)*. **Là où ce document diverge d'une décision du lock, le lock prime** jusqu'à l'amendement daté de son propriétaire *(tâche **L-2**)*, ⛔ le texte ci-dessous n'est **pas repeint** par @Architect. Voir aussi [ADR-016](../adr/ADR-016-donnees-pratiquant-preuves-registre-exercice.md) *(Proposé)*.
+
 > 🔐 **AVERTISSEMENT DE CLASSIFICATION.** Ce design porte sur des données **C3 — secrètes** *(clé de
 > release, mots de passe, clé d'empreinte d'appareil)* et **C2 — confidentielles** *(numéro de série de
 > l'appareil personnel de l'humain et, point établi ici au §3.4, **le contenu des échéances du
