@@ -2,7 +2,7 @@
 
 > Principes **non-négociables**, référencés à chaque phase du workflow (inspiré du
 > `constitution.md` de GitHub Spec Kit). Chaque article indique son **enforcement** : une règle
-> sans mécanisme d'application est un vœu, pas une règle. Version 1.2 — 2026-08-01.
+> sans mécanisme d'application est un vœu, pas une règle. Version 1.3 — 2026-09-30.
 >
 > **Historique des versions** — *(la clause de Révision exige une PR dédiée, une ligne PROJECT_LOG et
 > un incrément de version ; l'historique est tenu ici pour que l'incrément soit **vérifiable** et non
@@ -14,6 +14,10 @@
 >   détaillé dans l'article. **Aucun autre article touché.**
 > * **1.2** — 2026-08-01 : **Art. 4 uniquement** (US-00.6). Le cliquet de couverture est **entré en
 >   vigueur** ; l'article affirmait encore le contraire. Motif détaillé dans l'article.
+>   **Aucun autre article touché.**
+> * **1.3** — 2026-09-30 : **Art. 6 uniquement** (US-01.3, point A-3). Nomme les **artefacts de
+>   signature locaux** (keystore, fichier de propriétés, clé d'empreinte d'appareil), qu'un build
+>   Android signé rend nécessaires. **Aucun gate créé.** Motif et bornes dans l'article.
 >   **Aucun autre article touché.**
 
 ---
@@ -142,13 +146,40 @@ pre-commit et CI · machine à états de `trace_append.py` (préconditions d'`EV
 
 ## Art. 6 — Secrets et fichiers d'enforcement
 
-Les secrets ne vivent que dans les variables d'environnement de la plateforme d'hébergement et les
-`.env` locaux jamais commités. Les fichiers d'enforcement (`scripts/githooks/`,
+Les secrets ne vivent que dans les variables d'environnement de la plateforme d'hébergement, les
+`.env` locaux jamais commités, et les **artefacts de signature locaux** d'une application : le
+**keystore** et la **clé d'empreinte d'appareil**, **hors du dépôt**, et le **fichier de propriétés de
+signature** (`android/key.properties`), **gitignoré** — même statut qu'un `.env` local. Aucun de ces
+secrets n'apparaît dans la trace, un rapport, le PROJECT_LOG ou une PR, et **aucun agent ne les lit**.
+Les fichiers d'enforcement (`scripts/githooks/`,
 `.claude/settings.json`, `.claude/hooks/`, `.gitleaks.toml`, `factory.config.json`,
 `scripts/factory_env.sh`) ne sont modifiables que par action humaine explicite.
 
 **Enforcement** : gitleaks (pre-commit + CI `secrets-scan`) · hook `protect_files.sh` ·
 `.gitignore`.
+
+> **Amendement 1.3 (2026-09-30, US-01.3, point A-3)** — L'article disait *« Les secrets ne vivent que
+> dans les variables d'environnement de la plateforme d'hébergement et les `.env` locaux jamais
+> commités »*. Or la chaîne de déploiement Android d'US-01.3 *(ADR-015, **Proposé**)* exige une clé de
+> signature, et **un keystore est un fichier**. Selon l'arbitrage humain H-3 du 2026-09-29, ses mots
+> de passe vivent dans `key.properties`. Sans amendement, **aucun build signé ne pouvait être conforme
+> à la lettre de l'article**, et ADR-015 ne pouvait pas être accepté contre elle. L'amendement
+> **nomme** ces artefacts. Il **n'élargit pas** l'exposition, puisqu'ils restent locaux et hors de
+> toute plateforme, conformément à H-3 (*aucun secret sur GitHub, dépôt PUBLIC*).
+>
+> ⛔ **CE QUE CET AMENDEMENT NE FAIT PAS — il ne crée AUCUN gate, et l'enforcement ci-dessus est
+> PLUS FAIBLE pour ces artefacts que pour un `.env`.** Mesuré le 2026-09-29 avec gitleaks 8.30.1 et
+> la configuration du dépôt, sur des fixtures factices hors du dépôt *(US-01.3, point C-11)* :
+> * un keystore **binaire** `.jks` → **exit 0, non détecté** ;
+> * un `key.properties` à mot de passe **faible** → **exit 0, non détecté** ;
+> * seul un mot de passe **à forte entropie** est détecté → **exit 1**.
+>
+> Le `.gitignore` qui couvre `key.properties`, `*.jks` et `*.keystore` est **`android/.gitignore`**. Il
+> **ne couvre rien hors d'`android/`**. La barrière réelle est donc, **aujourd'hui**, le
+> **`.gitignore` seul**. Les contrôles dédiés sont des **tâches** d'US-01.3 *(T2 : contrôle en CI ;
+> T4 : règles gitleaks)*, **pas encore en vigueur**. ⚠️ **« Aucun agent ne les lit » est une
+> obligation de PROCESS, NON enforced** : agents et humain partagent le même compte et la même
+> machine. **Aucun autre article n'est touché.**
 
 ## Art. 7 — Workflow scale-adaptive
 
