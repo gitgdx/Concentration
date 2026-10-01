@@ -61,5 +61,16 @@ frontend/coverage/
 # Logs
 *.log
 
+# Secrets de signature Android (US-01.3, T2 ; Constitution Art. 6, 1.3) — PARTOUT dans le dépôt.
+# android/.gitignore portait déjà ces motifs mais ne couvre RIEN hors de android/ (point C-9).
+# *.p12 et *.pfx : le keytool du JBR écrit du PKCS12 par défaut, quelle que soit l'extension.
+# ⚠️ Un .gitignore n'empêche ni `git add -f` ni un fichier déjà suivi : le contrôle
+# scripts/deploiement/check_secrets_signature.py (job requis governance) les refuse.
+key.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+
 # Claude Code — config locale machine (jamais versionnée)
 .claude/settings.local.json
