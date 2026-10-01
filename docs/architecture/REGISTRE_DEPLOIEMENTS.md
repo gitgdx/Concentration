@@ -816,6 +816,13 @@ sur l'appareil* (J-3 ⓵ ⓶). La CI **refuse** l'un de ces codes s'il apparaît
 | `validation_d_une_repetition` | saisie (validation) | 1 | 🆕 *(J-7)* INV-17 |
 | `sauvegarde_incomplete` | attestation T1 | 1 | UX M-30 ; R-J4 : l'attestation vit dans un rapport de T1 |
 | `cible_paquet_de_release` | instrument RNF-02 | 3 | UX M-31 ; ⚠️ code de **l'instrument de QA** (T9, @QA_Tester), ⛔ **pas de la chaîne** : il est listé ici **seulement** pour que les deux ensembles de codes soient égaux ; le registre n'enregistre jamais le paquet `.profile` |
+| `secret_signature_versionne` | contrôle des secrets | 1 | 🔒 *(lock J-13, 2026-10-01)* UX M-51 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `identifiant_appareil_en_clair` | contrôle des secrets | 1 | 🔒 *(lock J-13, 2026-10-01)* UX M-52 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `serie_trouvee_en_clair` | contrôle des secrets | 1 | 🔒 *(lock J-13, 2026-10-01)* UX M-53 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `valeur_interdite_versionnee` | contrôle des secrets | 1 | 🔒 *(lock J-13, 2026-10-01)* UX M-54 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `historique_superficiel` | contrôle des secrets | 2 | 🔒 *(lock J-13, 2026-10-01)* UX M-55 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `adb_sans_reponse` | contrôle des secrets | 2 | 🔒 *(lock J-13, 2026-10-01)* UX M-56 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
+| `instrument_git_illisible` | contrôle des secrets | 3 | 🔒 *(lock J-13, 2026-10-01)* UX M-57 ; émis par `scripts/deploiement/check_secrets_signature.py` (T2), ⛔ **jamais consigné** : le contrôle ne lit ni n'écrit le registre |
 
 ⚠️ **Un code, deux étapes, deux sorts** : `version_non_superieure` et `certificat_debug` sont **affichés**
 au build et **consignés** au staging. C'est **un seul** code : ⛔ il ne faut pas lui donner deux noms.

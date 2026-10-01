@@ -572,6 +572,7 @@ son report reste un **choix assumé**. US-01.1 (EPIC_01, track FULL) **redevient
     produits en parallèle** qui les ont révélés. ⚠️ **C'est le même angle mort que la DoD** *(qui n'exige
     la couverture d'aucun AC)* : **les instruments vérifient la cohérence de ce qui est là, jamais la
     complétude de ce qui devrait y être.**
+- 🔴 **`check_gherkin_mapping.py` PEUT RENDRE UN FAUX VERT — établi par T0 d'US-01.3 le 2026-10-01.** Son motif n'a **ni frontière de mot ni notion de commentaire** : `latest("<titre>")`, une méthode `.test("<titre>")` ou un commentaire `# test("<titre>")` sont lus comme des tests ⇒ un scénario peut être déclaré **couvert sans test**. ⛔ **ADR-015 (accepté) le disait « côté sûr »** : **ce constat est réfuté**, nommé au Story File d'US-01.3 *(§Réfutation)*, ⛔ l'ADR n'est pas réécrit. **Fermé pour US-01.3 seule** *(oracle `ast` de `reports/US-01.3/preverif_couple_python_criterion.py --couple`)* ; **ouvert pour tous les autres couples**, Dart compris *(déduit du motif, non mesuré)*. ➡️ **`/audit-methodo`.**
 - ✅ **RÉSOLU-2026-08-01 — l'Art. 4 dit désormais ce qui EST.** Cette entrée était une **exigence de
   clôture** posée par l'audit de revue *(si la PR dédiée glissait, **rien dans le corpus durable** n'aurait
   signalé la fausseté)* ; elle est **soldée par son propre critère** : l'amendement est **fusionné**
