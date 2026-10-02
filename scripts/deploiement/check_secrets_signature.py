@@ -44,13 +44,21 @@ CODES DE SORTIE (ADR-015 §6)
     2  ne conclut pas (clone superficiel, adb introuvable, aucun appareil...)
     3  defaut de l'instrument (git illisible, argument inconnu, autotest en echec)
 
-CODES DE CAUSE : uniquement le jeu gele de 60 (REGISTRE §6.2 et §6.2 bis,
+CODES DE CAUSE : uniquement le jeu gele de 60 (REGISTRE §6.2 et §6.2 bis,   [PÉRIMÉ-2026-10-01 : J-13]
 controle par `reports/US-01.3/egalite_codes_criterion.py` ; l'autotest le
-verifie). ⛔ AUCUN CODE N'EST CREE ICI. Plusieurs causes de ce controle n'ont
+verifie). ⛔ AUCUN CODE N'EST CREE ICI. Plusieurs causes de ce controle n'ont   [PÉRIMÉ-2026-10-01 : J-13]
 AUCUN code dans ce jeu (leur nombre est imprime par --selftest, jamais ecrit
 ici) : leur entree de CAUSES porte `code=None`, la sortie imprime
 `(code de cause non attribue)`, et l'attribution releve de l'arbitrage. Les
 cles internes ne sont jamais imprimees.
+  ⛔ PÉRIMÉ-2026-10-01 -- les deux phrases marquees ci-dessus decrivaient l'etat
+  du commit 63722fb. Addendum J-13 de l'Integration Lock (Story File d'US-01.3,
+  §Integration Lock, « Addendum du lock — 2026-10-01 ») : le jeu n'est plus
+  « gele a 60 » mais FERME, rouvert par le lock seul ; les causes sans code ont
+  recu chacune le leur (messages M-51 a M-57 du design UX §5.2). Depuis, le type
+  `Cause.code` est `str` : une cause sans code est IMPOSSIBLE, et l'autotest
+  echoue si une entree de CAUSES n'a pas de code. Le controle « codes emis ⊆
+  jeu ferme » reste en place.
 
 CE QU'IL NE PROUVE PAS
 ----------------------
@@ -69,6 +77,7 @@ CE QU'IL NE PROUVE PAS
 
 from __future__ import annotations
 
+import dataclasses
 import importlib.util
 import json
 import os
@@ -118,7 +127,7 @@ NOM_PROPRIETES = "key.properties"
 
 @dataclass(frozen=True)
 class Cause:
-    code: str | None  # code du jeu gele ; None = AUCUN code dans le jeu (arbitrage)
+    code: str  # code du jeu FERME (J-13) ; jamais None : une cause sans code est impossible
     issue: int
     phrase: str
     a_faire: str
@@ -132,31 +141,26 @@ CAUSES: dict[str, Cause] = {
     "keystore": Cause(
         "signature_keystore_dans_le_depot", REFUSE,
         "Un keystore est présent dans le dépôt, qui est public.", A_FAIRE_FUITE),
-    # Code a attribuer : propriete ou mot de passe de signature versionne.
-    "proprietes": Cause(
-        None, REFUSE,
+    "proprietes": Cause(  # M-51
+        "secret_signature_versionne", REFUSE,
         "Un fichier de propriétés de signature ou un mot de passe de signature est versionné.",
         A_FAIRE_FUITE),
-    # Code a attribuer : identifiant d'appareil hors de appareil.empreinte (forme).
-    "appareil": Cause(
-        None, REFUSE,
+    "appareil": Cause(  # M-52
+        "identifiant_appareil_en_clair", REFUSE,
         "Un identifiant d'appareil figure hors du champ appareil.empreinte, ou une empreinte "
         "n'a pas la forme imposée.",
         "remplacez l'identifiant par l'empreinte, ou par une valeur de la liste autorisée dans "
         "une fixture, puis relancez."),
-    # Code a attribuer : numero de serie lu par adb, trouve en clair (valeur).
-    "serie_en_clair": Cause(
-        None, REFUSE,
+    "serie_en_clair": Cause(  # M-53
+        "serie_trouvee_en_clair", REFUSE,
         "Le numéro de série d'un appareil connecté figure en clair dans le dépôt.", A_FAIRE_FUITE),
-    # Code a attribuer : valeur interdite (REGISTRE §1.8) dans une preuve ou une fixture.
-    "valeur_interdite": Cause(
-        None, REFUSE,
+    "valeur_interdite": Cause(  # M-54
+        "valeur_interdite_versionnee", REFUSE,
         "Une preuve ou une fixture porte une valeur interdite : chemin absolu du poste, adresse, "
         "nom de certificat ou liste d'applications.",
         "remplacez la valeur par sa forme caviardée (registre, paragraphe 5.2), puis relancez."),
-    # Code a attribuer : historique tronque.
-    "historique_incomplet": Cause(
-        None, NE_CONCLUT_PAS,
+    "historique_incomplet": Cause(  # M-55
+        "historique_superficiel", NE_CONCLUT_PAS,
         "Le clone est superficiel : l'historique du dépôt n'a pas pu être lu en entier.",
         "relancez dans un clone complet (en CI : fetch-depth: 0)."),
     "adb_introuvable": Cause(
@@ -169,14 +173,12 @@ CAUSES: dict[str, Cause] = {
         "aucun_appareil", NE_CONCLUT_PAS,
         "Aucun appareil physique n'est connecté : aucun numéro de série n'a été lu.",
         "branchez l'appareil de référence, autorisez le débogage, puis relancez."),
-    # Code a attribuer : adb present mais muet.
-    "adb_muet": Cause(
-        None, NE_CONCLUT_PAS,
+    "adb_muet": Cause(  # M-56
+        "adb_sans_reponse", NE_CONCLUT_PAS,
         "L'outil adb a été lancé mais n'a rendu aucune liste d'appareils lisible.",
         "relancez le serveur adb, puis relancez."),
-    # Code a attribuer : defaut de l'instrument.
-    "git_illisible": Cause(
-        None, DEFAUT,
+    "git_illisible": Cause(  # M-57
+        "instrument_git_illisible", DEFAUT,
         "git n'a pas pu lire le dépôt.",
         "signalez-le à @DevOps ou @Architect, sans relancer en boucle."),
 }
@@ -667,7 +669,7 @@ def rendre(issue: int, constats: set[Constat], etabli: str, notes: list[tuple[st
     for nom in noms:
         cause = CAUSES[nom]
         out += _envelopper("Cause", cause.phrase)
-        out.append("  (" + (cause.code or "code de cause non attribué") + ")")
+        out.append("  (" + cause.code + ")")
     if issue == CONFORME:
         out += _envelopper("Ce qui est établi", etabli)
         out += _envelopper("À faire", "passez à l'étape suivante du runbook.")
@@ -764,6 +766,11 @@ def _pkcs12(forme: str) -> bytes:
     return b"\x30\x80" + corps + b"\x00\x00"
 
 
+def causes_sans_code(causes: dict[str, Cause]) -> list[str]:
+    """Cles dont le code n'est pas une chaine non vide. Le type l'interdit deja ; ceci le PROUVE."""
+    return sorted(k for k, c in causes.items() if not (isinstance(c.code, str) and c.code))
+
+
 def _cles(constats: set[Constat]) -> set[tuple[str, str, str]]:
     return {(c.cause, c.chemin, c.portee) for c in constats}
 
@@ -790,6 +797,29 @@ def _git_tmp(d: Path, *args: str) -> None:
 def selftest() -> int:
     echecs: list[str] = []
     tues = 0
+    # ASSERTION (J-13) : aucune entree de CAUSES sans code. Mutant : chaque entree, tour a
+    # tour, remise a None puis a la chaine vide -> l'assertion DOIT la voir (sinon autotest rouge).
+    if causes_sans_code(CAUSES):
+        echecs.append("causes sans code : %d" % len(causes_sans_code(CAUSES)))
+    else:
+        tues += 1
+    for cle in CAUSES:
+        for vide in (None, ""):
+            mutant = dict(CAUSES)
+            mutant[cle] = dataclasses.replace(CAUSES[cle], code=vide)  # type: ignore[arg-type]
+            if causes_sans_code(mutant) != [cle]:
+                echecs.append("mutant sans code non vu : %r" % (vide,))
+                break
+        else:
+            continue
+        break
+    else:
+        tues += 1
+    if echecs:  # sans code, aucune sortie ne peut etre rendue : arret immediat, autotest ROUGE
+        for e in echecs:
+            print("ECHEC : " + e)
+        print("Code de sortie : %d" % DEFAUT)
+        return DEFAUT
     serie = "Q" + _hasard(11)  # valeur fictive NON listee, tiree a l'execution
     mdp = "x" + _hasard(9).lower()
     propre = {
@@ -1026,10 +1056,10 @@ def selftest() -> int:
     # Mutant de grammaire : un mot de l'issue 0 reintroduit a la forme negative doit etre vu
     if not interdits.search("Ce n'est pas un succès."):
         echecs.append("O mutant : vocabulaire interdit non detecte")
-    # Codes emis ⊆ jeu gele de 60 ; aucun code cree
+    # Codes emis ⊆ jeu ferme (J-13) ; aucun code cree
     try:
         geles = _codes_geles()
-        hors = {c.code for c in CAUSES.values() if c.code and c.code not in geles}
+        hors = {c.code for c in CAUSES.values() if c.code not in geles}
         if hors:
             echecs.append("codes hors du jeu gele : %s" % sorted(hors))
         else:
@@ -1050,8 +1080,7 @@ def selftest() -> int:
 
     for e in echecs:
         print("ECHEC : " + e)
-    sans_code = sorted(k for k, c in CAUSES.items() if c.code is None)
-    print("Causes sans code dans le jeu gele : %d" % len(sans_code))
+    print("Causes sans code : %d (assertion : echec si non nul)" % len(causes_sans_code(CAUSES)))
     print("Mutants tues : %d ; controle negatif sur le depot reel : %s"
           % (tues, "aucun refus" if not any("controle negatif" in e for e in echecs) else "EN ECHEC"))
     print("Autotest : " + ("aucun echec" if not echecs else "%d echec(s)" % len(echecs)))
@@ -1066,6 +1095,9 @@ def main(argv: list[str]) -> int:
         pass
     if argv == ["--selftest"]:
         return selftest()
+    if causes_sans_code(CAUSES):  # J-13 : une cause sans code est un defaut de l'instrument
+        sys.stdout.write("Une cause de l'outil n'a pas de code.\nCode de sortie : %d\n" % DEFAUT)
+        return DEFAUT
     if argv == ["--local"]:
         issue, texte = mode_local(RACINE, executer_reel, dict(os.environ), windows=os.name == "nt")
     elif not argv:
