@@ -68,7 +68,12 @@ jobs:
     name: 📋 Governance (SCB + traçabilité + synchro)
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 (US-01.3, T2) : le contrôle des secrets de signature lit TOUT
+      # l'historique. Un clone superficiel le ferait rendre 2 (« ne conclut pas »),
+      # donc rouge — jamais un vert sur un historique tronqué.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       # ⚠️ actionlint est un STEP de ce job, et NON un job séparé — c'est délibéré.
       #    Un nouveau job ne serait PAS un contexte requis (les 4 contextes requis sont
       #    figés dans factory.config.json, fichier Art. 6) : il serait donc RAPPORTÉ sans
@@ -139,6 +144,18 @@ jobs:
         run: python scripts/check_gherkin_mapping.py
       - name: 🥒 Autotest de mutation du contrôle de correspondance
         run: python scripts/check_gherkin_mapping.py --selftest
+      # ⛔ T2 (US-01.3) — MEME JOB, MEME RAISON : un job separe serait RAPPORTE sans
+      #    BLOQUER. Refuse keystore (par CONTENU), proprietes et mots de passe de
+      #    signature, et tout identifiant d'appareil hors appareil.empreinte, dans les
+      #    fichiers suivis, l'historique et les messages de commit (AC-4, AC-1).
+      #    ⚠️ BORNE : la CI ne connait pas la valeur reelle du numero de serie, elle
+      #    ne refuse que sa FORME ; la recherche par valeur est le mode --local, lance
+      #    par l'humain sur sa machine, jamais ici. Codes : 0 / 1 / 2 / 3 (ADR-015 §6),
+      #    tout code non nul rend ce job rouge.
+      - name: 🔑 Contrôle des secrets de signature (US-01.3, T2)
+        run: python scripts/deploiement/check_secrets_signature.py
+      - name: 🔑 Autotest de mutation du contrôle des secrets de signature
+        run: python scripts/deploiement/check_secrets_signature.py --selftest
 
   app-quality:
     name: 📱 App (gates run_gates.py)
